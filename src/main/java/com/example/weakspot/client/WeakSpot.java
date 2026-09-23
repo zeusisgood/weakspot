@@ -25,6 +25,8 @@ final class WeakSpot {
     double u;
     double v;
     long lastActiveTick;
+    /** このブロックで当てた回数（統計用）。 */
+    int hits;
 
     private WeakSpot(BlockPos pos, EnumFacing face, double plane, FaceRect rect, double radius) {
         this.pos = pos;

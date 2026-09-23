@@ -24,6 +24,9 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換、弱点の配置、ブースト量）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態、ヒット判定、描画、ヒット音、クライアント側のブースト。
   - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。ブーストの時間枠は `ClientTickEvent` START で増える `clientTick` で数える。`PlayerControllerMP` は tick ごとに進捗を積算するので、枠内の tick だけ倍率を掛ければよい。
+  - 統計（`StatsManager` / `StatsScreen`、K キー）もクライアントだけで集計・保存する（`.minecraft/weakspot/stats.json`）。ブロックを壊したかどうかは、叩いていた弱点のブロックが直後に空気になったかで判定している。
+  - 画面の文字列は `assets/weakspot/lang/en_us.lang` と `ja_jp.lang` の両方に追加すること。
+  - キーバインドの登録は `@SidedProxy`（`CommonProxy` / `client.ClientProxy`）の `init` で行う。
 - `network/HitMessage`: クライアント→サーバーのヒット通知（BlockPos のみ）。唯一のパケット。
 - `server/ServerBoostTracker`: 論理サーバー側。`LeftClickBlock` で「今どのブロックを破壊中か」と開始 tick を記録し、ヒット通知はそのブロックと一致したときだけ受け付ける。アクセストランスフォーマーは使っていない。
 

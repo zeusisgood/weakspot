@@ -1,0 +1,17 @@
+key.categories.weakspot=Weak Spot Mining
+key.weakspot.stats=Open Weak Spot Stats
+
+weakspot.stats.title=Weak Spot Stats
+weakspot.stats.column.session=This Session
+weakspot.stats.column.total=All Time
+weakspot.stats.hits=Weak spot hits
+weakspot.stats.blocks=Blocks broken
+weakspot.stats.blocksWithHit=Blocks broken with a hit
+weakspot.stats.averageHits=Average hits per block
+weakspot.stats.maxHits=Most hits on one block
+weakspot.stats.timeSaved=Time saved (est.)
+weakspot.stats.time.seconds=%ss
+weakspot.stats.time.minutes=%sm %ss
+weakspot.stats.time.hours=%sh %sm
+weakspot.stats.reset=Reset All Time
+weakspot.stats.reset.confirm=Click again to reset
