@@ -41,7 +41,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 - Minecraft Java Edition **1.12.2**
 - Minecraft Forge **1.12.2 - 14.23.5.2860**（[公式サイト](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.12.2.html)から入手）
 - Java 8（Forge 1.12.2 の要件）
-- この Mod の jar（`weakspot-<バージョン>.jar`）。今は配布ファイルがないので、[開発](#開発)の手順でビルドしてください（`build/libs/` に出力されます）。
+- この Mod の jar（`weakspot-<バージョン>.jar`）。[Releases](https://github.com/zeusisgood/weakspot/releases) からダウンロードしてください。自分でビルドする場合は[開発](#開発)の手順を参照してください。
 
 ### クライアント（シングルプレイ・マルチプレイ共通）
 
