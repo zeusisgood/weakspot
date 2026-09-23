@@ -2,6 +2,7 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BoostMath;
+import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
 import java.util.Random;
@@ -33,12 +34,16 @@ public final class ClientWeakSpotHandler {
     private static final Random RANDOM = new Random();
     /** 叩くのをやめてからこの tick 以内にブロックが消えたら、自分で壊したとみなす（低 FPS でも取りこぼさない程度の余裕）。 */
     private static final int BROKEN_DETECTION_TICKS = 5;
+    /** この tick の間ヒットがなければ、連続ヒット（ヒット音の音階）を最初に戻す。 */
+    private static final int STREAK_RESET_TICKS = 40;
 
     /** ClientTickEvent の START で増える。PlayerControllerMP の進捗計算はその後に走る。 */
     static long clientTick;
     static WeakSpot spot;
 
     private static long lastHitTick = Long.MIN_VALUE / 2;
+    /** 連続ヒット数。ブロックをまたいで続き、ヒット音のピッチに使う。 */
+    private static int hitStreak;
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
     /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
@@ -136,7 +141,12 @@ public final class ClientWeakSpotHandler {
 
     private static void onHit(Minecraft mc) {
         WeakSpotRenderer.addFlash(spot, clientTick);
-        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(SoundEvents.BLOCK_NOTE_PLING, 2.0F));
+        if (clientTick - lastHitTick > STREAK_RESET_TICKS) {
+            hitStreak = 0;
+        }
+        hitStreak++;
+        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(
+                SoundEvents.BLOCK_NOTE_PLING, HitPitch.forStreak(hitStreak)));
 
         spot.hits++;
         StatsManager.recordHit(BoostMath.extraTicksPerHit(
@@ -169,6 +179,7 @@ public final class ClientWeakSpotHandler {
         spot = null;
         boostPos = null;
         lastHitTick = Long.MIN_VALUE / 2;
+        hitStreak = 0;
         boostHitTick = Long.MIN_VALUE / 2;
         WeakSpotRenderer.clearFlashes();
     }
