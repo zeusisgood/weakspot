@@ -3,6 +3,7 @@ package com.example.weakspot.server;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BoostMath;
 import com.example.weakspot.config.WeakSpotConfig;
+import com.example.weakspot.network.OtherHitMessage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -63,8 +64,11 @@ public final class ServerBoostTracker {
         MINING.put(player.getUniqueID(), mining);
     }
 
+    /** 他のプレイヤーのヒット音が届く距離（ブロック）。 */
+    private static final double OTHERS_SOUND_RANGE = 16;
+
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
-    public static void onHit(EntityPlayerMP player, BlockPos pos) {
+    public static void onHit(EntityPlayerMP player, BlockPos pos, int streak) {
         if (player.capabilities.isCreativeMode || player.isSpectator()) {
             return;
         }
@@ -83,6 +87,19 @@ public final class ServerBoostTracker {
         mining.lastHitTick = now;
         mining.extraTicks += BoostMath.extraTicksPerHit(
                 WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks);
+        notifyNearbyPlayers(player, pos, streak);
+    }
+
+    /** 受け付けたヒットだけを、近くの他のプレイヤーに知らせる（ヒット音を鳴らすため）。 */
+    private static void notifyNearbyPlayers(EntityPlayerMP hitter, BlockPos pos, int streak) {
+        OtherHitMessage message = new OtherHitMessage(pos, Math.max(1, streak));
+        double rangeSq = OTHERS_SOUND_RANGE * OTHERS_SOUND_RANGE;
+        for (EntityPlayer other : hitter.world.playerEntities) {
+            if (other != hitter && other instanceof EntityPlayerMP
+                    && other.getDistanceSqToCenter(pos) <= rangeSq) {
+                WeakSpotMod.network.sendTo(message, (EntityPlayerMP) other);
+            }
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOW)

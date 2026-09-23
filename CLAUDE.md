@@ -16,18 +16,21 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 起動ログの `module-info.class ... IllegalArgumentException` は FG3 + 1.12 でいつも出るノイズで、無視してよい。
 - クライアント確認: コンテナ内では画面を出せない。ビルドした jar をホスト側 Minecraft（Forge 1.12.2）の `mods` に入れて確認する。描画・ヒット判定・体感速度は Claude が検証できないので、ユーザーに確認を依頼する。
 - Mod のバージョンは `build.gradle` の `version` と `WeakSpotMod.VERSION` の2か所にある。変えるときは両方を揃える。
+- リリースの流れ: 機能ごとにパッチバージョンを上げる → README の「更新履歴」（と必要なら「最新版」の行）を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
 
 ## アーキテクチャ
 
 クライアントとサーバーの**両方に Mod が必要**（`acceptableRemoteVersions` 未指定なので同じバージョンが必要）。パッケージは `com.example.weakspot`。
 
-- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換、弱点の配置、ブースト量）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
+- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換、弱点の配置、ブースト量、ヒット音の音階 `HitPitch`、統計 `MiningStats`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態、ヒット判定、描画、ヒット音、クライアント側のブースト。
+  - 自分のヒット音は pling で、連続ヒット数（ブロックをまたいで続き、40 tick ヒットがないとリセット）に応じて長音階を上がり、1オクターブで最初に戻る。他のプレイヤーの音は `OtherHitSounds`。
   - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。ブーストの時間枠は `ClientTickEvent` START で増える `clientTick` で数える。`PlayerControllerMP` は tick ごとに進捗を積算するので、枠内の tick だけ倍率を掛ければよい。
   - 統計（`StatsManager` / `StatsScreen`、K キー）もクライアントだけで集計・保存する（`.minecraft/weakspot/stats.json`）。ブロックを壊したかどうかは、叩いていた弱点のブロックが直後に空気になったかで判定している。
   - 画面の文字列は `assets/weakspot/lang/en_us.lang` と `ja_jp.lang` の両方に追加すること。
   - キーバインドの登録は `@SidedProxy`（`CommonProxy` / `client.ClientProxy`）の `init` で行う。
-- `network/HitMessage`: クライアント→サーバーのヒット通知（BlockPos のみ）。唯一のパケット。
+- `network/HitMessage`: クライアント→サーバーのヒット通知（BlockPos と連続ヒット数）。
+- `network/OtherHitMessage`: サーバーが受け付けたヒットを、16ブロック以内の他のプレイヤーに転送する。受け取ったクライアントは、設定の楽器と音量で、送り主の連続ヒット数に合った音階の音を鳴らす。このハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスには `proxy.onOtherPlayerHit` 経由でアクセスする。
 - `server/ServerBoostTracker`: 論理サーバー側。`LeftClickBlock` で「今どのブロックを破壊中か」と開始 tick を記録し、ヒット通知はそのブロックと一致したときだけ受け付ける。アクセストランスフォーマーは使っていない。
 
 ### 重要: サーバー側のブーストは時間枠ではない
@@ -38,4 +41,5 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - ヒット間隔の制限は、クライアントが `minHitIntervalTicks`、サーバーはネットワークの揺らぎを見込んで 2 tick 甘くしている。サーバーがヒットを拒否してクライアントだけブーストされると、ブロックが一度戻って見える。
 - ブーストの目安: H tick ごとにヒットすると、速度は通常の `1 + (倍率-1)×継続/H` 倍。初期値なら `1 + 12/H` で、約 0.6 秒ごとのヒットで2倍、`minHitIntervalTicks=6` で最大3倍。
 
-設定は `@Config`（`config/weakspot.cfg`）。MVP ではサーバーとクライアントで同じ値を使う前提で、同期はしていない。
+設定は `@Config`（`config/weakspot.cfg`）で、同期はしていない。コメントの先頭に、どちら側が使うかを書く。`[共通]`（`boostMultiplier`, `boostDurationTicks`, `minHitIntervalTicks`）は両側で同じ値が必要。`[クライアント]` は見た目と音だけに関わる。設定を追加するときは、README の設定表の該当する方にも追加すること。
+- パケット（`HitMessage` / `OtherHitMessage`）の中身を変えると、古いバージョンとは通信できなくなる。README の更新履歴にそのことを書くこと。

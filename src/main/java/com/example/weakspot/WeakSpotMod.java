@@ -1,6 +1,7 @@
 package com.example.weakspot;
 
 import com.example.weakspot.network.HitMessage;
+import com.example.weakspot.network.OtherHitMessage;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -15,7 +16,7 @@ public class WeakSpotMod {
 
     public static final String MODID = "weakspot";
     public static final String NAME = "Weak Spot Mining";
-    public static final String VERSION = "1.0.4";
+    public static final String VERSION = "1.0.5";
 
     public static SimpleNetworkWrapper network;
 
@@ -26,6 +27,7 @@ public class WeakSpotMod {
     public void preInit(FMLPreInitializationEvent event) {
         network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         network.registerMessage(HitMessage.Handler.class, HitMessage.class, 0, Side.SERVER);
+        network.registerMessage(OtherHitMessage.Handler.class, OtherHitMessage.class, 1, Side.CLIENT);
     }
 
     @Mod.EventHandler

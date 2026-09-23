@@ -7,38 +7,50 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
-/** config/weakspot.cfg。MVP ではサーバーとクライアントで同じ値を使う前提。 */
+/**
+ * config/weakspot.cfg。値は同期しない。
+ * [共通] はサーバーとクライアントの両方が使うので同じ値にする。[クライアント] は各プレイヤーが自由に変えてよい。
+ */
 @Config(modid = WeakSpotMod.MODID)
 public final class WeakSpotConfig {
 
-    @Config.Comment("ヒット時の破壊速度の倍率")
+    @Config.Comment("[共通] ヒット時の破壊速度の倍率")
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double boostMultiplier = 4.0;
 
-    @Config.Comment("倍率を掛ける時間（tick）。1回のヒットで通常の (倍率-1)×この値 tick 分だけ進む")
+    @Config.Comment("[共通] 倍率を掛ける時間（tick）。1回のヒットで通常の (倍率-1)×この値 tick 分だけ進む")
     @Config.RangeInt(min = 1, max = 200)
     public static int boostDurationTicks = 4;
 
-    @Config.Comment("弱点の半径（面の短い辺に対する比率）")
+    @Config.Comment("[クライアント] 弱点の半径（面の短い辺に対する比率）")
     @Config.RangeDouble(min = 0.02, max = 0.5)
     public static double weakSpotRadiusRatio = 0.14;
 
-    @Config.Comment({"弱点の外周とブロック面の縁の間に空ける最小の距離（ブロック）",
+    @Config.Comment({"[クライアント] 弱点の外周とブロック面の縁の間に空ける最小の距離（ブロック）",
             "大きくすると弱点が面の中央に寄る。大きくしすぎると minMoveDistance だけ離れた場所が取れず、移動距離が短くなる"})
     @Config.RangeDouble(min = 0.0, max = 0.5)
     public static double edgeMargin = 0.1;
 
-    @Config.Comment("ヒット後に弱点が移動する最小距離（ブロック）")
+    @Config.Comment("[クライアント] ヒット後に弱点が移動する最小距離（ブロック）")
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double minMoveDistance = 0.4;
 
-    @Config.Comment("長押しをやめた後に弱点が残る時間（tick）")
+    @Config.Comment("[クライアント] 長押しをやめた後に弱点が残る時間（tick）")
     @Config.RangeInt(min = 0, max = 1200)
     public static int lingerTicks = 40;
 
-    @Config.Comment("ヒット通知を受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.Comment("[共通] ヒット通知を受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
     public static int minHitIntervalTicks = 6;
+
+    @Config.Comment({"[クライアント] 他のプレイヤーのヒット音の音量（0 で聞こえなくなる）",
+            "バニラの「プレイヤー」音量も掛かる"})
+    @Config.RangeDouble(min = 0.0, max = 1.0)
+    public static double othersHitVolume = 0.4;
+
+    @Config.Comment({"[クライアント] 他のプレイヤーのヒット音に使うノートブロックの楽器",
+            "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING（PLING は自分のヒット音と同じ）"})
+    public static OtherHitSound othersHitSound = OtherHitSound.XYLOPHONE;
 
     private WeakSpotConfig() {
     }

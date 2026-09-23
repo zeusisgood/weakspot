@@ -155,7 +155,7 @@ public final class ClientWeakSpotHandler {
         lastHitTick = clientTick;
         boostHitTick = clientTick;
         boostPos = spot.pos;
-        WeakSpotMod.network.sendToServer(new HitMessage(spot.pos));
+        WeakSpotMod.network.sendToServer(new HitMessage(spot.pos, hitStreak));
 
         spot.relocate(WeakSpotConfig.edgeMargin, WeakSpotConfig.minMoveDistance, RANDOM);
     }
