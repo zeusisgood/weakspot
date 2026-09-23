@@ -23,6 +23,11 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 0.02, max = 0.5)
     public static double weakSpotRadiusRatio = 0.14;
 
+    @Config.Comment({"弱点の外周とブロック面の縁の間に空ける最小の距離（ブロック）",
+            "大きくすると弱点が面の中央に寄る。大きくしすぎると minMoveDistance だけ離れた場所が取れず、移動距離が短くなる"})
+    @Config.RangeDouble(min = 0.0, max = 0.5)
+    public static double edgeMargin = 0.1;
+
     @Config.Comment("ヒット後に弱点が移動する最小距離（ブロック）")
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double minMoveDistance = 0.4;

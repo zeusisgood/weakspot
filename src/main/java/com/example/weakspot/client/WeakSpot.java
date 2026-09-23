@@ -37,7 +37,7 @@ final class WeakSpot {
 
     /** 照準位置 aim を避けて、新しい弱点を出す。 */
     static WeakSpot spawn(World world, BlockPos pos, IBlockState state, EnumFacing face, Vec3d aim,
-                          double radiusRatio, double minDistance, Random random) {
+                          double radiusRatio, double edgeMargin, double minDistance, Random random) {
         AxisAlignedBB box = state.getSelectedBoundingBox(world, pos);
         int axis = face.getAxis().ordinal();
         FaceRect rect = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
@@ -47,7 +47,7 @@ final class WeakSpot {
 
         WeakSpot spot = new WeakSpot(pos, face, plane, rect, WeakSpotPlacer.radius(rect, radiusRatio));
         double[] aimUV = spot.toUV(aim);
-        double[] p = WeakSpotPlacer.place(rect, spot.radius, aimUV[0], aimUV[1], minDistance, random);
+        double[] p = WeakSpotPlacer.place(rect, spot.radius, edgeMargin, aimUV[0], aimUV[1], minDistance, random);
         spot.u = p[0];
         spot.v = p[1];
         return spot;
@@ -67,8 +67,8 @@ final class WeakSpot {
     }
 
     /** 今の位置から minDistance 以上離れた場所へ移動する。 */
-    void relocate(double minDistance, Random random) {
-        double[] p = WeakSpotPlacer.place(rect, radius, u, v, minDistance, random);
+    void relocate(double edgeMargin, double minDistance, Random random) {
+        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minDistance, random);
         u = p[0];
         v = p[1];
     }

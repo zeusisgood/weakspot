@@ -84,6 +84,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 | `boostMultiplier` | 4.0 | ヒット時の破壊速度の倍率 |
 | `boostDurationTicks` | 4 | 倍率を掛ける時間（tick） |
 | `weakSpotRadiusRatio` | 0.14 | 弱点の半径（面の短い辺に対する比率） |
+| `edgeMargin` | 0.1 | 弱点の外周とブロック面の縁の間に空ける最小の距離（ブロック）。大きいほど弱点が中央に寄る |
 | `minMoveDistance` | 0.4 | ヒット後に弱点が移動する最小距離（ブロック） |
 | `lingerTicks` | 40 | 長押しをやめた後に弱点が残る時間（tick） |
 | `minHitIntervalTicks` | 6 | ヒットを受け付ける最小間隔（tick） |

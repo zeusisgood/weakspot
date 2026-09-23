@@ -24,7 +24,7 @@ public class WeakSpotPlacerTest {
         double u = 0.5;
         double v = 0.5;
         for (int i = 0; i < 1000; i++) {
-            double[] next = WeakSpotPlacer.place(FULL, r, u, v, 0.4, random);
+            double[] next = WeakSpotPlacer.place(FULL, r, 0.05, u, v, 0.4, random);
             assertTrue(next[0] - r >= 0 && next[0] + r <= 1);
             assertTrue(next[1] - r >= 0 && next[1] + r <= 1);
             assertTrue(FaceMath.distance(u, v, next[0], next[1]) >= 0.4);
@@ -34,9 +34,21 @@ public class WeakSpotPlacerTest {
     }
 
     @Test
+    public void edgeMarginKeepsSpotAwayFromEdges() {
+        Random random = new Random(2);
+        double r = 0.14;
+        double edge = 0.1;
+        for (int i = 0; i < 1000; i++) {
+            double[] p = WeakSpotPlacer.place(FULL, r, edge, random.nextDouble(), random.nextDouble(), 0.4, random);
+            assertTrue(p[0] - r >= edge - 1e-9 && p[0] + r <= 1 - edge + 1e-9);
+            assertTrue(p[1] - r >= edge - 1e-9 && p[1] + r <= 1 - edge + 1e-9);
+        }
+    }
+
+    @Test
     public void tinyFaceFallsBackToCenter() {
         FaceRect tiny = new FaceRect(0, 0, 0.1, 0.1);
-        double[] p = WeakSpotPlacer.place(tiny, 0.1, 0.05, 0.05, 0.4, new Random(1));
+        double[] p = WeakSpotPlacer.place(tiny, 0.1, 0.1, 0.05, 0.05, 0.4, new Random(1));
         assertEquals(0.05, p[0], 1e-9);
         assertEquals(0.05, p[1], 1e-9);
     }

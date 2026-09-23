@@ -92,7 +92,8 @@ public final class ClientWeakSpotHandler {
 
         if (spot == null || !spot.matches(pos, target.sideHit)) {
             spot = WeakSpot.spawn(mc.world, pos, state, target.sideHit, target.hitVec,
-                    WeakSpotConfig.weakSpotRadiusRatio, WeakSpotConfig.minMoveDistance, RANDOM);
+                    WeakSpotConfig.weakSpotRadiusRatio, WeakSpotConfig.edgeMargin, WeakSpotConfig.minMoveDistance,
+                    RANDOM);
         }
         spot.lastActiveTick = clientTick;
 
@@ -123,7 +124,7 @@ public final class ClientWeakSpotHandler {
         boostPos = spot.pos;
         WeakSpotMod.network.sendToServer(new HitMessage(spot.pos));
 
-        spot.relocate(WeakSpotConfig.minMoveDistance, RANDOM);
+        spot.relocate(WeakSpotConfig.edgeMargin, WeakSpotConfig.minMoveDistance, RANDOM);
     }
 
     /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */

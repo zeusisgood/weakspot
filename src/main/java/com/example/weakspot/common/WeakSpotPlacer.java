@@ -20,11 +20,12 @@ public final class WeakSpotPlacer {
 
     /**
      * 弱点の中心位置 (u, v) を選ぶ。
-     * 円が面からはみ出さず縁から少し離れる範囲で、(avoidU, avoidV) から minDistance 以上離れた位置を選ぶ。
+     * 円の外周と面の縁の間を edgeMargin 以上空けた範囲で、(avoidU, avoidV) から minDistance 以上離れた位置を選ぶ。
+     * 面が小さくてその範囲が取れない軸では、面の中央に置く。
      */
-    public static double[] place(FaceRect face, double radius, double avoidU, double avoidV,
+    public static double[] place(FaceRect face, double radius, double edgeMargin, double avoidU, double avoidV,
                                  double minDistance, Random random) {
-        double margin = radius * 1.35;
+        double margin = radius + Math.max(0, edgeMargin);
         double loU = face.minU + margin;
         double hiU = face.maxU - margin;
         double loV = face.minV + margin;
