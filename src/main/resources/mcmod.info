@@ -1,0 +1,16 @@
+[
+{
+  "modid": "weakspot",
+  "name": "Weak Spot Mining",
+  "description": "ブロックを壊すとき、面に出る弱点を狙うと破壊が一気に進む。",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": [],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

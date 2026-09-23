@@ -1,0 +1,48 @@
+{
+  "name": "weak-spot-mining-mod (Forge 1.12.2)",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "features": {
+    // Forge 1.12.2 (ForgeGradle 2.3) は JDK 8 が必須
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "8",
+      "jdkDistro": "tem",
+      "installGradle": false,
+      "installMaven": false
+    },
+    // Claude Code の前提
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+
+  // Gradle キャッシュを名前付きボリュームに保存（再ビルドの高速化）
+  "mounts": [
+    "source=weakspot-gradle-cache,target=/home/vscode/.gradle,type=volume"
+  ],
+
+  // テスト用サーバー (runServer) 用
+  "forwardPorts": [25565],
+  "portsAttributes": {
+    "25565": { "label": "Minecraft test server" }
+  },
+
+  "containerEnv": {
+    "GRADLE_OPTS": "-Xmx2g -Dfile.encoding=UTF-8"
+  },
+
+  // ボリュームの所有者を vscode ユーザーに直し、Java のバージョンを表示
+  "postCreateCommand": "sudo chown -R $(id -u):$(id -g) /home/vscode/.gradle && java -version",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-gradle"
+      ],
+      "settings": {
+        "java.import.gradle.enabled": true,
+        "files.encoding": "utf8"
+      }
+    }
+  }
+}

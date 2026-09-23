@@ -1,0 +1,38 @@
+# Gradle / ForgeGradle
+.gradle/
+build/
+out/
+classes/
+mcmodsrepo/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Dev run directory (world, config, logs, eula.txt)
+run/
+
+# Eclipse
+bin/
+eclipse/
+*.launch
+.settings/
+.metadata/
+.classpath
+.project
+
+# IntelliJ IDEA
+.idea/
+*.ipr
+*.iws
+*.iml
+
+# VS Code (keep shared workspace settings)
+.vscode/*
+!.vscode/settings.json
+
+# OS / misc
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+
+# Files from Forge MDK
+forge*changelog.txt
