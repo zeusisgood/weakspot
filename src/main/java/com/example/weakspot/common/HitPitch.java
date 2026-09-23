@@ -1,6 +1,6 @@
 package com.example.weakspot.common;
 
-/** 連続ヒット数に応じたヒット音のピッチ。長音階で1オクターブ上がり、その先は最高音のまま。 */
+/** 連続ヒット数に応じたヒット音のピッチ。長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す。 */
 public final class HitPitch {
 
     /** 長音階（ド レ ミ ファ ソ ラ シ ド）の半音数。 */
@@ -11,9 +11,9 @@ public final class HitPitch {
     private HitPitch() {
     }
 
-    /** streak は 1 始まり（1回目のヒットが最低音）。 */
+    /** streak は 1 始まり（1回目のヒットが最低音、9回目で再び最低音）。 */
     public static float forStreak(int streak) {
-        int index = Math.min(Math.max(streak, 1), MAJOR_SCALE.length) - 1;
+        int index = (Math.max(streak, 1) - 1) % MAJOR_SCALE.length;
         return (float) (BASE_PITCH * Math.pow(2, MAJOR_SCALE[index] / 12.0));
     }
 }

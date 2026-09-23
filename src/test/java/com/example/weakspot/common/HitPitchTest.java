@@ -14,11 +14,13 @@ public class HitPitchTest {
     }
 
     @Test
-    public void risesEachHitThenStaysAtTop() {
+    public void risesEachHitThenWrapsToBottom() {
         for (int i = 1; i < 8; i++) {
             assertTrue(HitPitch.forStreak(i + 1) > HitPitch.forStreak(i));
         }
-        assertEquals(2.0F, HitPitch.forStreak(20), 1e-6);
+        assertEquals(1.0F, HitPitch.forStreak(9), 1e-6);
+        assertEquals(HitPitch.forStreak(3), HitPitch.forStreak(11), 1e-6);
+        assertEquals(2.0F, HitPitch.forStreak(16), 1e-6);
     }
 
     @Test
