@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様の正本は `SPEC_v1.0.md`。数値・挙動・MVP 完了条件（§12）・スコープ外（§13）はそちらを参照し、仕様と食い違う実装をする場合はユーザーに確認する。
+仕様の正本は `SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）。v1.1 に書かれていないことは v1.0 と現行実装のまま。仕様と食い違う実装をする場合はユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -16,11 +16,16 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 起動ログの `module-info.class ... IllegalArgumentException` は FG3 + 1.12 でいつも出るノイズで、無視してよい。
 - クライアント確認: コンテナ内では画面を出せない。ビルドした jar をホスト側 Minecraft（Forge 1.12.2）の `mods` に入れて確認する。描画・ヒット判定・体感速度は Claude が検証できないので、ユーザーに確認を依頼する。
 - Mod のバージョンは `build.gradle` の `version` と `WeakSpotMod.VERSION` の2か所にある。変えるときは両方を揃える。
-- リリースの流れ: 機能ごとにパッチバージョンを上げる → README の「更新履歴」（と必要なら「最新版」の行）を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
+- バージョンの方針（1.1.0 以降）:
+  - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
+  - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
+  - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
+  - **1.1.0 は `SPEC_v1.1.md` の全機能をまとめて出すまで、開発の途中でバージョンを上げない**（現行は 1.0.5。`acceptableRemoteVersions` もまだ未指定）。
+- リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
 
 ## アーキテクチャ
 
-クライアントとサーバーの**両方に Mod が必要**（`acceptableRemoteVersions` 未指定なので同じバージョンが必要）。パッケージは `com.example.weakspot`。
+クライアントとサーバーの**両方に Mod が必要**（1.0.x は `acceptableRemoteVersions` 未指定なので完全に同じバージョンが必要。1.1.0 からは同じマイナー同士）。パッケージは `com.example.weakspot`。
 
 - `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換、弱点の配置、ブースト量、ヒット音の音階 `HitPitch`、統計 `MiningStats`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態、ヒット判定、描画、ヒット音、クライアント側のブースト。
@@ -42,4 +47,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - ブーストの目安: H tick ごとにヒットすると、速度は通常の `1 + (倍率-1)×継続/H` 倍。初期値なら `1 + 12/H` で、約 0.6 秒ごとのヒットで2倍、`minHitIntervalTicks=6` で最大3倍。
 
 設定は `@Config`（`config/weakspot.cfg`）で、同期はしていない。コメントの先頭に、どちら側が使うかを書く。`[共通]`（`boostMultiplier`, `boostDurationTicks`, `minHitIntervalTicks`）は両側で同じ値が必要。`[クライアント]` は見た目と音だけに関わる。設定を追加するときは、README の設定表の該当する方にも追加すること。
-- パケット（`HitMessage` / `OtherHitMessage`）の中身を変えると、古いバージョンとは通信できなくなる。README の更新履歴にそのことを書くこと。
+- パケット（`HitMessage` / `OtherHitMessage`）の中身を変えたり、パケットを追加・削除したりすると、古いバージョンとは通信できなくなる。マイナーを上げ、README の更新履歴にそのことを書くこと。
