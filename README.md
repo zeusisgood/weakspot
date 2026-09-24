@@ -3,7 +3,7 @@
 Fortnite の資材集めにある「弱点（クリティカル）を叩くと速く壊せる」仕組みを Minecraft に持ち込む Mod です。
 
 - 対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**
-- 最新版: **1.2.0**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
+- 最新版: **1.2.1**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
 
 ## 遊び方
 
@@ -339,6 +339,11 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - 迷ったときは、マイナーを上げます。
 
 ## 更新履歴
+
+### 1.2.1
+
+- ニワトリなど、体が当たり判定より大きい動物で、自分の弱点が体に隠れて見づらかったのを直した。隠れた部分も薄く透けて見える（設定 `animalSpotSeeThrough`。他のプレイヤーのマークは透かさない）
+- 通信内容は変わっていない。1.2.x 同士は、そのまま接続できる
 
 ### 1.2.0
 
