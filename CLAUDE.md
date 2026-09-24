@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.1.md`（Mod 1.1.1。耐久回復の修正だけ）、`doc/SPEC_v1.1.2.md`（Mod 1.1.2。成長の対象の拡張）、`doc/SPEC_v1.1.3.md`（Mod 1.1.3。コンボの表示）、`doc/SPEC_v1.1.4.md`（Mod 1.1.4。弱点の移動の残像演出）、`doc/SPEC_v1.1.5.md`（Mod 1.1.5。掘っているブロックの耐久バー。クライアントだけ）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -14,8 +14,11 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - テストのみ: `./gradlew test`、1クラスだけ: `./gradlew test --tests com.example.weakspot.common.WeakSpotPlacerTest`
 - 専用サーバー起動: `./gradlew runServer`（作業ディレクトリは `run/`、`nogui` 付き。`run/eula.txt` は同意済み）。止めるときはコンソールで `stop`。
   - パイプで `stop` を流しても Gradle 経由では届かない。Claude が起動を確かめるときは `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を確認する。
-  - 起動ログの `module-info.class ... IllegalArgumentException` は FG3 + 1.12 でいつも出るノイズで、無視してよい。
+  - 起動ログの `module-info.class ... IllegalArgumentException`（`Unable to read a class file correctly`）は FG3 + 1.12 でいつも出るノイズで、無視してよい。`Missing English translation for weakspot: .../build/classes/java/main/assets/...` の WARN も、開発環境のリソースの置き場所によるいつものノイズ。
 - クライアント確認: コンテナ内では画面を出せない。ビルドした jar をホスト側 Minecraft（Forge 1.12.2）の `mods` に入れて確認する。描画・ヒット判定・体感速度は Claude が検証できないので、ユーザーに確認を依頼する。
+- Minecraft の非公開のフィールドは、アクセストランスフォーマーではなくリフレクションで読む。開発環境は MCP 名、実際の環境（reobf 後）は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（例: `client/MiningProgress`）。Forge の3引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
+  - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/maven_downloader/de/oceanlabs/mcp/mcp_snapshot/20171003-1.12/mcp_snapshot-20171003-1.12.zip` の `fields.csv`（`methods.csv`）、または `~/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-srg.jar` を `javap -p` で見る。
+  - 画面を出さずに両方の環境で確かめるには、自分のクラスを小さなプログラムからリフレクションで呼ぶ（インスタンスは `Unsafe.allocateInstance`）。開発環境は `sourceSets.main.runtimeClasspath`（Gradle の init スクリプトで書き出す）、実際の環境はその中の `build/classes` `build/resources` と `..._mapped_snapshot_...` の jar を、`build/libs` の reobf 済み jar と上の `-srg.jar` に差し替えたクラスパスで動かす。
 - Mod のバージョンは `build.gradle` の `version` と `WeakSpotMod.VERSION` の2か所にある。変えるときは両方を揃える。
 - バージョンの方針（1.1.0 以降）:
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
@@ -23,13 +26,14 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
   - 現行は 1.1.5。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
+  - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
   - 仕様書（`doc/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装からタグと push まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。GitHub Release の作成は、ユーザーが手動で行う。
 
 ## アーキテクチャ
 
 クライアントとサーバーの**両方に Mod が必要**（1.1.0 からは同じマイナー同士なら接続できる。1.0.x とは接続できない）。パッケージは `com.example.weakspot`。
 
-弱点は3種類（`common/HitKind`）: **採掘**（左の長押し）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable` と、サトウキビ・サボテン・ネザーウォート）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE）。節目と耐久回復は採掘だけが対象。
+弱点は3種類（`common/HitKind`）: **採掘**（左の長押し。対象は、壊せて、今の破壊速度で 1 tick に進む量 `getPlayerRelativeBlockHardness` が 1.0 未満のブロック。1.0 以上のブロックはバニラの `PlayerControllerMP.clickBlock` がクリックした瞬間に壊し、「掘っている」状態にも入らないので、弱点も耐久バーも出せない。素手の土などは対象）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable` と、サトウキビ・サボテン・ネザーウォート）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE）。節目と耐久回復は採掘だけが対象。
 
 - `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、連続ヒット数 `HitStreak`、ヒット音の音階 `HitPitch`、コンボの表示の計算 `ComboTier` / `ComboMilestones` / `ComboDisplay`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`、`IGrowable` でない植物の育てる余地 `GrowthRoom`、マーカーの移動と残像 `MarkerMotion`、耐久バーの形 `BlockHealthBar`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `RightClickTargets`（両側）: 右クリックの弱点の対象判定。クライアントとサーバーで同じ条件（同期した設定）を使う。
@@ -79,5 +83,5 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 `@Config`（`config/weakspot.cfg`）。キー名を変えないように、カテゴリは分けず `general` に並べる。コメントの先頭に、どちらの値が使われるかを書く。
 - `[サーバー]`: サーバーの値が正。クライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` の static フィールドに書き込まない**（書き込むと `ConfigManager.sync` でサーバーの値がクライアントの `weakspot.cfg` に保存されてしまう）。サーバーだけが使う項目（報酬、成長の回数、機械の倍率など）は送らない。
 - `[クライアント]`: 音と、他のプレイヤーのマークの表示と、コンボの表示と、弱点の移動の演出と、耐久バーだけ（見た目と音だけに関わるもの）。`WeakSpotConfig` をそのまま読む。
-- 設定を追加するときは、README の設定表の該当する方にも追加すること。`SyncedSettings` に項目を足すと通信内容が変わる。
+- 設定を追加するときは、README の設定表の該当する方にも追加すること。設定画面の説明は `weakspot.general.<キーを小文字にしたもの>.tooltip` を `en_us.lang` と `ja_jp.lang` の両方に足す（1.1.3 以降の `[クライアント]` の項目。それより前の項目は `@Config.Comment` の日本語のまま）。`SyncedSettings` に項目を足すと通信内容が変わる。
 - パケットの中身を変えたり、パケットを追加・削除したりすると、古いバージョンとは通信できなくなる。マイナーを上げ、`acceptableRemoteVersions` を書き換え、README の更新履歴にそのことを書くこと。統計の保存形式（NBT のキー）を古い版で読めないように変えるときも同じ。
