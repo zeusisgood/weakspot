@@ -45,20 +45,33 @@ final class WeakSpot {
     /** 照準位置 aim を避けて、新しい弱点を出す。minRadius は最小の半径（0 なら比率どおり）。 */
     static WeakSpot spawn(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, Vec3d aim,
                           double radiusRatio, double minRadius, double edgeMargin, double minDistance, Random random) {
+        WeakSpot spot = create(kind, world, pos, state, face, radiusRatio, minRadius);
+        double[] aimUV = spot.toUV(aim);
+        double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, edgeMargin, aimUV[0], aimUV[1], minDistance, random);
+        spot.u = p[0];
+        spot.v = p[1];
+        return spot;
+    }
+
+    /** 他のプレイヤーから届いた位置 (u, v) に弱点を置く（描画用）。大きさは全員同じ設定値なので、自分の側で計算する。 */
+    static WeakSpot at(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, double u, double v,
+                       double radiusRatio) {
+        WeakSpot spot = create(kind, world, pos, state, face, radiusRatio, 0);
+        spot.u = u;
+        spot.v = v;
+        return spot;
+    }
+
+    /** ブロックの当たり判定の箱から、その面の矩形・平面・半径を決める（位置 u, v はまだ決めない）。 */
+    private static WeakSpot create(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face,
+                                   double radiusRatio, double minRadius) {
         AxisAlignedBB box = state.getSelectedBoundingBox(world, pos);
         int axis = face.getAxis().ordinal();
         FaceRect rect = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
         double[] min = {box.minX, box.minY, box.minZ};
         double[] max = {box.maxX, box.maxY, box.maxZ};
         double plane = face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? max[axis] : min[axis];
-
-        WeakSpot spot = new WeakSpot(kind, pos, face, plane, rect, WeakSpotPlacer.radius(rect, radiusRatio, minRadius),
-                box);
-        double[] aimUV = spot.toUV(aim);
-        double[] p = WeakSpotPlacer.place(rect, spot.radius, edgeMargin, aimUV[0], aimUV[1], minDistance, random);
-        spot.u = p[0];
-        spot.v = p[1];
-        return spot;
+        return new WeakSpot(kind, pos, face, plane, rect, WeakSpotPlacer.radius(rect, radiusRatio, minRadius), box);
     }
 
     boolean matches(HitKind kind, BlockPos pos, EnumFacing face) {

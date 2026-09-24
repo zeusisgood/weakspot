@@ -2,6 +2,7 @@ package com.example.weakspot;
 
 import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.SyncedSettings;
+import com.example.weakspot.network.MarkerMessage.MarkerData;
 import net.minecraft.util.math.BlockPos;
 
 /** 物理サーバー用。クライアント専用の処理は ClientProxy で行う。 */
@@ -25,6 +26,10 @@ public class CommonProxy {
 
     /** 自分の統計が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onStatsReceived(MiningStats session, MiningStats total) {
+    }
+
+    /** 近くの他のプレイヤーの弱点マークが届いた。marker が null なら消えた（サーバー → クライアントのパケットから呼ばれる）。 */
+    public void onOtherMarker(int playerEntityId, MarkerData marker) {
     }
 
     /** 採掘ヒットの累計が節目に達した（サーバー → クライアントのパケットから呼ばれる）。 */

@@ -112,6 +112,15 @@ public final class WeakSpotConfig {
             "minecraft:brown_shulker_box", "minecraft:green_shulker_box", "minecraft:red_shulker_box",
             "minecraft:black_shulker_box"};
 
+    @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
+            "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
+    @Config.RangeDouble(min = 0.0, max = 256.0)
+    public static double markerShareRange = 16;
+
+    @Config.Comment("[サーバー] 弱点マークの状態を、1プレイヤーあたり送る最小間隔（tick）。通信の多さを抑える")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int markerSendMinIntervalTicks = 2;
+
     @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（採掘・成長・機械で共通）",
             "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING",
             "統計画面（K キー）のサウンドでも変えられ、試聴できる"})
@@ -130,6 +139,17 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 他のプレイヤーのヒット音に使うノートブロックの楽器",
             "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING"})
     public static HitSound othersHitSound = HitSound.XYLOPHONE;
+
+    @Config.Comment("[クライアント] 他のプレイヤーの弱点マークを表示するか")
+    public static boolean otherMarkerEnabled = true;
+
+    @Config.Comment({"[クライアント] 他のプレイヤーの弱点マークの色（#RRGGBB）。自分のマーク（オレンジ）と区別できる色にする",
+            "読めない値のときは初期値の水色 #3FA9FF を使う"})
+    public static String otherMarkerColor = "#3FA9FF";
+
+    @Config.Comment("[クライアント] 他のプレイヤーの弱点マークの濃さ（自分のマークの濃さに掛ける。1 で同じ、0 で見えない）")
+    @Config.RangeDouble(min = 0.0, max = 1.0)
+    public static double otherMarkerAlpha = 0.6;
 
     private WeakSpotConfig() {
     }

@@ -29,6 +29,8 @@ public final class SyncedSettings {
     public int machineMinHitIntervalTicks;
     /** 機械の加速の対象外。登録名。 */
     public Set<String> excludedBlocks;
+    public double markerShareRange;
+    public int markerSendMinIntervalTicks;
 
     private SyncedSettings() {
     }
@@ -48,6 +50,8 @@ public final class SyncedSettings {
         s.growthExcludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.growthExcludedBlocks));
         s.machineMinHitIntervalTicks = WeakSpotConfig.machineMinHitIntervalTicks;
         s.excludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.excludedBlocks));
+        s.markerShareRange = WeakSpotConfig.markerShareRange;
+        s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
     }
 
@@ -64,6 +68,8 @@ public final class SyncedSettings {
         writeStrings(buf, growthExcludedBlocks);
         buf.writeInt(machineMinHitIntervalTicks);
         writeStrings(buf, excludedBlocks);
+        buf.writeDouble(markerShareRange);
+        buf.writeInt(markerSendMinIntervalTicks);
     }
 
     public static SyncedSettings read(ByteBuf buf) {
@@ -80,6 +86,8 @@ public final class SyncedSettings {
         s.growthExcludedBlocks = readStrings(buf);
         s.machineMinHitIntervalTicks = buf.readInt();
         s.excludedBlocks = readStrings(buf);
+        s.markerShareRange = buf.readDouble();
+        s.markerSendMinIntervalTicks = buf.readInt();
         return s;
     }
 

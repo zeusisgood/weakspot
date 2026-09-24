@@ -3,6 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.CommonProxy;
 import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.SyncedSettings;
+import com.example.weakspot.network.MarkerMessage.MarkerData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 
@@ -31,6 +32,11 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void onStatsReceived(MiningStats session, MiningStats total) {
         Minecraft.getMinecraft().addScheduledTask(() -> StatsScreen.receive(session, total));
+    }
+
+    @Override
+    public void onOtherMarker(int playerEntityId, MarkerData marker) {
+        Minecraft.getMinecraft().addScheduledTask(() -> OtherMarkers.receive(playerEntityId, marker));
     }
 
     @Override

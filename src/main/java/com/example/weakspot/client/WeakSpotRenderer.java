@@ -1,6 +1,9 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.MarkerColor;
+import com.example.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -11,13 +14,16 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 
-/** 弱点の円と、ヒット時に広がって消えるリングを描く。 */
+/** 弱点の円と、ヒット時に広がって消えるリングを描く。他のプレイヤーのマークは、設定の色と濃さで同じ形に描く。 */
 final class WeakSpotRenderer {
 
     private static final int SEGMENTS = 32;
     private static final double LIFT = 0.003;
     private static final int FADE_TICKS = 10;
     private static final int FLASH_TICKS = 6;
+
+    /** 他のプレイヤーのマークの色が読めないときの色（水色 #3FA9FF）。 */
+    private static final int DEFAULT_OTHER_COLOR = 0x3FA9FF;
 
     private static final List<Flash> FLASHES = new ArrayList<>();
 
@@ -52,11 +58,14 @@ final class WeakSpotRenderer {
     }
 
     static void render(Minecraft mc, WeakSpot spot, long tick, float partialTicks) {
-        if (spot == null && FLASHES.isEmpty()) {
-            return;
-        }
         Entity camera = mc.getRenderViewEntity();
         if (camera == null) {
+            return;
+        }
+        List<WeakSpot> others = WeakSpotConfig.otherMarkerEnabled && WeakSpotConfig.otherMarkerAlpha > 0
+                ? OtherMarkers.visible(camera)
+                : Collections.emptyList();
+        if (spot == null && FLASHES.isEmpty() && others.isEmpty()) {
             return;
         }
         double cx = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * partialTicks;
@@ -74,6 +83,19 @@ final class WeakSpotRenderer {
         GlStateManager.depthMask(false);
         GlStateManager.glLineWidth(2.0F);
 
+        if (!others.isEmpty()) {
+            int rgb = MarkerColor.parse(WeakSpotConfig.otherMarkerColor, DEFAULT_OTHER_COLOR);
+            float a = (float) WeakSpotConfig.otherMarkerAlpha;
+            float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
+            float[] center = MarkerColor.towardWhite(rgb, 0.75F);
+            for (WeakSpot other : others) {
+                drawDisk(other, other.u, other.v, other.radius, cx, cy, cz,
+                        (rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, 0.45F * a);
+                drawRing(other, other.u, other.v, other.radius, cx, cy, cz, ring[0], ring[1], ring[2], 0.9F * a);
+                drawDisk(other, other.u, other.v, other.radius * 0.3, cx, cy, cz,
+                        center[0], center[1], center[2], 0.9F * a);
+            }
+        }
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks);
             if (alpha > 0) {
