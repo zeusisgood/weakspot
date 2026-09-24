@@ -9,6 +9,7 @@ import com.example.weakspot.network.OtherMarkerMessage;
 import com.example.weakspot.network.SettingsMessage;
 import com.example.weakspot.network.StatsMessage;
 import com.example.weakspot.network.StatsRequestMessage;
+import com.example.weakspot.network.SwitchMessage;
 import com.example.weakspot.server.MachineAccelerator;
 import com.example.weakspot.server.WeakSpotCommand;
 import net.minecraftforge.fml.common.Mod;
@@ -52,6 +53,7 @@ public class WeakSpotMod {
         network.registerMessage(MilestoneMessage.Handler.class, MilestoneMessage.class, 5, Side.CLIENT);
         network.registerMessage(MarkerMessage.Handler.class, MarkerMessage.class, 6, Side.SERVER);
         network.registerMessage(OtherMarkerMessage.Handler.class, OtherMarkerMessage.class, 7, Side.CLIENT);
+        network.registerMessage(SwitchMessage.Handler.class, SwitchMessage.class, 8, Side.SERVER);
     }
 
     @Mod.EventHandler

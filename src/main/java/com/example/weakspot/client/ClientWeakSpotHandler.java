@@ -70,6 +70,7 @@ public final class ClientWeakSpotHandler {
         }
         Minecraft mc = Minecraft.getMinecraft();
         ToggleKeyHandler.remindIfOff(mc);
+        ToggleKeyHandler.syncToServer(mc);
         if (mc.world == null || mc.player == null) {
             reset();
             return;

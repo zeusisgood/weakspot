@@ -55,6 +55,9 @@ public final class RightClickHits {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos) {
+        if (!ServerSwitches.isEnabled(player)) {
+            return;
+        }
         Clicking clicking = CLICKING.get(player.getUniqueID());
         World world = player.world;
         long now = world.getTotalWorldTime();

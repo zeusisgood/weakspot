@@ -5,6 +5,7 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.RightClickHits;
+import com.example.weakspot.server.ServerSwitches;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.block.Block;
@@ -144,8 +145,8 @@ public final class RightClickTargets {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         EntityPlayer player = event.getEntityPlayer();
         World world = event.getWorld();
-        if (world.isRemote && !WeakSpotConfig.weakSpotsEnabled) {
-            // 弱点の一時オフ（J キー）: 自分のクライアントでは通常の右クリックのままにする
+        if (world.isRemote ? !WeakSpotConfig.weakSpotsEnabled : !ServerSwitches.isEnabled(player)) {
+            // 弱点の一時オフ（J キー）: 通常の右クリックのままにする。サーバーは、クライアントから届いた状態を見る
             return;
         }
         HitKind kind = classify(world, player, event.getPos(), settings(world));

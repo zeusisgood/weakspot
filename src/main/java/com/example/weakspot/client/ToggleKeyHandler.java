@@ -3,6 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.WeakSpotSwitch;
 import com.example.weakspot.config.WeakSpotConfig;
+import com.example.weakspot.network.SwitchMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.resources.I18n;
@@ -53,6 +54,25 @@ public final class ToggleKeyHandler {
         mc.ingameGUI.setOverlayMessage(I18n.format(on ? "weakspot.toggle.on" : "weakspot.toggle.off"), false);
         mc.getSoundHandler().playSound(
                 PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, on ? 1.2F : 0.8F));
+    }
+
+    /** 最後にサーバーへ伝えた状態。null なら、このワールド（サーバー）にはまだ伝えていない。 */
+    private static Boolean lastSent;
+
+    /**
+     * 弱点のオン・オフを、サーバーに伝える（ワールドに入ったとき、切り替えたとき。設定画面で変えたときも）。
+     * クライアントの tick から毎 tick 呼ぶ。届く前のサーバーは、オンとして扱う。
+     */
+    static void syncToServer(Minecraft mc) {
+        if (mc.world == null || mc.player == null || mc.getConnection() == null) {
+            lastSent = null;
+            return;
+        }
+        boolean on = WeakSpotConfig.weakSpotsEnabled;
+        if (lastSent == null || lastSent != on) {
+            lastSent = on;
+            WeakSpotMod.network.sendToServer(new SwitchMessage(on));
+        }
     }
 
     /** ワールドに入った直後に、オフのままなら、アクションバーで知らせる（クライアントの tick から毎 tick 呼ぶ）。 */

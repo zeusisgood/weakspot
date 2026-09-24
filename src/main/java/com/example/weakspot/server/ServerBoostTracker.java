@@ -107,7 +107,7 @@ public final class ServerBoostTracker {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
     public static void onHit(EntityPlayerMP player, BlockPos pos, int streak) {
-        if (player.capabilities.isCreativeMode || player.isSpectator()) {
+        if (player.capabilities.isCreativeMode || player.isSpectator() || !ServerSwitches.isEnabled(player)) {
             return;
         }
         Mining mining = MINING.get(player.getUniqueID());
@@ -147,7 +147,7 @@ public final class ServerBoostTracker {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         EntityPlayer player = event.getEntityPlayer();
-        if (player.world.isRemote) {
+        if (player.world.isRemote || !ServerSwitches.isEnabled(player)) {
             return;
         }
         Mining mining = MINING.get(player.getUniqueID());
