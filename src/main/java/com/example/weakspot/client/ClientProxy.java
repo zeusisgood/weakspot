@@ -27,4 +27,9 @@ public class ClientProxy extends CommonProxy {
     public void onStatsReceived(MiningStats session, MiningStats total) {
         Minecraft.getMinecraft().addScheduledTask(() -> StatsScreen.receive(session, total));
     }
+
+    @Override
+    public void onMilestone(int milestone) {
+        Minecraft.getMinecraft().addScheduledTask(() -> MilestoneEffects.show(milestone));
+    }
 }

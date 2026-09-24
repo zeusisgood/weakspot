@@ -7,6 +7,7 @@ import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * config/weakspot.cfg。
@@ -46,6 +47,27 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int minHitIntervalTicks = 6;
 
+    @Config.Comment({"[サーバー] 採掘ヒットの累計がこの数の倍数になるたびに、手に持っているツールの耐久を回復する",
+            "0 で回復しない"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int hitsPerRepair = 5;
+
+    @Config.Comment("[サーバー] hitsPerRepair ごとに回復する耐久")
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int repairPerStep = 1;
+
+    @Config.Comment({"[サーバー] 節目にする採掘ヒットの累計。達した瞬間に1回だけ、祝いの演出と報酬が出る",
+            "milestoneXp と milestoneRepair は、この順番に対応する"})
+    public static int[] milestones = {100, 777, 1000, 10000};
+
+    @Config.Comment({"[サーバー] 節目ごとにもらえる経験値（milestones の順に対応）",
+            "数が足りない分は 0 として扱う"})
+    public static int[] milestoneXp = {10, 77, 30, 100};
+
+    @Config.Comment({"[サーバー] 節目ごとに回復する、手に持っているツールの耐久（milestones の順に対応）",
+            "数が足りない分は 0 として扱う"})
+    public static int[] milestoneRepair = {10, 77, 30, 100};
+
     @Config.Comment({"[クライアント] 他のプレイヤーのヒット音の音量（0 で聞こえなくなる）",
             "バニラの「プレイヤー」音量も掛かる"})
     @Config.RangeDouble(min = 0.0, max = 1.0)
@@ -56,6 +78,16 @@ public final class WeakSpotConfig {
     public static OtherHitSound othersHitSound = OtherHitSound.XYLOPHONE;
 
     private WeakSpotConfig() {
+    }
+
+    /** 節目と量の数が合っていなければ、ログに警告を出す（足りない分は 0 として扱う）。 */
+    public static void warnIfMisconfigured() {
+        if (milestoneXp.length != milestones.length || milestoneRepair.length != milestones.length) {
+            LogManager.getLogger(WeakSpotMod.MODID).warn(
+                    "weakspot.cfg: milestones has {} entries but milestoneXp has {} and milestoneRepair has {}; "
+                            + "missing amounts are treated as 0",
+                    milestones.length, milestoneXp.length, milestoneRepair.length);
+        }
     }
 
     @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -69,6 +101,7 @@ public final class WeakSpotConfig {
             if (WeakSpotMod.MODID.equals(event.getModID())) {
                 ConfigManager.sync(WeakSpotMod.MODID, Config.Type.INSTANCE);
                 SettingsSync.resendToAll();
+                warnIfMisconfigured();
             }
         }
     }

@@ -117,6 +117,7 @@ public final class ServerBoostTracker {
         mining.extraTicks += extra;
         mining.hits++;
         ServerStats.record(player, stats -> stats.recordHit(extra));
+        MiningRewards.onMiningHit(player);
         notifyNearbyPlayers(player, pos, streak);
     }
 

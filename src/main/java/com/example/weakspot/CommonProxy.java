@@ -21,4 +21,8 @@ public class CommonProxy {
     /** 自分の統計が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onStatsReceived(MiningStats session, MiningStats total) {
     }
+
+    /** 採掘ヒットの累計が節目に達した（サーバー → クライアントのパケットから呼ばれる）。 */
+    public void onMilestone(int milestone) {
+    }
 }

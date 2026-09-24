@@ -19,3 +19,7 @@ weakspot.stats.reset=累計をリセット
 weakspot.stats.reset.confirm=もう一度押すとリセット
 
 weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定が使われます（音と他のプレイヤーのマークを除く）
+
+weakspot.milestone.title=%s ヒット！
+weakspot.milestone.subtitle=弱点ヒットの節目を達成
+weakspot.milestone.chat=[弱点] 弱点ヒットが %s 回に達しました！

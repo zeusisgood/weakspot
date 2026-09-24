@@ -1,6 +1,8 @@
 package com.example.weakspot;
 
+import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
+import com.example.weakspot.network.MilestoneMessage;
 import com.example.weakspot.network.OtherHitMessage;
 import com.example.weakspot.network.SettingsMessage;
 import com.example.weakspot.network.StatsMessage;
@@ -35,10 +37,12 @@ public class WeakSpotMod {
         network.registerMessage(SettingsMessage.Handler.class, SettingsMessage.class, 2, Side.CLIENT);
         network.registerMessage(StatsRequestMessage.Handler.class, StatsRequestMessage.class, 3, Side.SERVER);
         network.registerMessage(StatsMessage.Handler.class, StatsMessage.class, 4, Side.CLIENT);
+        network.registerMessage(MilestoneMessage.Handler.class, MilestoneMessage.class, 5, Side.CLIENT);
     }
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+        WeakSpotConfig.warnIfMisconfigured();
         proxy.init();
     }
 }

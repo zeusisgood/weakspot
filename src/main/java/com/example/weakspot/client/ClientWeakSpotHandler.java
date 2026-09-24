@@ -1,15 +1,12 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
-import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -126,8 +123,7 @@ public final class ClientWeakSpotHandler {
             hitStreak = 0;
         }
         hitStreak++;
-        mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(
-                SoundEvents.BLOCK_NOTE_PLING, HitPitch.forStreak(hitStreak)));
+        HitSounds.playOwn(hitStreak);
 
         SyncedSettings settings = ClientSettings.get();
 
@@ -162,5 +158,6 @@ public final class ClientWeakSpotHandler {
         hitStreak = 0;
         boostHitTick = Long.MIN_VALUE / 2;
         WeakSpotRenderer.clearFlashes();
+        HitSounds.clear();
     }
 }
