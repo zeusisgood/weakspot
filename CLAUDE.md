@@ -24,7 +24,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.1.5。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.1.6。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
   - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
   - 仕様書（`doc/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装からタグと push まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。GitHub Release の作成は、ユーザーが手動で行う。
@@ -49,6 +49,9 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - マーカーの表示位置と当たり判定の位置は別（1.1.4）。`WeakSpot.u` / `v` は当たり判定の位置で、ヒットの瞬間に移動先へ変わる。表示位置は `WeakSpot.motion`（`common/MarkerMotion`）で、実時間（`Minecraft.getSystemTime()`）の 80 ms で ease-out に動き、通った道に残像を 4 個（150 ms で消える）残す。移動中の次のヒットは、前の移動先から動き直す。出し直し（新しい弱点、別の面・ブロック）はその場で切り替える。設定 `weakSpotTrailEnabled`（`[クライアント]`）でオフ。`WeakSpotRenderer` は表示位置に描き、送信（`OtherMarkers.sendOwn`）とヒット判定は当たり判定の位置を使う。
   - 耐久バー（1.1.5）: 自分が掘っているブロックの残りの耐久（1 − 破壊の進み具合）を、採掘の弱点と同じ面の「下」の余白（下の辺から中心 0.05、太さ 0.06、面の幅の 80%。実際の当たり判定の箱の面）に、緑 `#3DDC84` と半透明の黒の背景で描く。側面は下の辺、上面・下面はプレイヤーに一番近い辺が「下」。左から伸び、プレイヤーの右手の側から縮む（形の計算は `common/BlockHealthBar`）。`WeakSpotRenderer` がマーカーより先に（下に）描く。出すのは、採掘の弱点がこのフレームの照準の面に出ていて、`PlayerControllerMP` が今そのブロックを掘っているときだけ（長押しをやめる・壊れると `getIsHittingBlock()` が false になり、すぐ消える）。設定 `blockHealthBarEnabled`（`[クライアント]`）。
     - 破壊の進み具合と掘っているブロックは、`PlayerControllerMP` の非公開のフィールドをリフレクションで読む（`client/MiningProgress`）。開発環境の MCP 名（`curBlockDamageMP` / `currentBlock`）と実際の環境の SRG 名（`field_78770_f` / `field_178895_c`）を順に試す。Forge の `ReflectionHelper.findField` の3引数の版は起動環境の判定で片方しか試さないので使わない。見つからなければ警告を1回出してバーを出さない。進み具合は tick ごとに積まれるので、`ClientTickEvent` START（その tick の進捗の前）で前の値を覚え、フレームごとに補間する。
+  - 成長バー（1.1.6、`GrowthBar`）: 成長の弱点が今出ている作物の足元に、黄 `#FFD23F` のバーを描く。値は名前が `age` の整数プロパティ（なければ `stage`）÷ 最大。柱（サトウキビ・サボテン）は `growthTarget` の一番上の節の年齢。**描き方は汎用の部品 `WorldBar.draw`（中心のワールド座標・幅・太さ・値・色を渡すと、プレイヤーの方を向いた水平のバーを、左から伸ばして描く。深度テストは切る）。1.2.0 の動物の足元のバーには、これを流用する**。設定 `growthBarEnabled`。
+  - 他のプレイヤーのマークの形（1.1.6）: `common/MarkerShape`（CIRCLE / RING / DIAMOND / SQUARE。頂点数・回転・半径の倍率を持つ）。設定 `otherMarkerShape`（初期値 RING）。`WeakSpotRenderer.drawMarker` が形を受け取る。自分のマークは CIRCLE 固定。
+  - 弱点の一時オフ（1.1.6、`ToggleKeyHandler`、J キー、設定 `weakSpotsEnabled`）。オフの間に止める処理の一覧: ①弱点の表示・ヒット判定（`onRenderWorldLast` で `updateAim` を呼ばない）と通知（ヒットが起きないので `HitMessage` も出ない）、②自分のマークの送信（`spot` が null になり、`OtherMarkers.sendOwn` が「消えた」を送る）、③ブースト（`onBreakSpeed`、`boostPos`）、④耐久バー・成長バー（`onRenderWorldLast`）、⑤クライアント側の右クリックの抑止（`RightClickTargets.onRightClickBlock` が `world.isRemote` のときに返る）。まとめて `ClientWeakSpotHandler.stopOwnWeakSpots`。**止められないもの: サーバー側の右クリックの抑止（機械の GUI が開かない）。サーバーは、クライアントがオフかを知る手段がない（通信を変えられない）ので、Mod 入りのサーバーでは、オフでも、対象の右クリックは通常動作にならない。**
   - 節目の演出（`MilestoneEffects`）: タイトル、チャット1行、花火、音階の駆け上がり。777 は虹色で派手にする。
   - 画面の文字列は `assets/weakspot/lang/en_us.lang` と `ja_jp.lang` の両方に追加すること。
   - キーバインドの登録は `@SidedProxy`（`CommonProxy` / `client.ClientProxy`）の `init` で行う。
@@ -60,6 +63,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - `MilestoneMessage`（S→C）: 達成した節目。
   - `MarkerMessage`（C→S）/ `OtherMarkerMessage`（S→C）: 採掘の弱点マーク。サーバーは検証せずに転送する。
 - `server/`（論理サーバー）:
+  - `WeakSpotCommand`（1.1.6）: `/weakspot [stats|reset] <プレイヤー>`（権限レベル 2、オンラインのプレイヤーだけ）。`WeakSpotMod.serverStarting` で登録。表示は翻訳キー。`reset` は `ServerStats.resetTotal`。
   - `ServerBoostTracker`: `LeftClickBlock` で「今どのブロックを破壊中か」と開始 tick、弱点が出るブロックか（一瞬で壊れないか）を記録する。採掘ヒットはそのブロックと一致したときだけ受け付ける。「壊した」は `BreakEvent`（LOWEST、キャンセルされていないもの）で数える。アクセストランスフォーマーは使っていない。
   - `RightClickHits`: 成長・機械ヒットの検証（直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、対象か）と効果（成長は `randomTick` を余分に呼ぶ。サトウキビ・サボテンは柱の一番上の節に）。
   - `MachineAccelerator`: 機械ヒットの位置と残り時間をメモリにだけ持ち、`WorldTickEvent` END で `update()` を余分に呼ぶ（Time in a Bottle と同じ方式）。例外はあえて捕まえない（ユーザーの判断。クラッシュレポートで機械を特定し、`excludedBlocks` に足してもらう）。
