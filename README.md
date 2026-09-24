@@ -3,9 +3,11 @@
 Fortnite の資材集めにある「弱点（クリティカル）を叩くと速く壊せる」仕組みを Minecraft に持ち込む Mod です。
 
 - 対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**
-- 最新版: **1.4.0**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
+- 最新版: **1.4.1**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
 
 ## 遊び方
+
+初めてワールド（サーバー）に入ると、遊び方の**ガイドの本**が1冊もらえます。統計画面（K キー）の右上の「**ガイド**」ボタンで、いつでも読み直せます。
 
 ### 採掘（左クリックの長押し）
 
@@ -312,6 +314,7 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 | `meleeMinHitIntervalTicks` | 4 | 近接のヒットを受け付ける最小間隔（tick）。攻撃のゲージの条件もある |
 | `critsPerRepair` | 5 | 近接の弱点のクリティカル何回ごとに、手に持っている物の耐久を回復するか（余りはログアウトまで持ち越す）。0 で回復しない。**サーバーだけが使う**（クライアントには送らない） |
 | `critRepairPerStep` | 1 | `critsPerRepair` ごとに回復する耐久。**サーバーだけが使う**（クライアントには送らない） |
+| `giveGuideBook` | true | 初めてログインしたプレイヤーに、遊び方のガイドの本を渡すか（1人1回）。**サーバーだけが使う**（クライアントには送らない） |
 | `markerShareRange` | 16 | 他のプレイヤーの弱点マークが見える範囲（ブロック）。0 で見えなくなる |
 | `markerSendMinIntervalTicks` | 2 | 弱点マークの状態を送る最小間隔（tick）。通信の多さを抑える |
 
@@ -385,7 +388,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 | `server/` | 管理コマンド、破壊速度ブースト、成長・機械・動物・釣り・弓・近接のヒット、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
 | `config/` | 設定 |
 
-仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
+仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
 
 ## バージョンの方針
 
@@ -394,6 +397,12 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - 迷ったときは、マイナーを上げます。
 
 ## 更新履歴
+
+### 1.4.1
+
+- 遊び方のガイドの本を追加した。初めてワールド（サーバー）に入ったときに1冊もらえる（1.4.0 以前から遊んでいる人も、1回もらえる）。文章は、各自の言語（日本語・英語）で出る。統計画面の「ガイド」ボタンでも読める
+- 設定 `giveGuideBook`（サーバーだけが使う）で、本を渡さないようにできる
+- 通信内容は変わっていない。1.4.x 同士は、そのまま接続できる
 
 ### 1.4.0
 
