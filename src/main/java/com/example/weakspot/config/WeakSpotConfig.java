@@ -107,6 +107,11 @@ public final class WeakSpotConfig {
             "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant",
             "minecraft:brown_mushroom", "minecraft:red_mushroom"};
 
+    @Config.Comment({"[サーバー] IGrowable を持たない植物のうち、成長の弱点の対象にするブロックの登録名（追加リスト）",
+            "育つ条件をコードで決めてあるのは、サトウキビ・サボテン・ネザーウォートだけ。それ以外を足しても弱点は出ない",
+            "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる"})
+    public static String[] growthExtraBlocks = {"minecraft:reeds", "minecraft:cactus", "minecraft:nether_wart"};
+
     @Config.Comment({"[サーバー] 機械の弱点に当てたとき、update() を毎tick何倍呼ぶか（4.0 なら毎tick 3回余分に呼ぶ）",
             "複数のプレイヤーが同じ機械を加速しても、足さずに大きいほうだけを使う"})
     @Config.RangeDouble(min = 1.0, max = 100.0)

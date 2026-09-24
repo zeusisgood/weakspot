@@ -39,8 +39,9 @@ public final class RightClickTargets {
     }
 
     /**
-     * IGrowable を持たないが、成長の弱点の対象にする植物（登録名）。コード内の固定のリスト（設定化は 1.2.0）。
-     * 対象外は設定 growthExcludedBlocks で、このリストのブロックにも効く。
+     * IGrowable を持たない植物のうち、育つ条件（育てる余地）をコードで決めてあるもの（登録名）。
+     * 実際に対象にするかは設定 growthExtraBlocks（追加リスト）で決め、ここにないブロックを追加リストに足しても
+     * 弱点は出ない（エラーにはしない）。対象外は設定 growthExcludedBlocks で、追加リストのブロックにも効く。
      */
     private static final Map<String, ExtraPlant> EXTRA_GROWTH_BLOCKS = new HashMap<>();
 
@@ -73,7 +74,7 @@ public final class RightClickTargets {
 
     /**
      * 成長の弱点の対象か。対象外リスト（growthExcludedBlocks）になく、次のどちらか。
-     * 成長できる状態の IGrowable、または追加リストの植物で育てる余地があるもの（GrowthRoom）。
+     * 成長できる状態の IGrowable、または追加リスト（growthExtraBlocks）の植物で育てる余地があるもの（GrowthRoom）。
      */
     public static boolean isGrowable(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         Block block = state.getBlock();
@@ -84,7 +85,7 @@ public final class RightClickTargets {
         if (block instanceof IGrowable) {
             return ((IGrowable) block).canGrow(world, pos, state, world.isRemote);
         }
-        ExtraPlant extra = EXTRA_GROWTH_BLOCKS.get(name);
+        ExtraPlant extra = settings.growthExtraBlocks.contains(name) ? EXTRA_GROWTH_BLOCKS.get(name) : null;
         if (extra == ExtraPlant.COLUMN) {
             return hasColumnRoom(world, pos, block);
         }
