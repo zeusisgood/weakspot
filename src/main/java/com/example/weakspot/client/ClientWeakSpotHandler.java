@@ -190,7 +190,7 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 弱点の一時オフ（J キー）の間、自分の弱点を出さず、ヒットも起こさない。
+     * 弱点の一時オフ（HOME キー）の間、自分の弱点を出さず、ヒットも起こさない。
      * 出ていた弱点は消す（自分のマークの送信は、弱点が null になると「消えた」を送る）。ブーストも止める。
      */
     static void stopOwnWeakSpots() {

@@ -14,8 +14,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * 弓の弱点のヒット通知の検証と効果（論理サーバー）。弓を引いている最中で、まだ引き切っていないときだけ受け付け、
- * 弓の引きを bowHitTicks 進める（BowDraw）。照準の角度は確かめない（クライアントを信用する。釣りと同じ程度の確認）。
+ * 弓の弱点のヒット通知の検証と効果（論理サーバー）。弓を引いている最中に受け付け、引き切る前は弓の引きを
+ * bowHitTicks 進め、引き切ったあとは過剰チャージ（矢のダメージ +10%、上限 5 回）を 1 増やす（BowDraw）。照準の角度は確かめない（クライアントを信用する。釣りと同じ程度の確認）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class BowHits {
@@ -33,7 +33,12 @@ public final class BowHits {
                 || !WeakSpotConfig.bowWeakSpotEnabled || WeakSpotConfig.bowHitTicks <= 0) {
             return;
         }
-        if (!BowDraw.isDrawing(player) || BowMath.isFull(BowDraw.usedTicks(player))) {
+        if (!BowDraw.isDrawing(player)) {
+            return;
+        }
+        // 引き切ったあとは、過剰チャージ（上限まで）
+        boolean full = BowMath.isFull(BowDraw.usedTicks(player));
+        if (full && !BowMath.canOvercharge(BowDraw.overcharge(player))) {
             return;
         }
         long now = player.world.getTotalWorldTime();
@@ -43,7 +48,11 @@ public final class BowHits {
             return;
         }
         LAST_HIT.put(player.getUniqueID(), now);
-        BowDraw.add(player, WeakSpotConfig.bowHitTicks);
+        if (full) {
+            BowDraw.addOvercharge(player);
+        } else {
+            BowDraw.add(player, WeakSpotConfig.bowHitTicks);
+        }
         ServerStats.record(player, stats -> stats.recordBowHit());
         ServerStats.countStreak(player);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);

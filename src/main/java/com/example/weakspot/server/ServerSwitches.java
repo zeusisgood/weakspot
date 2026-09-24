@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * プレイヤーごとの弱点のオン・オフ（クライアントの J キー）。ログインのたびにクライアントから届く。メモリだけ。
+ * プレイヤーごとの弱点のオン・オフ（クライアントの HOME キー）。ログインのたびにクライアントから届く。メモリだけ。
  * 届く前はオン。オフのプレイヤーについて、サーバーは右クリック・左クリックの抑止、ヒットの受け付け、ブースト、
  * マークの転送を止める。
  */

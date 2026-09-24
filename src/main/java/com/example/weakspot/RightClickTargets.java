@@ -146,7 +146,7 @@ public final class RightClickTargets {
         EntityPlayer player = event.getEntityPlayer();
         World world = event.getWorld();
         if (world.isRemote ? !WeakSpotConfig.weakSpotsEnabled : !ServerSwitches.isEnabled(player)) {
-            // 弱点の一時オフ（J キー）: 通常の右クリックのままにする。サーバーは、クライアントから届いた状態を見る
+            // 弱点の一時オフ（HOME キー）: 通常の右クリックのままにする。サーバーは、クライアントから届いた状態を見る
             return;
         }
         HitKind kind = classify(world, player, event.getPos(), settings(world));

@@ -24,6 +24,7 @@ import net.minecraftforge.fml.relauncher.Side;
 /**
  * 弓の弱点（自分だけ。他のプレイヤーには見せない）と、引きゲージ。弓を引いている間、照準の近く（視線から 3〜8 度）に
  * 弱点を出し、照準を合わせるだけでヒットにする（クリックは要らない）。ヒットすると、弓の引きが進む（BowDraw）。
+ * 引き切ったあとは、過剰チャージ（矢のダメージ +10%、上限 5 回。1.3.4）が上限に届くまで弱点を出す。
  *
  * 弱点は向き（yaw / pitch）で持ち、目からその向きの先の点を、釣りと同じく画面上の位置に変換して、画面上で一定の大きさ
  * （半径 12 GUI ピクセル）の円として描く（ScreenProjection）。当たり判定も釣りと同じ（FishingMath.allowedAngle）。
@@ -49,6 +50,10 @@ final class BowSpot {
     private static final float[] BAR_DRAWING = {0xFF / 255F, 0x8C / 255F, 0x42 / 255F, 1.0F};
     private static final float[] BAR_FULL = {0xFF / 255F, 0xD2 / 255F, 0x3F / 255F, 1.0F};
     private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
+    /** 過剰チャージの目盛り #FF4D4D。ゲージのすぐ下に、上限の数だけ並べる。 */
+    private static final float[] OVERCHARGE = {0xFF / 255F, 0x4D / 255F, 0x4D / 255F, 1.0F};
+    private static final int OVERCHARGE_HEIGHT = 2;
+    private static final int OVERCHARGE_GAP = 1;
 
     private static final ScreenProjection SCREEN = new ScreenProjection();
 
@@ -95,7 +100,7 @@ final class BowSpot {
             return;
         }
         EntityPlayerSP player = mc.player;
-        if (BowMath.isFull(BowDraw.usedTicks(player))) {
+        if (!spotWanted(player)) {
             hasSpot = false;
         } else if (!hasSpot) {
             // 引き始めた。今の視線の近くに出す
@@ -106,6 +111,11 @@ final class BowSpot {
             MOTION.jumpTo(yaw, pitch);
             hasSpot = true;
         }
+    }
+
+    /** 弱点を出すか。引き切る前と、引き切ったあとの過剰チャージが上限に届くまで。 */
+    private static boolean spotWanted(EntityPlayerSP player) {
+        return !BowMath.isFull(BowDraw.usedTicks(player)) || BowMath.canOvercharge(BowDraw.overcharge(player));
     }
 
     /** 向き (y, p) の弱点の点のワールド座標。 */
@@ -151,9 +161,13 @@ final class BowSpot {
     private static void onHit(EntityPlayerSP player) {
         int streak = ClientWeakSpotHandler.registerHit(HitKind.BOW);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.BOW, streak));
-        // サーバーの返事を待たずに、自分の側でも引きを進める（弓の見た目とゲージのため）
-        BowDraw.add(player, ClientSettings.get().bowHitTicks);
+        // サーバーの返事を待たずに、自分の側でも引きを進める（弓の見た目とゲージのため）。引き切ったあとは過剰チャージ
         if (BowMath.isFull(BowDraw.usedTicks(player))) {
+            BowDraw.addOvercharge(player);
+        } else {
+            BowDraw.add(player, ClientSettings.get().bowHitTicks);
+        }
+        if (!spotWanted(player)) {
             hasSpot = false;
             return;
         }
@@ -242,7 +256,7 @@ final class BowSpot {
         }
     }
 
-    /** 照準の下の、引き具合のゲージ。左から伸び、引き切ったら色が変わる。 */
+    /** 照準の下の、引き具合のゲージ。左から伸び、引き切ったら色が変わる。引き切ったあとは、過剰チャージの目盛りも出す。 */
     private static void drawBar(Minecraft mc, float partialTicks) {
         ScaledResolution res = new ScaledResolution(mc);
         int used = mc.player.getItemInUseMaxCount();
@@ -253,6 +267,18 @@ final class BowSpot {
         ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
         if (value > 0) {
             ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * value, y0 + BAR_HEIGHT, full ? BAR_FULL : BAR_DRAWING);
+        }
+        int overcharge = BowDraw.overcharge(mc.player);
+        if (full && (overcharge > 0 || hasSpot)) {
+            // 過剰チャージの目盛り。達した分を赤く
+            int count = BowMath.MAX_OVERCHARGE_HITS;
+            double width = (BAR_WIDTH - OVERCHARGE_GAP * (count - 1)) / (double) count;
+            double top = y0 + BAR_HEIGHT + OVERCHARGE_GAP;
+            for (int i = 0; i < count; i++) {
+                double left = x0 + i * (width + OVERCHARGE_GAP);
+                ScreenProjection.rect(left, top, left + width, top + OVERCHARGE_HEIGHT,
+                        i < overcharge ? OVERCHARGE : BAR_BACK);
+            }
         }
     }
 }

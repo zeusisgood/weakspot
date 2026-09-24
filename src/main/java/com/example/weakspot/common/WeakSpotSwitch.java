@@ -1,6 +1,6 @@
 package com.example.weakspot.common;
 
-/** 弱点の一時オフ（J キー）のオン・オフの切り替え。 */
+/** 弱点の一時オフ（HOME キー）のオン・オフの切り替え。 */
 public final class WeakSpotSwitch {
 
     private WeakSpotSwitch() {

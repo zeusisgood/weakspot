@@ -82,4 +82,18 @@ public class RepairSettlementTest {
         assertEquals(0, result.repair);
         assertEquals(0, result.carry);
     }
+
+    @Test
+    public void criticalHitsRepairOnceEveryFive() {
+        // 近接のクリティカル（1.3.4）: 1回ずつ精算し、5回ごとに 1 回復する
+        int carry = 0;
+        int repaired = 0;
+        for (int i = 0; i < 12; i++) {
+            RepairSettlement result = RepairSettlement.settle(carry, 1, 5, 1, 1, 100);
+            carry = result.carry;
+            repaired += result.repair;
+        }
+        assertEquals(2, repaired);
+        assertEquals(2, carry);
+    }
 }

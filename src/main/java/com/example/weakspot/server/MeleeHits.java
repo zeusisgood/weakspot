@@ -2,6 +2,7 @@ package com.example.weakspot.server;
 
 import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.RepairSettlement;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
@@ -42,6 +44,8 @@ public final class MeleeHits {
     /** プレイヤー → 今まさにクリティカルにする攻撃の敵（AttackEntityEvent から CriticalHitEvent まで）。 */
     private static final Map<UUID, Entity> CRITS = new HashMap<>();
     private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
+    /** 耐久回復の数え方の余り（クリティカルの回数）。メモリにだけ持ち、再ログインで 0 に戻る。 */
+    private static final Map<UUID, Integer> REPAIR_CARRY = new HashMap<>();
 
     private MeleeHits() {
     }
@@ -110,6 +114,23 @@ public final class MeleeHits {
         event.setResult(Event.Result.ALLOW);
         event.setDamageModifier(CRIT_MULTIPLIER);
         ServerStats.record(player, stats -> stats.recordCritHit());
+        if (player instanceof EntityPlayerMP) {
+            repairWeapon((EntityPlayerMP) player);
+        }
+    }
+
+    /**
+     * クリティカル critsPerRepair 回ごとに、メインハンドの物の耐久を critRepairPerStep 回復する（採掘の耐久回復と同じ精算）。
+     * このあと、バニラが攻撃の分の耐久を減らす。
+     */
+    private static void repairWeapon(EntityPlayerMP player) {
+        ItemStack stack = player.getHeldItemMainhand();
+        int damage = !stack.isEmpty() && stack.isItemStackDamageable() ? stack.getItemDamage() : 0;
+        RepairSettlement result = RepairSettlement.settle(REPAIR_CARRY.getOrDefault(player.getUniqueID(), 0), 1,
+                WeakSpotConfig.critsPerRepair, WeakSpotConfig.critRepairPerStep, WeakSpotConfig.critRepairPerStep,
+                damage);
+        REPAIR_CARRY.put(player.getUniqueID(), result.carry);
+        MiningRewards.repairHeldTool(player, result.repair);
     }
 
     @SubscribeEvent
@@ -118,5 +139,6 @@ public final class MeleeHits {
         PENDING.remove(id);
         CRITS.remove(id);
         LAST_HIT.remove(id);
+        REPAIR_CARRY.remove(id);
     }
 }

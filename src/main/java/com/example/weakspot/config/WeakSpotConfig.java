@@ -236,6 +236,15 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int meleeMinHitIntervalTicks = 4;
 
+    @Config.Comment({"[サーバー] 近接の弱点のクリティカル何回ごとに、手に持っている物の耐久を回復するか。0 で回復しない",
+            "余りはログアウトまで持ち越す。サーバーだけが使う（クライアントには送らない）"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int critsPerRepair = 5;
+
+    @Config.Comment("[サーバー] critsPerRepair ごとに回復する耐久。サーバーだけが使う（クライアントには送らない）")
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int critRepairPerStep = 1;
+
     @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
             "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
     @Config.RangeDouble(min = 0.0, max = 256.0)
@@ -306,7 +315,7 @@ public final class WeakSpotConfig {
             "CIRCLE（塗りつぶした円）, RING（中抜きの輪）, DIAMOND（ひし形）, SQUARE（四角）。自分のマークは円のまま"})
     public static MarkerShape otherMarkerShape = MarkerShape.RING;
 
-    @Config.Comment({"[クライアント] 自分の弱点のオン・オフ（J キーで切り替わる。操作設定で変えられる）",
+    @Config.Comment({"[クライアント] 自分の弱点のオン・オフ（HOME キーで切り替わる。操作設定で変えられる）",
             "オフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える"})
     public static boolean weakSpotsEnabled = true;
 
@@ -315,7 +324,7 @@ public final class WeakSpotConfig {
     public static boolean animalSpotSeeThrough = true;
 
     @Config.Comment({"[クライアント] 弓を引いている間、照準の下に引き具合のゲージを表示するか",
-            "弓の弱点や、弱点の一時オフ（J キー）に関係なく出る"})
+            "弓の弱点や、弱点の一時オフ（HOME キー）に関係なく出る"})
     public static boolean bowDrawBarEnabled = true;
 
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")

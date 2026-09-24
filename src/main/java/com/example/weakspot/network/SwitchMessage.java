@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** クライアント → サーバー: 弱点のオン・オフ（J キー）の状態。ログイン時と、切り替えたときに送る。 */
+/** クライアント → サーバー: 弱点のオン・オフ（HOME キー）の状態。ログイン時と、切り替えたときに送る。 */
 public class SwitchMessage implements IMessage {
 
     private boolean enabled;

@@ -48,8 +48,8 @@ public final class MiningRewards {
         repairHeldTool(player, result.repair);
     }
 
-    /** メインハンドのツールの耐久を回復する。耐久のないものや、減っていないものは何もしない。 */
-    private static void repairHeldTool(EntityPlayerMP player, int amount) {
+    /** メインハンドのツールの耐久を回復する。耐久のないものや、減っていないものは何もしない（近接のクリティカルからも使う）。 */
+    static void repairHeldTool(EntityPlayerMP player, int amount) {
         ItemStack stack = player.getHeldItemMainhand();
         if (amount <= 0 || stack.isEmpty() || !stack.isItemStackDamageable() || !stack.isItemDamaged()) {
             return;

@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * プレイヤーごとの弱点のオン・オフ（サーバーが持つ、クライアントの J キーの状態）。
+ * プレイヤーごとの弱点のオン・オフ（サーバーが持つ、クライアントの HOME キーの状態）。
  * オフのプレイヤーだけを覚えるので、届く前（何も知らない）プレイヤーはオンとして扱う。
  */
 public final class PlayerSwitches<K> {

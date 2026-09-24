@@ -3,8 +3,8 @@ package com.example.weakspot.common;
 import java.util.Random;
 
 /**
- * 弓の弱点の計算（SPEC_v1.3 §1）。Minecraft に依存しない。
- * 弱点の向き（yaw / pitch。Minecraft と同じ度の向き）、引きの進め方、引きゲージの値。
+ * 弓の弱点の計算（SPEC_v1.3 §1、過剰チャージは SPEC_v1.3.4 §2）。Minecraft に依存しない。
+ * 弱点の向き（yaw / pitch。Minecraft と同じ度の向き）、引きの進め方、引きゲージの値、過剰チャージの倍率。
  */
 public final class BowMath {
 
@@ -15,6 +15,10 @@ public final class BowMath {
     public static final double MAX_OFFSET_DEGREES = 8.0;
     /** ヒットのあと、前の向きから最低でも離れる角度（度）。 */
     public static final double MIN_MOVE_DEGREES = 4.0;
+    /** 過剰チャージ（引き切ったあとのヒット）1回で上げる、矢のダメージの割合（1.3.4）。 */
+    public static final double OVERCHARGE_PER_HIT = 0.10;
+    /** 過剰チャージの上限のヒット数（+50%）。 */
+    public static final int MAX_OVERCHARGE_HITS = 5;
 
     private BowMath() {
     }
@@ -82,6 +86,16 @@ public final class BowMath {
     /** 1ヒットで実際に進める tick 数。引いた時間 used に足して、引き切り（FULL_DRAW_TICKS）を超えない。 */
     public static int addedTicks(int used, int hitTicks) {
         return Math.max(0, Math.min(hitTicks, FULL_DRAW_TICKS - used));
+    }
+
+    /** 過剰チャージ hits 回の矢のダメージの倍率（上限 MAX_OVERCHARGE_HITS 回）。 */
+    public static double overchargeMultiplier(int hits) {
+        return 1.0 + OVERCHARGE_PER_HIT * Math.max(0, Math.min(hits, MAX_OVERCHARGE_HITS));
+    }
+
+    /** まだ過剰チャージできるか（引き切ったあとも弱点を出すか）。 */
+    public static boolean canOvercharge(int hits) {
+        return hits < MAX_OVERCHARGE_HITS;
     }
 
     /** 引き切ったか。 */

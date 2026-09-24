@@ -5,8 +5,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -28,6 +31,20 @@ public final class BowDraw {
 
     /** プレイヤー → まだ反映していない、進める tick 数。クライアントとサーバーのスレッドの両方から触る。 */
     private static final Map<EntityLivingBase, Integer> PENDING = Collections.synchronizedMap(new WeakHashMap<>());
+    /** プレイヤー → 引き切ったあとのヒット（過剰チャージ）の回数。引き始めと、矢を放ったときに 0 に戻す。 */
+    private static final Map<EntityLivingBase, Integer> OVERCHARGE = Collections.synchronizedMap(new WeakHashMap<>());
+    /** サーバー: 矢を放ったプレイヤー → その矢のダメージに掛ける倍率と、放った tick（同じ tick に出た矢に掛ける）。 */
+    private static final Map<EntityLivingBase, Loose> LOOSED = Collections.synchronizedMap(new WeakHashMap<>());
+
+    private static final class Loose {
+        final double multiplier;
+        final long tick;
+
+        Loose(double multiplier, long tick) {
+            this.multiplier = multiplier;
+            this.tick = tick;
+        }
+    }
 
     private BowDraw() {
     }
@@ -56,9 +73,24 @@ public final class BowDraw {
         return added;
     }
 
+    public static int overcharge(EntityLivingBase entity) {
+        Integer hits = OVERCHARGE.get(entity);
+        return hits == null ? 0 : hits;
+    }
+
+    /** 引き切ったあとのヒット。上限（BowMath.MAX_OVERCHARGE_HITS）未満なら 1 増やして true。 */
+    public static boolean addOvercharge(EntityLivingBase entity) {
+        if (!BowMath.canOvercharge(overcharge(entity))) {
+            return false;
+        }
+        OVERCHARGE.merge(entity, 1, Integer::sum);
+        return true;
+    }
+
     @SubscribeEvent
     public static void onUseStart(LivingEntityUseItemEvent.Start event) {
         PENDING.remove(event.getEntityLiving());
+        OVERCHARGE.remove(event.getEntityLiving());
     }
 
     /** duration は、この tick に 1 減らす前の残り時間。引いた時間は (最大 - duration)。 */
@@ -81,12 +113,36 @@ public final class BowDraw {
         }
     }
 
-    /** 同じ tick のうちに放った矢には、まだ反映していない分を charge に足す。 */
+    /**
+     * 同じ tick のうちに放った矢には、まだ反映していない分を charge に足す。
+     * 過剰チャージがあれば、サーバーは倍率を覚えて、この直後にワールドに出る矢（onJoinWorld）に掛ける。
+     */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onArrowLoose(ArrowLooseEvent event) {
-        Integer ticks = PENDING.remove(event.getEntityPlayer());
+        EntityPlayer player = event.getEntityPlayer();
+        Integer ticks = PENDING.remove(player);
         if (ticks != null) {
             event.setCharge(event.getCharge() + BowMath.addedTicks(event.getCharge(), ticks));
+        }
+        Integer hits = OVERCHARGE.remove(player);
+        if (hits != null && hits > 0 && !player.world.isRemote) {
+            LOOSED.put(player, new Loose(BowMath.overchargeMultiplier(hits), player.world.getTotalWorldTime()));
+        }
+    }
+
+    /** 過剰チャージして放った矢のダメージ（パワーのエンチャントを含む）に、倍率を掛ける（サーバー）。 */
+    @SubscribeEvent
+    public static void onJoinWorld(EntityJoinWorldEvent event) {
+        if (LOOSED.isEmpty() || event.getWorld().isRemote || !(event.getEntity() instanceof EntityArrow)) {
+            return;
+        }
+        EntityArrow arrow = (EntityArrow) event.getEntity();
+        if (!(arrow.shootingEntity instanceof EntityLivingBase)) {
+            return;
+        }
+        Loose loose = LOOSED.remove(arrow.shootingEntity);
+        if (loose != null && loose.tick == event.getWorld().getTotalWorldTime()) {
+            arrow.setDamage(arrow.getDamage() * loose.multiplier);
         }
     }
 }

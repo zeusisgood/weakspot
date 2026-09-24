@@ -79,4 +79,14 @@ public class BowMathTest {
         assertEquals(170, BowMath.wrapDegrees(-190), 1e-9);
         assertEquals(0, BowMath.wrapDegrees(720), 1e-9);
     }
+
+    @Test
+    public void overchargeAddsTenPercentUpToFiftyPercent() {
+        assertEquals(1.0, BowMath.overchargeMultiplier(0), 1e-9);
+        assertEquals(1.3, BowMath.overchargeMultiplier(3), 1e-9);
+        assertEquals(1.5, BowMath.overchargeMultiplier(5), 1e-9);
+        assertEquals(1.5, BowMath.overchargeMultiplier(9), 1e-9);
+        assertTrue(BowMath.canOvercharge(4));
+        assertFalse(BowMath.canOvercharge(5));
+    }
 }
