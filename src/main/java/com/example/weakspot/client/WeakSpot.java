@@ -4,6 +4,7 @@ import com.example.weakspot.common.FaceMath;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.FaceRect;
 import com.example.weakspot.common.MarkerMotion;
+import com.example.weakspot.common.MeleeArea;
 import com.example.weakspot.common.WeakSpotPlacer;
 import com.example.weakspot.config.SyncedSettings;
 import java.util.Random;
@@ -34,7 +35,10 @@ final class WeakSpot {
     /** 動物の弱点の、面の左下の角のワールド座標 (u, v)。ブロックは 0。 */
     private double originU;
     private double originV;
-    /** ブロックの弱点はワールド座標の矩形。動物の弱点は、大きさだけを持つ (0, 0)〜(幅, 高さ)。 */
+    /**
+     * ブロックの弱点はワールド座標の矩形。動物の弱点は、大きさだけを持つ (0, 0)〜(幅, 高さ)。
+     * 近接の弱点は、その中の弱点を出す範囲（側面は上の 6 割。MeleeArea）。
+     */
     final FaceRect rect;
     final double radius;
     /** この面での、縁の余白と最小移動距離（面の大きさに合わせて決める。WeakSpotPlacer.layout）。 */
@@ -144,8 +148,12 @@ final class WeakSpot {
         AxisAlignedBB box = entity.getEntityBoundingBox();
         int axis = face.getAxis().ordinal();
         FaceRect world = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
-        FaceRect rect = new FaceRect(0, 0, world.width(), world.height());
-        if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
+        // 近接の弱点は、敵の上のほう（頭・首・胴体のあたり）にだけ出す。底面には出さない
+        FaceRect rect = kind == HitKind.MELEE
+                ? MeleeArea.area(world.width(), world.height(), axis,
+                        face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE)
+                : new FaceRect(0, 0, world.width(), world.height());
+        if (rect == null || WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
             return null;
         }
         WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio,
