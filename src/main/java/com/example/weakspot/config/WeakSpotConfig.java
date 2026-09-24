@@ -119,7 +119,7 @@ public final class WeakSpotConfig {
     @Config.Comment({"[サーバー] キノコへの成長ヒット1回で、巨大キノコに育てようとする確率（0〜1。骨粉1回と同じ処理）",
             "育つ条件（下のブロック、上の空き）はバニラのまま。育たなければキノコが残る"})
     @Config.RangeDouble(min = 0.0, max = 1.0)
-    public static double mushroomGrowChance = 0.1;
+    public static double mushroomGrowChance = 0.2;
 
     @Config.Comment({"[サーバー] IGrowable を持たない植物のうち、成長の弱点の対象にするブロックの登録名（追加リスト）",
             "育つ条件をコードで決めてあるのは、サトウキビ・サボテン・ネザーウォートだけ。それ以外を足しても弱点は出ない",
@@ -309,18 +309,26 @@ public final class WeakSpotConfig {
      * 古い版で作った weakspot.cfg を1回だけ移行する（サーバーの起動時に呼ぶ。preInit の間の ConfigManager.sync は
      * ファイルの値でフィールドを上書きする「読み込み」になるので、そこでは保存できない）。
      * 1: 1.2.2 でキノコを成長の対象にしたので、growthExcludedBlocks からキノコを取り除く（書き戻したら尊重する）。
+     * 2: 1.2.4 で mushroomGrowChance の初期値を 0.2 にしたので、古い初期値 0.1 のままなら 0.2 にする（ほかの値は残す）。
      */
     public static void migrate() {
-        if (configVersion >= 1) {
+        if (configVersion >= 2) {
             return;
         }
-        List<String> excluded = new ArrayList<>(Arrays.asList(growthExcludedBlocks));
-        if (excluded.removeAll(Arrays.asList("minecraft:brown_mushroom", "minecraft:red_mushroom"))) {
-            growthExcludedBlocks = excluded.toArray(new String[0]);
-            LogManager.getLogger(WeakSpotMod.MODID).info(
-                    "weakspot.cfg: removed mushrooms from growthExcludedBlocks (mushrooms can grow since 1.2.2)");
+        if (configVersion < 1) {
+            List<String> excluded = new ArrayList<>(Arrays.asList(growthExcludedBlocks));
+            if (excluded.removeAll(Arrays.asList("minecraft:brown_mushroom", "minecraft:red_mushroom"))) {
+                growthExcludedBlocks = excluded.toArray(new String[0]);
+                LogManager.getLogger(WeakSpotMod.MODID).info(
+                        "weakspot.cfg: removed mushrooms from growthExcludedBlocks (mushrooms can grow since 1.2.2)");
+            }
         }
-        configVersion = 1;
+        if (mushroomGrowChance == 0.1) {
+            mushroomGrowChance = 0.2;
+            LogManager.getLogger(WeakSpotMod.MODID).info(
+                    "weakspot.cfg: changed mushroomGrowChance from the old default 0.1 to 0.2 (default since 1.2.4)");
+        }
+        configVersion = 2;
         save();
     }
 
