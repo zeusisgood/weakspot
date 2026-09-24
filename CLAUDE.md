@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）、`doc/SPEC_v1.2.3.md`（Mod 1.2.3。`/weakspot reload`）、`doc/SPEC_v1.2.4.md`（Mod 1.2.4。`mushroomGrowChance` の初期値を 0.2 に）、`doc/SPEC_v1.3.md`（Mod 1.3.0。マイナー。弓の弱点と近接の弱点。実装時の確認事項は §5）、`doc/SPEC_v1.3.1.md`（Mod 1.3.1。近接の弱点を箱の上の 6 割だけに出す）、`doc/SPEC_v1.3.2.md`（Mod 1.3.2。他のプレイヤーのヒット音を成長・機械でも鳴らす）、`doc/SPEC_v1.3.3.md`（Mod 1.3.3。動物・釣り・弓・近接でも鳴らす）、`doc/SPEC_v1.3.4.md`（Mod 1.3.4。近接のクリティカルで耐久回復、弓の過剰チャージ、一時オフのキーを HOME に）、`doc/SPEC_v1.3.5.md`（Mod 1.3.5。近接の弱点を 16 ブロック先から見せる）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）、`doc/SPEC_v1.2.3.md`（Mod 1.2.3。`/weakspot reload`）、`doc/SPEC_v1.2.4.md`（Mod 1.2.4。`mushroomGrowChance` の初期値を 0.2 に）、`doc/SPEC_v1.3.md`（Mod 1.3.0。マイナー。弓の弱点と近接の弱点。実装時の確認事項は §5）、`doc/SPEC_v1.3.1.md`（Mod 1.3.1。近接の弱点を箱の上の 6 割だけに出す）、`doc/SPEC_v1.3.2.md`（Mod 1.3.2。他のプレイヤーのヒット音を成長・機械でも鳴らす）、`doc/SPEC_v1.3.3.md`（Mod 1.3.3。動物・釣り・弓・近接でも鳴らす）、`doc/SPEC_v1.3.4.md`（Mod 1.3.4。近接のクリティカルで耐久回復、弓の過剰チャージ、一時オフのキーを HOME に）、`doc/SPEC_v1.3.5.md`（Mod 1.3.5。近接の弱点を 16 ブロック先から見せる）、`doc/SPEC_v1.3.6.md`（Mod 1.3.6。機械・成長のマークも他のプレイヤーに見せる）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -25,7 +25,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.3.5。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.3,1.4)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.3.6。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.3,1.4)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - クラウドのセッションはタグを push できない（403）。そのときは、ブランチだけ push し、タグを付けて `main` とタグを push するコマンドをユーザーに渡す（ユーザーが手元で実行する）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
   - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
@@ -48,7 +48,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - ヒット音（`HitSounds`）: 楽器と音量は各自の設定（`myHitSound` / `myHitVolume`、`othersHitSound` / `othersHitVolume`）。どれも「プレイヤー」のカテゴリ。自分の音と試聴は距離なし（`AttenuationType.NONE`）、他のプレイヤーの音はブロックの位置から。連続ヒット数（`common/HitStreak`。`ClientWeakSpotHandler.STREAK`。種類・ブロックをまたいで続き、40 tick ヒットがないと途切れる。死亡・リスポーン・ディメンション移動・ワールドを出たときも 0 に戻る。数は戻らずに上がり続ける）に応じて長音階を上がり、1オクターブで最初に戻る（`HitPitch` が数から求める）。
   - コンボの表示（`ComboHud`）: 同じ連続ヒット数を HUD（`RenderGameOverlayEvent.Post` の `ALL`。F1 で隠しているときは描かない）に出す。2 以上で「12 HIT」、ヒットで弾む、色の段階（10 / 25 / 50 / 100。`ComboTier`）、途切れるまでの残り時間のバー。途切れたら薄くして消し、5 以上なら「MAX n」を 20 tick 残す。10 / 25 / 50 / 100 に達した瞬間に強調音（自分のヒット音の楽器の最高音）と光（`ComboMilestones`）。時間は `clientTick`（一時停止中は止まる）。設定は `[クライアント]` の `comboDisplayEnabled` / `comboScale` / `comboPosition` / `comboMilestoneEffects`。サーバーには何も送らない（統計の「最大連続ヒット数」は通信が変わるので 1.2.0）。
   - 統計画面（`StatsScreen`、K キー）: 「統計」タブはサーバーから届いた数字を表示するだけ（開いたとき・設定画面から戻ったときに要求）。「サウンド」タブは楽器・音量・試聴で、`WeakSpotConfig.save()`（`ConfigManager.sync`）で `weakspot.cfg` に保存する。「設定画面を開く」は `WeakSpotGuiFactory.create`（Mods メニューと同じ `GuiConfig`。他人のサーバーに接続中は2行目に注意書き）。
-  - 他のプレイヤーのマーク（`OtherMarkers`）: 自分の採掘の弱点が出た・動いた・消えたときに送り（`markerSendMinIntervalTicks` で間引き、出ている間は 20 tick ごとに送り直す）、届いたマークは 60 tick 更新がなければ消す。描画は `WeakSpotRenderer` で、色と濃さは各自の設定。同じブロックの同じ面で位置が変わったマークは、前の `WeakSpot` を使い回して、最後に知っている位置から動かす（同じ位置の送り直しは動かさない）。
+  - 他のプレイヤーのマーク（`OtherMarkers`）: 自分の採掘・機械・成長（機械・成長は 1.3.6 から。受け取る側は採掘と同じブロックのマークとして描く）と動物の弱点が出た・動いた・消えたときに送り（`markerSendMinIntervalTicks` で間引き、出ている間は 20 tick ごとに送り直す）、届いたマークは 60 tick 更新がなければ消す。描画は `WeakSpotRenderer` で、色と濃さは各自の設定。同じブロックの同じ面で位置が変わったマークは、前の `WeakSpot` を使い回して、最後に知っている位置から動かす（同じ位置の送り直しは動かさない）。
   - マーカーの表示位置と当たり判定の位置は別（1.1.4）。`WeakSpot.u` / `v` は当たり判定の位置で、ヒットの瞬間に移動先へ変わる。表示位置は `WeakSpot.motion`（`common/MarkerMotion`）で、実時間（`Minecraft.getSystemTime()`）の 80 ms で ease-out に動き、通った道に残像を 4 個（150 ms で消える）残す。移動中の次のヒットは、前の移動先から動き直す。出し直し（新しい弱点、別の面・ブロック）はその場で切り替える。設定 `weakSpotTrailEnabled`（`[クライアント]`）でオフ。`WeakSpotRenderer` は表示位置に描き、送信（`OtherMarkers.sendOwn`）とヒット判定は当たり判定の位置を使う。
   - 耐久バー（1.1.5）: 自分が掘っているブロックの残りの耐久（1 − 破壊の進み具合）を、採掘の弱点と同じ面の「下」の余白（下の辺から中心 0.05、太さ 0.06、面の幅の 80%。実際の当たり判定の箱の面）に、緑 `#3DDC84` と半透明の黒の背景で描く。側面は下の辺、上面・下面はプレイヤーに一番近い辺が「下」。左から伸び、プレイヤーの右手の側から縮む（形の計算は `common/BlockHealthBar`）。`WeakSpotRenderer` がマーカーより先に（下に）描く。出すのは、採掘の弱点がこのフレームの照準の面に出ていて、`PlayerControllerMP` が今そのブロックを掘っているときだけ（長押しをやめる・壊れると `getIsHittingBlock()` が false になり、すぐ消える）。設定 `blockHealthBarEnabled`（`[クライアント]`）。
     - 破壊の進み具合と掘っているブロックは、`PlayerControllerMP` の非公開のフィールドをリフレクションで読む（`client/MiningProgress`）。開発環境の MCP 名（`curBlockDamageMP` / `currentBlock`）と実際の環境の SRG 名（`field_78770_f` / `field_178895_c`）を順に試す。Forge の `ReflectionHelper.findField` の3引数の版は起動環境の判定で片方しか試さないので使わない。見つからなければ警告を1回出してバーを出さない。進み具合は tick ごとに積まれるので、`ClientTickEvent` START（その tick の進捗の前）で前の値を覚え、フレームごとに補間する。
@@ -72,7 +72,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - `SettingsMessage`（S→C）: サーバーの設定値（`SyncedSettings`）。ログイン時と、ホストが設定を変えたとき。
   - `StatsRequestMessage`（C→S、リセットの指示を含む）/ `StatsMessage`（S→C）: 統計。
   - `MilestoneMessage`（S→C）: 達成した節目。
-  - `MarkerMessage`（C→S）/ `OtherMarkerMessage`（S→C）: 採掘と動物の弱点マーク（`MarkerData.entityId`）。サーバーは検証せずに転送する（オフのプレイヤーのものは捨てる）。
+  - `MarkerMessage`（C→S）/ `OtherMarkerMessage`（S→C）: 採掘・機械・成長（ブロック）と動物の弱点マーク（`MarkerData.entityId`）。サーバーは検証せずに転送する（オフのプレイヤーのものは捨てる）。
   - `SwitchMessage`（C→S、8）/ `AnimalQueryMessage`（C→S、9）/ `AnimalStateMessage`（S→C、10）/ `FishingQueryMessage`（C→S、11）/ `FishingStateMessage`（S→C、12）: 1.2.0 で足した。
 - `server/`（論理サーバー）:
   - `WeakSpotCommand`（1.1.6）: `/weakspot [stats|reset] <プレイヤー>`（権限レベル 2、オンラインのプレイヤーだけ）と `/weakspot reload`（1.2.3。`WeakSpotConfig.reloadFromFile` で読み直し、`SettingsSync.resendToAll`）。`WeakSpotMod.serverStarting` で登録。表示は翻訳キー。`reset` は `ServerStats.resetTotal`。
