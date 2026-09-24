@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.block.BlockMushroom;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -100,8 +101,18 @@ public final class RightClickHits {
     /**
      * randomTick を余分に呼ぶ。成長の条件（明るさ、水分など）はブロック自身が確かめるので、骨粉のように一気には育たない。
      * サトウキビ・サボテンは柱の一番上の節にかける（伸びると一番上が変わるので、毎回探し直す）。
+     * キノコは randomTick では広がるだけなので、代わりに確率で骨粉と同じ grow を呼ぶ（巨大キノコ）。
      */
     private static void grow(World world, BlockPos pos, SyncedSettings settings) {
+        IBlockState first = world.getBlockState(pos);
+        if (first.getBlock() instanceof BlockMushroom) {
+            BlockMushroom mushroom = (BlockMushroom) first.getBlock();
+            if (world.rand.nextDouble() < WeakSpotConfig.mushroomGrowChance
+                    && mushroom.canGrow(world, pos, first, false)) {
+                mushroom.grow(world, world.rand, pos, first);
+            }
+            return;
+        }
         for (int i = 0; i < WeakSpotConfig.growthTicksPerHit; i++) {
             IBlockState state = world.getBlockState(pos);
             if (!RightClickTargets.isGrowable(world, pos, state, settings)) {

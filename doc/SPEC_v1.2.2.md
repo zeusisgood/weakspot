@@ -35,7 +35,7 @@
 ### 2.2 既存の設定ファイルの移行
 - `@Config` は、設定ファイルにある値を優先するので、1.2.1 以前に作られた `weakspot.cfg` には、キノコが残る
 - そこで、1回だけ、`growthExcludedBlocks` からキノコの2つを取り除く
-  - 新しい設定 `configVersion`（初期値 0）を足す。`preInit` で `configVersion` が 1 未満なら、キノコの2つを取り除き、`configVersion` を 1 にして保存する
+  - 新しい設定 `configVersion`（初期値 0）を足す。サーバーの起動時（`serverStarting`。1人プレイでも内部サーバーの起動時）に、`configVersion` が 1 未満なら、キノコの2つを取り除き、`configVersion` を 1 にして保存する
   - 移行の後に、管理者がキノコを除外リストに書き戻したら、そのまま尊重する（もう取り除かない）
   - 取り除いたときは、ログに1行出す
 
@@ -57,5 +57,5 @@
 
 ## 4. 確認事項
 
-- ビルド・テストが通ること、`runServer` が起動し、移行の後の `weakspot.cfg` で `growthExcludedBlocks` にキノコがなく、`configVersion=1` になっていること
+- ビルド・テストが通ること、サーバーが起動し、移行の後の `weakspot.cfg` で `growthExcludedBlocks` にキノコがなく、`configVersion=1` になっていること
 - ゲーム内での確認（ユーザーに依頼）: 暗い場所か菌糸の上のキノコに弱点が出て、当て続けると巨大キノコに育つこと

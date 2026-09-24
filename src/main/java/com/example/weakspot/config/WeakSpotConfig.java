@@ -3,6 +3,9 @@ package com.example.weakspot.config;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.server.SettingsSync;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -102,10 +105,14 @@ public final class WeakSpotConfig {
     public static double growthMinRadius = 0.08;
 
     @Config.Comment({"[サーバー] 成長の弱点を出さないブロックの登録名（サトウキビ・サボテン・ネザーウォートにも効く）",
-            "IGrowable を持つブロックのうち、作物・苗木ではないもの（草ブロック、草、キノコなど）を初期値で外している"})
+            "IGrowable を持つブロックのうち、作物・苗木ではないもの（草ブロック、草など）を初期値で外している"})
     public static String[] growthExcludedBlocks = {
-            "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant",
-            "minecraft:brown_mushroom", "minecraft:red_mushroom"};
+            "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant"};
+
+    @Config.Comment({"[サーバー] キノコへの成長ヒット1回で、巨大キノコに育てようとする確率（0〜1。骨粉1回と同じ処理）",
+            "育つ条件（下のブロック、上の空き）はバニラのまま。育たなければキノコが残る"})
+    @Config.RangeDouble(min = 0.0, max = 1.0)
+    public static double mushroomGrowChance = 0.1;
 
     @Config.Comment({"[サーバー] IGrowable を持たない植物のうち、成長の弱点の対象にするブロックの登録名（追加リスト）",
             "育つ条件をコードで決めてあるのは、サトウキビ・サボテン・ネザーウォートだけ。それ以外を足しても弱点は出ない",
@@ -280,12 +287,34 @@ public final class WeakSpotConfig {
             "ニワトリなど、体が当たり判定より大きい動物で見やすくなる。他のプレイヤーのマークは透かさない"})
     public static boolean animalSpotSeeThrough = true;
 
+    @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
+    public static int configVersion = 0;
+
     private WeakSpotConfig() {
     }
 
     /** 統計画面などから [クライアント] の値を書き換えた後に呼び、weakspot.cfg に保存する（Forge の設定画面と同じ値になる）。 */
     public static void save() {
         ConfigManager.sync(WeakSpotMod.MODID, Config.Type.INSTANCE);
+    }
+
+    /**
+     * 古い版で作った weakspot.cfg を1回だけ移行する（サーバーの起動時に呼ぶ。preInit の間の ConfigManager.sync は
+     * ファイルの値でフィールドを上書きする「読み込み」になるので、そこでは保存できない）。
+     * 1: 1.2.2 でキノコを成長の対象にしたので、growthExcludedBlocks からキノコを取り除く（書き戻したら尊重する）。
+     */
+    public static void migrate() {
+        if (configVersion >= 1) {
+            return;
+        }
+        List<String> excluded = new ArrayList<>(Arrays.asList(growthExcludedBlocks));
+        if (excluded.removeAll(Arrays.asList("minecraft:brown_mushroom", "minecraft:red_mushroom"))) {
+            growthExcludedBlocks = excluded.toArray(new String[0]);
+            LogManager.getLogger(WeakSpotMod.MODID).info(
+                    "weakspot.cfg: removed mushrooms from growthExcludedBlocks (mushrooms can grow since 1.2.2)");
+        }
+        configVersion = 1;
+        save();
     }
 
     /** 節目と量の数が合っていなければ、ログに警告を出す（足りない分は 0 として扱う）。 */
