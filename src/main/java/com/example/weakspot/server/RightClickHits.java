@@ -93,14 +93,19 @@ public final class RightClickHits {
         return player.getDistanceSq(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < reach * reach;
     }
 
-    /** randomTick を余分に呼ぶ。成長の条件（明るさ、水分など）はブロック自身が確かめるので、骨粉のように一気には育たない。 */
+    /**
+     * randomTick を余分に呼ぶ。成長の条件（明るさ、水分など）はブロック自身が確かめるので、骨粉のように一気には育たない。
+     * サトウキビ・サボテンは柱の一番上の節にかける（伸びると一番上が変わるので、毎回探し直す）。
+     */
     private static void grow(World world, BlockPos pos, SyncedSettings settings) {
         for (int i = 0; i < WeakSpotConfig.growthTicksPerHit; i++) {
             IBlockState state = world.getBlockState(pos);
             if (!RightClickTargets.isGrowable(world, pos, state, settings)) {
                 return;
             }
-            state.getBlock().randomTick(world, pos, state, world.rand);
+            BlockPos target = RightClickTargets.growthTarget(world, pos, state);
+            IBlockState targetState = target.equals(pos) ? state : world.getBlockState(target);
+            targetState.getBlock().randomTick(world, target, targetState, world.rand);
         }
     }
 
