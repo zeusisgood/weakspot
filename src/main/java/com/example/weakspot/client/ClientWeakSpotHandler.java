@@ -261,7 +261,7 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 右クリックの弱点。植物は一番大きい面（多くは上面。サトウキビなどは側面。IC2 のゴムの木は樹液の穴の面）に、
+     * 右クリックの弱点。植物は一番大きい面（多くは上面。サトウキビなどは側面。1マス全体のブロックは照準の面）に、
      * 機械は狙っている面に出す。
      * 照準がその面に当たっているときだけヒットにする。
      */
@@ -274,10 +274,9 @@ public final class ClientWeakSpotHandler {
         }
         IBlockState state = mc.world.getBlockState(pos);
         AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
-        // IC2 のゴムの木は、乾いた樹液の穴のある面に出す（1.3.7）
-        EnumFacing resin = kind == HitKind.GROWTH ? RightClickTargets.resinHoleFace(state) : null;
-        EnumFacing face = resin != null ? resin
-                : kind == HitKind.GROWTH ? growthFace(mc, pos, box, target.sideHit) : target.sideHit;
+        // 1マス全体のブロック（IC2 のゴムの木の幹など）は、上面が隠れていることが多いので、照準の面に出す（1.4.0）
+        EnumFacing face = kind == HitKind.GROWTH && !isFullCube(box, pos) ? growthFace(mc, pos, box, target.sideHit)
+                : target.sideHit;
         if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
             spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec, settings, RANDOM);
         }
@@ -395,6 +394,14 @@ public final class ClientWeakSpotHandler {
         EnumFacing keep = spot != null && spot.kind == HitKind.GROWTH && spot.pos.equals(pos) && spot.box.equals(box)
                 && WeakSpot.isFacing(box, spot.face, eye) ? spot.face : null;
         return WeakSpot.growthFace(box, eye, aimed, keep);
+    }
+
+    /** 当たり判定の箱が、そのマス全体か。 */
+    private static boolean isFullCube(AxisAlignedBB box, BlockPos pos) {
+        double eps = 1e-6;
+        return Math.abs(box.minX - pos.getX()) < eps && Math.abs(box.minY - pos.getY()) < eps
+                && Math.abs(box.minZ - pos.getZ()) < eps && Math.abs(box.maxX - pos.getX() - 1) < eps
+                && Math.abs(box.maxY - pos.getY() - 1) < eps && Math.abs(box.maxZ - pos.getZ() - 1) < eps;
     }
 
     private static int minHitInterval(HitKind kind, SyncedSettings settings) {

@@ -1,8 +1,8 @@
 package com.example.weakspot.config;
 
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.GrowthFilters;
 import com.example.weakspot.common.MarkerShape;
-import com.example.weakspot.common.ResinHole;
 import com.example.weakspot.server.SettingsSync;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -122,10 +122,11 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double mushroomGrowChance = 0.2;
 
-    @Config.Comment({"[サーバー] IGrowable を持たない植物のうち、成長の弱点の対象にするブロックの登録名（追加リスト）",
-            "育つ条件をコードで決めてあるのは、サトウキビ・サボテン・ネザーウォートだけ。それ以外を足しても弱点は出ない",
-            "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる",
-            "ic2:rubber_wood は IC2 のゴムの木の乾いた樹液の穴（穴が戻るのを早める。IC2 がなければ何もしない）"})
+    @Config.Comment({"[サーバー] 成長の弱点の対象に足すブロック（追加リスト）。当てると randomTick を余分に呼んで早める",
+            "1行に「登録名」か「登録名[プロパティ=条件,...]」。条件は 0-6（数の範囲）、dry_*（* は任意の文字列）、完全一致",
+            "例: somemod:crop[age=0-6]。条件を書かないと、いつでも出す（ネザーウォートは age=0-2、ic2:rubber_wood は state=dry_* が初期の条件。",
+            "サトウキビ・サボテンは柱の高さをコードで判定する）。葉・草ブロック・耕地・氷など、成長以外に randomTick を使うブロックは書かない",
+            "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる"})
     public static String[] growthExtraBlocks = {"minecraft:reeds", "minecraft:cactus", "minecraft:nether_wart",
             "ic2:rubber_wood"};
 
@@ -366,8 +367,8 @@ public final class WeakSpotConfig {
                     "weakspot.cfg: changed mushroomGrowChance from the old default 0.1 to 0.2 (default since 1.2.4)");
         }
         List<String> extra = new ArrayList<>(Arrays.asList(growthExtraBlocks));
-        if (!extra.contains(ResinHole.BLOCK)) {
-            extra.add(ResinHole.BLOCK);
+        if (!extra.contains("ic2:rubber_wood")) {
+            extra.add("ic2:rubber_wood");
             growthExtraBlocks = extra.toArray(new String[0]);
             LogManager.getLogger(WeakSpotMod.MODID).info(
                     "weakspot.cfg: added ic2:rubber_wood to growthExtraBlocks (IC2 rubber wood resin holes since 1.3.7)");
@@ -424,6 +425,11 @@ public final class WeakSpotConfig {
 
     /** 節目と量の数が合っていなければ、ログに警告を出す（足りない分は 0 として扱う）。 */
     public static void warnIfMisconfigured() {
+        for (String entry : GrowthFilters.parse(Arrays.asList(growthExtraBlocks)).invalid()) {
+            LogManager.getLogger(WeakSpotMod.MODID).warn(
+                    "weakspot.cfg: ignored an unreadable growthExtraBlocks entry: \"{}\" "
+                            + "(write modid:block or modid:block[property=pattern,...])", entry);
+        }
         if (milestoneXp.length != milestones.length || milestoneRepair.length != milestones.length) {
             LogManager.getLogger(WeakSpotMod.MODID).warn(
                     "weakspot.cfg: milestones has {} entries but milestoneXp has {} and milestoneRepair has {}; "

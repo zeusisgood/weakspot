@@ -1,23 +1,24 @@
 package com.example.weakspot;
 
+import com.example.weakspot.common.GrowthFilters;
 import com.example.weakspot.common.GrowthRoom;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.ResinHole;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerSwitches;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockNetherWart;
 import net.minecraft.block.BlockReed;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -34,32 +35,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class RightClickTargets {
 
-    /** IGrowable を持たない植物の育ち方。 */
-    private enum ExtraPlant {
-        /** 同じブロックが縦に伸びる（サトウキビ、サボテン）。育つのは柱の一番上の節だけ。 */
-        COLUMN,
-        /** 成長段階が進む（ネザーウォート）。 */
-        STAGE,
-        /** IC2 のゴムの木の乾いた樹液の穴が、randomTick で戻る（1.3.7。ResinHole）。 */
-        RESIN
-    }
-
     /**
-     * IGrowable を持たない植物のうち、育つ条件（育てる余地）をコードで決めてあるもの（登録名）。
-     * 実際に対象にするかは設定 growthExtraBlocks（追加リスト）で決め、ここにないブロックを追加リストに足しても
-     * 弱点は出ない（エラーにはしない）。対象外は設定 growthExcludedBlocks で、追加リストのブロックにも効く。
+     * 同じブロックが縦に伸びる植物（サトウキビ、サボテン）。育つのは柱の一番上の節だけなので、育てる余地（柱の高さ）を
+     * コードで判定し、効果は柱の一番上にかける。追加リスト（growthExtraBlocks）にあるときだけ対象（条件を書けば、それも満たすとき）。
      */
-    private static final Map<String, ExtraPlant> EXTRA_GROWTH_BLOCKS = new HashMap<>();
-
-    /** ネザーウォートの最後の成長段階（BlockNetherWart.AGE の最大値）。 */
-    private static final int NETHER_WART_LAST_STAGE = 3;
-
-    static {
-        EXTRA_GROWTH_BLOCKS.put("minecraft:reeds", ExtraPlant.COLUMN);
-        EXTRA_GROWTH_BLOCKS.put("minecraft:cactus", ExtraPlant.COLUMN);
-        EXTRA_GROWTH_BLOCKS.put("minecraft:nether_wart", ExtraPlant.STAGE);
-        EXTRA_GROWTH_BLOCKS.put(ResinHole.BLOCK, ExtraPlant.RESIN);
-    }
+    private static final Set<String> COLUMN_BLOCKS = new HashSet<>(Arrays.asList("minecraft:reeds", "minecraft:cactus"));
 
     private RightClickTargets() {
     }
@@ -80,8 +60,9 @@ public final class RightClickTargets {
     }
 
     /**
-     * 成長の弱点の対象か。対象外リスト（growthExcludedBlocks）になく、次のどちらか。
-     * 成長できる状態の IGrowable、または追加リスト（growthExtraBlocks）の植物で育てる余地があるもの（GrowthRoom）。
+     * 成長の弱点の対象か。対象外リスト（growthExcludedBlocks）になく、次のどちらか（1.4.0）。
+     * 追加リスト（growthExtraBlocks）にあるブロックは、書いた状態の条件（GrowthFilters。柱の植物は育てる余地も）を満たすとき。
+     * 追加リストにない IGrowable は、成長できる状態のとき。
      */
     public static boolean isGrowable(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         Block block = state.getBlock();
@@ -89,37 +70,26 @@ public final class RightClickTargets {
         if (settings.growthExcludedBlocks.contains(name)) {
             return false;
         }
+        GrowthFilters filters = settings.growthFilters();
+        if (filters.contains(name)) {
+            if (!filters.matches(name, propertyNames(state))) {
+                return false;
+            }
+            return !COLUMN_BLOCKS.contains(name) || hasColumnRoom(world, pos, block);
+        }
         if (block instanceof IGrowable) {
             return ((IGrowable) block).canGrow(world, pos, state, world.isRemote);
-        }
-        ExtraPlant extra = settings.growthExtraBlocks.contains(name) ? EXTRA_GROWTH_BLOCKS.get(name) : null;
-        if (extra == ExtraPlant.COLUMN) {
-            return hasColumnRoom(world, pos, block);
-        }
-        if (extra == ExtraPlant.STAGE && block instanceof BlockNetherWart) {
-            return GrowthRoom.hasStageRoom(state.getValue(BlockNetherWart.AGE), NETHER_WART_LAST_STAGE);
-        }
-        if (extra == ExtraPlant.RESIN) {
-            return resinHoleFace(state) != null;
         }
         return false;
     }
 
-    /**
-     * IC2 のゴムの木の、乾いた樹液の穴のある面（成長の弱点を出す面）。ゴムの木でない、乾いた穴がない、
-     * プロパティが読めない（IC2 の版が違う）ときは null。IC2 のクラスには依存せず、名前だけで読む。
-     */
-    public static EnumFacing resinHoleFace(IBlockState state) {
-        if (EXTRA_GROWTH_BLOCKS.get(String.valueOf(state.getBlock().getRegistryName())) != ExtraPlant.RESIN) {
-            return null;
-        }
+    /** 状態のプロパティの名前 → 値の名前（F3 の画面と同じ書き方）。 */
+    private static Map<String, String> propertyNames(IBlockState state) {
+        Map<String, String> names = new HashMap<>();
         for (IProperty<?> property : state.getPropertyKeys()) {
-            if (property.getName().equals(ResinHole.PROPERTY)) {
-                String facing = ResinHole.dryFacing(valueName(state, property));
-                return facing == null ? null : EnumFacing.byName(facing);
-            }
+            names.put(property.getName(), valueName(state, property));
         }
-        return null;
+        return names;
     }
 
     private static <T extends Comparable<T>> String valueName(IBlockState state, IProperty<T> property) {
@@ -148,8 +118,7 @@ public final class RightClickTargets {
      */
     public static BlockPos growthTarget(World world, BlockPos pos, IBlockState state) {
         Block block = state.getBlock();
-        if (block instanceof IGrowable
-                || EXTRA_GROWTH_BLOCKS.get(String.valueOf(block.getRegistryName())) != ExtraPlant.COLUMN) {
+        if (!COLUMN_BLOCKS.contains(String.valueOf(block.getRegistryName()))) {
             return pos;
         }
         return pos.up(blocksAbove(world, pos, block));

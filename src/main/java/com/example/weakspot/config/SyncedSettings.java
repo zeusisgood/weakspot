@@ -1,5 +1,6 @@
 package com.example.weakspot.config;
 
+import com.example.weakspot.common.GrowthFilters;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,8 +30,10 @@ public final class SyncedSettings {
     public double growthMinRadius;
     /** 登録名（"minecraft:grass" など）。 */
     public Set<String> growthExcludedBlocks;
-    /** 成長の弱点の追加リスト（IGrowable を持たない植物）。登録名。 */
+    /** 成長の弱点の追加リスト。1行は「登録名」か「登録名[状態の条件]」（1.4.0。GrowthFilters）。 */
     public Set<String> growthExtraBlocks;
+    /** growthExtraBlocks を読んだもの。最初に使うときに作る（作った後は読むだけなので、使い回してよい）。送らない。 */
+    private GrowthFilters growthFilters;
     public int machineMinHitIntervalTicks;
     /** 機械の加速の対象外。登録名。 */
     public Set<String> excludedBlocks;
@@ -61,6 +64,16 @@ public final class SyncedSettings {
     public int markerSendMinIntervalTicks;
 
     private SyncedSettings() {
+    }
+
+    /** 成長の弱点の追加リストを読んだもの。 */
+    public GrowthFilters growthFilters() {
+        GrowthFilters filters = growthFilters;
+        if (filters == null) {
+            filters = GrowthFilters.parse(growthExtraBlocks);
+            growthFilters = filters;
+        }
+        return filters;
     }
 
     /** この側の weakspot.cfg の値。 */
