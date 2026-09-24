@@ -24,6 +24,18 @@ public class MiningStatsTest {
     }
 
     @Test
+    public void growthAndMachineHitsDoNotCountAsMiningHits() {
+        MiningStats stats = new MiningStats();
+        stats.recordGrowthHit();
+        stats.recordMachineHit();
+        stats.recordMachineHit();
+        assertEquals(0, stats.hits);
+        assertEquals(1, stats.growthHits);
+        assertEquals(2, stats.machineHits);
+        assertEquals(0, stats.savedTicks, 1e-9);
+    }
+
+    @Test
     public void averageIsNaNWithoutBlocks() {
         assertTrue(Double.isNaN(new MiningStats().averageHitsPerBlock()));
     }
@@ -33,10 +45,14 @@ public class MiningStatsTest {
         MiningStats stats = new MiningStats();
         stats.recordHit(12);
         stats.recordBlockBroken(1);
+        stats.recordGrowthHit();
+        stats.recordMachineHit();
         stats.reset();
         assertEquals(0, stats.hits);
         assertEquals(0, stats.blocksBroken);
         assertEquals(0, stats.maxHitsOnBlock);
         assertEquals(0, stats.savedTicks, 1e-9);
+        assertEquals(0, stats.growthHits);
+        assertEquals(0, stats.machineHits);
     }
 }

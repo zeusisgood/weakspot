@@ -28,7 +28,7 @@ public final class StatsKeyHandler {
     public static void onKeyInput(InputEvent.KeyInputEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
         if (OPEN_STATS.isPressed() && mc.currentScreen == null && mc.player != null) {
-            mc.displayGuiScreen(new StatsScreen());
+            StatsScreen.open(mc);
         }
     }
 }

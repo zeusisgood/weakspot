@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.CommonProxy;
+import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.SyncedSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
@@ -20,5 +21,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void onSettingsReceived(SyncedSettings settings) {
         Minecraft.getMinecraft().addScheduledTask(() -> ClientSettings.receive(settings));
+    }
+
+    @Override
+    public void onStatsReceived(MiningStats session, MiningStats total) {
+        Minecraft.getMinecraft().addScheduledTask(() -> StatsScreen.receive(session, total));
     }
 }

@@ -7,10 +7,12 @@ import com.example.weakspot.network.OtherHitMessage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -40,6 +42,10 @@ public final class ServerBoostTracker {
         final long startTick;
         double extraTicks;
         long lastHitTick = Long.MIN_VALUE / 2;
+        /** 弱点が出るブロック（壊せて、一瞬では壊れない）か。統計の「壊したブロック数」に数えるかに使う。 */
+        boolean eligible;
+        /** このブロックで受け付けたヒットの数。 */
+        int hits;
 
         Mining(BlockPos pos, long startTick) {
             this.pos = pos;
@@ -62,6 +68,28 @@ public final class ServerBoostTracker {
             mining.lastHitTick = previous.lastHitTick;
         }
         MINING.put(player.getUniqueID(), mining);
+        // 新しい Mining は追加進捗が0なので、ここで測る破壊速度に自分のブーストは入らない
+        IBlockState state = player.world.getBlockState(event.getPos());
+        mining.eligible = !player.capabilities.isCreativeMode
+                && !state.getBlock().isAir(state, player.world, event.getPos())
+                && state.getBlockHardness(player.world, event.getPos()) >= 0
+                && state.getPlayerRelativeBlockHardness(player, player.world, event.getPos()) < 1.0F;
+    }
+
+    /** 統計の「壊したブロック数」。他の Mod に取り消された破壊は数えない。 */
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onBreak(BlockEvent.BreakEvent event) {
+        EntityPlayer player = event.getPlayer();
+        if (player == null || player.world.isRemote || event.isCanceled()) {
+            return;
+        }
+        Mining mining = MINING.get(player.getUniqueID());
+        if (mining == null || !mining.eligible || !mining.pos.equals(event.getPos())) {
+            return;
+        }
+        mining.eligible = false;
+        int hits = mining.hits;
+        ServerStats.record(player, stats -> stats.recordBlockBroken(hits));
     }
 
     /** 他のプレイヤーのヒット音が届く距離（ブロック）。 */
@@ -85,8 +113,10 @@ public final class ServerBoostTracker {
             return;
         }
         mining.lastHitTick = now;
-        mining.extraTicks += BoostMath.extraTicksPerHit(
-                WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks);
+        double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks);
+        mining.extraTicks += extra;
+        mining.hits++;
+        ServerStats.record(player, stats -> stats.recordHit(extra));
         notifyNearbyPlayers(player, pos, streak);
     }
 

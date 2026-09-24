@@ -1,7 +1,6 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
-import com.example.weakspot.common.BoostMath;
 import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
@@ -32,8 +31,6 @@ import net.minecraftforge.fml.relauncher.Side;
 public final class ClientWeakSpotHandler {
 
     private static final Random RANDOM = new Random();
-    /** 叩くのをやめてからこの tick 以内にブロックが消えたら、自分で壊したとみなす（低 FPS でも取りこぼさない程度の余裕）。 */
-    private static final int BROKEN_DETECTION_TICKS = 5;
     /** この tick の間ヒットがなければ、連続ヒット（ヒット音の音階）を最初に戻す。 */
     private static final int STREAK_RESET_TICKS = 40;
 
@@ -48,8 +45,6 @@ public final class ClientWeakSpotHandler {
     private static long boostHitTick = Long.MIN_VALUE / 2;
     /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
     private static boolean suppressBoost;
-    /** ワールドに入った瞬間（統計の「今回」の開始）と出た瞬間（保存）を検出する。 */
-    private static boolean inWorld;
 
     private ClientWeakSpotHandler() {
     }
@@ -61,32 +56,18 @@ public final class ClientWeakSpotHandler {
         }
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.world == null || mc.player == null) {
-            if (inWorld) {
-                inWorld = false;
-                StatsManager.save();
-            }
             reset();
             return;
-        }
-        if (!inWorld) {
-            inWorld = true;
-            StatsManager.startSession();
         }
         if (mc.isGamePaused()) {
             return;
         }
         clientTick++;
-        if (spot != null && mc.world.isAirBlock(spot.pos)) {
-            // 直前まで叩いていたブロックが消えた = 自分で壊した
-            if (clientTick - spot.lastActiveTick <= BROKEN_DETECTION_TICKS) {
-                StatsManager.recordBlockBroken(spot.hits);
-            }
-            spot = null;
-        } else if (spot != null && clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks) {
+        if (spot != null && (mc.world.isAirBlock(spot.pos)
+                || clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks)) {
             spot = null;
         }
         WeakSpotRenderer.expireFlashes(clientTick);
-        StatsManager.tick(clientTick);
     }
 
     @SubscribeEvent
@@ -148,9 +129,7 @@ public final class ClientWeakSpotHandler {
         mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(
                 SoundEvents.BLOCK_NOTE_PLING, HitPitch.forStreak(hitStreak)));
 
-        spot.hits++;
         SyncedSettings settings = ClientSettings.get();
-        StatsManager.recordHit(BoostMath.extraTicksPerHit(settings.boostMultiplier, settings.boostDurationTicks));
 
         lastHitTick = clientTick;
         boostHitTick = clientTick;

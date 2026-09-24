@@ -3,6 +3,8 @@ package com.example.weakspot;
 import com.example.weakspot.network.HitMessage;
 import com.example.weakspot.network.OtherHitMessage;
 import com.example.weakspot.network.SettingsMessage;
+import com.example.weakspot.network.StatsMessage;
+import com.example.weakspot.network.StatsRequestMessage;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -31,6 +33,8 @@ public class WeakSpotMod {
         network.registerMessage(HitMessage.Handler.class, HitMessage.class, 0, Side.SERVER);
         network.registerMessage(OtherHitMessage.Handler.class, OtherHitMessage.class, 1, Side.CLIENT);
         network.registerMessage(SettingsMessage.Handler.class, SettingsMessage.class, 2, Side.CLIENT);
+        network.registerMessage(StatsRequestMessage.Handler.class, StatsRequestMessage.class, 3, Side.SERVER);
+        network.registerMessage(StatsMessage.Handler.class, StatsMessage.class, 4, Side.CLIENT);
     }
 
     @Mod.EventHandler

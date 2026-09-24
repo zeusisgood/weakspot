@@ -1,23 +1,45 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MiningStats;
+import com.example.weakspot.network.StatsRequestMessage;
 import java.util.function.Function;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
-/** 「今回」と「累計」の統計を並べて表示する画面。 */
+/** 「今回」と「累計」の統計を並べて表示する画面。数字はサーバーから届いたものを表示するだけ。 */
 final class StatsScreen extends GuiScreen {
 
     private static final int BUTTON_RESET = 0;
     private static final int BUTTON_DONE = 1;
     private static final int ROW_HEIGHT = 14;
 
+    /** サーバーから最後に届いた統計。届くまでは null。 */
+    private static MiningStats session;
+    private static MiningStats total;
+
     private GuiButton resetButton;
     private boolean confirmingReset;
 
+    /** サーバーから統計が届いた（クライアントのスレッドで呼ぶ）。 */
+    static void receive(MiningStats newSession, MiningStats newTotal) {
+        session = newSession;
+        total = newTotal;
+    }
+
+    /** 画面を開くとき。前のワールドの数字を出さないように、届くまでは空欄にする。 */
+    static void open(Minecraft mc) {
+        session = null;
+        total = null;
+        mc.displayGuiScreen(new StatsScreen());
+    }
+
+    /** initGui は設定画面から戻ったときにも呼ばれるので、そのたびに最新の値をもらう。 */
     @Override
     public void initGui() {
+        WeakSpotMod.network.sendToServer(new StatsRequestMessage(false));
         buttonList.clear();
         int y = Math.min(height - 28, height / 2 + 70);
         resetButton = new GuiButton(BUTTON_RESET, width / 2 - 154, y, 150, 20, "");
@@ -30,7 +52,7 @@ final class StatsScreen extends GuiScreen {
     protected void actionPerformed(GuiButton button) {
         if (button.id == BUTTON_RESET) {
             if (confirmingReset) {
-                StatsManager.resetTotal();
+                WeakSpotMod.network.sendToServer(new StatsRequestMessage(true));
                 setConfirmingReset(false);
             } else {
                 setConfirmingReset(true);
@@ -44,11 +66,6 @@ final class StatsScreen extends GuiScreen {
     private void setConfirmingReset(boolean confirming) {
         confirmingReset = confirming;
         resetButton.displayString = I18n.format(confirming ? "weakspot.stats.reset.confirm" : "weakspot.stats.reset");
-    }
-
-    @Override
-    public void onGuiClosed() {
-        StatsManager.save();
     }
 
     @Override
@@ -71,14 +88,14 @@ final class StatsScreen extends GuiScreen {
         drawRight(I18n.format("weakspot.stats.column.total"), totalRight, y, 0xAAAAAA);
         y += ROW_HEIGHT + 2;
 
-        MiningStats session = StatsManager.session();
-        MiningStats total = StatsManager.total();
         y = row("weakspot.stats.hits", s -> Long.toString(s.hits), session, total, labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.blocks", s -> Long.toString(s.blocksBroken), session, total, labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.blocksWithHit", s -> Long.toString(s.blocksBrokenWithHit), session, total, labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.averageHits", StatsScreen::formatAverage, session, total, labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.maxHits", s -> Long.toString(s.maxHitsOnBlock), session, total, labelX, sessionRight, totalRight, y);
-        row("weakspot.stats.timeSaved", s -> formatDuration(s.savedSeconds()), session, total, labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.timeSaved", s -> formatDuration(s.savedSeconds()), session, total, labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.growthHits", s -> Long.toString(s.growthHits), session, total, labelX, sessionRight, totalRight, y);
+        row("weakspot.stats.machineHits", s -> Long.toString(s.machineHits), session, total, labelX, sessionRight, totalRight, y);
 
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
@@ -86,8 +103,8 @@ final class StatsScreen extends GuiScreen {
     private int row(String labelKey, Function<MiningStats, String> value, MiningStats session, MiningStats total,
                     int labelX, int sessionRight, int totalRight, int y) {
         drawString(fontRenderer, I18n.format(labelKey), labelX, y, 0xFFFFFF);
-        drawRight(value.apply(session), sessionRight, y, 0xFFFFFF);
-        drawRight(value.apply(total), totalRight, y, 0xFFFF55);
+        drawRight(session == null ? "..." : value.apply(session), sessionRight, y, 0xFFFFFF);
+        drawRight(total == null ? "..." : value.apply(total), totalRight, y, 0xFFFF55);
         return y + ROW_HEIGHT;
     }
 
