@@ -207,6 +207,15 @@ public final class ClientWeakSpotHandler {
         if (player.capabilities.isCreativeMode || player.isSpectator()) {
             return;
         }
+        if (!mc.playerController.getIsHittingBlock() && !player.isHandActive()
+                && !mc.gameSettings.keyBindUseItem.isKeyDown() && ClientSettings.get().meleeWeakSpotEnabled) {
+            // 近接の弱点は、攻撃が届く距離より遠く（16 ブロック）の敵にも出す（当てられるのは届く距離だけ）
+            RayTraceResult sight = MeleeSight.find(mc, framePartialTicks);
+            if (sight != null && MeleeTargets.isTarget(sight.entityHit)) {
+                aimMelee(mc, sight);
+                return;
+            }
+        }
         RayTraceResult target = mc.objectMouseOver;
         if (target == null) {
             return;
@@ -214,9 +223,6 @@ public final class ClientWeakSpotHandler {
         if (target.typeOfHit == RayTraceResult.Type.ENTITY) {
             if (!mc.playerController.getIsHittingBlock() && isHoldingUse(mc)) {
                 aimAnimal(mc, target);
-            } else if (!mc.playerController.getIsHittingBlock() && !player.isHandActive()
-                    && !mc.gameSettings.keyBindUseItem.isKeyDown()) {
-                aimMelee(mc, target);
             }
             return;
         }
@@ -316,8 +322,9 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 近接の弱点。攻撃が届く距離で敵に照準を合わせている間、照準が当たっている面に出す（面は、見えている間は変えない）。
-     * ここでは出すだけで、ヒットは左クリック（onMouse）で判定する。攻撃のゲージが溜まっていない間は、薄く描く。
+     * 近接の弱点。視線の先 16 ブロック以内の敵（MeleeSight）に照準を合わせている間、照準が当たっている面に出す
+     * （面は、見えている間は変えない）。ここでは出すだけで、ヒットは左クリック（onMouse）で、バニラの照準の先
+     * （攻撃が届く距離）の敵に対してだけ判定する。攻撃のゲージが溜まっていない間は、薄く描く。
      */
     private static void aimMelee(Minecraft mc, RayTraceResult target) {
         Entity entity = target.entityHit;
