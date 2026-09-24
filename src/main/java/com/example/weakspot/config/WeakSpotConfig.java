@@ -249,6 +249,10 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 100000)
     public static int critRepairPerStep = 1;
 
+    @Config.Comment({"[サーバー] 初めてログインしたプレイヤーに、遊び方のガイドの本を渡すか（1人1回）",
+            "統計画面（K キー）の「ガイド」ボタンでも読める。サーバーだけが使う（クライアントには送らない）"})
+    public static boolean giveGuideBook = true;
+
     @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
             "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
     @Config.RangeDouble(min = 0.0, max = 256.0)

@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.GuideBook;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.HitSound;
@@ -10,6 +11,7 @@ import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiScreenBook;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
@@ -23,6 +25,8 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_RESET = 0;
     private static final int BUTTON_DONE = 1;
     private static final int BUTTON_CONFIG = 2;
+    /** ガイドの本を開く（1.4.1）。どちらのタブでも出す。 */
+    private static final int BUTTON_GUIDE = 3;
     private static final int BUTTON_TAB_STATS = 10;
     private static final int BUTTON_TAB_SOUND = 11;
     private static final int BUTTON_MY_SOUND = 20;
@@ -81,6 +85,7 @@ final class StatsScreen extends GuiScreen {
                 I18n.format("weakspot.stats.tab.stats")));
         tabSound = add(new GuiButton(BUTTON_TAB_SOUND, center + 2, top + 14, 100, 20,
                 I18n.format("weakspot.stats.tab.sound")));
+        add(new GuiButton(BUTTON_GUIDE, center + 106, top + 14, 48, 20, I18n.format("weakspot.stats.guide")));
 
         int y = top + 56;
         mySound = add(new GuiButton(BUTTON_MY_SOUND, center - 154, y, 120, 20, ""));
@@ -153,6 +158,10 @@ final class StatsScreen extends GuiScreen {
                 break;
             case BUTTON_CONFIG:
                 mc.displayGuiScreen(WeakSpotGuiFactory.create(this));
+                break;
+            case BUTTON_GUIDE:
+                // 持っていなくても読めるように、その場で作った本を開く（サーバーには何も送らない）
+                mc.displayGuiScreen(new GuiScreenBook(mc.player, GuideBook.create(), false));
                 break;
             case BUTTON_TAB_STATS:
                 showTab(false);
