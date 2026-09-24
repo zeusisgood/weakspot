@@ -79,19 +79,37 @@ final class WeakSpot {
     }
 
     /**
-     * 作物・苗木の弱点を出す面。当たり判定の箱で一番大きい面（多くは上面）。
-     * 側面が一番大きいときは、プレイヤーから見える側にする。
+     * 成長の弱点を出す面。当たり判定の箱で一番大きい面（多くは上面）。
+     * 側面が一番大きいとき（サトウキビなど）は、見えている今の面 keep（なければ null）、照準が当たっている面 aimed、
+     * プレイヤーから見える側、の順に選ぶ（FaceMath.growthFaceAxis）。
      */
-    static EnumFacing growthFace(AxisAlignedBB box, Vec3d eye) {
-        int axis = FaceMath.largestFaceAxis(box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ);
+    static EnumFacing growthFace(AxisAlignedBB box, Vec3d eye, EnumFacing aimed, EnumFacing keep) {
+        Vec3d center = box.getCenter();
+        int axis = FaceMath.growthFaceAxis(box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ,
+                keep == null ? -1 : keep.getAxis().ordinal(), aimed.getAxis().ordinal(),
+                eye.x - center.x, eye.z - center.z);
         if (axis == FaceMath.AXIS_Y) {
             return EnumFacing.UP;
         }
-        Vec3d center = box.getCenter();
+        if (keep != null && keep.getAxis().ordinal() == axis) {
+            return keep;
+        }
+        if (aimed.getAxis().ordinal() == axis) {
+            return aimed;
+        }
         boolean positive = axis == FaceMath.AXIS_X ? eye.x > center.x : eye.z > center.z;
         return EnumFacing.getFacingFromAxis(
                 positive ? EnumFacing.AxisDirection.POSITIVE : EnumFacing.AxisDirection.NEGATIVE,
                 axis == FaceMath.AXIS_X ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
+    }
+
+    /** 箱の面 face が、視点 eye から見える側を向いているか（視点が面の平面より外側にある）。 */
+    static boolean isFacing(AxisAlignedBB box, EnumFacing face, Vec3d eye) {
+        int axis = face.getAxis().ordinal();
+        double[] e = {eye.x, eye.y, eye.z};
+        return face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE
+                ? e[axis] > new double[] {box.maxX, box.maxY, box.maxZ}[axis]
+                : e[axis] < new double[] {box.minX, box.minY, box.minZ}[axis];
     }
 
     double[] toUV(Vec3d point) {

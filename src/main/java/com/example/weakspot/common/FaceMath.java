@@ -65,6 +65,43 @@ public final class FaceMath {
         return x + eps >= z ? AXIS_X : AXIS_Z;
     }
 
+    /** 大きさ dx × dy × dz の箱で、法線軸 axis の面が一番大きい面（同じ大きさを含む）か。 */
+    public static boolean isLargestFace(int axis, double dx, double dy, double dz) {
+        double[] area = {dy * dz, dx * dz, dx * dy};
+        double max = Math.max(area[AXIS_X], Math.max(area[AXIS_Y], area[AXIS_Z]));
+        return area[axis] + 1e-6 >= max;
+    }
+
+    /**
+     * 成長の弱点を出す面の法線軸。上面が一番大きい（同じ大きさを含む）なら、常に Y（作物・苗木）。
+     * 側面が一番大きいときは、一番大きい側面のうち、次の順に選ぶ。
+     * 1. keepAxis: 今弱点が出ていて、プレイヤーから見えている面の軸（照準が別の側面へ移っても、面を変えない）
+     * 2. aimedAxis: 照準が当たっている面の軸
+     * 3. 視点の、箱の中心からのずれ (eyeOffsetX, eyeOffsetZ) が大きいほうの軸（同じなら X）
+     * 使わない軸は -1 を渡す。
+     */
+    public static int growthFaceAxis(double dx, double dy, double dz, int keepAxis, int aimedAxis,
+                                     double eyeOffsetX, double eyeOffsetZ) {
+        int largest = largestFaceAxis(dx, dy, dz);
+        if (largest == AXIS_Y) {
+            return AXIS_Y;
+        }
+        if (isLargestSide(keepAxis, dx, dy, dz)) {
+            return keepAxis;
+        }
+        if (isLargestSide(aimedAxis, dx, dy, dz)) {
+            return aimedAxis;
+        }
+        if (isLargestFace(AXIS_X, dx, dy, dz) && isLargestFace(AXIS_Z, dx, dy, dz)) {
+            return Math.abs(eyeOffsetZ) > Math.abs(eyeOffsetX) ? AXIS_Z : AXIS_X;
+        }
+        return largest;
+    }
+
+    private static boolean isLargestSide(int axis, double dx, double dy, double dz) {
+        return (axis == AXIS_X || axis == AXIS_Z) && isLargestFace(axis, dx, dy, dz);
+    }
+
     public static double distance(double u1, double v1, double u2, double v2) {
         double du = u1 - u2;
         double dv = v1 - v2;

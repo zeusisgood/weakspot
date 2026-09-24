@@ -14,6 +14,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -145,7 +146,7 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 右クリックの弱点。作物・苗木は一番大きい面（多くは上面）に、機械は狙っている面に出す。
+     * 右クリックの弱点。植物は一番大きい面（多くは上面。サトウキビなどは側面）に、機械は狙っている面に出す。
      * 照準がその面に当たっているときだけヒットにする。
      */
     private static void aimRightClick(Minecraft mc, RayTraceResult target) {
@@ -157,9 +158,7 @@ public final class ClientWeakSpotHandler {
         }
         IBlockState state = mc.world.getBlockState(pos);
         AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
-        EnumFacing face = kind == HitKind.GROWTH
-                ? WeakSpot.growthFace(box, mc.player.getPositionEyes(1.0F))
-                : target.sideHit;
+        EnumFacing face = kind == HitKind.GROWTH ? growthFace(mc, pos, box, target.sideHit) : target.sideHit;
         if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
             double minRadius = kind == HitKind.GROWTH ? settings.growthMinRadius : 0;
             spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec,
@@ -170,6 +169,17 @@ public final class ClientWeakSpotHandler {
                 && canHit(kind, minHitInterval(kind, settings))) {
             onHit(mc);
         }
+    }
+
+    /**
+     * 成長の弱点を出す面。同じ大きさの側面が複数あるとき（サトウキビなど）は、今の弱点の面が見えている間は変えない
+     * （照準が隣の側面へ移ってもちらつかない）。見えなくなったとき（回り込んだとき）や出し直すときに選び直す。
+     */
+    private static EnumFacing growthFace(Minecraft mc, BlockPos pos, AxisAlignedBB box, EnumFacing aimed) {
+        Vec3d eye = mc.player.getPositionEyes(1.0F);
+        EnumFacing keep = spot != null && spot.kind == HitKind.GROWTH && spot.pos.equals(pos) && spot.box.equals(box)
+                && WeakSpot.isFacing(box, spot.face, eye) ? spot.face : null;
+        return WeakSpot.growthFace(box, eye, aimed, keep);
     }
 
     private static int minHitInterval(HitKind kind, SyncedSettings settings) {

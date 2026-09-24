@@ -52,4 +52,44 @@ public class FaceMathTest {
         assertEquals(FaceMath.AXIS_X, FaceMath.largestFaceAxis(0.2, 1, 1));
         assertEquals(FaceMath.AXIS_Z, FaceMath.largestFaceAxis(1, 1, 0.2));
     }
+
+    private static final int NONE = -1;
+
+    @Test
+    public void growthFaceOfLowCropStaysTopWhateverTheAim() {
+        // 小麦など上面が一番大きい作物は、照準や今の面に関係なく上面（1.1.1 と同じ）
+        assertEquals(FaceMath.AXIS_Y, FaceMath.growthFaceAxis(1, 0.125, 1, NONE, FaceMath.AXIS_X, 3, 0));
+        assertEquals(FaceMath.AXIS_Y, FaceMath.growthFaceAxis(1, 0.875, 1, FaceMath.AXIS_Z, FaceMath.AXIS_Z, 0, 3));
+    }
+
+    @Test
+    public void growthFaceOfSaplingStaysTop() {
+        assertEquals(FaceMath.AXIS_Y, FaceMath.growthFaceAxis(0.8, 0.8, 0.8, FaceMath.AXIS_X, FaceMath.AXIS_Z, 0, 3));
+    }
+
+    @Test
+    public void growthFaceOfSugarCanePrefersAimedSide() {
+        // サトウキビ（0.75 × 1 × 0.75）の側面は4つとも同じ大きさ
+        assertEquals(FaceMath.AXIS_Z, FaceMath.growthFaceAxis(0.75, 1, 0.75, NONE, FaceMath.AXIS_Z, 3, 0.1));
+        assertEquals(FaceMath.AXIS_X, FaceMath.growthFaceAxis(0.75, 1, 0.75, NONE, FaceMath.AXIS_X, 0.1, 3));
+    }
+
+    @Test
+    public void growthFaceKeepsVisibleCurrentSide() {
+        // 照準が隣の側面へ移っても、今の面が見えていれば変えない（ちらつかない）
+        assertEquals(FaceMath.AXIS_X, FaceMath.growthFaceAxis(0.75, 1, 0.75, FaceMath.AXIS_X, FaceMath.AXIS_Z, 1, 1));
+    }
+
+    @Test
+    public void growthFaceFromTopAimFollowsEye() {
+        // 上面を狙っているときは、視点のずれが大きいほうの側面
+        assertEquals(FaceMath.AXIS_Z, FaceMath.growthFaceAxis(0.75, 1, 0.75, NONE, FaceMath.AXIS_Y, 0.2, -3));
+        assertEquals(FaceMath.AXIS_X, FaceMath.growthFaceAxis(0.75, 1, 0.75, NONE, FaceMath.AXIS_Y, 3, 0.2));
+    }
+
+    @Test
+    public void growthFaceIgnoresSmallerSides() {
+        // X 面だけが一番大きい箱では、Z 面を狙っていても、Z 面が今の面でも X 面
+        assertEquals(FaceMath.AXIS_X, FaceMath.growthFaceAxis(0.2, 1, 1, FaceMath.AXIS_Z, FaceMath.AXIS_Z, 0, 3));
+    }
 }
