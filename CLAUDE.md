@@ -21,7 +21,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.1.0。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.1.1。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
 
 ## アーキテクチャ
@@ -30,7 +30,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 弱点は3種類（`common/HitKind`）: **採掘**（左の長押し）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable`）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE）。節目と耐久回復は採掘だけが対象。
 
-- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、ヒット音の音階 `HitPitch`、統計 `MiningStats`、節目と耐久回復 `Milestones`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
+- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、ヒット音の音階 `HitPitch`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `RightClickTargets`（両側）: 右クリックの弱点の対象判定。クライアントとサーバーで同じ条件（同期した設定）を使う。対象を条件どおりに右クリックしたら、`RightClickBlock` をメインハンドで SUCCESS にしてキャンセルし、通常動作（GUI、オフハンドの設置など）を止める。クライアントでキャンセルしてもバニラは右クリックのパケットを送るので、サーバーでも発火し、そこで「直前に右クリックした」ことを記録する。右クリックを押しっぱなしにすると、バニラは 4 tick ごとに右クリックする。
 - `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態、ヒット判定、描画、ヒット音、クライアント側のブースト。弱点は一度に1つ（`ClientWeakSpotHandler.spot`）。
   - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。右クリックの押しっぱなしは `keyBindUseItem.isKeyDown()` で見る。作物・苗木の弱点は一番大きい面（多くは上面）に出し、照準がその面に当たっているときだけヒットにする。育って当たり判定の箱が変わったら出し直す。
@@ -52,8 +52,11 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - `ServerBoostTracker`: `LeftClickBlock` で「今どのブロックを破壊中か」と開始 tick、弱点が出るブロックか（一瞬で壊れないか）を記録する。採掘ヒットはそのブロックと一致したときだけ受け付ける。「壊した」は `BreakEvent`（LOWEST、キャンセルされていないもの）で数える。アクセストランスフォーマーは使っていない。
   - `RightClickHits`: 成長・機械ヒットの検証（直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、対象か）と効果（成長は `randomTick` を余分に呼ぶ）。
   - `MachineAccelerator`: 機械ヒットの位置と残り時間をメモリにだけ持ち、`WorldTickEvent` END で `update()` を余分に呼ぶ（Time in a Bottle と同じ方式）。例外はあえて捕まえない（ユーザーの判断。クラッシュレポートで機械を特定し、`excludedBlocks` に足してもらう）。
-  - `ServerStats`: 統計。累計はプレイヤーの永続データ（`PlayerPersisted` の `weakspot`。死亡・ディメンション移動で引き継がれる）に、「今回」はメモリに持つ。節目と耐久回復は、画面のリセットでは消えない別の累計 `rewardHits` で数える（報酬を取り直せないように）。
-  - `MiningRewards`: 耐久回復と節目の報酬。
+  - `ServerStats`: 統計。累計はプレイヤーの永続データ（`PlayerPersisted` の `weakspot`。死亡・ディメンション移動で引き継がれる）に、「今回」はメモリに持つ。節目は、画面のリセットでは消えない別の累計 `rewardHits` で数える（報酬を取り直せないように）。
+  - `MiningRewards`: 耐久回復と節目の報酬。節目はヒットごと（`rewardHits`）に判定する。耐久回復はヒットのときではなく、ブロックを壊したときに精算する（`common/RepairSettlement`）。
+    - 採掘ヒットは `ServerBoostTracker.Mining.hits` に未確定として持つ。`BreakEvent`（LOWEST、キャンセルされていないもの）でそのブロックと一致したときだけ確定し、`MiningRewards.onBlockBroken` に渡す。長押しをやめた（ABORT には Forge のイベントがない）・別のブロックに移ったときは、次の `LeftClickBlock` で `Mining` が作り直されるので、未確定のヒットは捨てられる。
+    - `BreakEvent` はツールの耐久が減る前（`tryHarvestBlock` の先頭）に来るので、回復してから壊れる（耐久が残り1でもツールが残る）。
+    - 回復の数え方の余りはメモリだけに持つ（ログアウトで 0）。1回の破壊での回復は `maxRepairPerBreak`（サーバーだけが使う。送らない）まで。
   - `SettingsSync` / `MarkerRelay`: 設定の送信、弱点マークの転送（毎 tick、マークから `markerShareRange` 以内のプレイヤーを計算し直し、入った人に現在の状態、出た人に「消えた」を送る）。
 
 ### 重要: サーバー側のブーストは時間枠ではない
