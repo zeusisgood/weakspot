@@ -19,14 +19,20 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
-// acceptableRemoteVersions を指定しないので、サーバーとクライアントの両方に同じバージョンが必要
+/**
+ * サーバーとクライアントの両方に必要。同じマイナー同士（1.1.x）なら、パッチが違っても接続できる。
+ * 通信内容を変えたらマイナーを上げ、ACCEPTED_VERSIONS も新しいマイナーに書き換える（CLAUDE.md のバージョンの方針）。
+ */
 @Mod(modid = WeakSpotMod.MODID, name = WeakSpotMod.NAME, version = WeakSpotMod.VERSION,
+        acceptableRemoteVersions = WeakSpotMod.ACCEPTED_VERSIONS,
         guiFactory = "com.example.weakspot.client.WeakSpotGuiFactory")
 public class WeakSpotMod {
 
     public static final String MODID = "weakspot";
     public static final String NAME = "Weak Spot Mining";
-    public static final String VERSION = "1.0.5";
+    public static final String VERSION = "1.1.0";
+    /** 接続できる相手のバージョンの範囲（Maven の書式）。 */
+    public static final String ACCEPTED_VERSIONS = "[1.1,1.2)";
 
     public static SimpleNetworkWrapper network;
 
