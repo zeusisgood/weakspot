@@ -21,7 +21,7 @@ public final class ServerStats {
 
     private static final String TAG = WeakSpotMod.MODID;
     private static final String TAG_TOTAL = "total";
-    /** 節目と耐久回復に使う採掘ヒットの累計。画面の「累計をリセット」では消さない（節目の報酬を何度も取れないように）。 */
+    /** 節目に使う採掘ヒットの累計。画面の「累計をリセット」では消さない（節目の報酬を何度も取れないように）。 */
     private static final String TAG_REWARD_HITS = "rewardHits";
 
     private static final Map<UUID, MiningStats> SESSIONS = new HashMap<>();
@@ -55,7 +55,7 @@ public final class ServerStats {
         data(player).setTag(TAG_TOTAL, write(total));
     }
 
-    /** 節目と耐久回復に使う累計を1増やし、増えた後の値を返す。 */
+    /** 節目に使う累計を1増やし、増えた後の値を返す。 */
     public static long addRewardHit(EntityPlayer player) {
         NBTTagCompound data = data(player);
         long hits = data.getLong(TAG_REWARD_HITS) + 1;

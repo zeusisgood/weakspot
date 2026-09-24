@@ -1,8 +1,6 @@
 package com.example.weakspot.common;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,20 +9,6 @@ import org.junit.Test;
 public class MilestonesTest {
 
     private static final int[] DEFAULT = {100, 777, 1000, 10000};
-
-    @Test
-    public void repairsEveryFifthHit() {
-        assertFalse(Milestones.isRepairHit(4, 5));
-        assertTrue(Milestones.isRepairHit(5, 5));
-        assertFalse(Milestones.isRepairHit(6, 5));
-        assertTrue(Milestones.isRepairHit(10, 5));
-    }
-
-    @Test
-    public void repairDisabledByZeroInterval() {
-        assertFalse(Milestones.isRepairHit(5, 0));
-        assertFalse(Milestones.isRepairHit(0, 5));
-    }
 
     @Test
     public void reachesMilestoneOnlyAtExactCount() {

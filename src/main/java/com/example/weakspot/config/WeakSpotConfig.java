@@ -47,14 +47,19 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int minHitIntervalTicks = 6;
 
-    @Config.Comment({"[サーバー] 採掘ヒットの累計がこの数の倍数になるたびに、手に持っているツールの耐久を回復する",
-            "0 で回復しない"})
+    @Config.Comment({"[サーバー] ブロックを壊したとき、そのブロックで当てた採掘ヒットを数え、この数ごとに手に持っているツールの耐久を回復する",
+            "壊さずにやめたブロックのヒットは数えない。余りは次に壊すブロックへ持ち越す。0 で回復しない"})
     @Config.RangeInt(min = 0, max = 100000)
     public static int hitsPerRepair = 5;
 
     @Config.Comment("[サーバー] hitsPerRepair ごとに回復する耐久")
     @Config.RangeInt(min = 0, max = 100000)
     public static int repairPerStep = 1;
+
+    @Config.Comment({"[サーバー] 1回の破壊で回復する耐久の上限。上限で回復できなかった分は持ち越さない",
+            "0 で耐久回復（節目の報酬を除く）が無効になる"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int maxRepairPerBreak = 1;
 
     @Config.Comment({"[サーバー] 節目にする採掘ヒットの累計。達した瞬間に1回だけ、祝いの演出と報酬が出る",
             "milestoneXp と milestoneRepair は、この順番に対応する"})

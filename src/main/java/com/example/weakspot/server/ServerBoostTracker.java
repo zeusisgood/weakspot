@@ -44,7 +44,10 @@ public final class ServerBoostTracker {
         long lastHitTick = Long.MIN_VALUE / 2;
         /** 弱点が出るブロック（壊せて、一瞬では壊れない）か。統計の「壊したブロック数」に数えるかに使う。 */
         boolean eligible;
-        /** このブロックで受け付けたヒットの数。 */
+        /**
+         * このブロックで受け付けたヒットの数。壊したときに耐久回復の精算に渡す（未確定のヒット）。
+         * 長押しをやめたり別のブロックに移ったりすると、次の LeftClickBlock で Mining ごと作り直されるので捨てられる。
+         */
         int hits;
 
         Mining(BlockPos pos, long startTick) {
@@ -76,7 +79,11 @@ public final class ServerBoostTracker {
                 && state.getPlayerRelativeBlockHardness(player, player.world, event.getPos()) < 1.0F;
     }
 
-    /** 統計の「壊したブロック数」。他の Mod に取り消された破壊は数えない。 */
+    /**
+     * 統計の「壊したブロック数」と、耐久回復の精算。他の Mod に取り消された破壊は数えない。
+     * このイベントはツールの耐久が減る前（PlayerInteractionManager#tryHarvestBlock の先頭）に来るので、
+     * 耐久が残り1のツールでも、回復してから壊れる。
+     */
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBreak(BlockEvent.BreakEvent event) {
         EntityPlayer player = event.getPlayer();
@@ -90,6 +97,9 @@ public final class ServerBoostTracker {
         mining.eligible = false;
         int hits = mining.hits;
         ServerStats.record(player, stats -> stats.recordBlockBroken(hits));
+        if (player instanceof EntityPlayerMP) {
+            MiningRewards.onBlockBroken((EntityPlayerMP) player, hits);
+        }
     }
 
     /** 他のプレイヤーのヒット音が届く距離（ブロック）。 */

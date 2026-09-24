@@ -4,17 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 採掘ヒットの累計に応じた耐久回復と節目の判定。
- * 累計は1ヒットずつ増えるので、「倍数になった」「節目の数字に達した」は、増えた後の値が一致するかで判定する。
+ * 採掘ヒットの累計に応じた節目の判定（耐久回復の精算は RepairSettlement）。
+ * 累計は1ヒットずつ増えるので、「節目の数字に達した」は、増えた後の値が一致するかで判定する。
  */
 public final class Milestones {
 
     private Milestones() {
-    }
-
-    /** 累計が hitsPerRepair の倍数になったか。hitsPerRepair が0以下なら回復しない。 */
-    public static boolean isRepairHit(long totalHits, int hitsPerRepair) {
-        return hitsPerRepair > 0 && totalHits > 0 && totalHits % hitsPerRepair == 0;
     }
 
     /** 累計がちょうど達した節目の番号（milestones の添字）。同じ数字が複数あれば、すべて返す。 */
