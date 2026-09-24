@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -24,7 +24,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.2.1。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.2,1.3)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.2.2。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.2,1.3)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
   - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
   - 仕様書（`doc/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装からタグと push まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。GitHub Release の作成は、ユーザーが手動で行う。
@@ -38,7 +38,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - `common/`: Minecraft に依存しない純粋な計算（動物のタイマー `AnimalTimers`、釣り `FishingMath`、プレイヤーごとのオン・オフ `PlayerSwitches`、面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、連続ヒット数 `HitStreak`、ヒット音の音階 `HitPitch`、コンボの表示の計算 `ComboTier` / `ComboMilestones` / `ComboDisplay`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`、`IGrowable` でない植物の育てる余地 `GrowthRoom`、マーカーの移動と残像 `MarkerMotion`、耐久バーの形 `BlockHealthBar`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `RightClickTargets`（両側）: 右クリックの弱点の対象判定。クライアントとサーバーで同じ条件（同期した設定）を使う。
-  - 成長の対象（`isGrowable`）: 設定 `growthExcludedBlocks`（除外リスト。草ブロック・草・キノコなどは初期値で外す）になく、`canGrow` が true の `IGrowable`、または 設定 `growthExtraBlocks`（追加リスト。1.2.0 から設定。サーバーの値を同期する）にあり、`RightClickTargets.EXTRA_GROWTH_BLOCKS`（育つ条件をコードで決めてあるブロックの表。サトウキビ・サボテン・ネザーウォートだけ）にもある植物で育てる余地があるもの。追加リストに他のブロックを足しても、弱点が出ないだけでエラーにはしない。除外リストは追加リストにも効く。
+  - 成長の対象（`isGrowable`）: 設定 `growthExcludedBlocks`（除外リスト。草ブロック・草などは初期値で外す。キノコは 1.2.2 から対象）になく、`canGrow` が true の `IGrowable`、または 設定 `growthExtraBlocks`（追加リスト。1.2.0 から設定。サーバーの値を同期する）にあり、`RightClickTargets.EXTRA_GROWTH_BLOCKS`（育つ条件をコードで決めてあるブロックの表。サトウキビ・サボテン・ネザーウォートだけ）にもある植物で育てる余地があるもの。追加リストに他のブロックを足しても、弱点が出ないだけでエラーにはしない。除外リストは追加リストにも効く。
   - 追加リストの植物: サトウキビ・サボテンは柱の高さ < 3 で一番上のすぐ上が空気（高さ1のサトウキビは土台 `BlockReed#canBlockStay` も）、ネザーウォートは段階 < 3。バニラの `updateTick` の条件と同じ。育つのは柱の一番上の節だけなので、サーバーの効果は `growthTarget` で柱の一番上にかける。対象を条件どおりに右クリックしたら、`RightClickBlock` をメインハンドで SUCCESS にしてキャンセルし、通常動作（GUI、オフハンドの設置など）を止める。クライアントでキャンセルしてもバニラは右クリックのパケットを送るので、サーバーでも発火し、そこで「直前に右クリックした」ことを記録する。右クリックを押しっぱなしにすると、バニラは 4 tick ごとに右クリックする。
 - `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態、ヒット判定、描画、ヒット音、クライアント側のブースト。弱点は一度に1つ（`ClientWeakSpotHandler.spot`）。
   - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。右クリックの押しっぱなしは `keyBindUseItem.isKeyDown()` で見る。成長の弱点は一番大きい面（多くは上面）に出し、照準がその面に当たっているときだけヒットにする。同じ大きさの側面が複数あるとき（サトウキビなど）は照準の側面を選び、今の面が見えている間は変えない（`FaceMath.growthFaceAxis`）。育って当たり判定の箱が変わったら出し直す。
@@ -73,7 +73,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - `server/`（論理サーバー）:
   - `WeakSpotCommand`（1.1.6）: `/weakspot [stats|reset] <プレイヤー>`（権限レベル 2、オンラインのプレイヤーだけ）。`WeakSpotMod.serverStarting` で登録。表示は翻訳キー。`reset` は `ServerStats.resetTotal`。
   - `ServerBoostTracker`: `LeftClickBlock` で「今どのブロックを破壊中か」と開始 tick、弱点が出るブロックか（一瞬で壊れないか）を記録する。採掘ヒットはそのブロックと一致したときだけ受け付ける。「壊した」は `BreakEvent`（LOWEST、キャンセルされていないもの）で数える。アクセストランスフォーマーは使っていない。
-  - `RightClickHits`: 成長・機械ヒットの検証（直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、対象か）と効果（成長は `randomTick` を余分に呼ぶ。サトウキビ・サボテンは柱の一番上の節に）。
+  - `RightClickHits`: 成長・機械ヒットの検証（直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、対象か）と効果（成長は `randomTick` を余分に呼ぶ。サトウキビ・サボテンは柱の一番上の節に。キノコ `BlockMushroom` は `randomTick` では広がるだけなので、代わりに確率 `mushroomGrowChance` で骨粉と同じ `grow` を呼ぶ）。
   - `MachineAccelerator`: 機械ヒットの位置と残り時間をメモリにだけ持ち、`WorldTickEvent` END で `update()` を余分に呼ぶ（Time in a Bottle と同じ方式）。例外はあえて捕まえない（ユーザーの判断。クラッシュレポートで機械を特定し、`excludedBlocks` に足してもらう）。
   - `ServerStats`: 統計。累計はプレイヤーの永続データ（`PlayerPersisted` の `weakspot`。死亡・ディメンション移動で引き継がれる）に、「今回」はメモリに持つ。節目は、画面のリセットでは消えない別の累計 `rewardHits` で数える（報酬を取り直せないように）。
   - `MiningRewards`: 耐久回復と節目の報酬。節目はヒットごと（`rewardHits`）に判定する。耐久回復はヒットのときではなく、ブロックを壊したときに精算する（`common/RepairSettlement`）。
@@ -94,6 +94,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 `@Config`（`config/weakspot.cfg`）。キー名を変えないように、カテゴリは分けず `general` に並べる。コメントの先頭に、どちらの値が使われるかを書く。
 - `[サーバー]`: サーバーの値が正。1.2.0 で `weakSpotMinRadius` / `weakSpotMaxRadiusRatio` / `minFaceSize` / `growthExtraBlocks` / 動物と釣りの項目を足した（`villagerResetUnlocksNewTier` だけは、サーバーだけが使うので同期しない）。クライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` の static フィールドに書き込まない**（書き込むと `ConfigManager.sync` でサーバーの値がクライアントの `weakspot.cfg` に保存されてしまう）。サーバーだけが使う項目（報酬、成長の回数、機械の倍率など）は送らない。
+- 設定ファイルの移行（1.2.2）: `WeakSpotConfig.migrate` を `serverStarting` で呼び、`configVersion`（初期値 0）が古ければ1回だけ直して保存する（1: `growthExcludedBlocks` からキノコを取り除く）。`preInit` の間の `ConfigManager.sync` は「読み込み」（ファイルの値でフィールドを上書きする）になるので、そこでは保存できない。
 - `[クライアント]`: 音と、他のプレイヤーのマークの表示と、コンボの表示と、弱点の移動の演出と、耐久バーと、動物の弱点の透かしだけ（見た目と音だけに関わるもの）。`WeakSpotConfig` をそのまま読む。
 - 設定を追加するときは、README の設定表の該当する方にも追加すること。設定画面の説明は `weakspot.general.<キーを小文字にしたもの>.tooltip` を `en_us.lang` と `ja_jp.lang` の両方に足す（1.1.3 以降の `[クライアント]` の項目。それより前の項目は `@Config.Comment` の日本語のまま）。`SyncedSettings` に項目を足すと通信内容が変わる。
 - パケットの中身を変えたり、パケットを追加・削除したりすると、古いバージョンとは通信できなくなる。マイナーを上げ、`acceptableRemoteVersions` を書き換え、README の更新履歴にそのことを書くこと。統計の保存形式（NBT のキー）を古い版で読めないように変えるときも同じ。
