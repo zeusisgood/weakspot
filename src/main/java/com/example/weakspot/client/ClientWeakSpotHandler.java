@@ -69,6 +69,7 @@ public final class ClientWeakSpotHandler {
             return;
         }
         Minecraft mc = Minecraft.getMinecraft();
+        ToggleKeyHandler.remindIfOff(mc);
         if (mc.world == null || mc.player == null) {
             reset();
             return;
@@ -86,6 +87,9 @@ public final class ClientWeakSpotHandler {
         int broken = STREAK.expire(clientTick);
         if (broken > 0) {
             ComboHud.onBreak(broken, clientTick);
+        }
+        if (!WeakSpotConfig.weakSpotsEnabled) {
+            stopOwnWeakSpots();
         }
         if (spot != null && (isGone(mc.world, spot)
                 || clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks)) {
@@ -117,9 +121,21 @@ public final class ClientWeakSpotHandler {
             return;
         }
         framePartialTicks = event.getPartialTicks();
-        updateAim(mc);
-        double health = WeakSpotConfig.blockHealthBarEnabled ? healthBarRemaining(mc, event.getPartialTicks()) : -1;
-        WeakSpotRenderer.render(mc, spot, health, clientTick, event.getPartialTicks());
+        double health = -1;
+        double growth = -1;
+        if (WeakSpotConfig.weakSpotsEnabled) {
+            updateAim(mc);
+            if (WeakSpotConfig.blockHealthBarEnabled) {
+                health = healthBarRemaining(mc, event.getPartialTicks());
+            }
+            if (WeakSpotConfig.growthBarEnabled) {
+                growth = growthBarProgress(mc);
+            }
+        } else {
+            // 一時オフ。J を押した直後のフレームでも、自分の弱点を出さない
+            stopOwnWeakSpots();
+        }
+        WeakSpotRenderer.render(mc, spot, health, growth, clientTick, event.getPartialTicks());
     }
 
     /**
@@ -136,6 +152,25 @@ public final class ClientWeakSpotHandler {
         }
         double progress = MiningProgress.progress(mc.playerController, spot.pos, partialTicks);
         return progress < 0 ? -1 : BlockHealthBar.remaining(progress);
+    }
+
+    /** 成長バーに出す作物の進み具合（0〜1）。成長の弱点が今出ているときだけ。出さないときは -1。 */
+    private static double growthBarProgress(Minecraft mc) {
+        if (spot == null || spot.kind != HitKind.GROWTH || spot.lastActiveTick != clientTick) {
+            return -1;
+        }
+        return GrowthBar.progress(mc.world, spot.pos);
+    }
+
+    /**
+     * 弱点の一時オフ（J キー）の間、自分の弱点を出さず、ヒットも起こさない。
+     * 出ていた弱点は消す（自分のマークの送信は、弱点が null になると「消えた」を送る）。ブーストも止める。
+     */
+    static void stopOwnWeakSpots() {
+        spot = null;
+        boostPos = null;
+        boostHitTick = Long.MIN_VALUE / 2;
+        WeakSpotRenderer.clearFlashes();
     }
 
     private static void updateAim(Minecraft mc) {
@@ -257,7 +292,7 @@ public final class ClientWeakSpotHandler {
     /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-        if (!event.getEntityPlayer().world.isRemote || suppressBoost) {
+        if (!event.getEntityPlayer().world.isRemote || suppressBoost || !WeakSpotConfig.weakSpotsEnabled) {
             return;
         }
         if (event.getEntityPlayer() != Minecraft.getMinecraft().player || !event.getPos().equals(boostPos)) {

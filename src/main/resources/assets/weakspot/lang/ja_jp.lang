@@ -53,3 +53,20 @@ weakspot.general.comboposition.tooltip=[クライアント] コンボの表示�
 weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）
 weakspot.general.blockhealthbarenabled.tooltip=[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか\n自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る
 weakspot.general.weakspottrailenabled.tooltip=[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）\n見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く
+
+key.weakspot.toggle=弱点のオン・オフ
+weakspot.toggle.on=弱点: オン
+weakspot.toggle.off=弱点: オフ
+weakspot.toggle.offReminder=弱点: オフ（%s で切り替え）
+weakspot.general.growthbarenabled.tooltip=[クライアント] 作物の足元に、成長の進み具合を黄色のバーで表示するか\n成長の弱点を出している間（素手で右クリックを押しっぱなしにしている間）だけ出る
+weakspot.general.othermarkershape.tooltip=[クライアント] 他のプレイヤーの弱点マークの形\nCIRCLE（塗りつぶした円）, RING（中抜きの輪）, DIAMOND（ひし形）, SQUARE（四角）。自分のマークは円のまま
+weakspot.general.weakspotsenabled.tooltip=[クライアント] 自分の弱点のオン・オフ（弱点のオン・オフのキーで切り替わる）\nオフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える
+
+weakspot.command.usage=/weakspot stats <プレイヤー> | /weakspot reset <プレイヤー>（オンラインのプレイヤーだけ）
+weakspot.command.usage.stats=/weakspot stats <プレイヤー>
+weakspot.command.usage.reset=/weakspot reset <プレイヤー>
+weakspot.command.offline=オンラインのプレイヤーだけ指定できます
+weakspot.command.stats.header=[弱点] %s の統計
+weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s
+weakspot.command.stats.total=  累計: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s
+weakspot.command.reset=[弱点] %s の統計の累計を消しました

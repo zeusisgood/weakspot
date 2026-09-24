@@ -3,6 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.common.BlockHealthBar;
 import com.example.weakspot.common.MarkerColor;
 import com.example.weakspot.common.MarkerMotion;
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,8 +76,11 @@ final class WeakSpotRenderer {
         FLASHES.clear();
     }
 
-    /** health は耐久バーの残りの耐久（0〜1。spot の面に描く）。負ならバーを描かない。 */
-    static void render(Minecraft mc, WeakSpot spot, double health, long tick, float partialTicks) {
+    /**
+     * health は耐久バーの残りの耐久（0〜1。spot の面に描く）。負ならバーを描かない。
+     * growth は作物の成長バーの進み具合（0〜1。spot のブロックの足元に描く）。負ならバーを描かない。
+     */
+    static void render(Minecraft mc, WeakSpot spot, double health, double growth, long tick, float partialTicks) {
         Entity camera = mc.getRenderViewEntity();
         if (camera == null) {
             return;
@@ -111,14 +115,17 @@ final class WeakSpotRenderer {
             float[] disk = {(rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F};
             float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
             float[] center = MarkerColor.towardWhite(rgb, 0.75F);
+            MarkerShape shape = WeakSpotConfig.otherMarkerShape == null ? MarkerShape.RING
+                    : WeakSpotConfig.otherMarkerShape;
             for (WeakSpot other : others) {
-                drawMarker(other, disk, ring, center, (float) WeakSpotConfig.otherMarkerAlpha, nowMs, cx, cy, cz);
+                drawMarker(other, shape, disk, ring, center, (float) WeakSpotConfig.otherMarkerAlpha, nowMs,
+                        cx, cy, cz);
             }
         }
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks);
             if (alpha > 0) {
-                drawMarker(spot, OWN_DISK, OWN_RING, OWN_CENTER, alpha, nowMs, cx, cy, cz);
+                drawMarker(spot, MarkerShape.CIRCLE, OWN_DISK, OWN_RING, OWN_CENTER, alpha, nowMs, cx, cy, cz);
             }
         }
         for (Iterator<Flash> it = FLASHES.iterator(); it.hasNext(); ) {
@@ -129,6 +136,10 @@ final class WeakSpotRenderer {
             }
             double radius = flash.spot.radius * (1 + progress * 1.2);
             drawRing(flash.spot, flash.u, flash.v, radius, cx, cy, cz, 1.0F, 1.0F, 1.0F, 1 - progress);
+        }
+
+        if (spot != null && growth >= 0) {
+            GrowthBar.draw(spot.pos, growth, cx, cy, cz);
         }
 
         GlStateManager.glLineWidth(1.0F);
@@ -143,27 +154,73 @@ final class WeakSpotRenderer {
      * マーカー（円、輪、中心）を表示位置に描く。移動の演出がオンなら、残像と、動いている最中の先頭の明るさも描く。
      * 当たり判定は spot.u, spot.v（移動先）のままで、ここでは見た目だけを動かす。
      */
-    private static void drawMarker(WeakSpot spot, float[] disk, float[] ring, float[] center, float alpha, long nowMs,
-                                   double cx, double cy, double cz) {
+    private static void drawMarker(WeakSpot spot, MarkerShape shape, float[] disk, float[] ring, float[] center,
+                                   float alpha, long nowMs, double cx, double cy, double cz) {
         double u = spot.u;
         double v = spot.v;
         if (WeakSpotConfig.weakSpotTrailEnabled) {
             for (MarkerMotion.Afterimage image : spot.motion.afterimages(nowMs)) {
                 float a = (float) image.alpha(nowMs) * alpha;
-                drawDisk(spot, image.u, image.v, spot.radius, cx, cy, cz, disk[0], disk[1], disk[2], 0.35F * a);
-                drawRing(spot, image.u, image.v, spot.radius, cx, cy, cz, ring[0], ring[1], ring[2], 0.5F * a);
+                drawFill(spot, shape, image.u, image.v, spot.radius, cx, cy, cz, disk, 0.35F * a);
+                drawOutline(spot, shape, image.u, image.v, spot.radius, cx, cy, cz, ring, 0.5F * a);
             }
             double[] p = spot.motion.position(nowMs);
             u = p[0];
             v = p[1];
         }
-        drawDisk(spot, u, v, spot.radius, cx, cy, cz, disk[0], disk[1], disk[2], 0.45F * alpha);
-        drawRing(spot, u, v, spot.radius, cx, cy, cz, ring[0], ring[1], ring[2], 0.9F * alpha);
-        drawDisk(spot, u, v, spot.radius * 0.3, cx, cy, cz, center[0], center[1], center[2], 0.9F * alpha);
+        drawFill(spot, shape, u, v, spot.radius, cx, cy, cz, disk, 0.45F * alpha);
+        drawOutline(spot, shape, u, v, spot.radius, cx, cy, cz, ring, 0.9F * alpha);
+        if (shape.hasCenterDot()) {
+            drawDisk(spot, u, v, spot.radius * 0.3, cx, cy, cz, center[0], center[1], center[2], 0.9F * alpha);
+        }
         double head = WeakSpotConfig.weakSpotTrailEnabled ? spot.motion.headHighlight(nowMs) : 0;
         if (head > 0) {
-            drawDisk(spot, u, v, spot.radius, cx, cy, cz, 1.0F, 1.0F, 1.0F, (float) (HEAD_WHITE * head) * alpha);
+            drawFill(spot, shape, u, v, spot.radius, cx, cy, cz, WHITE, (float) (HEAD_WHITE * head) * alpha);
         }
+    }
+
+    private static final float[] WHITE = {1.0F, 1.0F, 1.0F};
+
+    /** 形の中を塗る。RING は輪の部分（内側の半径との間）だけ塗る。 */
+    private static void drawFill(WeakSpot spot, MarkerShape shape, double u, double v, double radius,
+                                 double cx, double cy, double cz, float[] rgb, float a) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        double outer = radius * shape.radiusScale;
+        if (shape.filled) {
+            buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
+            vertex(buffer, spot.worldPoint(u, v, LIFT), cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
+            for (int i = 0; i <= shape.sides; i++) {
+                double[] p = shapePoint(spot, shape, u, v, outer, i);
+                vertex(buffer, p, cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
+            }
+        } else {
+            double inner = outer * MarkerShape.RING_INNER_RATIO;
+            buffer.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            for (int i = 0; i <= shape.sides; i++) {
+                vertex(buffer, shapePoint(spot, shape, u, v, outer, i), cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
+                vertex(buffer, shapePoint(spot, shape, u, v, inner, i), cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
+            }
+        }
+        tessellator.draw();
+    }
+
+    private static void drawOutline(WeakSpot spot, MarkerShape shape, double u, double v, double radius,
+                                    double cx, double cy, double cz, float[] rgb, float a) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
+        for (int i = 0; i < shape.sides; i++) {
+            vertex(buffer, shapePoint(spot, shape, u, v, radius * shape.radiusScale, i), cx, cy, cz,
+                    rgb[0], rgb[1], rgb[2], a);
+        }
+        tessellator.draw();
+    }
+
+    /** 形の i 番目の頂点（面から少し浮かせる）。 */
+    private static double[] shapePoint(WeakSpot spot, MarkerShape shape, double u, double v, double distance, int i) {
+        double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
+        return spot.worldPoint(u + distance * Math.cos(angle), v + distance * Math.sin(angle), LIFT * 1.2);
     }
 
     /**

@@ -12,6 +12,7 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void init() {
         StatsKeyHandler.register();
+        ToggleKeyHandler.register();
     }
 
     @Override

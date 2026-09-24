@@ -1,6 +1,7 @@
 package com.example.weakspot.config;
 
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.server.SettingsSync;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
@@ -178,6 +179,18 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか",
             "自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る"})
     public static boolean blockHealthBarEnabled = true;
+
+    @Config.Comment({"[クライアント] 作物の足元に、成長の進み具合を黄色のバーで表示するか",
+            "成長の弱点を出している間（素手で右クリックを押しっぱなしにしている間）だけ出る"})
+    public static boolean growthBarEnabled = true;
+
+    @Config.Comment({"[クライアント] 他のプレイヤーの弱点マークの形",
+            "CIRCLE（塗りつぶした円）, RING（中抜きの輪）, DIAMOND（ひし形）, SQUARE（四角）。自分のマークは円のまま"})
+    public static MarkerShape otherMarkerShape = MarkerShape.RING;
+
+    @Config.Comment({"[クライアント] 自分の弱点のオン・オフ（J キーで切り替わる。操作設定で変えられる）",
+            "オフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える"})
+    public static boolean weakSpotsEnabled = true;
 
     private WeakSpotConfig() {
     }

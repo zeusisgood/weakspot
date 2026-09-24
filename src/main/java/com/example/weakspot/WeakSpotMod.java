@@ -10,10 +10,12 @@ import com.example.weakspot.network.SettingsMessage;
 import com.example.weakspot.network.StatsMessage;
 import com.example.weakspot.network.StatsRequestMessage;
 import com.example.weakspot.server.MachineAccelerator;
+import com.example.weakspot.server.WeakSpotCommand;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
@@ -50,6 +52,11 @@ public class WeakSpotMod {
         network.registerMessage(MilestoneMessage.Handler.class, MilestoneMessage.class, 5, Side.CLIENT);
         network.registerMessage(MarkerMessage.Handler.class, MarkerMessage.class, 6, Side.SERVER);
         network.registerMessage(OtherMarkerMessage.Handler.class, OtherMarkerMessage.class, 7, Side.CLIENT);
+    }
+
+    @Mod.EventHandler
+    public void serverStarting(FMLServerStartingEvent event) {
+        event.registerServerCommand(new WeakSpotCommand());
     }
 
     @Mod.EventHandler
