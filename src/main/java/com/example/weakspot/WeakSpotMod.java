@@ -3,6 +3,8 @@ package com.example.weakspot;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.AnimalQueryMessage;
 import com.example.weakspot.network.AnimalStateMessage;
+import com.example.weakspot.network.FishingQueryMessage;
+import com.example.weakspot.network.FishingStateMessage;
 import com.example.weakspot.network.HitMessage;
 import com.example.weakspot.network.MarkerMessage;
 import com.example.weakspot.network.MilestoneMessage;
@@ -58,6 +60,8 @@ public class WeakSpotMod {
         network.registerMessage(SwitchMessage.Handler.class, SwitchMessage.class, 8, Side.SERVER);
         network.registerMessage(AnimalQueryMessage.Handler.class, AnimalQueryMessage.class, 9, Side.SERVER);
         network.registerMessage(AnimalStateMessage.Handler.class, AnimalStateMessage.class, 10, Side.CLIENT);
+        network.registerMessage(FishingQueryMessage.Handler.class, FishingQueryMessage.class, 11, Side.SERVER);
+        network.registerMessage(FishingStateMessage.Handler.class, FishingStateMessage.class, 12, Side.CLIENT);
     }
 
     @Mod.EventHandler

@@ -190,6 +190,18 @@ public final class WeakSpotConfig {
             "オフなら、ロックの解除だけ行う。サーバーだけが使う（クライアントには送らない）"})
     public static boolean villagerResetUnlocksNewTier = false;
 
+    @Config.Comment("[サーバー] 釣りの弱点のオン・オフ")
+    public static boolean fishingWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] 釣りの、最長の待ち時間（600 tick）を 0 にするまでのヒット数（1ヒット = 600 tick ÷ この数）",
+            "0 以下で、釣りの弱点を無効にする"})
+    @Config.RangeInt(min = 0, max = 600)
+    public static int fishingHits = 6;
+
+    @Config.Comment("[サーバー] 釣りのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int fishingMinHitIntervalTicks = 6;
+
     @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
             "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
     @Config.RangeDouble(min = 0.0, max = 256.0)

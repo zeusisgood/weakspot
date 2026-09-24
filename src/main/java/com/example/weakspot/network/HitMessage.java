@@ -2,6 +2,7 @@ package com.example.weakspot.network;
 
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.server.AnimalHits;
+import com.example.weakspot.server.FishingHits;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerBoostTracker;
 import io.netty.buffer.ByteBuf;
@@ -78,7 +79,7 @@ public class HitMessage implements IMessage {
                 } else if (kind == HitKind.ANIMAL) {
                     AnimalHits.onHit(player, entityId);
                 } else if (kind == HitKind.FISHING) {
-                    // 釣りのヒットは、釣りの弱点の実装で受ける
+                    FishingHits.onHit(player);
                 } else {
                     RightClickHits.onHit(player, kind, pos);
                 }

@@ -115,6 +115,7 @@ public final class ServerStats {
         stats.machineHits = tag.getLong("machineHits");
         stats.maxStreak = tag.getLong("maxStreak");
         stats.animalHits = tag.getLong("animalHits");
+        stats.fishingHits = tag.getLong("fishingHits");
         return stats;
     }
 
@@ -129,6 +130,7 @@ public final class ServerStats {
         tag.setLong("machineHits", stats.machineHits);
         tag.setLong("maxStreak", stats.maxStreak);
         tag.setLong("animalHits", stats.animalHits);
+        tag.setLong("fishingHits", stats.fishingHits);
         return tag;
     }
 }

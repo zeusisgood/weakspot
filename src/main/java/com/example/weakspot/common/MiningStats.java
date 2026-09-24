@@ -35,6 +35,13 @@ public final class MiningStats {
         animalHits++;
     }
 
+    /** 釣りの弱点に当てた回数。 */
+    public long fishingHits;
+
+    public void recordFishingHit() {
+        fishingHits++;
+    }
+
     public void recordHit(double extraTicks) {
         hits++;
         savedTicks += Math.max(0, extraTicks);
@@ -75,5 +82,6 @@ public final class MiningStats {
         machineHits = 0;
         maxStreak = 0;
         animalHits = 0;
+        fishingHits = 0;
     }
 }

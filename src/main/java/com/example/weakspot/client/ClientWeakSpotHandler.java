@@ -192,6 +192,7 @@ public final class ClientWeakSpotHandler {
         boostPos = null;
         boostHitTick = Long.MIN_VALUE / 2;
         WeakSpotRenderer.clearFlashes();
+        FishingSpot.clear();
     }
 
     private static void updateAim(Minecraft mc) {
@@ -343,14 +344,26 @@ public final class ClientWeakSpotHandler {
         }
     }
 
-    private static void onHit(Minecraft mc) {
-        HitKind kind = spot.kind;
-        WeakSpotRenderer.addFlash(spot, clientTick);
+    /** 前のヒットから minInterval tick あいているか（釣りの弱点からも使う）。 */
+    static boolean canHitNow(HitKind kind, int minInterval) {
+        return canHit(kind, minInterval);
+    }
+
+    /**
+     * どの種類のヒットにも共通の処理: 連続ヒット、ヒット音、コンボの表示、ヒット間隔の記録。ヒット後の連続ヒット数を返す。
+     */
+    static int registerHit(HitKind kind) {
         int hitStreak = STREAK.hit(clientTick);
         HitSounds.playOwn(hitStreak);
         ComboHud.onHit(hitStreak, clientTick + framePartialTicks);
-
         LAST_HIT_TICK[kind.ordinal()] = clientTick;
+        return hitStreak;
+    }
+
+    private static void onHit(Minecraft mc) {
+        HitKind kind = spot.kind;
+        WeakSpotRenderer.addFlash(spot, clientTick);
+        int hitStreak = registerHit(kind);
         if (kind == HitKind.MINING) {
             boostHitTick = clientTick;
             boostPos = spot.pos;
@@ -390,6 +403,7 @@ public final class ClientWeakSpotHandler {
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
         boostHitTick = Long.MIN_VALUE / 2;
         AnimalStates.clear();
+        FishingSpot.clear();
         lastPlayer = null;
         resetStreak();
         WeakSpotRenderer.clearFlashes();

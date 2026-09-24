@@ -36,6 +36,10 @@ public class CommonProxy {
     public void onAnimalState(int entityId, int mask, float[] progress) {
     }
 
+    /** 釣りの浮きの状態が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
+    public void onFishingState(boolean waiting, float progress) {
+    }
+
     /** クライアントが、この動物に弱点が出ていると知っているか（サーバーの返事を覚えているか）。 */
     public boolean animalWeakSpotActive(int entityId) {
         return false;

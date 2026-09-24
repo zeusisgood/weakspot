@@ -49,6 +49,9 @@ public final class SyncedSettings {
     public Set<String> animalExcludedEntities;
     /** しゃがみを条件にする MOD の動物。エンティティの ID。 */
     public Set<String> animalSneakRequiredEntities;
+    public boolean fishingWeakSpotEnabled;
+    public int fishingHits;
+    public int fishingMinHitIntervalTicks;
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -87,6 +90,9 @@ public final class SyncedSettings {
         s.animalMinHitIntervalTicks = WeakSpotConfig.animalMinHitIntervalTicks;
         s.animalExcludedEntities = new HashSet<>(Arrays.asList(WeakSpotConfig.animalExcludedEntities));
         s.animalSneakRequiredEntities = new HashSet<>(Arrays.asList(WeakSpotConfig.animalSneakRequiredEntities));
+        s.fishingWeakSpotEnabled = WeakSpotConfig.fishingWeakSpotEnabled;
+        s.fishingHits = WeakSpotConfig.fishingHits;
+        s.fishingMinHitIntervalTicks = WeakSpotConfig.fishingMinHitIntervalTicks;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -122,6 +128,9 @@ public final class SyncedSettings {
         buf.writeInt(animalMinHitIntervalTicks);
         writeStrings(buf, animalExcludedEntities);
         writeStrings(buf, animalSneakRequiredEntities);
+        buf.writeBoolean(fishingWeakSpotEnabled);
+        buf.writeInt(fishingHits);
+        buf.writeInt(fishingMinHitIntervalTicks);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -157,6 +166,9 @@ public final class SyncedSettings {
         s.animalMinHitIntervalTicks = buf.readInt();
         s.animalExcludedEntities = readStrings(buf);
         s.animalSneakRequiredEntities = readStrings(buf);
+        s.fishingWeakSpotEnabled = buf.readBoolean();
+        s.fishingHits = buf.readInt();
+        s.fishingMinHitIntervalTicks = buf.readInt();
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;

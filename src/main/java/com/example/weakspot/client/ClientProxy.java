@@ -46,6 +46,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void onFishingState(boolean waiting, float progress) {
+        Minecraft.getMinecraft().addScheduledTask(() -> FishingSpot.receive(waiting, progress));
+    }
+
+    @Override
     public boolean animalWeakSpotActive(int entityId) {
         return AnimalStates.isActive(entityId);
     }

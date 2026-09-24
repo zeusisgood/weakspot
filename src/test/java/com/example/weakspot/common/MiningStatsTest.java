@@ -89,4 +89,14 @@ public class MiningStatsTest {
         stats.reset();
         assertEquals(0, stats.animalHits);
     }
+
+    @Test
+    public void fishingHitsAreCountedSeparatelyAndReset() {
+        MiningStats stats = new MiningStats();
+        stats.recordFishingHit();
+        assertEquals(1, stats.fishingHits);
+        assertEquals(0, stats.hits);
+        stats.reset();
+        assertEquals(0, stats.fishingHits);
+    }
 }

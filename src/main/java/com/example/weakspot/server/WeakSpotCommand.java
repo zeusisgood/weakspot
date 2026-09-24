@@ -75,7 +75,7 @@ public final class WeakSpotCommand extends CommandBase {
                 stats.hits, stats.blocksBroken, stats.blocksBrokenWithHit,
                 Double.isNaN(average) ? "-" : String.format("%.2f", average),
                 stats.maxHitsOnBlock, String.format("%.1f", stats.savedSeconds()),
-                stats.growthHits, stats.machineHits, stats.maxStreak, stats.animalHits));
+                stats.growthHits, stats.machineHits, stats.maxStreak, stats.animalHits, stats.fishingHits));
     }
 
     @Override
