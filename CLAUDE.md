@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）、`doc/SPEC_v1.2.3.md`（Mod 1.2.3。`/weakspot reload`）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）、`doc/SPEC_v1.2.3.md`（Mod 1.2.3。`/weakspot reload`）、`doc/SPEC_v1.2.4.md`（Mod 1.2.4。`mushroomGrowChance` の初期値を 0.2 に）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -25,7 +25,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.2.3。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.2,1.3)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.2.4。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.2,1.3)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+- クラウドのセッションはタグを push できない（403）。そのときは、ブランチだけ push し、タグを付けて `main` とタグを push するコマンドをユーザーに渡す（ユーザーが手元で実行する）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
   - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
   - 仕様書（`doc/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装からタグと push まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。GitHub Release の作成は、ユーザーが手動で行う。
@@ -95,7 +96,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 `@Config`（`config/weakspot.cfg`）。キー名を変えないように、カテゴリは分けず `general` に並べる。コメントの先頭に、どちらの値が使われるかを書く。
 - `[サーバー]`: サーバーの値が正。1.2.0 で `weakSpotMinRadius` / `weakSpotMaxRadiusRatio` / `minFaceSize` / `growthExtraBlocks` / 動物と釣りの項目を足した（`villagerResetUnlocksNewTier` だけは、サーバーだけが使うので同期しない）。クライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` の static フィールドに書き込まない**（書き込むと `ConfigManager.sync` でサーバーの値がクライアントの `weakspot.cfg` に保存されてしまう）。サーバーだけが使う項目（報酬、成長の回数、機械の倍率など）は送らない。
-- 設定ファイルの移行（1.2.2）: `WeakSpotConfig.migrate` を `serverStarting` で呼び、`configVersion`（初期値 0）が古ければ1回だけ直して保存する（1: `growthExcludedBlocks` からキノコを取り除く）。`preInit` の間の `ConfigManager.sync` は「読み込み」（ファイルの値でフィールドを上書きする）になるので、そこでは保存できない。
+- 設定ファイルの移行（1.2.2）: `WeakSpotConfig.migrate` を `serverStarting` で呼び、`configVersion`（初期値 0）が古ければ1回だけ直して保存する（1: `growthExcludedBlocks` からキノコを取り除く。2: `mushroomGrowChance` が古い初期値 0.1 なら 0.2 に）。`preInit` の間の `ConfigManager.sync` は「読み込み」（ファイルの値でフィールドを上書きする）になるので、そこでは保存できない。
 - 設定の読み直し（1.2.3）: 起動後の `ConfigManager.sync` は、`Property#hasChanged` の項目だけファイル → フィールド、ほかはフィールド → ファイルの向きに動く。`reloadFromFile` は、`ConfigManager` の非公開の `CONFIGS` から `Configuration` を取り出して `load()` し、全項目を同じ値で `set` し直して（「変わった」の印）から `sync` する。
 - `[クライアント]`: 音と、他のプレイヤーのマークの表示と、コンボの表示と、弱点の移動の演出と、耐久バーと、動物の弱点の透かしだけ（見た目と音だけに関わるもの）。`WeakSpotConfig` をそのまま読む。
 - 設定を追加するときは、README の設定表の該当する方にも追加すること。設定画面の説明は `weakspot.general.<キーを小文字にしたもの>.tooltip` を `en_us.lang` と `ja_jp.lang` の両方に足す（1.1.3 以降の `[クライアント]` の項目。それより前の項目は `@Config.Comment` の日本語のまま）。`SyncedSettings` に項目を足すと通信内容が変わる。
