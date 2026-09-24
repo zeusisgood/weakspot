@@ -18,7 +18,7 @@ weakspot.stats.time.hours=%s時間%s分
 weakspot.stats.reset=累計をリセット
 weakspot.stats.reset.confirm=もう一度押すとリセット
 
-weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定が使われます（音、他のプレイヤーのマーク、コンボの表示を除く）
+weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定が使われます（音と見た目の設定を除く）
 
 weakspot.milestone.title=%s ヒット！
 weakspot.milestone.subtitle=弱点ヒットの節目を達成
