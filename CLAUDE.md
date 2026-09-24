@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.1.md`（Mod 1.1.1。耐久回復の修正だけ）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 に書かれていないことは v1.1 と現行実装のまま。仕様と食い違う実装をする場合はユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.1.md`（Mod 1.1.1。耐久回復の修正だけ）、`doc/SPEC_v1.1.2.md`（Mod 1.1.2。成長の対象の拡張）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装をする場合はユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -21,19 +21,21 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.1.1。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.1.2。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
 
 ## アーキテクチャ
 
 クライアントとサーバーの**両方に Mod が必要**（1.1.0 からは同じマイナー同士なら接続できる。1.0.x とは接続できない）。パッケージは `com.example.weakspot`。
 
-弱点は3種類（`common/HitKind`）: **採掘**（左の長押し）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable`）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE）。節目と耐久回復は採掘だけが対象。
+弱点は3種類（`common/HitKind`）: **採掘**（左の長押し）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable` と、サトウキビ・サボテン・ネザーウォート）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE）。節目と耐久回復は採掘だけが対象。
 
-- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、ヒット音の音階 `HitPitch`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
-- `RightClickTargets`（両側）: 右クリックの弱点の対象判定。クライアントとサーバーで同じ条件（同期した設定）を使う。対象を条件どおりに右クリックしたら、`RightClickBlock` をメインハンドで SUCCESS にしてキャンセルし、通常動作（GUI、オフハンドの設置など）を止める。クライアントでキャンセルしてもバニラは右クリックのパケットを送るので、サーバーでも発火し、そこで「直前に右クリックした」ことを記録する。右クリックを押しっぱなしにすると、バニラは 4 tick ごとに右クリックする。
+- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、ヒット音の音階 `HitPitch`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`、`IGrowable` でない植物の育てる余地 `GrowthRoom`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
+- `RightClickTargets`（両側）: 右クリックの弱点の対象判定。クライアントとサーバーで同じ条件（同期した設定）を使う。
+  - 成長の対象（`isGrowable`）: 設定 `growthExcludedBlocks`（除外リスト。草ブロック・草・キノコなどは初期値で外す）になく、`canGrow` が true の `IGrowable`、または `RightClickTargets.EXTRA_GROWTH_BLOCKS`（追加リスト。コード内の固定のリスト。設定化は 1.2.0）の植物で育てる余地があるもの。除外リストは追加リストにも効く。
+  - 追加リストの植物: サトウキビ・サボテンは柱の高さ < 3 で一番上のすぐ上が空気（高さ1のサトウキビは土台 `BlockReed#canBlockStay` も）、ネザーウォートは段階 < 3。バニラの `updateTick` の条件と同じ。育つのは柱の一番上の節だけなので、サーバーの効果は `growthTarget` で柱の一番上にかける。対象を条件どおりに右クリックしたら、`RightClickBlock` をメインハンドで SUCCESS にしてキャンセルし、通常動作（GUI、オフハンドの設置など）を止める。クライアントでキャンセルしてもバニラは右クリックのパケットを送るので、サーバーでも発火し、そこで「直前に右クリックした」ことを記録する。右クリックを押しっぱなしにすると、バニラは 4 tick ごとに右クリックする。
 - `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態、ヒット判定、描画、ヒット音、クライアント側のブースト。弱点は一度に1つ（`ClientWeakSpotHandler.spot`）。
-  - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。右クリックの押しっぱなしは `keyBindUseItem.isKeyDown()` で見る。作物・苗木の弱点は一番大きい面（多くは上面）に出し、照準がその面に当たっているときだけヒットにする。育って当たり判定の箱が変わったら出し直す。
+  - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。右クリックの押しっぱなしは `keyBindUseItem.isKeyDown()` で見る。成長の弱点は一番大きい面（多くは上面）に出し、照準がその面に当たっているときだけヒットにする。同じ大きさの側面が複数あるとき（サトウキビなど）は照準の側面を選び、今の面が見えている間は変えない（`FaceMath.growthFaceAxis`）。育って当たり判定の箱が変わったら出し直す。
   - ブーストの時間枠は `ClientTickEvent` START で増える `clientTick` で数える。`PlayerControllerMP` は tick ごとに進捗を積算するので、枠内の tick だけ倍率を掛ければよい。
   - ヒット音（`HitSounds`）: 楽器と音量は各自の設定（`myHitSound` / `myHitVolume`、`othersHitSound` / `othersHitVolume`）。どれも「プレイヤー」のカテゴリ。自分の音と試聴は距離なし（`AttenuationType.NONE`）、他のプレイヤーの音はブロックの位置から。連続ヒット数（種類・ブロックをまたいで続き、40 tick ヒットがないとリセット）に応じて長音階を上がり、1オクターブで最初に戻る。
   - 統計画面（`StatsScreen`、K キー）: 「統計」タブはサーバーから届いた数字を表示するだけ（開いたとき・設定画面から戻ったときに要求）。「サウンド」タブは楽器・音量・試聴で、`WeakSpotConfig.save()`（`ConfigManager.sync`）で `weakspot.cfg` に保存する。「設定画面を開く」は `WeakSpotGuiFactory.create`（Mods メニューと同じ `GuiConfig`。他人のサーバーに接続中は2行目に注意書き）。
@@ -50,7 +52,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - `MarkerMessage`（C→S）/ `OtherMarkerMessage`（S→C）: 採掘の弱点マーク。サーバーは検証せずに転送する。
 - `server/`（論理サーバー）:
   - `ServerBoostTracker`: `LeftClickBlock` で「今どのブロックを破壊中か」と開始 tick、弱点が出るブロックか（一瞬で壊れないか）を記録する。採掘ヒットはそのブロックと一致したときだけ受け付ける。「壊した」は `BreakEvent`（LOWEST、キャンセルされていないもの）で数える。アクセストランスフォーマーは使っていない。
-  - `RightClickHits`: 成長・機械ヒットの検証（直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、対象か）と効果（成長は `randomTick` を余分に呼ぶ）。
+  - `RightClickHits`: 成長・機械ヒットの検証（直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、対象か）と効果（成長は `randomTick` を余分に呼ぶ。サトウキビ・サボテンは柱の一番上の節に）。
   - `MachineAccelerator`: 機械ヒットの位置と残り時間をメモリにだけ持ち、`WorldTickEvent` END で `update()` を余分に呼ぶ（Time in a Bottle と同じ方式）。例外はあえて捕まえない（ユーザーの判断。クラッシュレポートで機械を特定し、`excludedBlocks` に足してもらう）。
   - `ServerStats`: 統計。累計はプレイヤーの永続データ（`PlayerPersisted` の `weakspot`。死亡・ディメンション移動で引き継がれる）に、「今回」はメモリに持つ。節目は、画面のリセットでは消えない別の累計 `rewardHits` で数える（報酬を取り直せないように）。
   - `MiningRewards`: 耐久回復と節目の報酬。節目はヒットごと（`rewardHits`）に判定する。耐久回復はヒットのときではなく、ブロックを壊したときに精算する（`common/RepairSettlement`）。

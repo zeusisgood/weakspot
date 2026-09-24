@@ -86,7 +86,7 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 0.0, max = 0.5)
     public static double growthMinRadius = 0.08;
 
-    @Config.Comment({"[サーバー] 作物・苗木の弱点を出さないブロックの登録名",
+    @Config.Comment({"[サーバー] 成長の弱点を出さないブロックの登録名（サトウキビ・サボテン・ネザーウォートにも効く）",
             "IGrowable を持つブロックのうち、作物・苗木ではないもの（草ブロック、草、キノコなど）を初期値で外している"})
     public static String[] growthExcludedBlocks = {
             "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant",
