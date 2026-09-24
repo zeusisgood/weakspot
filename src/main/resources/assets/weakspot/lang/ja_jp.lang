@@ -67,9 +67,12 @@ weakspot.general.othermarkershape.tooltip=[クライアント] 他のプレイ�
 weakspot.general.weakspotsenabled.tooltip=[クライアント] 自分の弱点のオン・オフ（弱点のオン・オフのキーで切り替わる）\nオフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える
 weakspot.general.animalspotseethrough.tooltip=[クライアント] 自分の動物の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか\nニワトリなど、体が当たり判定より大きい動物で見やすくなる。他のプレイヤーのマークは透かさない
 
-weakspot.command.usage=/weakspot stats <プレイヤー> | /weakspot reset <プレイヤー>（オンラインのプレイヤーだけ）
+weakspot.command.usage=/weakspot stats <プレイヤー> | /weakspot reset <プレイヤー>（オンラインのプレイヤーだけ） | /weakspot reload
 weakspot.command.usage.stats=/weakspot stats <プレイヤー>
 weakspot.command.usage.reset=/weakspot reset <プレイヤー>
+weakspot.command.usage.reload=/weakspot reload
+weakspot.command.reload=[弱点] 設定（weakspot.cfg）を読み直しました
+weakspot.command.reload.failed=設定を読み直せませんでした。サーバーを再起動してください（詳しくはサーバーのログ）
 weakspot.command.offline=オンラインのプレイヤーだけ指定できます
 weakspot.command.stats.header=[弱点] %s の統計
 weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s

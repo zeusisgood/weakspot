@@ -3,11 +3,18 @@ package com.example.weakspot.config;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.server.SettingsSync;
+import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.common.config.Property;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -315,6 +322,52 @@ public final class WeakSpotConfig {
         }
         configVersion = 1;
         save();
+    }
+
+    private static boolean reloadWarned;
+
+    /**
+     * weakspot.cfg をファイルから読み直して、フィールドに反映する（/weakspot reload）。読み直せなければ false。
+     * 起動後の ConfigManager.sync は、「変わった」（Property#hasChanged）項目だけファイルの値をフィールドへ読み込み、
+     * ほかはフィールドの値をファイルへ書き出す。そこで ConfigManager が持っている Configuration を読み直し、
+     * すべての項目に「変わった」の印を付けてから sync する（Forge の設定画面と同じ流れ）。
+     */
+    public static boolean reloadFromFile() {
+        Configuration cfg = cachedConfiguration();
+        if (cfg == null) {
+            return false;
+        }
+        cfg.load();
+        for (String name : cfg.getCategoryNames()) {
+            ConfigCategory category = cfg.getCategory(name);
+            for (Property property : category.values()) {
+                if (property.isList()) {
+                    property.set(property.getStringList());
+                } else {
+                    property.set(property.getString());
+                }
+            }
+        }
+        ConfigManager.sync(WeakSpotMod.MODID, Config.Type.INSTANCE);
+        return true;
+    }
+
+    /** ConfigManager の非公開の CONFIGS（ファイルの絶対パス → Configuration）から weakspot.cfg を取り出す。Forge のクラスなので名前は1つ。 */
+    @SuppressWarnings("unchecked")
+    private static Configuration cachedConfiguration() {
+        try {
+            Field field = ConfigManager.class.getDeclaredField("CONFIGS");
+            field.setAccessible(true);
+            Map<String, Configuration> configs = (Map<String, Configuration>) field.get(null);
+            File file = new File(Loader.instance().getConfigDir(), WeakSpotMod.MODID + ".cfg");
+            return configs.get(file.getAbsolutePath());
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            if (!reloadWarned) {
+                reloadWarned = true;
+                LogManager.getLogger(WeakSpotMod.MODID).warn("Could not reload weakspot.cfg", e);
+            }
+            return null;
+        }
     }
 
     /** 節目と量の数が合っていなければ、ログに警告を出す（足りない分は 0 として扱う）。 */

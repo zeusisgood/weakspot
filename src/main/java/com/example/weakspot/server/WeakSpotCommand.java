@@ -1,6 +1,7 @@
 package com.example.weakspot.server;
 
 import com.example.weakspot.common.MiningStats;
+import com.example.weakspot.config.WeakSpotConfig;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -14,13 +15,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 /**
- * 管理コマンド /weakspot（OP 以上）。オンラインのプレイヤーの統計を表示する・累計を消す。
+ * 管理コマンド /weakspot（OP 以上）。オンラインのプレイヤーの統計を表示する・累計を消す・設定を読み直す。
  * 表示は翻訳キーで出す（クライアントにも Mod が入っている前提で、クライアントが翻訳する）。
  * 「累計を消す」は統計画面の「累計をリセット」と同じ処理（ServerStats.resetTotal）。
  */
 public final class WeakSpotCommand extends CommandBase {
 
+    /** プレイヤーを指定するサブコマンド。 */
     private static final List<String> SUBCOMMANDS = java.util.Arrays.asList("stats", "reset");
+    private static final List<String> ALL_SUBCOMMANDS = java.util.Arrays.asList("stats", "reset", "reload");
 
     @Override
     public String getName() {
@@ -44,6 +47,13 @@ public final class WeakSpotCommand extends CommandBase {
             return;
         }
         String sub = args[0];
+        if (sub.equals("reload")) {
+            if (args.length != 1) {
+                throw new WrongUsageException("weakspot.command.usage.reload");
+            }
+            reload(sender);
+            return;
+        }
         if (!SUBCOMMANDS.contains(sub)) {
             throw new WrongUsageException("weakspot.command.usage");
         }
@@ -60,6 +70,16 @@ public final class WeakSpotCommand extends CommandBase {
             ServerStats.resetTotal(player);
             sender.sendMessage(new TextComponentTranslation("weakspot.command.reset", player.getName()));
         }
+    }
+
+    /** weakspot.cfg を読み直し、全員に設定を送り直す（設定画面で変えたときと同じ）。 */
+    private static void reload(ICommandSender sender) throws CommandException {
+        if (!WeakSpotConfig.reloadFromFile()) {
+            throw new CommandException("weakspot.command.reload.failed");
+        }
+        SettingsSync.resendToAll();
+        WeakSpotConfig.warnIfMisconfigured();
+        sender.sendMessage(new TextComponentTranslation("weakspot.command.reload"));
     }
 
     private static void showStats(ICommandSender sender, EntityPlayerMP player) {
@@ -82,7 +102,7 @@ public final class WeakSpotCommand extends CommandBase {
     public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
                                           @Nullable BlockPos targetPos) {
         if (args.length == 1) {
-            return getListOfStringsMatchingLastWord(args, SUBCOMMANDS);
+            return getListOfStringsMatchingLastWord(args, ALL_SUBCOMMANDS);
         }
         if (args.length == 2 && SUBCOMMANDS.contains(args[0])) {
             return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());

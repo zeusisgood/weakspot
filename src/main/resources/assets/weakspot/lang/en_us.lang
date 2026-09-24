@@ -67,9 +67,12 @@ weakspot.general.othermarkershape.tooltip=[Client] Shape of other players' weak 
 weakspot.general.weakspotsenabled.tooltip=[Client] Turn your own weak spots on or off (the Toggle Weak Spots key switches it).\nWhile off, your weak spots do not appear and the game plays as usual. Other players' markers are still shown.
 weakspot.general.animalspotseethrough.tooltip=[Client] When your weak spot on an animal is hidden by its body, show the hidden part faintly through it.\nHelps with animals whose body is bigger than their hitbox, such as chickens. Other players' markers are not shown through.
 
-weakspot.command.usage=/weakspot stats <player> | /weakspot reset <player> (online players only)
+weakspot.command.usage=/weakspot stats <player> | /weakspot reset <player> (online players only) | /weakspot reload
 weakspot.command.usage.stats=/weakspot stats <player>
 weakspot.command.usage.reset=/weakspot reset <player>
+weakspot.command.usage.reload=/weakspot reload
+weakspot.command.reload=[Weak Spot] Reloaded the config (weakspot.cfg)
+weakspot.command.reload.failed=Could not reload the config. Please restart the server (see the server log)
 weakspot.command.offline=Only online players can be specified
 weakspot.command.stats.header=[Weak Spot] Stats of %s
 weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s
