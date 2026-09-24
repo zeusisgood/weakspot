@@ -54,8 +54,8 @@ public final class RightClickHits {
         clicking.clickTick = player.world.getTotalWorldTime();
     }
 
-    /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
-    public static void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos) {
+    /** クライアントからのヒット通知（サーバースレッドで実行される）。streak は他のプレイヤーのヒット音の音階に使う。 */
+    public static void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos, int streak) {
         if (!ServerSwitches.isEnabled(player)) {
             return;
         }
@@ -86,6 +86,8 @@ public final class RightClickHits {
             ServerStats.record(player, stats -> stats.recordMachineHit());
         }
         ServerStats.countStreak(player);
+        // 採掘と同じく、近くの他のプレイヤーにもヒット音を鳴らす
+        ServerBoostTracker.notifyNearbyPlayers(player, pos, streak);
     }
 
     private static int minHitInterval(HitKind kind) {

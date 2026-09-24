@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * クライアント → サーバー: 「弱点にヒットした」という通知。kind はヒットの種類（HitKind）。
- * streak は連続ヒット数で、周りのプレイヤーのヒット音の音階を合わせるためだけに使う（採掘だけ）。
+ * streak は連続ヒット数で、周りのプレイヤーのヒット音の音階を合わせるためだけに使う（採掘・成長・機械）。
  */
 public class HitMessage implements IMessage {
 
@@ -87,7 +87,7 @@ public class HitMessage implements IMessage {
                 } else if (kind == HitKind.MELEE) {
                     MeleeHits.onHit(player, entityId);
                 } else {
-                    RightClickHits.onHit(player, kind, pos);
+                    RightClickHits.onHit(player, kind, pos, streak);
                 }
             });
             return null;
