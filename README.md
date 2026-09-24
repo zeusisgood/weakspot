@@ -218,7 +218,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 | `server/` | 破壊速度ブースト、成長・機械のヒット、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
 | `config/` | 設定 |
 
-仕様は [SPEC_v1.0.md](SPEC_v1.0.md)（MVP）と [SPEC_v1.1.md](SPEC_v1.1.md)（1.1.0 での追加・変更）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
+仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
 
 ## バージョンの方針
 
