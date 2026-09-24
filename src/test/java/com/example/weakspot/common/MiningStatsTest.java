@@ -55,4 +55,27 @@ public class MiningStatsTest {
         assertEquals(0, stats.growthHits);
         assertEquals(0, stats.machineHits);
     }
+
+    @Test
+    public void maxStreakKeepsTheLargestAndResets() {
+        MiningStats stats = new MiningStats();
+        stats.recordStreak(3);
+        stats.recordStreak(12);
+        stats.recordStreak(1);
+        assertEquals(12, stats.maxStreak);
+        stats.reset();
+        assertEquals(0, stats.maxStreak);
+    }
+
+    @Test
+    public void streakCountedAcrossKindsFeedsMaxStreak() {
+        // 採掘・成長・機械のヒットを、種類に関係なく同じ HitStreak に入れる。40 tick あくと数え直し
+        HitStreak streak = new HitStreak();
+        MiningStats stats = new MiningStats();
+        long[] ticks = {0, 6, 12, 18, 24, 100, 106};
+        for (long tick : ticks) {
+            stats.recordStreak(streak.hit(tick));
+        }
+        assertEquals(5, stats.maxStreak);
+    }
 }

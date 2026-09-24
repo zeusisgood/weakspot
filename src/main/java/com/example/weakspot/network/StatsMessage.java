@@ -42,6 +42,7 @@ public class StatsMessage implements IMessage {
         stats.savedTicks = buf.readDouble();
         stats.growthHits = buf.readLong();
         stats.machineHits = buf.readLong();
+        stats.maxStreak = buf.readLong();
         return stats;
     }
 
@@ -53,6 +54,7 @@ public class StatsMessage implements IMessage {
         buf.writeDouble(stats.savedTicks);
         buf.writeLong(stats.growthHits);
         buf.writeLong(stats.machineHits);
+        buf.writeLong(stats.maxStreak);
     }
 
     public static class Handler implements IMessageHandler<StatsMessage, IMessage> {

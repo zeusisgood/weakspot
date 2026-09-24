@@ -81,6 +81,7 @@ public final class RightClickHits {
             MachineAccelerator.hit(world, pos);
             ServerStats.record(player, stats -> stats.recordMachineHit());
         }
+        ServerStats.countStreak(player);
     }
 
     private static int minHitInterval(HitKind kind) {

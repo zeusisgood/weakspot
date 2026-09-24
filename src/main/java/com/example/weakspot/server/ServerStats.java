@@ -1,12 +1,14 @@
 package com.example.weakspot.server;
 
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.common.MiningStats;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -25,6 +27,8 @@ public final class ServerStats {
     private static final String TAG_REWARD_HITS = "rewardHits";
 
     private static final Map<UUID, MiningStats> SESSIONS = new HashMap<>();
+    /** 連続ヒット（コンボ）。クライアントのコンボと同じ条件で、サーバーの tick で数える。メモリだけ。 */
+    private static final Map<UUID, HitStreak> STREAKS = new HashMap<>();
 
     private ServerStats() {
     }
@@ -37,6 +41,28 @@ public final class ServerStats {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         SESSIONS.remove(event.player.getUniqueID());
+        STREAKS.remove(event.player.getUniqueID());
+    }
+
+    /** クライアントのコンボと同じく、死亡（リスポーン）とディメンション移動で連続ヒットを最初に戻す。 */
+    @SubscribeEvent
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        STREAKS.remove(event.player.getUniqueID());
+    }
+
+    @SubscribeEvent
+    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        STREAKS.remove(event.player.getUniqueID());
+    }
+
+    /**
+     * 受け付けたヒット（採掘・成長・機械・動物・釣りのすべて）を、連続ヒットに数えて、最大を更新する。
+     * 種類とブロックをまたいで続き、40 tick ヒットがないと途切れる（HitStreak）。
+     */
+    public static void countStreak(EntityPlayerMP player) {
+        long now = player.mcServer.getTickCounter();
+        int count = STREAKS.computeIfAbsent(player.getUniqueID(), id -> new HitStreak()).hit(now);
+        record(player, stats -> stats.recordStreak(count));
     }
 
     public static MiningStats session(EntityPlayer player) {
@@ -87,6 +113,7 @@ public final class ServerStats {
         stats.savedTicks = tag.getDouble("savedTicks");
         stats.growthHits = tag.getLong("growthHits");
         stats.machineHits = tag.getLong("machineHits");
+        stats.maxStreak = tag.getLong("maxStreak");
         return stats;
     }
 
@@ -99,6 +126,7 @@ public final class ServerStats {
         tag.setDouble("savedTicks", stats.savedTicks);
         tag.setLong("growthHits", stats.growthHits);
         tag.setLong("machineHits", stats.machineHits);
+        tag.setLong("maxStreak", stats.maxStreak);
         return tag;
     }
 }

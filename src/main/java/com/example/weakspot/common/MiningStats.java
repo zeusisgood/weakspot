@@ -20,6 +20,14 @@ public final class MiningStats {
     /** 機械の弱点に当てた回数。 */
     public long machineHits;
 
+    /** 種類を問わない連続ヒット（コンボ）の最大。サーバーが HitStreak で数える。 */
+    public long maxStreak;
+
+    /** 連続ヒット数 count（ヒット後の数）を記録する。最大だけを残す。 */
+    public void recordStreak(long count) {
+        maxStreak = Math.max(maxStreak, count);
+    }
+
     public void recordHit(double extraTicks) {
         hits++;
         savedTicks += Math.max(0, extraTicks);
@@ -58,5 +66,6 @@ public final class MiningStats {
         savedTicks = 0;
         growthHits = 0;
         machineHits = 0;
+        maxStreak = 0;
     }
 }

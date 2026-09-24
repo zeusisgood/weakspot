@@ -49,6 +49,10 @@ final class StatsScreen extends GuiScreen {
     private GuiButton othersSound;
     private boolean confirmingReset;
     private int top;
+    /** 今のフレームの、マウスが乗っている行の説明（統計タブ）。 */
+    private String tooltip;
+    private int mouseX;
+    private int mouseY;
 
     /** サーバーから統計が届いた（クライアントのスレッドで呼ぶ）。 */
     static void receive(MiningStats newSession, MiningStats newTotal) {
@@ -69,7 +73,7 @@ final class StatsScreen extends GuiScreen {
         WeakSpotMod.network.sendToServer(new StatsRequestMessage(false));
 
         buttonList.clear();
-        top = Math.max(10, height / 2 - 100);
+        top = Math.max(10, height / 2 - 116);
         int center = width / 2;
 
         tabStats = add(new GuiButton(BUTTON_TAB_STATS, center - 102, top + 14, 100, 20,
@@ -95,7 +99,7 @@ final class StatsScreen extends GuiScreen {
         }));
         add(new GuiButton(BUTTON_OTHERS_PREVIEW, center + 94, y, 60, 20, I18n.format("weakspot.sound.preview")));
 
-        int bottom = Math.min(height - 28, top + 178);
+        int bottom = Math.min(height - 28, top + 200);
         resetButton = add(new GuiButton(BUTTON_RESET, center - 154, bottom, 100, 20, ""));
         add(new GuiButton(BUTTON_CONFIG, center - 50, bottom, 100, 20, I18n.format("weakspot.stats.openConfig")));
         add(new GuiButton(BUTTON_DONE, center + 54, bottom, 100, 20, I18n.format("gui.done")));
@@ -194,6 +198,9 @@ final class StatsScreen extends GuiScreen {
     @Override
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         drawDefaultBackground();
+        this.mouseX = mouseX;
+        this.mouseY = mouseY;
+        tooltip = null;
         drawCenteredString(fontRenderer, I18n.format("weakspot.stats.title"), width / 2, top, 0xFFFFFF);
         if (soundTab) {
             drawSoundTab();
@@ -201,6 +208,9 @@ final class StatsScreen extends GuiScreen {
             drawStatsTab();
         }
         super.drawScreen(mouseX, mouseY, partialTicks);
+        if (tooltip != null) {
+            drawHoveringText(fontRenderer.listFormattedStringToWidth(tooltip, 200), mouseX, mouseY);
+        }
     }
 
     private void drawSoundTab() {
@@ -226,12 +236,18 @@ final class StatsScreen extends GuiScreen {
         y = row("weakspot.stats.maxHits", s -> Long.toString(s.maxHitsOnBlock), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.timeSaved", s -> formatDuration(s.savedSeconds()), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.growthHits", s -> Long.toString(s.growthHits), labelX, sessionRight, totalRight, y);
-        row("weakspot.stats.machineHits", s -> Long.toString(s.machineHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.machineHits", s -> Long.toString(s.machineHits), labelX, sessionRight, totalRight, y);
+        row("weakspot.stats.maxStreak", s -> Long.toString(s.maxStreak), labelX, sessionRight, totalRight, y);
     }
 
     private int row(String labelKey, Function<MiningStats, String> value, int labelX, int sessionRight, int totalRight,
                     int y) {
         drawString(fontRenderer, I18n.format(labelKey), labelX, y, 0xFFFFFF);
+        String tooltipKey = labelKey + ".tooltip";
+        if (I18n.hasKey(tooltipKey) && mouseY >= y && mouseY < y + ROW_HEIGHT && mouseX >= labelX
+                && mouseX <= totalRight) {
+            tooltip = I18n.format(tooltipKey);
+        }
         drawRight(session == null ? "..." : value.apply(session), sessionRight, y, 0xFFFFFF);
         drawRight(total == null ? "..." : value.apply(total), totalRight, y, 0xFFFF55);
         return y + ROW_HEIGHT;
