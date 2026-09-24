@@ -50,6 +50,21 @@ public final class FaceMath {
         return new FaceRect(min[u], min[v], max[u], max[v]);
     }
 
+    /**
+     * 大きさ dx × dy × dz の箱で、面積が一番大きい面の法線軸。
+     * 同じ大きさなら Y（上面）、次に X、Z の順に選ぶ（作物・苗木の弱点は上面に出したいため）。
+     */
+    public static int largestFaceAxis(double dx, double dy, double dz) {
+        double eps = 1e-6;
+        double x = dy * dz;
+        double y = dx * dz;
+        double z = dx * dy;
+        if (y + eps >= x && y + eps >= z) {
+            return AXIS_Y;
+        }
+        return x + eps >= z ? AXIS_X : AXIS_Z;
+    }
+
     public static double distance(double u1, double v1, double u2, double v2) {
         double du = u1 - u2;
         double dv = v1 - v2;

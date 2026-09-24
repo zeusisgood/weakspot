@@ -34,4 +34,22 @@ public class FaceMathTest {
         assertEquals(64, r.minV, EPS);
         assertEquals(64.5, r.maxV, EPS);
     }
+
+    @Test
+    public void largestFaceOfLowCropIsTop() {
+        // 小麦の成長段階0（高さ 0.125）
+        assertEquals(FaceMath.AXIS_Y, FaceMath.largestFaceAxis(1, 0.125, 1));
+    }
+
+    @Test
+    public void largestFacePrefersTopOnTies() {
+        // 苗木の当たり判定（0.8 × 0.8 × 0.8）
+        assertEquals(FaceMath.AXIS_Y, FaceMath.largestFaceAxis(0.8, 0.8, 0.8));
+    }
+
+    @Test
+    public void largestFaceOfThinTallBoxIsSide() {
+        assertEquals(FaceMath.AXIS_X, FaceMath.largestFaceAxis(0.2, 1, 1));
+        assertEquals(FaceMath.AXIS_Z, FaceMath.largestFaceAxis(1, 1, 0.2));
+    }
 }

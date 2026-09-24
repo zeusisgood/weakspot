@@ -1,6 +1,10 @@
 package com.example.weakspot.config;
 
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 /**
  * サーバーの値が正の設定のうち、クライアントが使うもの。サーバーが自分の WeakSpotConfig から作って送り、
@@ -18,6 +22,10 @@ public final class SyncedSettings {
     public double edgeMargin;
     public double minMoveDistance;
     public int lingerTicks;
+    public int growthMinHitIntervalTicks;
+    public double growthMinRadius;
+    /** 登録名（"minecraft:grass" など）。 */
+    public Set<String> growthExcludedBlocks;
 
     private SyncedSettings() {
     }
@@ -32,6 +40,9 @@ public final class SyncedSettings {
         s.edgeMargin = WeakSpotConfig.edgeMargin;
         s.minMoveDistance = WeakSpotConfig.minMoveDistance;
         s.lingerTicks = WeakSpotConfig.lingerTicks;
+        s.growthMinHitIntervalTicks = WeakSpotConfig.growthMinHitIntervalTicks;
+        s.growthMinRadius = WeakSpotConfig.growthMinRadius;
+        s.growthExcludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.growthExcludedBlocks));
         return s;
     }
 
@@ -43,6 +54,9 @@ public final class SyncedSettings {
         buf.writeDouble(edgeMargin);
         buf.writeDouble(minMoveDistance);
         buf.writeInt(lingerTicks);
+        buf.writeInt(growthMinHitIntervalTicks);
+        buf.writeDouble(growthMinRadius);
+        writeStrings(buf, growthExcludedBlocks);
     }
 
     public static SyncedSettings read(ByteBuf buf) {
@@ -54,6 +68,25 @@ public final class SyncedSettings {
         s.edgeMargin = buf.readDouble();
         s.minMoveDistance = buf.readDouble();
         s.lingerTicks = buf.readInt();
+        s.growthMinHitIntervalTicks = buf.readInt();
+        s.growthMinRadius = buf.readDouble();
+        s.growthExcludedBlocks = readStrings(buf);
         return s;
+    }
+
+    private static void writeStrings(ByteBuf buf, Set<String> strings) {
+        buf.writeInt(strings.size());
+        for (String string : strings) {
+            ByteBufUtils.writeUTF8String(buf, string);
+        }
+    }
+
+    private static Set<String> readStrings(ByteBuf buf) {
+        int size = buf.readInt();
+        Set<String> strings = new HashSet<>();
+        for (int i = 0; i < size; i++) {
+            strings.add(ByteBufUtils.readUTF8String(buf));
+        }
+        return strings;
     }
 }

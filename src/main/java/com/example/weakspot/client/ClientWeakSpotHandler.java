@@ -1,12 +1,17 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
+import java.util.Arrays;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
@@ -20,6 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * クライアント側の弱点処理。弱点の位置は自分のクライアントだけが持ち、他プレイヤーとは共有しない。
+ * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械）の弱点を扱う。弱点は一度に1つだけ。
  *
  * ヒット判定は毎フレーム行う（素早く照準を動かしたときに tick 単位だと取りこぼすため）。
  * 破壊速度のブーストは PlayerControllerMP の tick ごとの進捗に掛かるので、tick 単位で管理する。
@@ -35,13 +41,20 @@ public final class ClientWeakSpotHandler {
     static long clientTick;
     static WeakSpot spot;
 
-    private static long lastHitTick = Long.MIN_VALUE / 2;
-    /** 連続ヒット数。ブロックをまたいで続き、ヒット音のピッチに使う。 */
+    /** 種類ごとの最後のヒット（ヒット間隔の制限に使う）。 */
+    private static final long[] LAST_HIT_TICK = new long[HitKind.values().length];
+    /** 種類を問わない最後のヒット（連続ヒットの判定に使う）。 */
+    private static long lastAnyHitTick = Long.MIN_VALUE / 2;
+    /** 連続ヒット数。ブロックや種類をまたいで続き、ヒット音のピッチに使う。 */
     private static int hitStreak;
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
     /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
     private static boolean suppressBoost;
+
+    static {
+        Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
+    }
 
     private ClientWeakSpotHandler() {
     }
@@ -60,11 +73,22 @@ public final class ClientWeakSpotHandler {
             return;
         }
         clientTick++;
-        if (spot != null && (mc.world.isAirBlock(spot.pos)
+        if (spot != null && (isGone(mc.world, spot)
                 || clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks)) {
             spot = null;
         }
         WeakSpotRenderer.expireFlashes(clientTick);
+    }
+
+    /** 弱点を出したブロックがなくなった（壊れた、育ちきった、など）。 */
+    private static boolean isGone(World world, WeakSpot spot) {
+        if (world.isAirBlock(spot.pos)) {
+            return true;
+        }
+        if (spot.kind == HitKind.GROWTH) {
+            return !RightClickTargets.isGrowable(world, spot.pos, world.getBlockState(spot.pos), ClientSettings.get());
+        }
+        return false;
     }
 
     @SubscribeEvent
@@ -79,29 +103,76 @@ public final class ClientWeakSpotHandler {
 
     private static void updateAim(Minecraft mc) {
         EntityPlayerSP player = mc.player;
-        if (!mc.playerController.getIsHittingBlock() || player.capabilities.isCreativeMode || player.isSpectator()) {
+        if (player.capabilities.isCreativeMode || player.isSpectator()) {
             return;
         }
         RayTraceResult target = mc.objectMouseOver;
         if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
             return;
         }
+        if (mc.playerController.getIsHittingBlock()) {
+            aimMining(mc, target);
+        } else if (isHoldingUse(mc)) {
+            aimRightClick(mc, target);
+        }
+    }
+
+    /** 右クリックを押しっぱなしにしているか（バニラが右クリックを繰り返す条件と同じ）。 */
+    private static boolean isHoldingUse(Minecraft mc) {
+        return mc.currentScreen == null && mc.gameSettings.keyBindUseItem.isKeyDown() && !mc.player.isHandActive();
+    }
+
+    private static void aimMining(Minecraft mc, RayTraceResult target) {
         BlockPos pos = target.getBlockPos();
         IBlockState state = mc.world.getBlockState(pos);
-        if (!isEligible(mc.world, player, pos, state)) {
+        if (!isEligible(mc.world, mc.player, pos, state)) {
             return;
         }
-
         SyncedSettings settings = ClientSettings.get();
-        if (spot == null || !spot.matches(pos, target.sideHit)) {
-            spot = WeakSpot.spawn(mc.world, pos, state, target.sideHit, target.hitVec,
-                    settings.weakSpotRadiusRatio, settings.edgeMargin, settings.minMoveDistance, RANDOM);
+        if (spot == null || !spot.matches(HitKind.MINING, pos, target.sideHit)) {
+            spot = WeakSpot.spawn(HitKind.MINING, mc.world, pos, state, target.sideHit, target.hitVec,
+                    settings.weakSpotRadiusRatio, 0, settings.edgeMargin, settings.minMoveDistance, RANDOM);
         }
         spot.lastActiveTick = clientTick;
-
-        if (spot.isHitBy(target.hitVec) && clientTick - lastHitTick >= settings.minHitIntervalTicks) {
+        if (spot.isHitBy(target.hitVec) && canHit(HitKind.MINING, settings.minHitIntervalTicks)) {
             onHit(mc);
         }
+    }
+
+    /**
+     * 右クリックの弱点。作物・苗木は一番大きい面（多くは上面）に、機械は狙っている面に出す。
+     * 照準がその面に当たっているときだけヒットにする。
+     */
+    private static void aimRightClick(Minecraft mc, RayTraceResult target) {
+        BlockPos pos = target.getBlockPos();
+        SyncedSettings settings = ClientSettings.get();
+        HitKind kind = RightClickTargets.classify(mc.world, mc.player, pos, settings);
+        if (kind == null) {
+            return;
+        }
+        IBlockState state = mc.world.getBlockState(pos);
+        AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
+        EnumFacing face = kind == HitKind.GROWTH
+                ? WeakSpot.growthFace(box, mc.player.getPositionEyes(1.0F))
+                : target.sideHit;
+        if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
+            double minRadius = kind == HitKind.GROWTH ? settings.growthMinRadius : 0;
+            spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec,
+                    settings.weakSpotRadiusRatio, minRadius, settings.edgeMargin, settings.minMoveDistance, RANDOM);
+        }
+        spot.lastActiveTick = clientTick;
+        if (target.sideHit == spot.face && spot.isHitBy(target.hitVec)
+                && canHit(kind, minHitInterval(kind, settings))) {
+            onHit(mc);
+        }
+    }
+
+    private static int minHitInterval(HitKind kind, SyncedSettings settings) {
+        return settings.growthMinHitIntervalTicks;
+    }
+
+    private static boolean canHit(HitKind kind, int minInterval) {
+        return clientTick - LAST_HIT_TICK[kind.ordinal()] >= minInterval;
     }
 
     /** 壊せないブロック（硬度が負）と、今の破壊速度で1tick以内に壊れるブロックは対象外。 */
@@ -118,20 +189,23 @@ public final class ClientWeakSpotHandler {
     }
 
     private static void onHit(Minecraft mc) {
+        HitKind kind = spot.kind;
         WeakSpotRenderer.addFlash(spot, clientTick);
-        if (clientTick - lastHitTick > STREAK_RESET_TICKS) {
+        if (clientTick - lastAnyHitTick > STREAK_RESET_TICKS) {
             hitStreak = 0;
         }
         hitStreak++;
         HitSounds.playOwn(hitStreak);
 
+        LAST_HIT_TICK[kind.ordinal()] = clientTick;
+        lastAnyHitTick = clientTick;
+        if (kind == HitKind.MINING) {
+            boostHitTick = clientTick;
+            boostPos = spot.pos;
+        }
+        WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
+
         SyncedSettings settings = ClientSettings.get();
-
-        lastHitTick = clientTick;
-        boostHitTick = clientTick;
-        boostPos = spot.pos;
-        WeakSpotMod.network.sendToServer(new HitMessage(spot.pos, hitStreak));
-
         spot.relocate(settings.edgeMargin, settings.minMoveDistance, RANDOM);
     }
 
@@ -154,7 +228,8 @@ public final class ClientWeakSpotHandler {
     private static void reset() {
         spot = null;
         boostPos = null;
-        lastHitTick = Long.MIN_VALUE / 2;
+        Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
+        lastAnyHitTick = Long.MIN_VALUE / 2;
         hitStreak = 0;
         boostHitTick = Long.MIN_VALUE / 2;
         WeakSpotRenderer.clearFlashes();

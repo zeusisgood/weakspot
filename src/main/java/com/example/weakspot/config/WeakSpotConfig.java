@@ -68,6 +68,25 @@ public final class WeakSpotConfig {
             "数が足りない分は 0 として扱う"})
     public static int[] milestoneRepair = {10, 77, 30, 100};
 
+    @Config.Comment({"[サーバー] 作物・苗木の弱点に1回当てるごとに、そのブロックに余分に呼ぶ randomTick の回数",
+            "骨粉と違い、明るさや農地の水分などの成長条件は守ったまま速くなる"})
+    @Config.RangeInt(min = 0, max = 1000)
+    public static int growthTicksPerHit = 5;
+
+    @Config.Comment("[サーバー] 作物・苗木のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int growthMinHitIntervalTicks = 6;
+
+    @Config.Comment("[サーバー] 作物・苗木の弱点の最小の半径（ブロック）。小さい面でも当てやすくする")
+    @Config.RangeDouble(min = 0.0, max = 0.5)
+    public static double growthMinRadius = 0.08;
+
+    @Config.Comment({"[サーバー] 作物・苗木の弱点を出さないブロックの登録名",
+            "IGrowable を持つブロックのうち、作物・苗木ではないもの（草ブロック、草、キノコなど）を初期値で外している"})
+    public static String[] growthExcludedBlocks = {
+            "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant",
+            "minecraft:brown_mushroom", "minecraft:red_mushroom"};
+
     @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（採掘・成長・機械で共通）",
             "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING",
             "統計画面（K キー）のサウンドでも変えられ、試聴できる"})

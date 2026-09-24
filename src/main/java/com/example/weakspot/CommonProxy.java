@@ -10,6 +10,11 @@ public class CommonProxy {
     public void init() {
     }
 
+    /** クライアントが今使う [サーバー] の設定値。物理サーバーでは呼ばれないが、念のため自分の値を返す。 */
+    public SyncedSettings clientSettings() {
+        return SyncedSettings.fromConfig();
+    }
+
     /** 他のプレイヤーがヒットした（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onOtherPlayerHit(BlockPos pos, int streak) {
     }

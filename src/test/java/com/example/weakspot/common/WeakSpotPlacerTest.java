@@ -18,6 +18,19 @@ public class WeakSpotPlacerTest {
     }
 
     @Test
+    public void minRadiusAppliesOnSmallFaces() {
+        FaceRect cocoaSide = new FaceRect(0, 0, 0.375, 0.5);
+        assertEquals(0.08, WeakSpotPlacer.radius(cocoaSide, 0.14, 0.08), 1e-9);
+        assertEquals(0.14, WeakSpotPlacer.radius(FULL, 0.14, 0.08), 1e-9);
+    }
+
+    @Test
+    public void minRadiusNeverExceedsHalfTheFace() {
+        FaceRect tiny = new FaceRect(0, 0, 0.1, 0.1);
+        assertEquals(0.05, WeakSpotPlacer.radius(tiny, 0.14, 0.08), 1e-9);
+    }
+
+    @Test
     public void placedSpotStaysInsideAndMovesFarEnough() {
         Random random = new Random(1);
         double r = 0.14;

@@ -19,6 +19,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public SyncedSettings clientSettings() {
+        return ClientSettings.get();
+    }
+
+    @Override
     public void onSettingsReceived(SyncedSettings settings) {
         Minecraft.getMinecraft().addScheduledTask(() -> ClientSettings.receive(settings));
     }
