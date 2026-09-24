@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.1.md`（Mod 1.1.1。耐久回復の修正だけ）、`doc/SPEC_v1.1.2.md`（Mod 1.1.2。成長の対象の拡張）、`doc/SPEC_v1.1.3.md`（Mod 1.1.3。コンボの表示）、`doc/SPEC_v1.1.4.md`（Mod 1.1.4。弱点の移動の残像演出）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.1.md`（Mod 1.1.1。耐久回復の修正だけ）、`doc/SPEC_v1.1.2.md`（Mod 1.1.2。成長の対象の拡張）、`doc/SPEC_v1.1.3.md`（Mod 1.1.3。コンボの表示）、`doc/SPEC_v1.1.4.md`（Mod 1.1.4。弱点の移動の残像演出）、`doc/SPEC_v1.1.5.md`（Mod 1.1.5。掘っているブロックの耐久バー。クライアントだけ）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -21,7 +21,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.1.4。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.1.5。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.1,1.2)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
   - 仕様書（`doc/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装からタグと push まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。GitHub Release の作成は、ユーザーが手動で行う。
 
@@ -31,7 +31,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 弱点は3種類（`common/HitKind`）: **採掘**（左の長押し）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable` と、サトウキビ・サボテン・ネザーウォート）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE）。節目と耐久回復は採掘だけが対象。
 
-- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、連続ヒット数 `HitStreak`、ヒット音の音階 `HitPitch`、コンボの表示の計算 `ComboTier` / `ComboMilestones` / `ComboDisplay`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`、`IGrowable` でない植物の育てる余地 `GrowthRoom`、マーカーの移動と残像 `MarkerMotion`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
+- `common/`: Minecraft に依存しない純粋な計算（面の (u,v) 座標変換と一番大きい面、弱点の配置と最小半径、ブースト量、連続ヒット数 `HitStreak`、ヒット音の音階 `HitPitch`、コンボの表示の計算 `ComboTier` / `ComboMilestones` / `ComboDisplay`、統計 `MiningStats`、節目 `Milestones`、耐久回復の精算 `RepairSettlement`、機械の加速 `MachineBoost`、マークの送信頻度 `MarkerSendPolicy`、色 `MarkerColor`、`IGrowable` でない植物の育てる余地 `GrowthRoom`、マーカーの移動と残像 `MarkerMotion`、耐久バーの形 `BlockHealthBar`）。単体テストはここだけにある。1.7.10 への移植を見込んで、MC クラスを持ち込まない。
 - `RightClickTargets`（両側）: 右クリックの弱点の対象判定。クライアントとサーバーで同じ条件（同期した設定）を使う。
   - 成長の対象（`isGrowable`）: 設定 `growthExcludedBlocks`（除外リスト。草ブロック・草・キノコなどは初期値で外す）になく、`canGrow` が true の `IGrowable`、または `RightClickTargets.EXTRA_GROWTH_BLOCKS`（追加リスト。コード内の固定のリスト。設定化は 1.2.0）の植物で育てる余地があるもの。除外リストは追加リストにも効く。
   - 追加リストの植物: サトウキビ・サボテンは柱の高さ < 3 で一番上のすぐ上が空気（高さ1のサトウキビは土台 `BlockReed#canBlockStay` も）、ネザーウォートは段階 < 3。バニラの `updateTick` の条件と同じ。育つのは柱の一番上の節だけなので、サーバーの効果は `growthTarget` で柱の一番上にかける。対象を条件どおりに右クリックしたら、`RightClickBlock` をメインハンドで SUCCESS にしてキャンセルし、通常動作（GUI、オフハンドの設置など）を止める。クライアントでキャンセルしてもバニラは右クリックのパケットを送るので、サーバーでも発火し、そこで「直前に右クリックした」ことを記録する。右クリックを押しっぱなしにすると、バニラは 4 tick ごとに右クリックする。
@@ -43,6 +43,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 統計画面（`StatsScreen`、K キー）: 「統計」タブはサーバーから届いた数字を表示するだけ（開いたとき・設定画面から戻ったときに要求）。「サウンド」タブは楽器・音量・試聴で、`WeakSpotConfig.save()`（`ConfigManager.sync`）で `weakspot.cfg` に保存する。「設定画面を開く」は `WeakSpotGuiFactory.create`（Mods メニューと同じ `GuiConfig`。他人のサーバーに接続中は2行目に注意書き）。
   - 他のプレイヤーのマーク（`OtherMarkers`）: 自分の採掘の弱点が出た・動いた・消えたときに送り（`markerSendMinIntervalTicks` で間引き、出ている間は 20 tick ごとに送り直す）、届いたマークは 60 tick 更新がなければ消す。描画は `WeakSpotRenderer` で、色と濃さは各自の設定。同じブロックの同じ面で位置が変わったマークは、前の `WeakSpot` を使い回して、最後に知っている位置から動かす（同じ位置の送り直しは動かさない）。
   - マーカーの表示位置と当たり判定の位置は別（1.1.4）。`WeakSpot.u` / `v` は当たり判定の位置で、ヒットの瞬間に移動先へ変わる。表示位置は `WeakSpot.motion`（`common/MarkerMotion`）で、実時間（`Minecraft.getSystemTime()`）の 80 ms で ease-out に動き、通った道に残像を 4 個（150 ms で消える）残す。移動中の次のヒットは、前の移動先から動き直す。出し直し（新しい弱点、別の面・ブロック）はその場で切り替える。設定 `weakSpotTrailEnabled`（`[クライアント]`）でオフ。`WeakSpotRenderer` は表示位置に描き、送信（`OtherMarkers.sendOwn`）とヒット判定は当たり判定の位置を使う。
+  - 耐久バー（1.1.5）: 自分が掘っているブロックの残りの耐久（1 − 破壊の進み具合）を、採掘の弱点と同じ面の「下」の余白（下の辺から中心 0.05、太さ 0.06、面の幅の 80%。実際の当たり判定の箱の面）に、緑 `#3DDC84` と半透明の黒の背景で描く。側面は下の辺、上面・下面はプレイヤーに一番近い辺が「下」。左から伸び、プレイヤーの右手の側から縮む（形の計算は `common/BlockHealthBar`）。`WeakSpotRenderer` がマーカーより先に（下に）描く。出すのは、採掘の弱点がこのフレームの照準の面に出ていて、`PlayerControllerMP` が今そのブロックを掘っているときだけ（長押しをやめる・壊れると `getIsHittingBlock()` が false になり、すぐ消える）。設定 `blockHealthBarEnabled`（`[クライアント]`）。
+    - 破壊の進み具合と掘っているブロックは、`PlayerControllerMP` の非公開のフィールドをリフレクションで読む（`client/MiningProgress`）。開発環境の MCP 名（`curBlockDamageMP` / `currentBlock`）と実際の環境の SRG 名（`field_78770_f` / `field_178895_c`）を順に試す。Forge の `ReflectionHelper.findField` の3引数の版は起動環境の判定で片方しか試さないので使わない。見つからなければ警告を1回出してバーを出さない。進み具合は tick ごとに積まれるので、`ClientTickEvent` START（その tick の進捗の前）で前の値を覚え、フレームごとに補間する。
   - 節目の演出（`MilestoneEffects`）: タイトル、チャット1行、花火、音階の駆け上がり。777 は虹色で派手にする。
   - 画面の文字列は `assets/weakspot/lang/en_us.lang` と `ja_jp.lang` の両方に追加すること。
   - キーバインドの登録は `@SidedProxy`（`CommonProxy` / `client.ClientProxy`）の `init` で行う。
@@ -76,6 +78,6 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 `@Config`（`config/weakspot.cfg`）。キー名を変えないように、カテゴリは分けず `general` に並べる。コメントの先頭に、どちらの値が使われるかを書く。
 - `[サーバー]`: サーバーの値が正。クライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` の static フィールドに書き込まない**（書き込むと `ConfigManager.sync` でサーバーの値がクライアントの `weakspot.cfg` に保存されてしまう）。サーバーだけが使う項目（報酬、成長の回数、機械の倍率など）は送らない。
-- `[クライアント]`: 音と、他のプレイヤーのマークの表示と、コンボの表示と、弱点の移動の演出だけ（見た目と音だけに関わるもの）。`WeakSpotConfig` をそのまま読む。
+- `[クライアント]`: 音と、他のプレイヤーのマークの表示と、コンボの表示と、弱点の移動の演出と、耐久バーだけ（見た目と音だけに関わるもの）。`WeakSpotConfig` をそのまま読む。
 - 設定を追加するときは、README の設定表の該当する方にも追加すること。`SyncedSettings` に項目を足すと通信内容が変わる。
 - パケットの中身を変えたり、パケットを追加・削除したりすると、古いバージョンとは通信できなくなる。マイナーを上げ、`acceptableRemoteVersions` を書き換え、README の更新履歴にそのことを書くこと。統計の保存形式（NBT のキー）を古い版で読めないように変えるときも同じ。
