@@ -3,6 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
 import java.util.Arrays;
@@ -35,8 +36,6 @@ import net.minecraftforge.fml.relauncher.Side;
 public final class ClientWeakSpotHandler {
 
     private static final Random RANDOM = new Random();
-    /** この tick の間ヒットがなければ、連続ヒット（ヒット音の音階）を最初に戻す。 */
-    private static final int STREAK_RESET_TICKS = 40;
 
     /** ClientTickEvent の START で増える。PlayerControllerMP の進捗計算はその後に走る。 */
     static long clientTick;
@@ -44,10 +43,10 @@ public final class ClientWeakSpotHandler {
 
     /** 種類ごとの最後のヒット（ヒット間隔の制限に使う）。 */
     private static final long[] LAST_HIT_TICK = new long[HitKind.values().length];
-    /** 種類を問わない最後のヒット（連続ヒットの判定に使う）。 */
-    private static long lastAnyHitTick = Long.MIN_VALUE / 2;
-    /** 連続ヒット数。ブロックや種類をまたいで続き、ヒット音のピッチに使う。 */
-    private static int hitStreak;
+    /** 連続ヒット数。ブロックや種類をまたいで続き、ヒット音のピッチとコンボの表示に使う。 */
+    static final HitStreak STREAK = new HitStreak();
+    /** 死亡・ディメンション移動（どちらもプレイヤーが作り直される）を見分けるため。 */
+    private static EntityPlayerSP lastPlayer;
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
     /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
@@ -69,6 +68,11 @@ public final class ClientWeakSpotHandler {
         if (mc.world == null || mc.player == null) {
             reset();
             return;
+        }
+        if (mc.player != lastPlayer || mc.player.getHealth() <= 0) {
+            // 死亡したとき、リスポーンやディメンション移動でプレイヤーが作り直されたときは、連続ヒットを最初に戻す
+            lastPlayer = mc.player;
+            resetStreak();
         }
         if (mc.isGamePaused()) {
             return;
@@ -206,14 +210,10 @@ public final class ClientWeakSpotHandler {
     private static void onHit(Minecraft mc) {
         HitKind kind = spot.kind;
         WeakSpotRenderer.addFlash(spot, clientTick);
-        if (clientTick - lastAnyHitTick > STREAK_RESET_TICKS) {
-            hitStreak = 0;
-        }
-        hitStreak++;
+        int hitStreak = STREAK.hit(clientTick);
         HitSounds.playOwn(hitStreak);
 
         LAST_HIT_TICK[kind.ordinal()] = clientTick;
-        lastAnyHitTick = clientTick;
         if (kind == HitKind.MINING) {
             boostHitTick = clientTick;
             boostPos = spot.pos;
@@ -244,10 +244,14 @@ public final class ClientWeakSpotHandler {
         spot = null;
         boostPos = null;
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
-        lastAnyHitTick = Long.MIN_VALUE / 2;
-        hitStreak = 0;
         boostHitTick = Long.MIN_VALUE / 2;
+        lastPlayer = null;
+        resetStreak();
         WeakSpotRenderer.clearFlashes();
         HitSounds.clear();
+    }
+
+    private static void resetStreak() {
+        STREAK.reset();
     }
 }

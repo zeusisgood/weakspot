@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.HitPitch;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.client.resources.I18n;
@@ -46,7 +47,7 @@ final class MilestoneEffects {
 
         HitSounds.playScale(HitSounds::playOwn, lucky ? 1 : 2, 0);
         if (lucky) {
-            HitSounds.playScale(HitSounds::playOwn, 1, HitSounds.SCALE_LENGTH + 2);
+            HitSounds.playScale(HitSounds::playOwn, 1, HitPitch.SCALE_LENGTH + 2);
         }
     }
 

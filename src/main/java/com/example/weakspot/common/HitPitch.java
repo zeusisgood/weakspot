@@ -1,10 +1,15 @@
 package com.example.weakspot.common;
 
-/** 連続ヒット数に応じたヒット音のピッチ。長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す。 */
+/**
+ * 連続ヒット数（HitStreak。戻らずに上がり続ける）に応じたヒット音のピッチ。
+ * 長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す。
+ */
 public final class HitPitch {
 
     /** 長音階（ド レ ミ ファ ソ ラ シ ド）の半音数。 */
     private static final int[] MAJOR_SCALE = {0, 2, 4, 5, 7, 9, 11, 12};
+    /** 音階の1オクターブの音の数。この数のヒットで最高音になる。 */
+    public static final int SCALE_LENGTH = MAJOR_SCALE.length;
     /** Minecraft の音のピッチは 0.5〜2.0。1.0 から始めて最高の 2.0 で1オクターブになる。 */
     private static final double BASE_PITCH = 1.0;
 

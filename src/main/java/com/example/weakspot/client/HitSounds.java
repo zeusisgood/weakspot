@@ -28,9 +28,6 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class HitSounds {
 
-    /** 音階の1オクターブの音の数（HitPitch の長音階）。 */
-    static final int SCALE_LENGTH = 8;
-
     /** 予約した音。delay が 0 になった tick に鳴らす。一時停止中も進める（統計画面の試聴のため）。 */
     private static final List<Scheduled> QUEUE = new ArrayList<>();
 
@@ -79,7 +76,7 @@ final class HitSounds {
 
     /** 音階を最低音から最高音まで ticksPerNote ごとに鳴らす。note は連続ヒット数を受け取って1音鳴らす処理。 */
     static void playScale(IntConsumer note, int ticksPerNote, int startDelay) {
-        for (int i = 0; i < SCALE_LENGTH; i++) {
+        for (int i = 0; i < HitPitch.SCALE_LENGTH; i++) {
             int streak = i + 1;
             schedule(startDelay + i * ticksPerNote, () -> note.accept(streak));
         }
