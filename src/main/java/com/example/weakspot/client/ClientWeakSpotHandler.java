@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.AnimalTargets;
+import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BlockHealthBar;
@@ -21,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -31,7 +33,8 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * クライアント側の弱点処理。弱点の位置は自分のクライアントだけが持ち、他プレイヤーとは共有しない。
- * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械）の弱点を扱う。弱点は一度に1つだけ。
+ * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械、動物）と、敵への攻撃（近接）の弱点を扱う。
+ * 弱点は一度に1つだけ。
  *
  * ヒット判定は毎フレーム行う（素早く照準を動かしたときに tick 単位だと取りこぼすため）。
  * 破壊速度のブーストは PlayerControllerMP の tick ごとの進捗に掛かるので、tick 単位で管理する。
@@ -106,6 +109,9 @@ public final class ClientWeakSpotHandler {
         if (spot.kind == HitKind.ANIMAL) {
             return spot.entity == null || spot.entity.isDead;
         }
+        if (spot.kind == HitKind.MELEE) {
+            return spot.entity == null || !MeleeTargets.isTarget(spot.entity);
+        }
         if (world.isAirBlock(spot.pos)) {
             return true;
         }
@@ -140,7 +146,7 @@ public final class ClientWeakSpotHandler {
             }
             animal = animalBarProgress();
             if (spot != null && spot.entity != null) {
-                // 動物の弱点は、描く時点の動物の位置に合わせる（当たり判定は updateAim で、その tick の位置に合わせた）
+                // 動物・敵の弱点は、描く時点の位置に合わせる（当たり判定は updateAim で、その tick の位置に合わせた）
                 spot.follow(WeakSpot.renderBox(spot.entity, event.getPartialTicks()));
             }
         } else {
@@ -193,6 +199,7 @@ public final class ClientWeakSpotHandler {
         boostHitTick = Long.MIN_VALUE / 2;
         WeakSpotRenderer.clearFlashes();
         FishingSpot.clear();
+        BowSpot.clear();
     }
 
     private static void updateAim(Minecraft mc) {
@@ -207,6 +214,9 @@ public final class ClientWeakSpotHandler {
         if (target.typeOfHit == RayTraceResult.Type.ENTITY) {
             if (!mc.playerController.getIsHittingBlock() && isHoldingUse(mc)) {
                 aimAnimal(mc, target);
+            } else if (!mc.playerController.getIsHittingBlock() && !player.isHandActive()
+                    && !mc.gameSettings.keyBindUseItem.isKeyDown()) {
+                aimMelee(mc, target);
             }
             return;
         }
@@ -292,7 +302,7 @@ public final class ClientWeakSpotHandler {
         EnumFacing aimed = WeakSpot.faceAt(box, target.hitVec);
         Vec3d eye = mc.player.getPositionEyes(1.0F);
         if (spot == null || spot.entity != entity || !WeakSpot.isFacing(box, spot.face, eye)) {
-            spot = WeakSpot.spawnOnEntity(entity, aimed, target.hitVec, settings, RANDOM);
+            spot = WeakSpot.spawnOnEntity(HitKind.ANIMAL, entity, aimed, target.hitVec, settings, RANDOM);
         }
         if (spot == null) {
             return;
@@ -301,6 +311,66 @@ public final class ClientWeakSpotHandler {
         spot.lastActiveTick = clientTick;
         if (aimed == spot.face && spot.isHitBy(target.hitVec)
                 && canHit(HitKind.ANIMAL, settings.animalMinHitIntervalTicks)) {
+            onHit(mc);
+        }
+    }
+
+    /**
+     * 近接の弱点。攻撃が届く距離で敵に照準を合わせている間、照準が当たっている面に出す（面は、見えている間は変えない）。
+     * ここでは出すだけで、ヒットは左クリック（onMouse）で判定する。攻撃のゲージが溜まっていない間は、薄く描く。
+     */
+    private static void aimMelee(Minecraft mc, RayTraceResult target) {
+        Entity entity = target.entityHit;
+        SyncedSettings settings = ClientSettings.get();
+        if (entity == null || !settings.meleeWeakSpotEnabled || !MeleeTargets.isTarget(entity)) {
+            return;
+        }
+        AxisAlignedBB box = entity.getEntityBoundingBox();
+        EnumFacing aimed = WeakSpot.faceAt(box, target.hitVec);
+        Vec3d eye = mc.player.getPositionEyes(1.0F);
+        if (spot == null || spot.kind != HitKind.MELEE || spot.entity != entity
+                || !WeakSpot.isFacing(box, spot.face, eye)) {
+            spot = WeakSpot.spawnOnEntity(HitKind.MELEE, entity, aimed, target.hitVec, settings, RANDOM);
+        }
+        if (spot == null) {
+            return;
+        }
+        spot.follow(box);
+        spot.lastActiveTick = clientTick;
+    }
+
+    /** 近接の弱点を、ヒットにできる状態か（攻撃のゲージが溜まっている）。溜まっていない間は、弱点を薄く描く。 */
+    static boolean isMeleeCharged() {
+        Minecraft mc = Minecraft.getMinecraft();
+        return mc.player != null && MeleeTargets.isCharged(mc.player, 0.5F);
+    }
+
+    /**
+     * 照準が近接の弱点に重なった左クリックを、ヒットにする。バニラの攻撃は止めない（MouseEvent は、攻撃のキーの処理より
+     * 先に来るので、ヒット通知が攻撃のパケットより先にサーバーへ届き、サーバーがその攻撃をクリティカルにする）。
+     * 攻撃のゲージが溜まっていないときは、普通の攻撃のまま（ヒットにも数えない）。
+     */
+    @SubscribeEvent
+    public static void onMouse(MouseEvent event) {
+        if (event.getButton() != 0 || !event.isButtonstate()) {
+            return;
+        }
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.currentScreen != null || mc.player == null || spot == null || spot.kind != HitKind.MELEE
+                || !WeakSpotConfig.weakSpotsEnabled || clientTick - spot.lastActiveTick > 1
+                || mc.player.isHandActive()) {
+            return;
+        }
+        RayTraceResult target = mc.objectMouseOver;
+        if (target == null || target.typeOfHit != RayTraceResult.Type.ENTITY || target.entityHit != spot.entity
+                || !isMeleeCharged()) {
+            return;
+        }
+        // 当たり判定は、照準の点と同じ tick の箱で行う（描く時点の箱に合わせたままだと、少しずれる）
+        AxisAlignedBB box = spot.entity.getEntityBoundingBox();
+        spot.follow(box);
+        if (WeakSpot.faceAt(box, target.hitVec) == spot.face && spot.isHitBy(target.hitVec)
+                && canHit(HitKind.MELEE, ClientSettings.get().meleeMinHitIntervalTicks)) {
             onHit(mc);
         }
     }
@@ -344,7 +414,7 @@ public final class ClientWeakSpotHandler {
         }
     }
 
-    /** 前のヒットから minInterval tick あいているか（釣りの弱点からも使う）。 */
+    /** 前のヒットから minInterval tick あいているか（釣り・弓の弱点からも使う）。 */
     static boolean canHitNow(HitKind kind, int minInterval) {
         return canHit(kind, minInterval);
     }
@@ -369,9 +439,11 @@ public final class ClientWeakSpotHandler {
             boostPos = spot.pos;
         }
         if (kind == HitKind.ANIMAL) {
-            WeakSpotMod.network.sendToServer(HitMessage.animal(spot.entity.getEntityId(), hitStreak));
+            WeakSpotMod.network.sendToServer(HitMessage.entity(kind, spot.entity.getEntityId(), hitStreak));
             // ヒットで進んだ分を、すぐに見に行く
             AnimalStates.query(spot.entity.getEntityId(), clientTick, true);
+        } else if (kind == HitKind.MELEE) {
+            WeakSpotMod.network.sendToServer(HitMessage.entity(kind, spot.entity.getEntityId(), hitStreak));
         } else {
             WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
         }
@@ -404,6 +476,7 @@ public final class ClientWeakSpotHandler {
         boostHitTick = Long.MIN_VALUE / 2;
         AnimalStates.clear();
         FishingSpot.clear();
+        BowSpot.clear();
         lastPlayer = null;
         resetStreak();
         WeakSpotRenderer.clearFlashes();

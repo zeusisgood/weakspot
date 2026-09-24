@@ -8,16 +8,10 @@ import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.FishingQueryMessage;
 import com.example.weakspot.network.HitMessage;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraftforge.client.event.MouseEvent;
@@ -28,7 +22,6 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import org.lwjgl.opengl.GL11;
 
 /**
  * 釣りの弱点（自分だけ。他のプレイヤーには見せない）。浮きが水に入って魚を待っている間、浮きのまわり（半径1ブロック）の
@@ -37,7 +30,7 @@ import org.lwjgl.opengl.GL11;
  * 弱点はワールドの1点（浮きからの水平の差 dx, dz。浮きが揺れても追従する）で、描くときに画面上の位置へ変換して、
  * 画面上で一定の大きさ（半径 12 GUI ピクセル）の円として描く（浮きが遠くても近くても同じ大きさ）。
  * 当たり判定は、視線と「目から弱点への向き」の角度の差が、画面上の円の半径・視野角・画面の高さから求めた角度より小さいこと。
- * 変換に使う行列は、RenderWorldLastEvent の時点の OpenGL の行列（視野角は射影行列から求める）。
+ * 変換に使う行列は、RenderWorldLastEvent の時点の OpenGL の行列（視野角は射影行列から求める。ScreenProjection）。
  * 待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、サーバーに状態を問い合わせる（FishingQueryMessage）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -55,7 +48,6 @@ final class FishingSpot {
     private static final int BAR_HEIGHT = 4;
     /** 浮きの画面上の位置から、バーの中心までの下向きの距離（GUI ピクセル）。 */
     private static final int BAR_OFFSET = 14;
-    private static final int SEGMENTS = 32;
 
     private static final float[] DISK = {1.0F, 0.35F, 0.15F};
     private static final float[] RING = {1.0F, 0.9F, 0.4F};
@@ -76,20 +68,10 @@ final class FishingSpot {
     private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
 
     // 最後に描いたフレームの行列など（HUD の描画と、左クリックの判定で使う）
-    private static final FloatBuffer MODELVIEW = GLAllocation.createDirectFloatBuffer(16);
-    private static final FloatBuffer PROJECTION = GLAllocation.createDirectFloatBuffer(16);
-    private static final IntBuffer VIEWPORT = GLAllocation.createDirectIntBuffer(16);
-    private static final float[] MV = new float[16];
-    private static final float[] PROJ = new float[16];
-    private static final int[] VP = new int[4];
-    private static double camX;
-    private static double camY;
-    private static double camZ;
+    private static final ScreenProjection SCREEN = new ScreenProjection();
     private static double hookX;
     private static double hookY;
     private static double hookZ;
-    /** このフレームの行列などが、今の弱点のもので、使えるか。 */
-    private static boolean frameValid;
     /** このフレーム、照準が弱点に重なっているか。 */
     private static boolean aimed;
 
@@ -108,7 +90,7 @@ final class FishingSpot {
         waiting = false;
         hasSpot = false;
         spotHook = null;
-        frameValid = false;
+        SCREEN.invalidate();
         aimed = false;
         lastQueryTick = Long.MIN_VALUE / 2;
     }
@@ -184,76 +166,26 @@ final class FishingSpot {
         return new double[] {hookX + pdx, hookY + LIFT, hookZ + pdz};
     }
 
-    /**
-     * ワールドの点を画面上の位置に変換する。返すのは {画面の左端からのピクセル, 上端からのピクセル, 視線との角度（ラジアン）}
-     * （ピクセルは実際のウィンドウのピクセル）。カメラの後ろ、画面の外なら null。
-     */
-    private static double[] project(double wx, double wy, double wz) {
-        double x = wx - camX;
-        double y = wy - camY;
-        double z = wz - camZ;
-        double ex = MV[0] * x + MV[4] * y + MV[8] * z + MV[12];
-        double ey = MV[1] * x + MV[5] * y + MV[9] * z + MV[13];
-        double ez = MV[2] * x + MV[6] * y + MV[10] * z + MV[14];
-        if (ez >= -0.05) {
-            return null;
-        }
-        double cx = PROJ[0] * ex + PROJ[4] * ey + PROJ[8] * ez + PROJ[12];
-        double cy = PROJ[1] * ex + PROJ[5] * ey + PROJ[9] * ez + PROJ[13];
-        double cw = PROJ[3] * ex + PROJ[7] * ey + PROJ[11] * ez + PROJ[15];
-        if (cw <= 0) {
-            return null;
-        }
-        double px = (cx / cw + 1) / 2 * VP[2];
-        double py = VP[3] - (cy / cw + 1) / 2 * VP[3];
-        if (px < 0 || px > VP[2] || py < 0 || py > VP[3]) {
-            return null;
-        }
-        double angle = Math.acos(Math.max(-1, Math.min(1, -ez / Math.sqrt(ex * ex + ey * ey + ez * ez))));
-        return new double[] {px, py, angle};
-    }
-
-    /** 縦の視野角（度）。射影行列の [1][1] が 1 / tan(fov / 2)。 */
-    private static double fovDegrees() {
-        return Math.toDegrees(2 * Math.atan(1.0 / PROJ[5]));
-    }
-
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
-        frameValid = false;
+        SCREEN.invalidate();
         aimed = false;
         if (!shown(mc) || mc.getRenderViewEntity() == null || mc.gameSettings.hideGUI || spotHook == null) {
             return;
         }
         float pt = event.getPartialTicks();
-        net.minecraft.entity.Entity camera = mc.getRenderViewEntity();
-        camX = camera.lastTickPosX + (camera.posX - camera.lastTickPosX) * pt;
-        camY = camera.lastTickPosY + (camera.posY - camera.lastTickPosY) * pt;
-        camZ = camera.lastTickPosZ + (camera.posZ - camera.lastTickPosZ) * pt;
         hookX = spotHook.lastTickPosX + (spotHook.posX - spotHook.lastTickPosX) * pt;
         hookY = spotHook.lastTickPosY + (spotHook.posY - spotHook.lastTickPosY) * pt;
         hookZ = spotHook.lastTickPosZ + (spotHook.posZ - spotHook.lastTickPosZ) * pt;
-
-        MODELVIEW.clear();
-        PROJECTION.clear();
-        VIEWPORT.clear();
-        GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODELVIEW);
-        GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, PROJECTION);
-        GL11.glGetInteger(GL11.GL_VIEWPORT, VIEWPORT);
-        MODELVIEW.get(MV).rewind();
-        PROJECTION.get(PROJ).rewind();
-        for (int i = 0; i < 4; i++) {
-            VP[i] = VIEWPORT.get(i);
-        }
-        frameValid = VP[3] > 0 && PROJ[5] != 0;
-        if (!frameValid) {
+        if (!SCREEN.capture(mc, pt)) {
             return;
         }
-        double[] p = project(hookX + dx, hookY + LIFT, hookZ + dz);
+        double[] p = SCREEN.project(hookX + dx, hookY + LIFT, hookZ + dz);
         if (p != null && mc.currentScreen == null) {
             double scale = new ScaledResolution(mc).getScaleFactor();
-            double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, fovDegrees(), VP[3]);
+            double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, SCREEN.fovDegrees(),
+                    SCREEN.viewportHeight());
             aimed = FishingMath.isAimed(p[2], allowed);
         }
     }
@@ -280,7 +212,7 @@ final class FishingSpot {
 
     private static void onHit() {
         int streak = ClientWeakSpotHandler.registerHit(HitKind.FISHING);
-        WeakSpotMod.network.sendToServer(HitMessage.fishing(streak));
+        WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.FISHING, streak));
         double[] next = FishingMath.nextSpot(dx, dz, RANDOM);
         dx = next[0];
         dz = next[1];
@@ -296,7 +228,7 @@ final class FishingSpot {
 
     @SubscribeEvent
     public static void onOverlayPost(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || !frameValid) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || !SCREEN.isValid()) {
             return;
         }
         Minecraft mc = Minecraft.getMinecraft();
@@ -319,11 +251,11 @@ final class FishingSpot {
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
         if (trail) {
             for (MarkerMotion.Afterimage image : MOTION.afterimages(nowMs)) {
-                double[] p = project(hookX + image.u, hookY + LIFT, hookZ + image.v);
+                double[] p = SCREEN.project(hookX + image.u, hookY + LIFT, hookZ + image.v);
                 if (p != null) {
                     float a = (float) image.alpha(nowMs);
-                    fill(p[0] / scale, p[1] / scale, radius, DISK, 0.35F * a);
-                    outline(p[0] / scale, p[1] / scale, radius, RING, 0.5F * a);
+                    ScreenProjection.fill(p[0] / scale, p[1] / scale, radius, DISK, 0.35F * a);
+                    ScreenProjection.outline(p[0] / scale, p[1] / scale, radius, RING, 0.5F * a);
                 }
             }
         }
@@ -334,28 +266,29 @@ final class FishingSpot {
             u = m[0];
             v = m[1];
         }
-        double[] p = project(hookX + u, hookY + LIFT, hookZ + v);
+        double[] p = SCREEN.project(hookX + u, hookY + LIFT, hookZ + v);
         if (p != null) {
             double gx = p[0] / scale;
             double gy = p[1] / scale;
-            fill(gx, gy, radius, DISK, 0.45F);
-            outline(gx, gy, radius, RING, 0.9F);
-            fill(gx, gy, radius * 0.3, new float[] {1.0F, 0.95F, 0.7F}, 0.9F);
+            ScreenProjection.fill(gx, gy, radius, DISK, 0.45F);
+            ScreenProjection.outline(gx, gy, radius, RING, 0.9F);
+            ScreenProjection.fill(gx, gy, radius * 0.3, new float[] {1.0F, 0.95F, 0.7F}, 0.9F);
             double head = trail ? MOTION.headHighlight(nowMs) : 0;
             if (head > 0) {
-                fill(gx, gy, radius, new float[] {1, 1, 1}, (float) (0.5 * head));
+                ScreenProjection.fill(gx, gy, radius, new float[] {1, 1, 1}, (float) (0.5 * head));
             }
         }
         // 浮きの下の、魚が寄ってくるまでの進み具合のバー
-        double[] hook = project(hookX, hookY, hookZ);
+        double[] hook = SCREEN.project(hookX, hookY, hookZ);
         if (hook != null) {
             double bx = hook[0] / scale;
             double by = hook[1] / scale + BAR_OFFSET;
-            rect(bx - BAR_WIDTH / 2.0, by - BAR_HEIGHT / 2.0, bx + BAR_WIDTH / 2.0, by + BAR_HEIGHT / 2.0, BACK);
+            ScreenProjection.rect(bx - BAR_WIDTH / 2.0, by - BAR_HEIGHT / 2.0, bx + BAR_WIDTH / 2.0,
+                    by + BAR_HEIGHT / 2.0, BACK);
             double f = Math.max(0, Math.min(1, progress));
             if (f > 0) {
-                rect(bx - BAR_WIDTH / 2.0, by - BAR_HEIGHT / 2.0, bx - BAR_WIDTH / 2.0 + BAR_WIDTH * f,
-                        by + BAR_HEIGHT / 2.0, FILL);
+                ScreenProjection.rect(bx - BAR_WIDTH / 2.0, by - BAR_HEIGHT / 2.0,
+                        bx - BAR_WIDTH / 2.0 + BAR_WIDTH * f, by + BAR_HEIGHT / 2.0, FILL);
             }
         }
 
@@ -365,41 +298,5 @@ final class FishingSpot {
         GlStateManager.enableTexture2D();
         GlStateManager.color(1, 1, 1, 1);
         GlStateManager.popMatrix();
-    }
-
-    private static void fill(double x, double y, double radius, float[] rgb, float a) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(x, y, 0).color(rgb[0], rgb[1], rgb[2], a).endVertex();
-        for (int i = 0; i <= SEGMENTS; i++) {
-            double angle = 2 * Math.PI * i / SEGMENTS;
-            buffer.pos(x + radius * Math.cos(angle), y + radius * Math.sin(angle), 0)
-                    .color(rgb[0], rgb[1], rgb[2], a).endVertex();
-        }
-        tessellator.draw();
-    }
-
-    private static void outline(double x, double y, double radius, float[] rgb, float a) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
-        for (int i = 0; i < SEGMENTS; i++) {
-            double angle = 2 * Math.PI * i / SEGMENTS;
-            buffer.pos(x + radius * Math.cos(angle), y + radius * Math.sin(angle), 0)
-                    .color(rgb[0], rgb[1], rgb[2], a).endVertex();
-        }
-        tessellator.draw();
-    }
-
-    private static void rect(double x0, double y0, double x1, double y1, float[] rgba) {
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(x0, y1, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
-        buffer.pos(x1, y1, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
-        buffer.pos(x1, y0, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
-        buffer.pos(x0, y0, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
-        tessellator.draw();
     }
 }

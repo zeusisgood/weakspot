@@ -52,6 +52,11 @@ public final class SyncedSettings {
     public boolean fishingWeakSpotEnabled;
     public int fishingHits;
     public int fishingMinHitIntervalTicks;
+    public boolean bowWeakSpotEnabled;
+    public int bowHitTicks;
+    public int bowMinHitIntervalTicks;
+    public boolean meleeWeakSpotEnabled;
+    public int meleeMinHitIntervalTicks;
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -93,6 +98,11 @@ public final class SyncedSettings {
         s.fishingWeakSpotEnabled = WeakSpotConfig.fishingWeakSpotEnabled;
         s.fishingHits = WeakSpotConfig.fishingHits;
         s.fishingMinHitIntervalTicks = WeakSpotConfig.fishingMinHitIntervalTicks;
+        s.bowWeakSpotEnabled = WeakSpotConfig.bowWeakSpotEnabled;
+        s.bowHitTicks = WeakSpotConfig.bowHitTicks;
+        s.bowMinHitIntervalTicks = WeakSpotConfig.bowMinHitIntervalTicks;
+        s.meleeWeakSpotEnabled = WeakSpotConfig.meleeWeakSpotEnabled;
+        s.meleeMinHitIntervalTicks = WeakSpotConfig.meleeMinHitIntervalTicks;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -131,6 +141,11 @@ public final class SyncedSettings {
         buf.writeBoolean(fishingWeakSpotEnabled);
         buf.writeInt(fishingHits);
         buf.writeInt(fishingMinHitIntervalTicks);
+        buf.writeBoolean(bowWeakSpotEnabled);
+        buf.writeInt(bowHitTicks);
+        buf.writeInt(bowMinHitIntervalTicks);
+        buf.writeBoolean(meleeWeakSpotEnabled);
+        buf.writeInt(meleeMinHitIntervalTicks);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -169,6 +184,11 @@ public final class SyncedSettings {
         s.fishingWeakSpotEnabled = buf.readBoolean();
         s.fishingHits = buf.readInt();
         s.fishingMinHitIntervalTicks = buf.readInt();
+        s.bowWeakSpotEnabled = buf.readBoolean();
+        s.bowHitTicks = buf.readInt();
+        s.bowMinHitIntervalTicks = buf.readInt();
+        s.meleeWeakSpotEnabled = buf.readBoolean();
+        s.meleeMinHitIntervalTicks = buf.readInt();
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;

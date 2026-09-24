@@ -16,7 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
- * 1つのブロック面、または動物の当たり判定の箱の面に出ている弱点。
+ * 1つのブロック面、または動物・敵の当たり判定の箱の面に出ている弱点。
  * ブロックの弱点の座標はワールド座標系の (u, v)。動物の弱点の (u, v) は、その面の左下の角からの位置で、
  * 動物が動いても一緒に動く（面の位置は follow で更新し、origin を足してワールド座標にする）。
  * u, v は当たり判定の位置（ヒットの瞬間に移動先へ変わる）。マーカーの表示位置は motion で別に持つ（見た目だけ）。
@@ -27,7 +27,7 @@ final class WeakSpot {
     final BlockPos pos;
     final EnumFacing face;
     final int axis;
-    /** 動物の弱点のときの動物（ブロックの弱点は null）。 */
+    /** 動物・近接の弱点のときの動物・敵（ブロックの弱点は null）。 */
     final Entity entity;
     /** 面の平面の、法線軸方向のワールド座標。動物が動くと変わる。 */
     double plane;
@@ -115,11 +115,12 @@ final class WeakSpot {
     }
 
     /**
-     * 動物の当たり判定の箱の、面 face に弱点を出す。面が小さすぎるときは null。
+     * 動物・敵の当たり判定の箱の、面 face に弱点を出す（kind は ANIMAL か MELEE）。面が小さすぎるときは null。
      * 小さい動物（子どものニワトリなど）は、ブロックの小さい面と同じ配置のルールに従う。
      */
-    static WeakSpot spawnOnEntity(Entity entity, EnumFacing face, Vec3d aim, SyncedSettings settings, Random random) {
-        WeakSpot spot = createOnEntity(entity, face, settings);
+    static WeakSpot spawnOnEntity(HitKind kind, Entity entity, EnumFacing face, Vec3d aim, SyncedSettings settings,
+                                  Random random) {
+        WeakSpot spot = createOnEntity(kind, entity, face, settings);
         if (spot == null) {
             return null;
         }
@@ -132,14 +133,14 @@ final class WeakSpot {
 
     /** 他のプレイヤーから届いた、動物の面の中の位置 (u, v) に弱点を置く（描画用）。 */
     static WeakSpot atEntity(Entity entity, EnumFacing face, double u, double v, SyncedSettings settings) {
-        WeakSpot spot = createOnEntity(entity, face, settings);
+        WeakSpot spot = createOnEntity(HitKind.ANIMAL, entity, face, settings);
         if (spot != null) {
             spot.moveTo(u, v, false, 0);
         }
         return spot;
     }
 
-    private static WeakSpot createOnEntity(Entity entity, EnumFacing face, SyncedSettings settings) {
+    private static WeakSpot createOnEntity(HitKind kind, Entity entity, EnumFacing face, SyncedSettings settings) {
         AxisAlignedBB box = entity.getEntityBoundingBox();
         int axis = face.getAxis().ordinal();
         FaceRect world = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
@@ -150,7 +151,7 @@ final class WeakSpot {
         WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio,
                 settings.weakSpotMinRadius, settings.weakSpotMaxRadiusRatio, settings.edgeMargin,
                 settings.minMoveDistance);
-        WeakSpot spot = new WeakSpot(HitKind.ANIMAL, entity, entity.getPosition(), face, 0, rect, layout, box);
+        WeakSpot spot = new WeakSpot(kind, entity, entity.getPosition(), face, 0, rect, layout, box);
         spot.follow(box);
         return spot;
     }

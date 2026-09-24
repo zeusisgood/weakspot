@@ -1,0 +1,54 @@
+package com.example.weakspot.server;
+
+import com.example.weakspot.BowDraw;
+import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.BowMath;
+import com.example.weakspot.config.WeakSpotConfig;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+
+/**
+ * 弓の弱点のヒット通知の検証と効果（論理サーバー）。弓を引いている最中で、まだ引き切っていないときだけ受け付け、
+ * 弓の引きを bowHitTicks 進める（BowDraw）。照準の角度は確かめない（クライアントを信用する。釣りと同じ程度の確認）。
+ */
+@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
+public final class BowHits {
+
+    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
+    private static final int INTERVAL_JITTER_TICKS = 2;
+
+    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
+
+    private BowHits() {
+    }
+
+    public static void onHit(EntityPlayerMP player) {
+        if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()
+                || !WeakSpotConfig.bowWeakSpotEnabled || WeakSpotConfig.bowHitTicks <= 0) {
+            return;
+        }
+        if (!BowDraw.isDrawing(player) || BowMath.isFull(BowDraw.usedTicks(player))) {
+            return;
+        }
+        long now = player.world.getTotalWorldTime();
+        Long last = LAST_HIT.get(player.getUniqueID());
+        int minInterval = Math.max(0, WeakSpotConfig.bowMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
+        if (last != null && now - last < minInterval) {
+            return;
+        }
+        LAST_HIT.put(player.getUniqueID(), now);
+        BowDraw.add(player, WeakSpotConfig.bowHitTicks);
+        ServerStats.record(player, stats -> stats.recordBowHit());
+        ServerStats.countStreak(player);
+    }
+
+    @SubscribeEvent
+    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        LAST_HIT.remove(event.player.getUniqueID());
+    }
+}

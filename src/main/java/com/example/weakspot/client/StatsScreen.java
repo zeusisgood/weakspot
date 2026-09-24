@@ -32,7 +32,8 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_OTHERS_VOLUME = 31;
     private static final int BUTTON_OTHERS_PREVIEW = 32;
 
-    private static final int ROW_HEIGHT = 12;
+    /** 13 行（見出し + 統計 13 項目）が、一番小さい画面でも下のボタンに重ならない高さ。 */
+    private static final int ROW_HEIGHT = 11;
     /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
 
@@ -239,6 +240,8 @@ final class StatsScreen extends GuiScreen {
         y = row("weakspot.stats.machineHits", s -> Long.toString(s.machineHits), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.animalHits", s -> Long.toString(s.animalHits), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.fishingHits", s -> Long.toString(s.fishingHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.bowHits", s -> Long.toString(s.bowHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.critHits", s -> Long.toString(s.critHits), labelX, sessionRight, totalRight, y);
         row("weakspot.stats.maxStreak", s -> Long.toString(s.maxStreak), labelX, sessionRight, totalRight, y);
     }
 

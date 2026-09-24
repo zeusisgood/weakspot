@@ -216,6 +216,26 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int fishingMinHitIntervalTicks = 6;
 
+    @Config.Comment("[サーバー] 弓の弱点のオン・オフ")
+    public static boolean bowWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] 弓の弱点に1回当てるごとに進める、弓の引きの tick 数（バニラの弓は 20 tick で引き切る）",
+            "引き切りは超えない。0 で、弓の弱点を無効にする"})
+    @Config.RangeInt(min = 0, max = 20)
+    public static int bowHitTicks = 5;
+
+    @Config.Comment("[サーバー] 弓のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int bowMinHitIntervalTicks = 4;
+
+    @Config.Comment({"[サーバー] 近接の弱点のオン・オフ",
+            "敵に出た弱点を、攻撃のゲージが溜まった状態で殴ると、クリティカルヒット（ジャンプ攻撃と同じ 1.5 倍）になる"})
+    public static boolean meleeWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] 近接のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int meleeMinHitIntervalTicks = 4;
+
     @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
             "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
     @Config.RangeDouble(min = 0.0, max = 256.0)
@@ -290,9 +310,13 @@ public final class WeakSpotConfig {
             "オフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える"})
     public static boolean weakSpotsEnabled = true;
 
-    @Config.Comment({"[クライアント] 自分の動物の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか",
-            "ニワトリなど、体が当たり判定より大きい動物で見やすくなる。他のプレイヤーのマークは透かさない"})
+    @Config.Comment({"[クライアント] 自分の動物・敵の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか",
+            "ニワトリやゾンビの腕など、体が当たり判定より大きいときに見やすくなる。他のプレイヤーのマークは透かさない"})
     public static boolean animalSpotSeeThrough = true;
+
+    @Config.Comment({"[クライアント] 弓を引いている間、照準の下に引き具合のゲージを表示するか",
+            "弓の弱点や、弱点の一時オフ（J キー）に関係なく出る"})
+    public static boolean bowDrawBarEnabled = true;
 
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
     public static int configVersion = 0;

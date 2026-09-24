@@ -42,6 +42,20 @@ public final class MiningStats {
         fishingHits++;
     }
 
+    /** 弓の弱点に当てた回数。 */
+    public long bowHits;
+
+    public void recordBowHit() {
+        bowHits++;
+    }
+
+    /** 近接の弱点でクリティカルヒットにした回数（サーバーが実際にクリティカルにしたもの）。 */
+    public long critHits;
+
+    public void recordCritHit() {
+        critHits++;
+    }
+
     public void recordHit(double extraTicks) {
         hits++;
         savedTicks += Math.max(0, extraTicks);
@@ -83,5 +97,7 @@ public final class MiningStats {
         maxStreak = 0;
         animalHits = 0;
         fishingHits = 0;
+        bowHits = 0;
+        critHits = 0;
     }
 }

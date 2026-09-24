@@ -2,7 +2,9 @@ package com.example.weakspot.network;
 
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.server.AnimalHits;
+import com.example.weakspot.server.BowHits;
 import com.example.weakspot.server.FishingHits;
+import com.example.weakspot.server.MeleeHits;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerBoostTracker;
 import io.netty.buffer.ByteBuf;
@@ -13,7 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * クライアント → サーバー: 「このブロックの弱点にヒットした」という通知。kind はヒットの種類（採掘 / 成長 / 機械）。
+ * クライアント → サーバー: 「弱点にヒットした」という通知。kind はヒットの種類（HitKind）。
  * streak は連続ヒット数で、周りのプレイヤーのヒット音の音階を合わせるためだけに使う（採掘だけ）。
  */
 public class HitMessage implements IMessage {
@@ -21,7 +23,7 @@ public class HitMessage implements IMessage {
     private HitKind kind;
     private BlockPos pos;
     private int streak;
-    /** 動物のヒットのときの動物のエンティティ ID。それ以外は -1。 */
+    /** 動物・近接のヒットのときの、動物・敵のエンティティ ID。それ以外は -1。 */
     private int entityId = -1;
 
     public HitMessage() {
@@ -33,16 +35,16 @@ public class HitMessage implements IMessage {
         this.streak = streak;
     }
 
-    /** 動物のヒット。位置は使わない。 */
-    public static HitMessage animal(int entityId, int streak) {
-        HitMessage message = new HitMessage(HitKind.ANIMAL, BlockPos.ORIGIN, streak);
+    /** 動物・敵（近接）のヒット。位置は使わない。 */
+    public static HitMessage entity(HitKind kind, int entityId, int streak) {
+        HitMessage message = new HitMessage(kind, BlockPos.ORIGIN, streak);
         message.entityId = entityId;
         return message;
     }
 
-    /** 釣りのヒット。位置も動物も使わない。 */
-    public static HitMessage fishing(int streak) {
-        return new HitMessage(HitKind.FISHING, BlockPos.ORIGIN, streak);
+    /** 釣り・弓のヒット。位置も動物も使わない。 */
+    public static HitMessage withoutTarget(HitKind kind, int streak) {
+        return new HitMessage(kind, BlockPos.ORIGIN, streak);
     }
 
     @Override
@@ -80,6 +82,10 @@ public class HitMessage implements IMessage {
                     AnimalHits.onHit(player, entityId);
                 } else if (kind == HitKind.FISHING) {
                     FishingHits.onHit(player);
+                } else if (kind == HitKind.BOW) {
+                    BowHits.onHit(player);
+                } else if (kind == HitKind.MELEE) {
+                    MeleeHits.onHit(player, entityId);
                 } else {
                     RightClickHits.onHit(player, kind, pos);
                 }

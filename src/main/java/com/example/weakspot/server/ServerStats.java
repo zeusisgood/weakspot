@@ -56,7 +56,7 @@ public final class ServerStats {
     }
 
     /**
-     * 受け付けたヒット（採掘・成長・機械・動物・釣りのすべて）を、連続ヒットに数えて、最大を更新する。
+     * 受け付けたヒット（採掘・成長・機械・動物・釣り・弓・近接のすべて）を、連続ヒットに数えて、最大を更新する。
      * 種類とブロックをまたいで続き、40 tick ヒットがないと途切れる（HitStreak）。
      */
     public static void countStreak(EntityPlayerMP player) {
@@ -116,6 +116,8 @@ public final class ServerStats {
         stats.maxStreak = tag.getLong("maxStreak");
         stats.animalHits = tag.getLong("animalHits");
         stats.fishingHits = tag.getLong("fishingHits");
+        stats.bowHits = tag.getLong("bowHits");
+        stats.critHits = tag.getLong("critHits");
         return stats;
     }
 
@@ -131,6 +133,8 @@ public final class ServerStats {
         tag.setLong("maxStreak", stats.maxStreak);
         tag.setLong("animalHits", stats.animalHits);
         tag.setLong("fishingHits", stats.fishingHits);
+        tag.setLong("bowHits", stats.bowHits);
+        tag.setLong("critHits", stats.critHits);
         return tag;
     }
 }

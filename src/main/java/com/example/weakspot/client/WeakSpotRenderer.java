@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.common.BlockHealthBar;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.MarkerColor;
 import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.common.MarkerShape;
@@ -37,6 +38,8 @@ final class WeakSpotRenderer {
     private static final double HEAD_WHITE = 0.5;
     /** 動物の弱点の、体に隠れた部分を透かして描くときの濃さ（通常の濃さに掛ける）。 */
     private static final float SEE_THROUGH_ALPHA = 0.35F;
+    /** 近接の弱点の、攻撃のゲージが溜まっていない間の濃さ（掛ける値）。 */
+    private static final float UNCHARGED_ALPHA = 0.35F;
 
     /** 耐久バーの、残りの耐久（緑 #3DDC84）と、バーの全体の背景（黒 #1E1E1E、半透明）。 */
     private static final float[] HEALTH_FILL = {0x3D / 255F, 0xDC / 255F, 0x84 / 255F, 1.0F};
@@ -129,6 +132,9 @@ final class WeakSpotRenderer {
         }
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks);
+            if (spot.kind == HitKind.MELEE && !ClientWeakSpotHandler.isMeleeCharged()) {
+                alpha *= UNCHARGED_ALPHA;
+            }
             if (alpha > 0) {
                 drawMarker(spot, MarkerShape.CIRCLE, OWN_DISK, OWN_RING, OWN_CENTER, alpha, nowMs, cx, cy, cz);
                 if (seeThrough(spot)) {
@@ -202,7 +208,7 @@ final class WeakSpotRenderer {
     private static final float[] WHITE = {1.0F, 1.0F, 1.0F};
 
     /**
-     * 自分の動物の弱点は、体の模型が当たり判定の箱より外に出ていると（ニワトリなど）体に隠れるので、
+     * 自分の動物・敵の弱点は、体の模型が当たり判定の箱より外に出ていると（ニワトリ、ゾンビの腕など）体に隠れるので、
      * 深度テストを切って薄くもう一度描く。他のプレイヤーのマークは、壁越しに見えてしまうので透かさない。
      */
     private static boolean seeThrough(WeakSpot spot) {

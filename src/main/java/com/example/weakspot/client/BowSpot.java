@@ -1,0 +1,258 @@
+package com.example.weakspot.client;
+
+import com.example.weakspot.BowDraw;
+import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.BowMath;
+import com.example.weakspot.common.FishingMath;
+import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.MarkerMotion;
+import com.example.weakspot.config.SyncedSettings;
+import com.example.weakspot.config.WeakSpotConfig;
+import com.example.weakspot.network.HitMessage;
+import java.util.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.gui.ScaledResolution;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
+
+/**
+ * 弓の弱点（自分だけ。他のプレイヤーには見せない）と、引きゲージ。弓を引いている間、照準の近く（視線から 3〜8 度）に
+ * 弱点を出し、照準を合わせるだけでヒットにする（クリックは要らない）。ヒットすると、弓の引きが進む（BowDraw）。
+ *
+ * 弱点は向き（yaw / pitch）で持ち、目からその向きの先の点を、釣りと同じく画面上の位置に変換して、画面上で一定の大きさ
+ * （半径 12 GUI ピクセル）の円として描く（ScreenProjection）。当たり判定も釣りと同じ（FishingMath.allowedAngle）。
+ * 引きゲージは、弓の弱点や一時オフに関係なく、bowDrawBarEnabled なら照準の下に出す。
+ */
+@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
+final class BowSpot {
+
+    private static final Random RANDOM = new Random();
+    /** 弱点の点を置く、目からの距離（ブロック）。向きだけが意味を持つ。 */
+    private static final double SPOT_DISTANCE = 16.0;
+
+    private static final int BAR_WIDTH = 40;
+    private static final int BAR_HEIGHT = 3;
+    /** 照準の中心から、ゲージの中心までの下向きの距離（GUI ピクセル）。 */
+    private static final int BAR_OFFSET = 12;
+
+    private static final float[] DISK = {1.0F, 0.35F, 0.15F};
+    private static final float[] RING = {1.0F, 0.9F, 0.4F};
+    private static final float[] CENTER = {1.0F, 0.95F, 0.7F};
+    private static final float[] WHITE = {1.0F, 1.0F, 1.0F};
+    /** 引いている途中 #FF8C42、引き切った #FFD23F、背景 #1E1E1E 半透明。 */
+    private static final float[] BAR_DRAWING = {0xFF / 255F, 0x8C / 255F, 0x42 / 255F, 1.0F};
+    private static final float[] BAR_FULL = {0xFF / 255F, 0xD2 / 255F, 0x3F / 255F, 1.0F};
+    private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
+
+    private static final ScreenProjection SCREEN = new ScreenProjection();
+
+    // 弱点の向き（当たり判定の位置）と、表示の位置 motion（u = yaw, v = pitch）
+    private static boolean hasSpot;
+    private static double yaw;
+    private static double pitch;
+    private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
+    /** このフレームの、目の位置。 */
+    private static double eyeX;
+    private static double eyeY;
+    private static double eyeZ;
+
+    private BowSpot() {
+    }
+
+    /** 弱点の一時オフ、ワールドを出たとき。 */
+    static void clear() {
+        hasSpot = false;
+        SCREEN.invalidate();
+    }
+
+    /** 弱点を出せるか（弓を引いていて、設定がオンで、クリエイティブ・スペクテイターでない）。 */
+    private static boolean eligible(Minecraft mc) {
+        if (mc.player == null || mc.world == null || !WeakSpotConfig.weakSpotsEnabled
+                || mc.player.capabilities.isCreativeMode || mc.player.isSpectator()) {
+            return false;
+        }
+        SyncedSettings settings = ClientSettings.get();
+        return settings.bowWeakSpotEnabled && settings.bowHitTicks > 0 && BowDraw.isDrawing(mc.player);
+    }
+
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) {
+            return;
+        }
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.isGamePaused()) {
+            return;
+        }
+        if (!eligible(mc)) {
+            clear();
+            return;
+        }
+        EntityPlayerSP player = mc.player;
+        if (BowMath.isFull(BowDraw.usedTicks(player))) {
+            hasSpot = false;
+        } else if (!hasSpot) {
+            // 引き始めた。今の視線の近くに出す
+            double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, player.rotationYaw,
+                    player.rotationPitch, RANDOM);
+            yaw = next[0];
+            pitch = next[1];
+            MOTION.jumpTo(yaw, pitch);
+            hasSpot = true;
+        }
+    }
+
+    /** 向き (y, p) の弱点の点のワールド座標。 */
+    private static double[] worldPoint(double y, double p) {
+        double[] d = BowMath.vector(y, p);
+        return new double[] {eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE};
+    }
+
+    private static double[] project(double y, double p) {
+        double[] w = worldPoint(y, p);
+        return SCREEN.project(w[0], w[1], w[2]);
+    }
+
+    /** 当たり判定は毎フレーム行う（素早く照準を動かしたときに、tick 単位だと取りこぼすため）。 */
+    @SubscribeEvent
+    public static void onRenderWorldLast(RenderWorldLastEvent event) {
+        Minecraft mc = Minecraft.getMinecraft();
+        SCREEN.invalidate();
+        if (!hasSpot || !eligible(mc) || mc.gameSettings.hideGUI) {
+            return;
+        }
+        float pt = event.getPartialTicks();
+        EntityPlayerSP player = mc.player;
+        eyeX = player.lastTickPosX + (player.posX - player.lastTickPosX) * pt;
+        eyeY = player.lastTickPosY + (player.posY - player.lastTickPosY) * pt + player.getEyeHeight();
+        eyeZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * pt;
+        if (!SCREEN.capture(mc, pt) || mc.currentScreen != null) {
+            return;
+        }
+        double[] p = project(yaw, pitch);
+        if (p == null) {
+            return;
+        }
+        double scale = new ScaledResolution(mc).getScaleFactor();
+        double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, SCREEN.fovDegrees(),
+                SCREEN.viewportHeight());
+        if (FishingMath.isAimed(p[2], allowed)
+                && ClientWeakSpotHandler.canHitNow(HitKind.BOW, ClientSettings.get().bowMinHitIntervalTicks)) {
+            onHit(player);
+        }
+    }
+
+    private static void onHit(EntityPlayerSP player) {
+        int streak = ClientWeakSpotHandler.registerHit(HitKind.BOW);
+        WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.BOW, streak));
+        // サーバーの返事を待たずに、自分の側でも引きを進める（弓の見た目とゲージのため）
+        BowDraw.add(player, ClientSettings.get().bowHitTicks);
+        if (BowMath.isFull(BowDraw.usedTicks(player))) {
+            hasSpot = false;
+            return;
+        }
+        double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, yaw, pitch, RANDOM);
+        yaw = next[0];
+        pitch = next[1];
+        if (WeakSpotConfig.weakSpotTrailEnabled) {
+            MOTION.moveTo(yaw, pitch, Minecraft.getSystemTime());
+        } else {
+            MOTION.jumpTo(yaw, pitch);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onOverlayPost(RenderGameOverlayEvent.Post event) {
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
+            return;
+        }
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.player == null || mc.gameSettings.hideGUI) {
+            return;
+        }
+        boolean spot = hasSpot && SCREEN.isValid() && eligible(mc);
+        boolean bar = WeakSpotConfig.bowDrawBarEnabled && BowDraw.isDrawing(mc.player);
+        if (!spot && !bar) {
+            return;
+        }
+        GlStateManager.pushMatrix();
+        GlStateManager.disableTexture2D();
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(
+                GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        GlStateManager.disableDepth();
+        GlStateManager.glLineWidth(2.0F);
+
+        if (spot) {
+            drawSpot(mc);
+        }
+        if (bar) {
+            drawBar(mc, event.getPartialTicks());
+        }
+
+        GlStateManager.glLineWidth(1.0F);
+        GlStateManager.enableDepth();
+        GlStateManager.disableBlend();
+        GlStateManager.enableTexture2D();
+        GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.popMatrix();
+    }
+
+    private static void drawSpot(Minecraft mc) {
+        double scale = new ScaledResolution(mc).getScaleFactor();
+        long nowMs = Minecraft.getSystemTime();
+        double radius = FishingMath.SPOT_SCREEN_RADIUS;
+        boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        if (trail) {
+            for (MarkerMotion.Afterimage image : MOTION.afterimages(nowMs)) {
+                double[] p = project(image.u, image.v);
+                if (p != null) {
+                    float a = (float) image.alpha(nowMs);
+                    ScreenProjection.fill(p[0] / scale, p[1] / scale, radius, DISK, 0.35F * a);
+                    ScreenProjection.outline(p[0] / scale, p[1] / scale, radius, RING, 0.5F * a);
+                }
+            }
+        }
+        double u = yaw;
+        double v = pitch;
+        if (trail) {
+            double[] m = MOTION.position(nowMs);
+            u = m[0];
+            v = m[1];
+        }
+        double[] p = project(u, v);
+        if (p == null) {
+            return;
+        }
+        double gx = p[0] / scale;
+        double gy = p[1] / scale;
+        ScreenProjection.fill(gx, gy, radius, DISK, 0.45F);
+        ScreenProjection.outline(gx, gy, radius, RING, 0.9F);
+        ScreenProjection.fill(gx, gy, radius * 0.3, CENTER, 0.9F);
+        double head = trail ? MOTION.headHighlight(nowMs) : 0;
+        if (head > 0) {
+            ScreenProjection.fill(gx, gy, radius, WHITE, (float) (0.5 * head));
+        }
+    }
+
+    /** 照準の下の、引き具合のゲージ。左から伸び、引き切ったら色が変わる。 */
+    private static void drawBar(Minecraft mc, float partialTicks) {
+        ScaledResolution res = new ScaledResolution(mc);
+        int used = mc.player.getItemInUseMaxCount();
+        boolean full = BowMath.isFull(used);
+        double value = full ? 1.0 : BowMath.barValue(used + partialTicks);
+        double x0 = res.getScaledWidth() / 2.0 - BAR_WIDTH / 2.0;
+        double y0 = res.getScaledHeight() / 2.0 + BAR_OFFSET - BAR_HEIGHT / 2.0;
+        ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
+        if (value > 0) {
+            ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * value, y0 + BAR_HEIGHT, full ? BAR_FULL : BAR_DRAWING);
+        }
+    }
+}

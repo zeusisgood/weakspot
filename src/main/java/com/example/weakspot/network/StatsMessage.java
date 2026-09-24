@@ -45,6 +45,8 @@ public class StatsMessage implements IMessage {
         stats.maxStreak = buf.readLong();
         stats.animalHits = buf.readLong();
         stats.fishingHits = buf.readLong();
+        stats.bowHits = buf.readLong();
+        stats.critHits = buf.readLong();
         return stats;
     }
 
@@ -59,6 +61,8 @@ public class StatsMessage implements IMessage {
         buf.writeLong(stats.maxStreak);
         buf.writeLong(stats.animalHits);
         buf.writeLong(stats.fishingHits);
+        buf.writeLong(stats.bowHits);
+        buf.writeLong(stats.critHits);
     }
 
     public static class Handler implements IMessageHandler<StatsMessage, IMessage> {
