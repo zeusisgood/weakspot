@@ -85,10 +85,15 @@ public final class ClientWeakSpotHandler {
         if (world.isAirBlock(spot.pos)) {
             return true;
         }
-        if (spot.kind == HitKind.GROWTH) {
-            return !RightClickTargets.isGrowable(world, spot.pos, world.getBlockState(spot.pos), ClientSettings.get());
+        IBlockState state = world.getBlockState(spot.pos);
+        switch (spot.kind) {
+            case GROWTH:
+                return !RightClickTargets.isGrowable(world, spot.pos, state, ClientSettings.get());
+            case MACHINE:
+                return !RightClickTargets.isMachine(world, spot.pos, state, ClientSettings.get());
+            default:
+                return false;
         }
-        return false;
     }
 
     @SubscribeEvent
@@ -168,7 +173,7 @@ public final class ClientWeakSpotHandler {
     }
 
     private static int minHitInterval(HitKind kind, SyncedSettings settings) {
-        return settings.growthMinHitIntervalTicks;
+        return kind == HitKind.MACHINE ? settings.machineMinHitIntervalTicks : settings.growthMinHitIntervalTicks;
     }
 
     private static boolean canHit(HitKind kind, int minInterval) {

@@ -8,6 +8,7 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
@@ -17,6 +18,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
  * 右クリックの弱点（作物・苗木、機械）の対象の判定。クライアントとサーバーで同じ条件を使う。
+ * しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木（しゃがんでいても、機械でなければ作物・苗木）。
  * 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -31,6 +33,9 @@ public final class RightClickTargets {
             return null;
         }
         IBlockState state = world.getBlockState(pos);
+        if (player.isSneaking() && player.getHeldItemOffhand().isEmpty() && isMachine(world, pos, state, settings)) {
+            return HitKind.MACHINE;
+        }
         if (isGrowable(world, pos, state, settings)) {
             return HitKind.GROWTH;
         }
@@ -43,6 +48,12 @@ public final class RightClickTargets {
         return block instanceof IGrowable
                 && !settings.growthExcludedBlocks.contains(String.valueOf(block.getRegistryName()))
                 && ((IGrowable) block).canGrow(world, pos, state, world.isRemote);
+    }
+
+    /** ITickable のタイルエンティティを持ち、対象外リストにないもの。 */
+    public static boolean isMachine(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
+        return world.getTileEntity(pos) instanceof ITickable
+                && !settings.excludedBlocks.contains(String.valueOf(state.getBlock().getRegistryName()));
     }
 
     /** この側で今使う設定値（クライアントは接続中ならサーバーの値）。 */

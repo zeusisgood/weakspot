@@ -7,10 +7,12 @@ import com.example.weakspot.network.OtherHitMessage;
 import com.example.weakspot.network.SettingsMessage;
 import com.example.weakspot.network.StatsMessage;
 import com.example.weakspot.network.StatsRequestMessage;
+import com.example.weakspot.server.MachineAccelerator;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStoppedEvent;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -38,6 +40,11 @@ public class WeakSpotMod {
         network.registerMessage(StatsRequestMessage.Handler.class, StatsRequestMessage.class, 3, Side.SERVER);
         network.registerMessage(StatsMessage.Handler.class, StatsMessage.class, 4, Side.CLIENT);
         network.registerMessage(MilestoneMessage.Handler.class, MilestoneMessage.class, 5, Side.CLIENT);
+    }
+
+    @Mod.EventHandler
+    public void serverStopped(FMLServerStoppedEvent event) {
+        MachineAccelerator.clear();
     }
 
     @Mod.EventHandler

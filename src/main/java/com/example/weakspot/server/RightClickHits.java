@@ -77,11 +77,14 @@ public final class RightClickHits {
         if (kind == HitKind.GROWTH) {
             grow(world, pos, settings);
             ServerStats.record(player, stats -> stats.recordGrowthHit());
+        } else if (kind == HitKind.MACHINE) {
+            MachineAccelerator.hit(world, pos);
+            ServerStats.record(player, stats -> stats.recordMachineHit());
         }
     }
 
     private static int minHitInterval(HitKind kind) {
-        return WeakSpotConfig.growthMinHitIntervalTicks;
+        return kind == HitKind.MACHINE ? WeakSpotConfig.machineMinHitIntervalTicks : WeakSpotConfig.growthMinHitIntervalTicks;
     }
 
     /** バニラが右クリックを受け付ける距離と同じ（REACH_DISTANCE + 3 をブロックの中心から測る）。 */

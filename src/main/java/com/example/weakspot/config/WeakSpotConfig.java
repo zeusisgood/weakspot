@@ -87,6 +87,31 @@ public final class WeakSpotConfig {
             "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant",
             "minecraft:brown_mushroom", "minecraft:red_mushroom"};
 
+    @Config.Comment({"[サーバー] 機械の弱点に当てたとき、update() を毎tick何倍呼ぶか（4.0 なら毎tick 3回余分に呼ぶ）",
+            "複数のプレイヤーが同じ機械を加速しても、足さずに大きいほうだけを使う"})
+    @Config.RangeDouble(min = 1.0, max = 100.0)
+    public static double machineBoostMultiplier = 4.0;
+
+    @Config.Comment("[サーバー] 機械の加速が続く時間（tick）")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int machineBoostDurationTicks = 4;
+
+    @Config.Comment("[サーバー] 機械のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int machineMinHitIntervalTicks = 6;
+
+    @Config.Comment({"[サーバー] 機械の加速の対象外にするブロックの登録名。対象外のブロックは、しゃがんで素手で右クリックしても GUI が普通に開く",
+            "加速で不具合が出た機械は、ここに登録名を足す"})
+    public static String[] excludedBlocks = {
+            "minecraft:chest", "minecraft:trapped_chest", "minecraft:ender_chest",
+            "minecraft:enchanting_table", "minecraft:beacon",
+            "minecraft:white_shulker_box", "minecraft:orange_shulker_box", "minecraft:magenta_shulker_box",
+            "minecraft:light_blue_shulker_box", "minecraft:yellow_shulker_box", "minecraft:lime_shulker_box",
+            "minecraft:pink_shulker_box", "minecraft:gray_shulker_box", "minecraft:silver_shulker_box",
+            "minecraft:cyan_shulker_box", "minecraft:purple_shulker_box", "minecraft:blue_shulker_box",
+            "minecraft:brown_shulker_box", "minecraft:green_shulker_box", "minecraft:red_shulker_box",
+            "minecraft:black_shulker_box"};
+
     @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（採掘・成長・機械で共通）",
             "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING",
             "統計画面（K キー）のサウンドでも変えられ、試聴できる"})

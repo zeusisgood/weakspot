@@ -26,6 +26,9 @@ public final class SyncedSettings {
     public double growthMinRadius;
     /** 登録名（"minecraft:grass" など）。 */
     public Set<String> growthExcludedBlocks;
+    public int machineMinHitIntervalTicks;
+    /** 機械の加速の対象外。登録名。 */
+    public Set<String> excludedBlocks;
 
     private SyncedSettings() {
     }
@@ -43,6 +46,8 @@ public final class SyncedSettings {
         s.growthMinHitIntervalTicks = WeakSpotConfig.growthMinHitIntervalTicks;
         s.growthMinRadius = WeakSpotConfig.growthMinRadius;
         s.growthExcludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.growthExcludedBlocks));
+        s.machineMinHitIntervalTicks = WeakSpotConfig.machineMinHitIntervalTicks;
+        s.excludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.excludedBlocks));
         return s;
     }
 
@@ -57,6 +62,8 @@ public final class SyncedSettings {
         buf.writeInt(growthMinHitIntervalTicks);
         buf.writeDouble(growthMinRadius);
         writeStrings(buf, growthExcludedBlocks);
+        buf.writeInt(machineMinHitIntervalTicks);
+        writeStrings(buf, excludedBlocks);
     }
 
     public static SyncedSettings read(ByteBuf buf) {
@@ -71,6 +78,8 @@ public final class SyncedSettings {
         s.growthMinHitIntervalTicks = buf.readInt();
         s.growthMinRadius = buf.readDouble();
         s.growthExcludedBlocks = readStrings(buf);
+        s.machineMinHitIntervalTicks = buf.readInt();
+        s.excludedBlocks = readStrings(buf);
         return s;
     }
 
