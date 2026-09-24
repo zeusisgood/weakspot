@@ -2,6 +2,7 @@ package com.example.weakspot;
 
 import com.example.weakspot.network.HitMessage;
 import com.example.weakspot.network.OtherHitMessage;
+import com.example.weakspot.network.SettingsMessage;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -11,7 +12,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
 // acceptableRemoteVersions を指定しないので、サーバーとクライアントの両方に同じバージョンが必要
-@Mod(modid = WeakSpotMod.MODID, name = WeakSpotMod.NAME, version = WeakSpotMod.VERSION)
+@Mod(modid = WeakSpotMod.MODID, name = WeakSpotMod.NAME, version = WeakSpotMod.VERSION,
+        guiFactory = "com.example.weakspot.client.WeakSpotGuiFactory")
 public class WeakSpotMod {
 
     public static final String MODID = "weakspot";
@@ -28,6 +30,7 @@ public class WeakSpotMod {
         network = NetworkRegistry.INSTANCE.newSimpleChannel(MODID);
         network.registerMessage(HitMessage.Handler.class, HitMessage.class, 0, Side.SERVER);
         network.registerMessage(OtherHitMessage.Handler.class, OtherHitMessage.class, 1, Side.CLIENT);
+        network.registerMessage(SettingsMessage.Handler.class, SettingsMessage.class, 2, Side.CLIENT);
     }
 
     @Mod.EventHandler

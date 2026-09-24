@@ -15,3 +15,5 @@ weakspot.stats.time.minutes=%s分%s秒
 weakspot.stats.time.hours=%s時間%s分
 weakspot.stats.reset=累計をリセット
 weakspot.stats.reset.confirm=もう一度押すとリセット
+
+weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定が使われます（音と他のプレイヤーのマークを除く）

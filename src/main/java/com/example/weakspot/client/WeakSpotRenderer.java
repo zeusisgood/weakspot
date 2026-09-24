@@ -1,6 +1,5 @@
 package com.example.weakspot.client;
 
-import com.example.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -104,7 +103,7 @@ final class WeakSpotRenderer {
     /** 長押しをやめた後、残り FADE_TICKS で薄くする。 */
     private static float spotAlpha(WeakSpot spot, long tick, float partialTicks) {
         float idle = tick - spot.lastActiveTick + partialTicks;
-        float remaining = WeakSpotConfig.lingerTicks - idle;
+        float remaining = ClientSettings.get().lingerTicks - idle;
         if (idle <= 1 || remaining >= FADE_TICKS) {
             return 1;
         }

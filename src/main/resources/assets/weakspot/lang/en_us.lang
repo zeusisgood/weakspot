@@ -15,3 +15,5 @@ weakspot.stats.time.minutes=%sm %ss
 weakspot.stats.time.hours=%sh %sm
 weakspot.stats.reset=Reset All Time
 weakspot.stats.reset.confirm=Click again to reset
+
+weakspot.config.remoteNotice=Connected to a server: its settings are used, except sounds and other players' markers

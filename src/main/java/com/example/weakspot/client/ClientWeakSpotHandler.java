@@ -3,7 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BoostMath;
 import com.example.weakspot.common.HitPitch;
-import com.example.weakspot.config.WeakSpotConfig;
+import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
@@ -82,7 +82,7 @@ public final class ClientWeakSpotHandler {
                 StatsManager.recordBlockBroken(spot.hits);
             }
             spot = null;
-        } else if (spot != null && clientTick - spot.lastActiveTick > WeakSpotConfig.lingerTicks) {
+        } else if (spot != null && clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks) {
             spot = null;
         }
         WeakSpotRenderer.expireFlashes(clientTick);
@@ -114,14 +114,14 @@ public final class ClientWeakSpotHandler {
             return;
         }
 
+        SyncedSettings settings = ClientSettings.get();
         if (spot == null || !spot.matches(pos, target.sideHit)) {
             spot = WeakSpot.spawn(mc.world, pos, state, target.sideHit, target.hitVec,
-                    WeakSpotConfig.weakSpotRadiusRatio, WeakSpotConfig.edgeMargin, WeakSpotConfig.minMoveDistance,
-                    RANDOM);
+                    settings.weakSpotRadiusRatio, settings.edgeMargin, settings.minMoveDistance, RANDOM);
         }
         spot.lastActiveTick = clientTick;
 
-        if (spot.isHitBy(target.hitVec) && clientTick - lastHitTick >= WeakSpotConfig.minHitIntervalTicks) {
+        if (spot.isHitBy(target.hitVec) && clientTick - lastHitTick >= settings.minHitIntervalTicks) {
             onHit(mc);
         }
     }
@@ -149,15 +149,15 @@ public final class ClientWeakSpotHandler {
                 SoundEvents.BLOCK_NOTE_PLING, HitPitch.forStreak(hitStreak)));
 
         spot.hits++;
-        StatsManager.recordHit(BoostMath.extraTicksPerHit(
-                WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks));
+        SyncedSettings settings = ClientSettings.get();
+        StatsManager.recordHit(BoostMath.extraTicksPerHit(settings.boostMultiplier, settings.boostDurationTicks));
 
         lastHitTick = clientTick;
         boostHitTick = clientTick;
         boostPos = spot.pos;
         WeakSpotMod.network.sendToServer(new HitMessage(spot.pos, hitStreak));
 
-        spot.relocate(WeakSpotConfig.edgeMargin, WeakSpotConfig.minMoveDistance, RANDOM);
+        spot.relocate(settings.edgeMargin, settings.minMoveDistance, RANDOM);
     }
 
     /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */
@@ -169,9 +169,10 @@ public final class ClientWeakSpotHandler {
         if (event.getEntityPlayer() != Minecraft.getMinecraft().player || !event.getPos().equals(boostPos)) {
             return;
         }
+        SyncedSettings settings = ClientSettings.get();
         long sinceHit = clientTick - boostHitTick;
-        if (sinceHit > 0 && sinceHit <= WeakSpotConfig.boostDurationTicks) {
-            event.setNewSpeed((float) (event.getNewSpeed() * WeakSpotConfig.boostMultiplier));
+        if (sinceHit > 0 && sinceHit <= settings.boostDurationTicks) {
+            event.setNewSpeed((float) (event.getNewSpeed() * settings.boostMultiplier));
         }
     }
 
