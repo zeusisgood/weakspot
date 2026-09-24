@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 他のプレイヤーの弱点マーク（見えるだけで、当たり判定はない）と、自分のマークの状態の送信。
- * 対象は採掘の弱点だけ。
+ * 対象は採掘の弱点と動物の弱点（成長・機械・釣りは送らない）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class OtherMarkers {
@@ -64,13 +64,17 @@ final class OtherMarkers {
             MARKERS.remove(entityId);
             return;
         }
-        IBlockState state = mc.world.getBlockState(data.pos);
-        if (state.getBlock().isAir(state, mc.world, data.pos)) {
-            MARKERS.remove(entityId);
-            return;
+        WeakSpot spot;
+        if (data.isAnimal()) {
+            Entity animal = mc.world.getEntityByID(data.entityId);
+            spot = animal == null || animal.isDead ? null
+                    : WeakSpot.atEntity(animal, data.face, data.u, data.v, ClientSettings.get());
+        } else {
+            IBlockState state = mc.world.getBlockState(data.pos);
+            spot = state.getBlock().isAir(state, mc.world, data.pos) ? null
+                    : WeakSpot.at(HitKind.MINING, mc.world, data.pos, state, data.face, data.u, data.v,
+                            ClientSettings.get());
         }
-        WeakSpot spot = WeakSpot.at(HitKind.MINING, mc.world, data.pos, state, data.face, data.u, data.v,
-                ClientSettings.get());
         if (spot == null) {
             MARKERS.remove(entityId);
             return;
@@ -87,11 +91,14 @@ final class OtherMarkers {
     }
 
     /** 描画する他のプレイヤーのマーク（範囲の外のものは除く）。 */
-    static List<WeakSpot> visible(Entity camera) {
+    static List<WeakSpot> visible(Entity camera, float partialTicks) {
         List<WeakSpot> result = new ArrayList<>();
         double range = ClientSettings.get().markerShareRange;
         for (Received marker : MARKERS.values()) {
             if (camera.getDistanceSqToCenter(marker.data.pos) <= range * range) {
+                if (marker.spot.entity != null) {
+                    marker.spot.follow(WeakSpot.renderBox(marker.spot.entity, partialTicks));
+                }
                 result.add(marker.spot);
             }
         }
@@ -113,20 +120,32 @@ final class OtherMarkers {
         tick++;
         for (Iterator<Received> it = MARKERS.values().iterator(); it.hasNext(); ) {
             Received marker = it.next();
-            if (tick - marker.receivedTick > TIMEOUT_TICKS || mc.world.isAirBlock(marker.data.pos)) {
+            if (tick - marker.receivedTick > TIMEOUT_TICKS || isGone(mc, marker.data)) {
                 it.remove();
             }
         }
         sendOwn();
     }
 
+    /** マークの対象（ブロックまたは動物）がなくなった。 */
+    private static boolean isGone(Minecraft mc, MarkerData data) {
+        if (data.isAnimal()) {
+            Entity animal = mc.world.getEntityByID(data.entityId);
+            return animal == null || animal.isDead;
+        }
+        return mc.world.isAirBlock(data.pos);
+    }
+
     /** 自分の採掘の弱点が出た・動いた・消えたときに、送信頻度の上限を守って送る。 */
     private static void sendOwn() {
         SyncedSettings settings = ClientSettings.get();
         WeakSpot spot = ClientWeakSpotHandler.spot;
-        MarkerData current = spot != null && spot.kind == HitKind.MINING
-                ? new MarkerData(spot.pos, spot.face, spot.u, spot.v)
-                : null;
+        MarkerData current = null;
+        if (spot != null && spot.kind == HitKind.MINING) {
+            current = new MarkerData(spot.pos, spot.face, spot.u, spot.v);
+        } else if (spot != null && spot.kind == HitKind.ANIMAL) {
+            current = new MarkerData(spot.entity.getPosition(), spot.face, spot.u, spot.v, spot.entity.getEntityId());
+        }
         if (settings.markerShareRange <= 0) {
             // サーバーは転送しないので送らない。範囲が 0 に変わる前に出ていたマークは、サーバー側で時間切れになる
             return;

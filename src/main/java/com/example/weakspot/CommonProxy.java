@@ -32,6 +32,15 @@ public class CommonProxy {
     public void onOtherMarker(int playerEntityId, MarkerData marker) {
     }
 
+    /** 動物の状態が届いた（サーバー → クライアントのパケットから呼ばれる）。progress は Timer の順番の進み具合。 */
+    public void onAnimalState(int entityId, int mask, float[] progress) {
+    }
+
+    /** クライアントが、この動物に弱点が出ていると知っているか（サーバーの返事を覚えているか）。 */
+    public boolean animalWeakSpotActive(int entityId) {
+        return false;
+    }
+
     /** 採掘ヒットの累計が節目に達した（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onMilestone(int milestone) {
     }

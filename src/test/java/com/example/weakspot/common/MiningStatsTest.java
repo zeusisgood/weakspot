@@ -78,4 +78,15 @@ public class MiningStatsTest {
         }
         assertEquals(5, stats.maxStreak);
     }
+
+    @Test
+    public void animalHitsAreCountedSeparatelyAndReset() {
+        MiningStats stats = new MiningStats();
+        stats.recordAnimalHit();
+        stats.recordAnimalHit();
+        assertEquals(2, stats.animalHits);
+        assertEquals(0, stats.hits);
+        stats.reset();
+        assertEquals(0, stats.animalHits);
+    }
 }

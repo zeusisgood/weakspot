@@ -79,14 +79,16 @@ final class WeakSpotRenderer {
     /**
      * health は耐久バーの残りの耐久（0〜1。spot の面に描く）。負ならバーを描かない。
      * growth は作物の成長バーの進み具合（0〜1。spot のブロックの足元に描く）。負ならバーを描かない。
+     * animal は動物の足元のバーの進み具合（0〜1。spot の動物の足元に描く）。負ならバーを描かない。
      */
-    static void render(Minecraft mc, WeakSpot spot, double health, double growth, long tick, float partialTicks) {
+    static void render(Minecraft mc, WeakSpot spot, double health, double growth, double animal, long tick,
+                       float partialTicks) {
         Entity camera = mc.getRenderViewEntity();
         if (camera == null) {
             return;
         }
         List<WeakSpot> others = WeakSpotConfig.otherMarkerEnabled && WeakSpotConfig.otherMarkerAlpha > 0
-                ? OtherMarkers.visible(camera)
+                ? OtherMarkers.visible(camera, partialTicks)
                 : Collections.emptyList();
         if (spot == null && FLASHES.isEmpty() && others.isEmpty()) {
             return;
@@ -106,7 +108,7 @@ final class WeakSpotRenderer {
         GlStateManager.depthMask(false);
         GlStateManager.glLineWidth(2.0F);
 
-        if (spot != null && health >= 0) {
+        if (spot != null && spot.entity == null && health >= 0) {
             drawHealthBar(spot, health, cx, cy, cz);
         }
         long nowMs = Minecraft.getSystemTime();
@@ -140,6 +142,9 @@ final class WeakSpotRenderer {
 
         if (spot != null && growth >= 0) {
             GrowthBar.draw(spot.pos, growth, cx, cy, cz);
+        }
+        if (spot != null && spot.entity != null && animal >= 0) {
+            AnimalBar.draw(spot.entity, animal, partialTicks, cx, cy, cz);
         }
 
         GlStateManager.glLineWidth(1.0F);

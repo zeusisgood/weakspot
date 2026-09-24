@@ -102,6 +102,32 @@ public final class FaceMath {
         return (axis == AXIS_X || axis == AXIS_Z) && isLargestFace(axis, dx, dy, dz);
     }
 
+    /**
+     * 箱 (min, max) の中か表面の点 p に一番近い面。{法線軸, 向き(+1 / -1)} を返す。
+     * 動物の弱点で、照準が当たっている面を選ぶのに使う（同じ距離なら Y、X、Z の順）。
+     */
+    public static int[] nearestFace(double[] p, double[] min, double[] max) {
+        int bestAxis = AXIS_Y;
+        int bestSign = 1;
+        double best = Double.MAX_VALUE;
+        int[] order = {AXIS_Y, AXIS_X, AXIS_Z};
+        for (int axis : order) {
+            double toMax = Math.abs(max[axis] - p[axis]);
+            double toMin = Math.abs(p[axis] - min[axis]);
+            if (toMax < best - 1e-9) {
+                best = toMax;
+                bestAxis = axis;
+                bestSign = 1;
+            }
+            if (toMin < best - 1e-9) {
+                best = toMin;
+                bestAxis = axis;
+                bestSign = -1;
+            }
+        }
+        return new int[] {bestAxis, bestSign};
+    }
+
     public static double distance(double u1, double v1, double u2, double v2) {
         double du = u1 - u2;
         double dv = v1 - v2;

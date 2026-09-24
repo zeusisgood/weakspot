@@ -28,6 +28,13 @@ public final class MiningStats {
         maxStreak = Math.max(maxStreak, count);
     }
 
+    /** 動物の弱点に当てた回数。 */
+    public long animalHits;
+
+    public void recordAnimalHit() {
+        animalHits++;
+    }
+
     public void recordHit(double extraTicks) {
         hits++;
         savedTicks += Math.max(0, extraTicks);
@@ -67,5 +74,6 @@ public final class MiningStats {
         growthHits = 0;
         machineHits = 0;
         maxStreak = 0;
+        animalHits = 0;
     }
 }

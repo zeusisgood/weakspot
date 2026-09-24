@@ -92,4 +92,14 @@ public class FaceMathTest {
         // X 面だけが一番大きい箱では、Z 面を狙っていても、Z 面が今の面でも X 面
         assertEquals(FaceMath.AXIS_X, FaceMath.growthFaceAxis(0.2, 1, 1, FaceMath.AXIS_Z, FaceMath.AXIS_Z, 0, 3));
     }
+
+    @Test
+    public void nearestFacePicksTheFaceTheAimIsOn() {
+        double[] min = {0, 0, 0};
+        double[] max = {0.6, 1.4, 0.6};
+        assertArrayEquals(new int[] {FaceMath.AXIS_Y, 1}, FaceMath.nearestFace(new double[] {0.3, 1.4, 0.3}, min, max));
+        assertArrayEquals(new int[] {FaceMath.AXIS_X, -1}, FaceMath.nearestFace(new double[] {0, 0.7, 0.3}, min, max));
+        assertArrayEquals(new int[] {FaceMath.AXIS_Z, 1}, FaceMath.nearestFace(new double[] {0.3, 0.7, 0.6}, min, max));
+        assertArrayEquals(new int[] {FaceMath.AXIS_Y, -1}, FaceMath.nearestFace(new double[] {0.3, 0.0, 0.3}, min, max));
+    }
 }

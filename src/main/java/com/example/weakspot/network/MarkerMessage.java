@@ -50,22 +50,39 @@ public class MarkerMessage implements IMessage {
         }
     }
 
-    /** 弱点マークの中身: どのブロックの、どの面の、面の中のどの位置（ワールド座標系の u, v）か。 */
+    /**
+     * 弱点マークの中身: どのブロック（または動物）の、どの面の、面の中のどの位置か。
+     * ブロックの位置はワールド座標系の u, v。動物は、面の左下の角からの位置。
+     */
     public static final class MarkerData {
         public final BlockPos pos;
         public final EnumFacing face;
         public final double u;
         public final double v;
+        /** 動物の弱点のときの動物のエンティティ ID。ブロックの弱点は -1。動物の (u, v) は、面の左下の角からの位置。 */
+        public final int entityId;
 
         public MarkerData(BlockPos pos, EnumFacing face, double u, double v) {
+            this(pos, face, u, v, -1);
+        }
+
+        /** 動物の弱点。pos は動物のいるブロック（転送する範囲の計算に使う）。 */
+        public MarkerData(BlockPos pos, EnumFacing face, double u, double v, int entityId) {
             this.pos = pos;
             this.face = face;
             this.u = u;
             this.v = v;
+            this.entityId = entityId;
         }
 
+        public boolean isAnimal() {
+            return entityId >= 0;
+        }
+
+        /** 動物は、動くと pos が変わるので、pos を比べない。 */
         public boolean sameAs(MarkerData other) {
-            return other != null && pos.equals(other.pos) && face == other.face && u == other.u && v == other.v;
+            return other != null && entityId == other.entityId && (isAnimal() || pos.equals(other.pos))
+                    && face == other.face && u == other.u && v == other.v;
         }
 
         /** null（消えた）も書ける。 */
@@ -76,6 +93,7 @@ public class MarkerMessage implements IMessage {
                 buf.writeByte(marker.face.getIndex());
                 buf.writeDouble(marker.u);
                 buf.writeDouble(marker.v);
+                buf.writeInt(marker.entityId);
             }
         }
 
@@ -88,10 +106,11 @@ public class MarkerMessage implements IMessage {
             int face = buf.readByte();
             double u = buf.readDouble();
             double v = buf.readDouble();
+            int entityId = buf.readInt();
             if (face < 0 || face >= EnumFacing.values().length || !Double.isFinite(u) || !Double.isFinite(v)) {
                 return null;
             }
-            return new MarkerData(pos, EnumFacing.getFront(face), u, v);
+            return new MarkerData(pos, EnumFacing.getFront(face), u, v, entityId);
         }
     }
 }

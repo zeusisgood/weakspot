@@ -137,6 +137,59 @@ public final class WeakSpotConfig {
             "minecraft:brown_shulker_box", "minecraft:green_shulker_box", "minecraft:red_shulker_box",
             "minecraft:black_shulker_box"};
 
+    @Config.Comment("[サーバー] 動物の弱点で、子どもの成長を早めるか")
+    public static boolean animalBabyEnabled = true;
+
+    @Config.Comment("[サーバー] 動物の弱点で、繁殖の待ち時間を短くするか")
+    public static boolean animalBreedingEnabled = true;
+
+    @Config.Comment("[サーバー] 羊の弱点で、羊毛の再生を早めるか（草は要らない）")
+    public static boolean sheepWoolEnabled = true;
+
+    @Config.Comment("[サーバー] ニワトリの弱点で、次の卵までの時間を短くするか")
+    public static boolean chickenEggEnabled = true;
+
+    @Config.Comment("[サーバー] 村人の弱点で、ロックされた取引の上限をリセットするか")
+    public static boolean villagerTradeResetEnabled = true;
+
+    @Config.Comment({"[サーバー] 子どもが大人になるまでの目安のヒット数（1ヒット = 24000 tick ÷ この数）",
+            "0 以下で、子どもの成長の加速を無効にする"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int animalBabyHits = 40;
+
+    @Config.Comment({"[サーバー] 繁殖の待ち時間が終わるまでの目安のヒット数（1ヒット = 6000 tick ÷ この数）",
+            "0 以下で、繁殖の待ち時間の短縮を無効にする"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int animalBreedingHits = 10;
+
+    @Config.Comment({"[サーバー] 毛を刈られた羊の毛が生えるまでのヒット数", "0 以下で無効にする"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int sheepWoolHits = 10;
+
+    @Config.Comment({"[サーバー] 次の卵までの目安のヒット数（1ヒット = 平均 9000 tick ÷ この数）", "0 以下で無効にする"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int chickenEggHits = 15;
+
+    @Config.Comment({"[サーバー] 村人の、ロックされた取引の上限がリセットされるまでのヒット数", "0 以下で無効にする"})
+    @Config.RangeInt(min = 0, max = 100000)
+    public static int villagerTradeResetHits = 10;
+
+    @Config.Comment("[サーバー] 動物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int animalMinHitIntervalTicks = 6;
+
+    @Config.Comment({"[サーバー] 動物の弱点の対象外にするエンティティの ID（例: minecraft:cow）",
+            "対象外の動物には弱点が出ず、右クリックも通常の動作になる"})
+    public static String[] animalExcludedEntities = {};
+
+    @Config.Comment({"[サーバー] しゃがみ+素手のときだけ弱点を出す MOD の動物のエンティティの ID",
+            "素手の右クリックに別の動作がある動物（乗る、持ち物の画面、座るなど）を足す。バニラの馬・飼いならしたオオカミなどは、コードで判定する"})
+    public static String[] animalSneakRequiredEntities = {};
+
+    @Config.Comment({"[サーバー] 村人の取引上限のリセットで、新しい取引の段階も解放するか（バニラの補充と同じ）",
+            "オフなら、ロックの解除だけ行う。サーバーだけが使う（クライアントには送らない）"})
+    public static boolean villagerResetUnlocksNewTier = false;
+
     @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
             "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
     @Config.RangeDouble(min = 0.0, max = 256.0)

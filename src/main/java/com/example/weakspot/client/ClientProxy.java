@@ -41,6 +41,16 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void onAnimalState(int entityId, int mask, float[] progress) {
+        Minecraft.getMinecraft().addScheduledTask(() -> AnimalStates.receive(entityId, mask, progress));
+    }
+
+    @Override
+    public boolean animalWeakSpotActive(int entityId) {
+        return AnimalStates.isActive(entityId);
+    }
+
+    @Override
     public void onMilestone(int milestone) {
         Minecraft.getMinecraft().addScheduledTask(() -> MilestoneEffects.show(milestone));
     }

@@ -237,6 +237,7 @@ final class StatsScreen extends GuiScreen {
         y = row("weakspot.stats.timeSaved", s -> formatDuration(s.savedSeconds()), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.growthHits", s -> Long.toString(s.growthHits), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.machineHits", s -> Long.toString(s.machineHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.animalHits", s -> Long.toString(s.animalHits), labelX, sessionRight, totalRight, y);
         row("weakspot.stats.maxStreak", s -> Long.toString(s.maxStreak), labelX, sessionRight, totalRight, y);
     }
 

@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.AnimalTargets;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BlockHealthBar;
@@ -13,6 +14,7 @@ import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -101,6 +103,9 @@ public final class ClientWeakSpotHandler {
 
     /** 弱点を出したブロックがなくなった（壊れた、育ちきった、など）。 */
     private static boolean isGone(World world, WeakSpot spot) {
+        if (spot.kind == HitKind.ANIMAL) {
+            return spot.entity == null || spot.entity.isDead;
+        }
         if (world.isAirBlock(spot.pos)) {
             return true;
         }
@@ -124,6 +129,7 @@ public final class ClientWeakSpotHandler {
         framePartialTicks = event.getPartialTicks();
         double health = -1;
         double growth = -1;
+        double animal = -1;
         if (WeakSpotConfig.weakSpotsEnabled) {
             updateAim(mc);
             if (WeakSpotConfig.blockHealthBarEnabled) {
@@ -132,11 +138,16 @@ public final class ClientWeakSpotHandler {
             if (WeakSpotConfig.growthBarEnabled) {
                 growth = growthBarProgress(mc);
             }
+            animal = animalBarProgress();
+            if (spot != null && spot.entity != null) {
+                // 動物の弱点は、描く時点の動物の位置に合わせる（当たり判定は updateAim で、その tick の位置に合わせた）
+                spot.follow(WeakSpot.renderBox(spot.entity, event.getPartialTicks()));
+            }
         } else {
             // 一時オフ。J を押した直後のフレームでも、自分の弱点を出さない
             stopOwnWeakSpots();
         }
-        WeakSpotRenderer.render(mc, spot, health, growth, clientTick, event.getPartialTicks());
+        WeakSpotRenderer.render(mc, spot, health, growth, animal, clientTick, event.getPartialTicks());
     }
 
     /**
@@ -163,6 +174,15 @@ public final class ClientWeakSpotHandler {
         return GrowthBar.progress(mc.world, spot.pos);
     }
 
+    /** 動物の足元のバーに出す進み具合（0〜1）。動物の弱点が今出ていて、サーバーの返事があるときだけ。出さないときは -1。 */
+    private static double animalBarProgress() {
+        if (spot == null || spot.kind != HitKind.ANIMAL || spot.lastActiveTick != clientTick) {
+            return -1;
+        }
+        AnimalStates.State state = AnimalStates.get(spot.entity.getEntityId(), clientTick);
+        return state == null ? -1 : state.barProgress();
+    }
+
     /**
      * 弱点の一時オフ（J キー）の間、自分の弱点を出さず、ヒットも起こさない。
      * 出ていた弱点は消す（自分のマークの送信は、弱点が null になると「消えた」を送る）。ブーストも止める。
@@ -180,7 +200,16 @@ public final class ClientWeakSpotHandler {
             return;
         }
         RayTraceResult target = mc.objectMouseOver;
-        if (target == null || target.typeOfHit != RayTraceResult.Type.BLOCK) {
+        if (target == null) {
+            return;
+        }
+        if (target.typeOfHit == RayTraceResult.Type.ENTITY) {
+            if (!mc.playerController.getIsHittingBlock() && isHoldingUse(mc)) {
+                aimAnimal(mc, target);
+            }
+            return;
+        }
+        if (target.typeOfHit != RayTraceResult.Type.BLOCK) {
             return;
         }
         if (mc.playerController.getIsHittingBlock()) {
@@ -242,6 +271,40 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
+     * 動物の弱点。素手（しゃがみが要る動物ではしゃがみ+素手）で右クリックを押しっぱなしにして動物に照準を合わせている間、
+     * サーバーに状態を問い合わせ、動いているタイマーがあるという返事のときだけ、照準が当たっている面に出す。
+     * 弱点の面は、その面がプレイヤーから見えている間は変えない。見えなくなったとき（回り込んだとき）と、消えたあとの
+     * 出し直しで、照準が当たっている面に選び直す。
+     */
+    private static void aimAnimal(Minecraft mc, RayTraceResult target) {
+        Entity entity = target.entityHit;
+        SyncedSettings settings = ClientSettings.get();
+        if (entity == null || !AnimalTargets.isTarget(mc.player, entity, settings)) {
+            return;
+        }
+        AnimalStates.query(entity.getEntityId(), clientTick, false);
+        AnimalStates.State state = AnimalStates.get(entity.getEntityId(), clientTick);
+        if (state == null || state.mask == 0) {
+            return;
+        }
+        AxisAlignedBB box = entity.getEntityBoundingBox();
+        EnumFacing aimed = WeakSpot.faceAt(box, target.hitVec);
+        Vec3d eye = mc.player.getPositionEyes(1.0F);
+        if (spot == null || spot.entity != entity || !WeakSpot.isFacing(box, spot.face, eye)) {
+            spot = WeakSpot.spawnOnEntity(entity, aimed, target.hitVec, settings, RANDOM);
+        }
+        if (spot == null) {
+            return;
+        }
+        spot.follow(box);
+        spot.lastActiveTick = clientTick;
+        if (aimed == spot.face && spot.isHitBy(target.hitVec)
+                && canHit(HitKind.ANIMAL, settings.animalMinHitIntervalTicks)) {
+            onHit(mc);
+        }
+    }
+
+    /**
      * 成長の弱点を出す面。同じ大きさの側面が複数あるとき（サトウキビなど）は、今の弱点の面が見えている間は変えない
      * （照準が隣の側面へ移ってもちらつかない）。見えなくなったとき（回り込んだとき）や出し直すときに選び直す。
      */
@@ -253,7 +316,14 @@ public final class ClientWeakSpotHandler {
     }
 
     private static int minHitInterval(HitKind kind, SyncedSettings settings) {
-        return kind == HitKind.MACHINE ? settings.machineMinHitIntervalTicks : settings.growthMinHitIntervalTicks;
+        switch (kind) {
+            case MACHINE:
+                return settings.machineMinHitIntervalTicks;
+            case ANIMAL:
+                return settings.animalMinHitIntervalTicks;
+            default:
+                return settings.growthMinHitIntervalTicks;
+        }
     }
 
     private static boolean canHit(HitKind kind, int minInterval) {
@@ -285,7 +355,13 @@ public final class ClientWeakSpotHandler {
             boostHitTick = clientTick;
             boostPos = spot.pos;
         }
-        WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
+        if (kind == HitKind.ANIMAL) {
+            WeakSpotMod.network.sendToServer(HitMessage.animal(spot.entity.getEntityId(), hitStreak));
+            // ヒットで進んだ分を、すぐに見に行く
+            AnimalStates.query(spot.entity.getEntityId(), clientTick, true);
+        } else {
+            WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
+        }
 
         // 同じ面の中の移動なので、演出がオンならマーカーを動かす（当たり判定は移動先ですぐに行う）
         spot.relocate(RANDOM, WeakSpotConfig.weakSpotTrailEnabled, Minecraft.getSystemTime());
@@ -313,6 +389,7 @@ public final class ClientWeakSpotHandler {
         boostPos = null;
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
         boostHitTick = Long.MIN_VALUE / 2;
+        AnimalStates.clear();
         lastPlayer = null;
         resetStreak();
         WeakSpotRenderer.clearFlashes();

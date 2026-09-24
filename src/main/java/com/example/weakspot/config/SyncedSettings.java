@@ -34,6 +34,21 @@ public final class SyncedSettings {
     public int machineMinHitIntervalTicks;
     /** 機械の加速の対象外。登録名。 */
     public Set<String> excludedBlocks;
+    public boolean animalBabyEnabled;
+    public boolean animalBreedingEnabled;
+    public boolean sheepWoolEnabled;
+    public boolean chickenEggEnabled;
+    public boolean villagerTradeResetEnabled;
+    public int animalBabyHits;
+    public int animalBreedingHits;
+    public int sheepWoolHits;
+    public int chickenEggHits;
+    public int villagerTradeResetHits;
+    public int animalMinHitIntervalTicks;
+    /** 動物の弱点の対象外。エンティティの ID。 */
+    public Set<String> animalExcludedEntities;
+    /** しゃがみを条件にする MOD の動物。エンティティの ID。 */
+    public Set<String> animalSneakRequiredEntities;
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -59,6 +74,19 @@ public final class SyncedSettings {
         s.growthExtraBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.growthExtraBlocks));
         s.machineMinHitIntervalTicks = WeakSpotConfig.machineMinHitIntervalTicks;
         s.excludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.excludedBlocks));
+        s.animalBabyEnabled = WeakSpotConfig.animalBabyEnabled;
+        s.animalBreedingEnabled = WeakSpotConfig.animalBreedingEnabled;
+        s.sheepWoolEnabled = WeakSpotConfig.sheepWoolEnabled;
+        s.chickenEggEnabled = WeakSpotConfig.chickenEggEnabled;
+        s.villagerTradeResetEnabled = WeakSpotConfig.villagerTradeResetEnabled;
+        s.animalBabyHits = WeakSpotConfig.animalBabyHits;
+        s.animalBreedingHits = WeakSpotConfig.animalBreedingHits;
+        s.sheepWoolHits = WeakSpotConfig.sheepWoolHits;
+        s.chickenEggHits = WeakSpotConfig.chickenEggHits;
+        s.villagerTradeResetHits = WeakSpotConfig.villagerTradeResetHits;
+        s.animalMinHitIntervalTicks = WeakSpotConfig.animalMinHitIntervalTicks;
+        s.animalExcludedEntities = new HashSet<>(Arrays.asList(WeakSpotConfig.animalExcludedEntities));
+        s.animalSneakRequiredEntities = new HashSet<>(Arrays.asList(WeakSpotConfig.animalSneakRequiredEntities));
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -81,6 +109,19 @@ public final class SyncedSettings {
         writeStrings(buf, growthExtraBlocks);
         buf.writeInt(machineMinHitIntervalTicks);
         writeStrings(buf, excludedBlocks);
+        buf.writeBoolean(animalBabyEnabled);
+        buf.writeBoolean(animalBreedingEnabled);
+        buf.writeBoolean(sheepWoolEnabled);
+        buf.writeBoolean(chickenEggEnabled);
+        buf.writeBoolean(villagerTradeResetEnabled);
+        buf.writeInt(animalBabyHits);
+        buf.writeInt(animalBreedingHits);
+        buf.writeInt(sheepWoolHits);
+        buf.writeInt(chickenEggHits);
+        buf.writeInt(villagerTradeResetHits);
+        buf.writeInt(animalMinHitIntervalTicks);
+        writeStrings(buf, animalExcludedEntities);
+        writeStrings(buf, animalSneakRequiredEntities);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -103,6 +144,19 @@ public final class SyncedSettings {
         s.growthExtraBlocks = readStrings(buf);
         s.machineMinHitIntervalTicks = buf.readInt();
         s.excludedBlocks = readStrings(buf);
+        s.animalBabyEnabled = buf.readBoolean();
+        s.animalBreedingEnabled = buf.readBoolean();
+        s.sheepWoolEnabled = buf.readBoolean();
+        s.chickenEggEnabled = buf.readBoolean();
+        s.villagerTradeResetEnabled = buf.readBoolean();
+        s.animalBabyHits = buf.readInt();
+        s.animalBreedingHits = buf.readInt();
+        s.sheepWoolHits = buf.readInt();
+        s.chickenEggHits = buf.readInt();
+        s.villagerTradeResetHits = buf.readInt();
+        s.animalMinHitIntervalTicks = buf.readInt();
+        s.animalExcludedEntities = readStrings(buf);
+        s.animalSneakRequiredEntities = readStrings(buf);
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;
