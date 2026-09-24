@@ -9,7 +9,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * クライアントが今使う [サーバー] の設定値。接続中はサーバーから届いた値、それ以外は自分の weakspot.cfg の値。
- * [クライアント] の設定（音、他のプレイヤーのマーク）は WeakSpotConfig をそのまま読む。
+ * [クライアント] の設定（音、他のプレイヤーのマーク、コンボの表示）は WeakSpotConfig をそのまま読む。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ClientSettings {
