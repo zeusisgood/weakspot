@@ -40,6 +40,8 @@ public final class ClientWeakSpotHandler {
     /** ClientTickEvent の START で増える。PlayerControllerMP の進捗計算はその後に走る。 */
     static long clientTick;
     static WeakSpot spot;
+    /** 今のフレームの partialTicks（ヒットした瞬間を、フレームの途中の値まで含めてコンボの表示に渡す）。 */
+    private static float framePartialTicks;
 
     /** 種類ごとの最後のヒット（ヒット間隔の制限に使う）。 */
     private static final long[] LAST_HIT_TICK = new long[HitKind.values().length];
@@ -78,6 +80,10 @@ public final class ClientWeakSpotHandler {
             return;
         }
         clientTick++;
+        int broken = STREAK.expire(clientTick);
+        if (broken > 0) {
+            ComboHud.onBreak(broken, clientTick);
+        }
         if (spot != null && (isGone(mc.world, spot)
                 || clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks)) {
             spot = null;
@@ -107,6 +113,7 @@ public final class ClientWeakSpotHandler {
         if (mc.world == null || mc.player == null) {
             return;
         }
+        framePartialTicks = event.getPartialTicks();
         updateAim(mc);
         WeakSpotRenderer.render(mc, spot, clientTick, event.getPartialTicks());
     }
@@ -212,6 +219,7 @@ public final class ClientWeakSpotHandler {
         WeakSpotRenderer.addFlash(spot, clientTick);
         int hitStreak = STREAK.hit(clientTick);
         HitSounds.playOwn(hitStreak);
+        ComboHud.onHit(hitStreak, clientTick + framePartialTicks);
 
         LAST_HIT_TICK[kind.ordinal()] = clientTick;
         if (kind == HitKind.MINING) {
@@ -253,5 +261,6 @@ public final class ClientWeakSpotHandler {
 
     private static void resetStreak() {
         STREAK.reset();
+        ComboHud.clear();
     }
 }

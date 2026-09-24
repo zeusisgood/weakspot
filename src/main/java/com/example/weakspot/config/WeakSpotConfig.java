@@ -156,6 +156,21 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double otherMarkerAlpha = 0.6;
 
+    @Config.Comment({"[クライアント] 連続ヒット（コンボ）の数を画面に表示するか",
+            "ヒット音の音階と同じ数え方（約2秒ヒットがないと途切れる）。2 以上で表示する"})
+    public static boolean comboDisplayEnabled = true;
+
+    @Config.Comment("[クライアント] コンボの数字の大きさの倍率")
+    @Config.RangeDouble(min = 0.5, max = 2.0)
+    public static double comboScale = 1.0;
+
+    @Config.Comment({"[クライアント] コンボの表示の位置",
+            "BELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央）"})
+    public static ComboPosition comboPosition = ComboPosition.BELOW_CROSSHAIR;
+
+    @Config.Comment("[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）")
+    public static boolean comboMilestoneEffects = true;
+
     private WeakSpotConfig() {
     }
 

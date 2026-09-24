@@ -44,3 +44,10 @@ weakspot.sound.instrument.HAT=ハイハット
 weakspot.sound.instrument.SNARE=スネア
 weakspot.sound.instrument.BASEDRUM=バスドラム
 weakspot.sound.instrument.PLING=プリング
+
+weakspot.combo.hit=%s HIT
+weakspot.combo.max=MAX %s
+weakspot.general.combodisplayenabled.tooltip=[クライアント] 連続ヒット（コンボ）の数を画面に表示するか\nヒット音の音階と同じ数え方（約2秒ヒットがないと途切れる）。2 以上で表示する
+weakspot.general.comboscale.tooltip=[クライアント] コンボの数字の大きさの倍率
+weakspot.general.comboposition.tooltip=[クライアント] コンボの表示の位置\nBELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央。ボスバーがあればその下）
+weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）

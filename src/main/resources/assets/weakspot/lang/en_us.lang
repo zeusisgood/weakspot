@@ -44,3 +44,10 @@ weakspot.sound.instrument.HAT=Hi-hat
 weakspot.sound.instrument.SNARE=Snare
 weakspot.sound.instrument.BASEDRUM=Bass Drum
 weakspot.sound.instrument.PLING=Pling
+
+weakspot.combo.hit=%s HIT
+weakspot.combo.max=MAX %s
+weakspot.general.combodisplayenabled.tooltip=[Client] Show your hit streak (combo) on screen.\nCounted like the hit sound's scale: it breaks after about 2 seconds without a hit. Shown from 2.
+weakspot.general.comboscale.tooltip=[Client] Size multiplier of the combo number.
+weakspot.general.comboposition.tooltip=[Client] Where to show the combo.\nBELOW_CROSSHAIR, RIGHT_OF_CROSSHAIR, TOP_CENTER (below boss bars)
+weakspot.general.combomilestoneeffects.tooltip=[Client] Accent sound and glow when the combo reaches 10, 25, 50 and 100.
