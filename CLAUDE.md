@@ -14,6 +14,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - テストのみ: `./gradlew test`、1クラスだけ: `./gradlew test --tests com.example.weakspot.common.WeakSpotPlacerTest`
 - 専用サーバー起動: `./gradlew runServer`（作業ディレクトリは `run/`、`nogui` 付き。`run/eula.txt` は同意済み）。止めるときはコンソールで `stop`。
   - パイプで `stop` を流しても Gradle 経由では届かない。Claude が起動を確かめるときは `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を確認する。
+  - devcontainer が使えない環境（クラウドのセッションなど。`runServer` が FML の `NetworkRegistry.newChannel` の NPE で落ちる）では、`runServer` での確認はしなくてよい（ユーザーの指示）。ユーザーが jar をダウンロードして試す。止まる条件の「runServer が起動しない」にも当たらない。ビルドとテストは通すこと。
   - 起動ログの `module-info.class ... IllegalArgumentException`（`Unable to read a class file correctly`）は FG3 + 1.12 でいつも出るノイズで、無視してよい。`Missing English translation for weakspot: .../build/classes/java/main/assets/...` の WARN も、開発環境のリソースの置き場所によるいつものノイズ。
 - クライアント確認: コンテナ内では画面を出せない。ビルドした jar をホスト側 Minecraft（Forge 1.12.2）の `mods` に入れて確認する。描画・ヒット判定・体感速度は Claude が検証できないので、ユーザーに確認を依頼する。
 - Minecraft の非公開のフィールドは、アクセストランスフォーマーではなくリフレクションで読む。開発環境は MCP 名、実際の環境（reobf 後）は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（例: `client/MiningProgress`）。Forge の3引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
