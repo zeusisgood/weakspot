@@ -9,6 +9,7 @@ import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -56,7 +57,7 @@ public final class MeleeHits {
     }
 
     /** クライアントからのヒット通知（サーバースレッド）。照準の位置は確かめない（クライアントを信用する）。 */
-    public static void onHit(EntityPlayerMP player, int entityId) {
+    public static void onHit(EntityPlayerMP player, int entityId, int streak) {
         if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()
                 || !WeakSpotConfig.meleeWeakSpotEnabled) {
             return;
@@ -74,6 +75,7 @@ public final class MeleeHits {
         LAST_HIT.put(player.getUniqueID(), now);
         PENDING.put(player.getUniqueID(), new Pending(entityId, now));
         ServerStats.countStreak(player);
+        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(entity), streak);
     }
 
     /** 攻撃の始まり（ゲージを 0 に戻す前）。キャンセルされた攻撃には来ない。 */

@@ -132,7 +132,10 @@ public final class ServerBoostTracker {
         notifyNearbyPlayers(player, pos, streak);
     }
 
-    /** 受け付けたヒットだけを、近くの他のプレイヤーに知らせる（ヒット音を鳴らすため。採掘・成長・機械）。 */
+    /**
+     * 受け付けたヒットだけを、近くの他のプレイヤーに知らせる（ヒット音を鳴らすため。すべての種類）。
+     * pos は鳴らす位置（ブロック。動物・近接は当てた生き物、釣りは浮き、弓は引いているプレイヤーの位置）。
+     */
     static void notifyNearbyPlayers(EntityPlayerMP hitter, BlockPos pos, int streak) {
         OtherHitMessage message = new OtherHitMessage(pos, Math.max(1, streak));
         double rangeSq = OTHERS_SOUND_RANGE * OTHERS_SOUND_RANGE;

@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -27,7 +28,7 @@ public final class BowHits {
     private BowHits() {
     }
 
-    public static void onHit(EntityPlayerMP player) {
+    public static void onHit(EntityPlayerMP player, int streak) {
         if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()
                 || !WeakSpotConfig.bowWeakSpotEnabled || WeakSpotConfig.bowHitTicks <= 0) {
             return;
@@ -45,6 +46,7 @@ public final class BowHits {
         BowDraw.add(player, WeakSpotConfig.bowHitTicks);
         ServerStats.record(player, stats -> stats.recordBowHit());
         ServerStats.countStreak(player);
+        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
     @SubscribeEvent

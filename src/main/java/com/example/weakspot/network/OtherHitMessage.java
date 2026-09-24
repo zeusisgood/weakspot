@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: 近くの他のプレイヤーが弱点（採掘・成長・機械）にヒットした。ヒット音を鳴らすためだけに使う。
+ * サーバー → クライアント: 近くの他のプレイヤーが弱点にヒットした（すべての種類。pos は鳴らす位置）。ヒット音を鳴らすためだけに使う。
  * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
  */
 public class OtherHitMessage implements IMessage {

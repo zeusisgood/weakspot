@@ -14,6 +14,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -154,7 +155,7 @@ public final class FishingHits {
     }
 
     /** クライアントからのヒット通知（サーバースレッド）。照準の角度は確かめない（クライアントを信用する）。 */
-    public static void onHit(EntityPlayerMP player) {
+    public static void onHit(EntityPlayerMP player, int streak) {
         if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()) {
             return;
         }
@@ -179,6 +180,7 @@ public final class FishingHits {
         }
         ServerStats.record(player, stats -> stats.recordFishingHit());
         ServerStats.countStreak(player);
+        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(hook), streak);
     }
 
     /**

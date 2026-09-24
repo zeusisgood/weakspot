@@ -17,6 +17,7 @@ import net.minecraft.entity.passive.EntityChicken;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -116,7 +117,7 @@ public final class AnimalHits {
     }
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
-    public static void onHit(EntityPlayerMP player, int entityId) {
+    public static void onHit(EntityPlayerMP player, int entityId, int streak) {
         if (!ServerSwitches.isEnabled(player)) {
             return;
         }
@@ -142,6 +143,7 @@ public final class AnimalHits {
         apply(entity, state.mask, settings);
         ServerStats.record(player, stats -> stats.recordAnimalHit());
         ServerStats.countStreak(player);
+        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(entity), streak);
     }
 
     /** 動いているタイマーを、すべて同時に進める。 */
