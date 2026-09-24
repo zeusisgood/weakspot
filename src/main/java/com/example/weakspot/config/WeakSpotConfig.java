@@ -68,16 +68,31 @@ public final class WeakSpotConfig {
             "数が足りない分は 0 として扱う"})
     public static int[] milestoneRepair = {10, 77, 30, 100};
 
+    @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（採掘・成長・機械で共通）",
+            "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING",
+            "統計画面（K キー）のサウンドでも変えられ、試聴できる"})
+    public static HitSound myHitSound = HitSound.PLING;
+
+    @Config.Comment({"[クライアント] 自分のヒット音の音量（0 で聞こえなくなる）",
+            "バニラの「プレイヤー」音量も掛かる"})
+    @Config.RangeDouble(min = 0.0, max = 1.0)
+    public static double myHitVolume = 0.25;
+
     @Config.Comment({"[クライアント] 他のプレイヤーのヒット音の音量（0 で聞こえなくなる）",
             "バニラの「プレイヤー」音量も掛かる"})
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double othersHitVolume = 0.4;
 
     @Config.Comment({"[クライアント] 他のプレイヤーのヒット音に使うノートブロックの楽器",
-            "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING（PLING は自分のヒット音と同じ）"})
-    public static OtherHitSound othersHitSound = OtherHitSound.XYLOPHONE;
+            "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING"})
+    public static HitSound othersHitSound = HitSound.XYLOPHONE;
 
     private WeakSpotConfig() {
+    }
+
+    /** 統計画面などから [クライアント] の値を書き換えた後に呼び、weakspot.cfg に保存する（Forge の設定画面と同じ値になる）。 */
+    public static void save() {
+        ConfigManager.sync(WeakSpotMod.MODID, Config.Type.INSTANCE);
     }
 
     /** 節目と量の数が合っていなければ、ログに警告を出す（足りない分は 0 として扱う）。 */

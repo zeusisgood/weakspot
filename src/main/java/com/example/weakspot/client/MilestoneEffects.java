@@ -44,9 +44,9 @@ final class MilestoneEffects {
                     fireworks(lucky, i));
         }
 
-        HitSounds.playOwnScale(lucky ? 1 : 2, 0);
+        HitSounds.playScale(HitSounds::playOwn, lucky ? 1 : 2, 0);
         if (lucky) {
-            HitSounds.playOwnScale(1, HitSounds.SCALE_LENGTH + 2);
+            HitSounds.playScale(HitSounds::playOwn, 1, HitSounds.SCALE_LENGTH + 2);
         }
     }
 
