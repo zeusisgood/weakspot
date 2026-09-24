@@ -2,6 +2,7 @@ package com.example.weakspot;
 
 import com.example.weakspot.common.GrowthRoom;
 import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.ResinHole;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.RightClickHits;
@@ -12,9 +13,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockNetherWart;
 import net.minecraft.block.BlockReed;
 import net.minecraft.block.IGrowable;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,7 +39,9 @@ public final class RightClickTargets {
         /** 同じブロックが縦に伸びる（サトウキビ、サボテン）。育つのは柱の一番上の節だけ。 */
         COLUMN,
         /** 成長段階が進む（ネザーウォート）。 */
-        STAGE
+        STAGE,
+        /** IC2 のゴムの木の乾いた樹液の穴が、randomTick で戻る（1.3.7。ResinHole）。 */
+        RESIN
     }
 
     /**
@@ -53,6 +58,7 @@ public final class RightClickTargets {
         EXTRA_GROWTH_BLOCKS.put("minecraft:reeds", ExtraPlant.COLUMN);
         EXTRA_GROWTH_BLOCKS.put("minecraft:cactus", ExtraPlant.COLUMN);
         EXTRA_GROWTH_BLOCKS.put("minecraft:nether_wart", ExtraPlant.STAGE);
+        EXTRA_GROWTH_BLOCKS.put(ResinHole.BLOCK, ExtraPlant.RESIN);
     }
 
     private RightClickTargets() {
@@ -93,7 +99,31 @@ public final class RightClickTargets {
         if (extra == ExtraPlant.STAGE && block instanceof BlockNetherWart) {
             return GrowthRoom.hasStageRoom(state.getValue(BlockNetherWart.AGE), NETHER_WART_LAST_STAGE);
         }
+        if (extra == ExtraPlant.RESIN) {
+            return resinHoleFace(state) != null;
+        }
         return false;
+    }
+
+    /**
+     * IC2 のゴムの木の、乾いた樹液の穴のある面（成長の弱点を出す面）。ゴムの木でない、乾いた穴がない、
+     * プロパティが読めない（IC2 の版が違う）ときは null。IC2 のクラスには依存せず、名前だけで読む。
+     */
+    public static EnumFacing resinHoleFace(IBlockState state) {
+        if (EXTRA_GROWTH_BLOCKS.get(String.valueOf(state.getBlock().getRegistryName())) != ExtraPlant.RESIN) {
+            return null;
+        }
+        for (IProperty<?> property : state.getPropertyKeys()) {
+            if (property.getName().equals(ResinHole.PROPERTY)) {
+                String facing = ResinHole.dryFacing(valueName(state, property));
+                return facing == null ? null : EnumFacing.byName(facing);
+            }
+        }
+        return null;
+    }
+
+    private static <T extends Comparable<T>> String valueName(IBlockState state, IProperty<T> property) {
+        return property.getName(state.getValue(property));
     }
 
     /** 柱の植物に育てる余地があるか（バニラの updateTick と同じ条件。土台はサトウキビだけ確かめる）。 */

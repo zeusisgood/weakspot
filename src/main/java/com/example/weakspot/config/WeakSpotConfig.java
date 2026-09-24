@@ -2,6 +2,7 @@ package com.example.weakspot.config;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MarkerShape;
+import com.example.weakspot.common.ResinHole;
 import com.example.weakspot.server.SettingsSync;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -123,8 +124,10 @@ public final class WeakSpotConfig {
 
     @Config.Comment({"[サーバー] IGrowable を持たない植物のうち、成長の弱点の対象にするブロックの登録名（追加リスト）",
             "育つ条件をコードで決めてあるのは、サトウキビ・サボテン・ネザーウォートだけ。それ以外を足しても弱点は出ない",
-            "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる"})
-    public static String[] growthExtraBlocks = {"minecraft:reeds", "minecraft:cactus", "minecraft:nether_wart"};
+            "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる",
+            "ic2:rubber_wood は IC2 のゴムの木の乾いた樹液の穴（穴が戻るのを早める。IC2 がなければ何もしない）"})
+    public static String[] growthExtraBlocks = {"minecraft:reeds", "minecraft:cactus", "minecraft:nether_wart",
+            "ic2:rubber_wood"};
 
     @Config.Comment({"[サーバー] 機械の弱点に当てたとき、update() を毎tick何倍呼ぶか（4.0 なら毎tick 3回余分に呼ぶ）",
             "複数のプレイヤーが同じ機械を加速しても、足さずに大きいほうだけを使う"})
@@ -343,9 +346,10 @@ public final class WeakSpotConfig {
      * ファイルの値でフィールドを上書きする「読み込み」になるので、そこでは保存できない）。
      * 1: 1.2.2 でキノコを成長の対象にしたので、growthExcludedBlocks からキノコを取り除く（書き戻したら尊重する）。
      * 2: 1.2.4 で mushroomGrowChance の初期値を 0.2 にしたので、古い初期値 0.1 のままなら 0.2 にする（ほかの値は残す）。
+     * 3: 1.3.7 で IC2 のゴムの木を成長の対象にしたので、growthExtraBlocks に ic2:rubber_wood を足す（書き戻したら尊重する）。
      */
     public static void migrate() {
-        if (configVersion >= 2) {
+        if (configVersion >= 3) {
             return;
         }
         if (configVersion < 1) {
@@ -356,12 +360,19 @@ public final class WeakSpotConfig {
                         "weakspot.cfg: removed mushrooms from growthExcludedBlocks (mushrooms can grow since 1.2.2)");
             }
         }
-        if (mushroomGrowChance == 0.1) {
+        if (configVersion < 2 && mushroomGrowChance == 0.1) {
             mushroomGrowChance = 0.2;
             LogManager.getLogger(WeakSpotMod.MODID).info(
                     "weakspot.cfg: changed mushroomGrowChance from the old default 0.1 to 0.2 (default since 1.2.4)");
         }
-        configVersion = 2;
+        List<String> extra = new ArrayList<>(Arrays.asList(growthExtraBlocks));
+        if (!extra.contains(ResinHole.BLOCK)) {
+            extra.add(ResinHole.BLOCK);
+            growthExtraBlocks = extra.toArray(new String[0]);
+            LogManager.getLogger(WeakSpotMod.MODID).info(
+                    "weakspot.cfg: added ic2:rubber_wood to growthExtraBlocks (IC2 rubber wood resin holes since 1.3.7)");
+        }
+        configVersion = 3;
         save();
     }
 

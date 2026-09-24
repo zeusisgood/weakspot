@@ -261,7 +261,8 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 右クリックの弱点。植物は一番大きい面（多くは上面。サトウキビなどは側面）に、機械は狙っている面に出す。
+     * 右クリックの弱点。植物は一番大きい面（多くは上面。サトウキビなどは側面。IC2 のゴムの木は樹液の穴の面）に、
+     * 機械は狙っている面に出す。
      * 照準がその面に当たっているときだけヒットにする。
      */
     private static void aimRightClick(Minecraft mc, RayTraceResult target) {
@@ -273,7 +274,10 @@ public final class ClientWeakSpotHandler {
         }
         IBlockState state = mc.world.getBlockState(pos);
         AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
-        EnumFacing face = kind == HitKind.GROWTH ? growthFace(mc, pos, box, target.sideHit) : target.sideHit;
+        // IC2 のゴムの木は、乾いた樹液の穴のある面に出す（1.3.7）
+        EnumFacing resin = kind == HitKind.GROWTH ? RightClickTargets.resinHoleFace(state) : null;
+        EnumFacing face = resin != null ? resin
+                : kind == HitKind.GROWTH ? growthFace(mc, pos, box, target.sideHit) : target.sideHit;
         if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
             spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec, settings, RANDOM);
         }
