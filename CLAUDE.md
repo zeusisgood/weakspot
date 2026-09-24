@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## プロジェクト概要
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
-仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）、`doc/SPEC_v1.2.3.md`（Mod 1.2.3。`/weakspot reload`）、`doc/SPEC_v1.2.4.md`（Mod 1.2.4。`mushroomGrowChance` の初期値を 0.2 に）、`doc/SPEC_v1.3.md`（Mod 1.3.0。マイナー。弓の弱点と近接の弱点。実装時の確認事項は §5）、`doc/SPEC_v1.3.1.md`（Mod 1.3.1。近接の弱点を箱の上の 6 割だけに出す）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
+仕様書はすべて `doc/` にある。仕様の正本は `doc/SPEC_v1.0.md`（MVP。数値・挙動・MVP 完了条件 §12・スコープ外 §13）と、その差分を定める `doc/SPEC_v1.1.md`（Mod 1.1.0。スコープ外は §14、実装時の確認事項は §12）、`doc/SPEC_v1.1.x.md`（各パッチ Mod 1.1.x の差分。内容は README の更新履歴を参照）、`doc/SPEC_v1.2.md`（Mod 1.2.0。マイナー。小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知。実装時の確認事項は §4）、`doc/SPEC_v1.2.1.md`（Mod 1.2.1。動物の弱点を体越しに薄く透かす）、`doc/SPEC_v1.2.2.md`（Mod 1.2.2。キノコを確率で巨大キノコに育てる）、`doc/SPEC_v1.2.3.md`（Mod 1.2.3。`/weakspot reload`）、`doc/SPEC_v1.2.4.md`（Mod 1.2.4。`mushroomGrowChance` の初期値を 0.2 に）、`doc/SPEC_v1.3.md`（Mod 1.3.0。マイナー。弓の弱点と近接の弱点。実装時の確認事項は §5）、`doc/SPEC_v1.3.1.md`（Mod 1.3.1。近接の弱点を箱の上の 6 割だけに出す）、`doc/SPEC_v1.3.2.md`（Mod 1.3.2。他のプレイヤーのヒット音を成長・機械でも鳴らす）。v1.1 に書かれていないことは v1.0 と現行実装のまま、v1.1.1 以降のパッチの仕様に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
 ## 開発環境・コマンド
 
@@ -25,7 +25,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、README の更新履歴に旧マイナーとは接続できないことを書く。
-  - 現行は 1.3.1。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.3,1.4)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.3.2。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.3,1.4)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - クラウドのセッションはタグを push できない（403）。そのときは、ブランチだけ push し、タグを付けて `main` とタグを push するコマンドをユーザーに渡す（ユーザーが手元で実行する）。
 - リリースの流れ: README の「最新版」の行と「更新履歴」を更新 → コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
   - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
@@ -68,7 +68,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 統計（1.2.0）: `maxStreak`（`ServerStats.countStreak`。受け付けたヒットのすべてで `HitStreak` をサーバーの tick で数える）、`animalHits`、`fishingHits`。1.3.0 で `bowHits`、`critHits`。保存は `PlayerPersisted` の `weakspot` の新しいキー（古い版は無視する）。
 - `network/`（`WeakSpotMod.preInit` で登録。番号は登録順）: パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは、クライアントのクラスに `proxy.onXxx` 経由でアクセスする。
   - `HitMessage`（C→S）: ヒット通知（種類、BlockPos、連続ヒット数、動物・敵のエンティティ ID）。1.3.0 で種類に BOW・MELEE。
-  - `OtherHitMessage`（S→C）: 受け付けた採掘ヒットを 16 ブロック以内の他のプレイヤーに転送する（ヒット音用）。
+  - `OtherHitMessage`（S→C）: 受け付けた採掘・成長・機械のヒット（成長・機械は 1.3.2 から。`RightClickHits` も `ServerBoostTracker.notifyNearbyPlayers` を呼ぶ）を、そのブロックから 16 ブロック以内の他のプレイヤーに転送する（ヒット音用）。
   - `SettingsMessage`（S→C）: サーバーの設定値（`SyncedSettings`）。ログイン時と、ホストが設定を変えたとき。
   - `StatsRequestMessage`（C→S、リセットの指示を含む）/ `StatsMessage`（S→C）: 統計。
   - `MilestoneMessage`（S→C）: 達成した節目。
