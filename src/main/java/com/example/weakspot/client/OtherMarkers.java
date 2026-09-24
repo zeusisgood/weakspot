@@ -70,7 +70,11 @@ final class OtherMarkers {
             return;
         }
         WeakSpot spot = WeakSpot.at(HitKind.MINING, mc.world, data.pos, state, data.face, data.u, data.v,
-                ClientSettings.get().weakSpotRadiusRatio);
+                ClientSettings.get());
+        if (spot == null) {
+            MARKERS.remove(entityId);
+            return;
+        }
         Received previous = MARKERS.get(entityId);
         boolean sameSurface = previous != null && previous.spot.sameSurface(spot);
         if (MarkerMotion.animates(WeakSpotConfig.weakSpotTrailEnabled, previous != null, sameSurface)) {

@@ -18,13 +18,44 @@ public final class WeakSpotPlacer {
         return Math.min(face.width(), face.height()) * radiusRatio;
     }
 
+    /** 縁の余白の上限（面の短い辺に対する比率）。小さい面で、中心の動ける範囲が消えないようにする。 */
+    static final double EDGE_MARGIN_FACE_RATIO = 0.12;
+    /** 最小移動距離の上限（動ける範囲の対角線に対する比率）。 */
+    static final double MOVE_DISTANCE_RANGE_RATIO = 0.6;
+
+    /** 面に合わせて決めた、弱点の大きさ・縁の余白・最小移動距離。 */
+    public static final class Layout {
+        public final double radius;
+        public final double edgeMargin;
+        public final double minMoveDistance;
+
+        Layout(double radius, double edgeMargin, double minMoveDistance) {
+            this.radius = radius;
+            this.edgeMargin = edgeMargin;
+            this.minMoveDistance = minMoveDistance;
+        }
+    }
+
     /**
-     * 最小の半径つき（作物のような小さい面で、弱点が小さくなりすぎないように）。
-     * ただし、面の短い辺の半分（面に収まる最大）は超えない。
+     * 面に合わせた配置の数値（SPEC_v1.2 §1.3）。ふつうの1×1の面では、設定値のまま（半径 = 短い辺 × radiusRatio）。
+     * 1. 半径は minRadius 以上、短い辺 × maxRadiusRatio 以下（両立しないときは上限を優先する）
+     * 2. 縁の余白は min(edgeMargin, 短い辺 × 0.12)
+     * 3. 最小移動距離は min(minMoveDistance, 動ける範囲の対角線 × 0.6)
      */
-    public static double radius(FaceRect face, double radiusRatio, double minRadius) {
+    public static Layout layout(FaceRect face, double radiusRatio, double minRadius, double maxRadiusRatio,
+                                double edgeMargin, double minMoveDistance) {
         double shorter = Math.min(face.width(), face.height());
-        return Math.min(Math.max(shorter * radiusRatio, minRadius), shorter / 2);
+        double radius = Math.min(Math.max(shorter * radiusRatio, minRadius), shorter * maxRadiusRatio);
+        double margin = Math.min(Math.max(0, edgeMargin), shorter * EDGE_MARGIN_FACE_RATIO);
+        double rangeU = Math.max(0, face.width() - 2 * (radius + margin));
+        double rangeV = Math.max(0, face.height() - 2 * (radius + margin));
+        double move = Math.min(minMoveDistance, Math.sqrt(rangeU * rangeU + rangeV * rangeV) * MOVE_DISTANCE_RANGE_RATIO);
+        return new Layout(radius, margin, move);
+    }
+
+    /** 面の短い辺が minFaceSize より小さければ、弱点を出さない（カーペットの側面など）。 */
+    public static boolean isTooSmall(FaceRect face, double minFaceSize) {
+        return Math.min(face.width(), face.height()) < minFaceSize;
     }
 
     /**

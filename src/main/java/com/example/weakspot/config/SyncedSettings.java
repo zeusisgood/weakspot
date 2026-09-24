@@ -21,6 +21,9 @@ public final class SyncedSettings {
     public double weakSpotRadiusRatio;
     public double edgeMargin;
     public double minMoveDistance;
+    public double weakSpotMinRadius;
+    public double weakSpotMaxRadiusRatio;
+    public double minFaceSize;
     public int lingerTicks;
     public int growthMinHitIntervalTicks;
     public double growthMinRadius;
@@ -44,6 +47,9 @@ public final class SyncedSettings {
         s.weakSpotRadiusRatio = WeakSpotConfig.weakSpotRadiusRatio;
         s.edgeMargin = WeakSpotConfig.edgeMargin;
         s.minMoveDistance = WeakSpotConfig.minMoveDistance;
+        s.weakSpotMinRadius = WeakSpotConfig.weakSpotMinRadius;
+        s.weakSpotMaxRadiusRatio = WeakSpotConfig.weakSpotMaxRadiusRatio;
+        s.minFaceSize = WeakSpotConfig.minFaceSize;
         s.lingerTicks = WeakSpotConfig.lingerTicks;
         s.growthMinHitIntervalTicks = WeakSpotConfig.growthMinHitIntervalTicks;
         s.growthMinRadius = WeakSpotConfig.growthMinRadius;
@@ -62,6 +68,9 @@ public final class SyncedSettings {
         buf.writeDouble(weakSpotRadiusRatio);
         buf.writeDouble(edgeMargin);
         buf.writeDouble(minMoveDistance);
+        buf.writeDouble(weakSpotMinRadius);
+        buf.writeDouble(weakSpotMaxRadiusRatio);
+        buf.writeDouble(minFaceSize);
         buf.writeInt(lingerTicks);
         buf.writeInt(growthMinHitIntervalTicks);
         buf.writeDouble(growthMinRadius);
@@ -80,6 +89,9 @@ public final class SyncedSettings {
         s.weakSpotRadiusRatio = buf.readDouble();
         s.edgeMargin = buf.readDouble();
         s.minMoveDistance = buf.readDouble();
+        s.weakSpotMinRadius = buf.readDouble();
+        s.weakSpotMaxRadiusRatio = buf.readDouble();
+        s.minFaceSize = buf.readDouble();
         s.lingerTicks = buf.readInt();
         s.growthMinHitIntervalTicks = buf.readInt();
         s.growthMinRadius = buf.readDouble();

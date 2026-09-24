@@ -5,6 +5,7 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.FaceRect;
 import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.common.WeakSpotPlacer;
+import com.example.weakspot.config.SyncedSettings;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -27,6 +28,9 @@ final class WeakSpot {
     final double plane;
     final FaceRect rect;
     final double radius;
+    /** この面での、縁の余白と最小移動距離（面の大きさに合わせて決める。WeakSpotPlacer.layout）。 */
+    private final double edgeMargin;
+    private final double minMoveDistance;
     /** 出したときの当たり判定の箱（作物は育つと高さが変わるので、変わったら出し直す）。 */
     final AxisAlignedBB box;
 
@@ -36,46 +40,68 @@ final class WeakSpot {
     /** マーカーの表示位置と残像。 */
     final MarkerMotion motion = new MarkerMotion(0, 0);
 
-    private WeakSpot(HitKind kind, BlockPos pos, EnumFacing face, double plane, FaceRect rect, double radius,
-                     AxisAlignedBB box) {
+    private WeakSpot(HitKind kind, BlockPos pos, EnumFacing face, double plane, FaceRect rect,
+                     WeakSpotPlacer.Layout layout, AxisAlignedBB box) {
         this.kind = kind;
         this.pos = pos;
         this.face = face;
         this.axis = face.getAxis().ordinal();
         this.plane = plane;
         this.rect = rect;
-        this.radius = radius;
+        this.radius = layout.radius;
+        this.edgeMargin = layout.edgeMargin;
+        this.minMoveDistance = layout.minMoveDistance;
         this.box = box;
     }
 
-    /** 照準位置 aim を避けて、新しい弱点を出す。minRadius は最小の半径（0 なら比率どおり）。 */
+    /**
+     * 照準位置 aim を避けて、新しい弱点を出す。面が小さすぎる（minFaceSize 未満）ときは出さずに null を返す。
+     * 成長の弱点は、作物の小さい面でも当てやすいように、growthMinRadius も下限に使う。
+     */
     static WeakSpot spawn(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, Vec3d aim,
-                          double radiusRatio, double minRadius, double edgeMargin, double minDistance, Random random) {
-        WeakSpot spot = create(kind, world, pos, state, face, radiusRatio, minRadius);
+                          SyncedSettings settings, Random random) {
+        WeakSpot spot = create(kind, world, pos, state, face, settings);
+        if (spot == null) {
+            return null;
+        }
         double[] aimUV = spot.toUV(aim);
-        double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, edgeMargin, aimUV[0], aimUV[1], minDistance, random);
+        double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, spot.edgeMargin, aimUV[0], aimUV[1],
+                spot.minMoveDistance, random);
         spot.moveTo(p[0], p[1], false, 0);
         return spot;
     }
 
-    /** 他のプレイヤーから届いた位置 (u, v) に弱点を置く（描画用）。大きさは全員同じ設定値なので、自分の側で計算する。 */
+    /**
+     * 他のプレイヤーから届いた位置 (u, v) に弱点を置く（描画用）。大きさは全員同じ設定値なので、自分の側で計算する。
+     * 面が小さすぎる場合は null。
+     */
     static WeakSpot at(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, double u, double v,
-                       double radiusRatio) {
-        WeakSpot spot = create(kind, world, pos, state, face, radiusRatio, 0);
-        spot.moveTo(u, v, false, 0);
+                       SyncedSettings settings) {
+        WeakSpot spot = create(kind, world, pos, state, face, settings);
+        if (spot != null) {
+            spot.moveTo(u, v, false, 0);
+        }
         return spot;
     }
 
     /** ブロックの当たり判定の箱から、その面の矩形・平面・半径を決める（位置 u, v はまだ決めない）。 */
     private static WeakSpot create(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face,
-                                   double radiusRatio, double minRadius) {
+                                   SyncedSettings settings) {
         AxisAlignedBB box = state.getSelectedBoundingBox(world, pos);
         int axis = face.getAxis().ordinal();
         FaceRect rect = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
+        if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
+            return null;
+        }
+        double minRadius = kind == HitKind.GROWTH
+                ? Math.max(settings.weakSpotMinRadius, settings.growthMinRadius)
+                : settings.weakSpotMinRadius;
+        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio, minRadius,
+                settings.weakSpotMaxRadiusRatio, settings.edgeMargin, settings.minMoveDistance);
         double[] min = {box.minX, box.minY, box.minZ};
         double[] max = {box.maxX, box.maxY, box.maxZ};
         double plane = face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? max[axis] : min[axis];
-        return new WeakSpot(kind, pos, face, plane, rect, WeakSpotPlacer.radius(rect, radiusRatio, minRadius), box);
+        return new WeakSpot(kind, pos, face, plane, rect, layout, box);
     }
 
     boolean matches(HitKind kind, BlockPos pos, EnumFacing face) {
@@ -131,8 +157,8 @@ final class WeakSpot {
     }
 
     /** 今の位置から minDistance 以上離れた場所へ移動する。animate なら、マーカーは nowMs から動いて追いつく。 */
-    void relocate(double edgeMargin, double minDistance, Random random, boolean animate, long nowMs) {
-        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minDistance, random);
+    void relocate(Random random, boolean animate, long nowMs) {
+        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, random);
         moveTo(p[0], p[1], animate, nowMs);
     }
 

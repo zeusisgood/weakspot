@@ -40,6 +40,20 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double minMoveDistance = 0.4;
 
+    @Config.Comment({"[サーバー] 弱点の半径の下限（ブロック）。ボタンなどの小さい面でも当てやすくする",
+            "上限（weakSpotMaxRadiusRatio）と食い違うときは上限を優先する"})
+    @Config.RangeDouble(min = 0.0, max = 0.5)
+    public static double weakSpotMinRadius = 0.08;
+
+    @Config.Comment("[サーバー] 弱点の半径の上限（面の短い辺に対する比率）。小さい面で弱点が面からはみ出さないようにする")
+    @Config.RangeDouble(min = 0.05, max = 0.5)
+    public static double weakSpotMaxRadiusRatio = 0.35;
+
+    @Config.Comment({"[サーバー] 弱点を出す面の、短い辺の最小の長さ（ブロック）。これより小さい面（カーペットの側面など）には弱点を出さない",
+            "0 で、どんな小さい面にも出す"})
+    @Config.RangeDouble(min = 0.0, max = 1.0)
+    public static double minFaceSize = 0.15;
+
     @Config.Comment("[サーバー] 長押しをやめた後に弱点が残る時間（tick）")
     @Config.RangeInt(min = 0, max = 1200)
     public static int lingerTicks = 40;

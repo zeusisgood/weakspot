@@ -202,8 +202,10 @@ public final class ClientWeakSpotHandler {
         }
         SyncedSettings settings = ClientSettings.get();
         if (spot == null || !spot.matches(HitKind.MINING, pos, target.sideHit)) {
-            spot = WeakSpot.spawn(HitKind.MINING, mc.world, pos, state, target.sideHit, target.hitVec,
-                    settings.weakSpotRadiusRatio, 0, settings.edgeMargin, settings.minMoveDistance, RANDOM);
+            spot = WeakSpot.spawn(HitKind.MINING, mc.world, pos, state, target.sideHit, target.hitVec, settings, RANDOM);
+        }
+        if (spot == null) {
+            return;
         }
         spot.lastActiveTick = clientTick;
         if (spot.isHitBy(target.hitVec) && canHit(HitKind.MINING, settings.minHitIntervalTicks)) {
@@ -226,9 +228,10 @@ public final class ClientWeakSpotHandler {
         AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
         EnumFacing face = kind == HitKind.GROWTH ? growthFace(mc, pos, box, target.sideHit) : target.sideHit;
         if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
-            double minRadius = kind == HitKind.GROWTH ? settings.growthMinRadius : 0;
-            spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec,
-                    settings.weakSpotRadiusRatio, minRadius, settings.edgeMargin, settings.minMoveDistance, RANDOM);
+            spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec, settings, RANDOM);
+        }
+        if (spot == null) {
+            return;
         }
         spot.lastActiveTick = clientTick;
         if (target.sideHit == spot.face && spot.isHitBy(target.hitVec)
@@ -283,10 +286,8 @@ public final class ClientWeakSpotHandler {
         }
         WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
 
-        SyncedSettings settings = ClientSettings.get();
         // 同じ面の中の移動なので、演出がオンならマーカーを動かす（当たり判定は移動先ですぐに行う）
-        spot.relocate(settings.edgeMargin, settings.minMoveDistance, RANDOM, WeakSpotConfig.weakSpotTrailEnabled,
-                Minecraft.getSystemTime());
+        spot.relocate(RANDOM, WeakSpotConfig.weakSpotTrailEnabled, Minecraft.getSystemTime());
     }
 
     /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */
