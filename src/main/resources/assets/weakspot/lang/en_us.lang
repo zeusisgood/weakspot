@@ -51,3 +51,4 @@ weakspot.general.combodisplayenabled.tooltip=[Client] Show your hit streak (comb
 weakspot.general.comboscale.tooltip=[Client] Size multiplier of the combo number.
 weakspot.general.comboposition.tooltip=[Client] Where to show the combo.\nBELOW_CROSSHAIR, RIGHT_OF_CROSSHAIR, TOP_CENTER (below boss bars)
 weakspot.general.combomilestoneeffects.tooltip=[Client] Accent sound and glow when the combo reaches 10, 25, 50 and 100.
+weakspot.general.weakspottrailenabled.tooltip=[Client] Animate weak spots as they move: the marker quickly slides to its new place, leaving a short trail.\nVisual only: hits count at the new place immediately. Off switches in place. Also applies to other players' markers.

@@ -3,6 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.common.FaceMath;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.FaceRect;
+import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.common.WeakSpotPlacer;
 import java.util.Random;
 import net.minecraft.block.state.IBlockState;
@@ -12,7 +13,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-/** 1つのブロック面に出ている弱点。座標はワールド座標系の (u, v)。 */
+/**
+ * 1つのブロック面に出ている弱点。座標はワールド座標系の (u, v)。
+ * u, v は当たり判定の位置（ヒットの瞬間に移動先へ変わる）。マーカーの表示位置は motion で別に持つ（見た目だけ）。
+ */
 final class WeakSpot {
 
     final HitKind kind;
@@ -29,6 +33,8 @@ final class WeakSpot {
     double u;
     double v;
     long lastActiveTick;
+    /** マーカーの表示位置と残像。 */
+    final MarkerMotion motion = new MarkerMotion(0, 0);
 
     private WeakSpot(HitKind kind, BlockPos pos, EnumFacing face, double plane, FaceRect rect, double radius,
                      AxisAlignedBB box) {
@@ -48,8 +54,7 @@ final class WeakSpot {
         WeakSpot spot = create(kind, world, pos, state, face, radiusRatio, minRadius);
         double[] aimUV = spot.toUV(aim);
         double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, edgeMargin, aimUV[0], aimUV[1], minDistance, random);
-        spot.u = p[0];
-        spot.v = p[1];
+        spot.moveTo(p[0], p[1], false, 0);
         return spot;
     }
 
@@ -57,8 +62,7 @@ final class WeakSpot {
     static WeakSpot at(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, double u, double v,
                        double radiusRatio) {
         WeakSpot spot = create(kind, world, pos, state, face, radiusRatio, 0);
-        spot.u = u;
-        spot.v = v;
+        spot.moveTo(u, v, false, 0);
         return spot;
     }
 
@@ -76,6 +80,11 @@ final class WeakSpot {
 
     boolean matches(HitKind kind, BlockPos pos, EnumFacing face) {
         return this.kind == kind && this.pos.equals(pos) && this.face == face;
+    }
+
+    /** 同じブロックの同じ面（形も同じ）か。違えば、マーカーは動かさずにその場で切り替える。 */
+    boolean sameSurface(WeakSpot other) {
+        return other != null && matches(other.kind, other.pos, other.face) && box.equals(other.box);
     }
 
     /**
@@ -121,11 +130,21 @@ final class WeakSpot {
         return WeakSpotPlacer.isHit(u, v, radius, a[0], a[1]);
     }
 
-    /** 今の位置から minDistance 以上離れた場所へ移動する。 */
-    void relocate(double edgeMargin, double minDistance, Random random) {
+    /** 今の位置から minDistance 以上離れた場所へ移動する。animate なら、マーカーは nowMs から動いて追いつく。 */
+    void relocate(double edgeMargin, double minDistance, Random random, boolean animate, long nowMs) {
         double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minDistance, random);
-        u = p[0];
-        v = p[1];
+        moveTo(p[0], p[1], animate, nowMs);
+    }
+
+    /** 当たり判定の位置はすぐに変え、マーカーは animate なら動かし、そうでなければその場で切り替える。 */
+    void moveTo(double newU, double newV, boolean animate, long nowMs) {
+        u = newU;
+        v = newV;
+        if (animate) {
+            motion.moveTo(newU, newV, nowMs);
+        } else {
+            motion.jumpTo(newU, newV);
+        }
     }
 
     /** 面から lift だけ浮かせた位置のワールド座標。 */

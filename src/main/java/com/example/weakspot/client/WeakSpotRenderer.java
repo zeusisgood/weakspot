@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.common.MarkerColor;
+import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,13 +15,22 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 
-/** 弱点の円と、ヒット時に広がって消えるリングを描く。他のプレイヤーのマークは、設定の色と濃さで同じ形に描く。 */
+/**
+ * 弱点の円と、ヒット時に広がって消えるリングを描く。他のプレイヤーのマークは、設定の色と濃さで同じ形に描く。
+ * マーカーは表示位置（WeakSpot.motion。移動の演出と残像）に描き、当たり判定の位置（u, v）とは分けている。
+ */
 final class WeakSpotRenderer {
 
     private static final int SEGMENTS = 32;
     private static final double LIFT = 0.003;
     private static final int FADE_TICKS = 10;
     private static final int FLASH_TICKS = 6;
+
+    private static final float[] OWN_DISK = {1.0F, 0.35F, 0.15F};
+    private static final float[] OWN_RING = {1.0F, 0.9F, 0.4F};
+    private static final float[] OWN_CENTER = {1.0F, 0.95F, 0.7F};
+    /** 動いている最中のマーカーに重ねる白の濃さ（動き始め）。 */
+    private static final double HEAD_WHITE = 0.5;
 
     /** 他のプレイヤーのマークの色が読めないときの色（水色 #3FA9FF）。 */
     private static final int DEFAULT_OTHER_COLOR = 0x3FA9FF;
@@ -83,25 +93,20 @@ final class WeakSpotRenderer {
         GlStateManager.depthMask(false);
         GlStateManager.glLineWidth(2.0F);
 
+        long nowMs = Minecraft.getSystemTime();
         if (!others.isEmpty()) {
             int rgb = MarkerColor.parse(WeakSpotConfig.otherMarkerColor, DEFAULT_OTHER_COLOR);
-            float a = (float) WeakSpotConfig.otherMarkerAlpha;
+            float[] disk = {(rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F};
             float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
             float[] center = MarkerColor.towardWhite(rgb, 0.75F);
             for (WeakSpot other : others) {
-                drawDisk(other, other.u, other.v, other.radius, cx, cy, cz,
-                        (rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, 0.45F * a);
-                drawRing(other, other.u, other.v, other.radius, cx, cy, cz, ring[0], ring[1], ring[2], 0.9F * a);
-                drawDisk(other, other.u, other.v, other.radius * 0.3, cx, cy, cz,
-                        center[0], center[1], center[2], 0.9F * a);
+                drawMarker(other, disk, ring, center, (float) WeakSpotConfig.otherMarkerAlpha, nowMs, cx, cy, cz);
             }
         }
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks);
             if (alpha > 0) {
-                drawDisk(spot, spot.u, spot.v, spot.radius, cx, cy, cz, 1.0F, 0.35F, 0.15F, 0.45F * alpha);
-                drawRing(spot, spot.u, spot.v, spot.radius, cx, cy, cz, 1.0F, 0.9F, 0.4F, 0.9F * alpha);
-                drawDisk(spot, spot.u, spot.v, spot.radius * 0.3, cx, cy, cz, 1.0F, 0.95F, 0.7F, 0.9F * alpha);
+                drawMarker(spot, OWN_DISK, OWN_RING, OWN_CENTER, alpha, nowMs, cx, cy, cz);
             }
         }
         for (Iterator<Flash> it = FLASHES.iterator(); it.hasNext(); ) {
@@ -120,6 +125,33 @@ final class WeakSpotRenderer {
         GlStateManager.enableCull();
         GlStateManager.enableTexture2D();
         GlStateManager.popMatrix();
+    }
+
+    /**
+     * マーカー（円、輪、中心）を表示位置に描く。移動の演出がオンなら、残像と、動いている最中の先頭の明るさも描く。
+     * 当たり判定は spot.u, spot.v（移動先）のままで、ここでは見た目だけを動かす。
+     */
+    private static void drawMarker(WeakSpot spot, float[] disk, float[] ring, float[] center, float alpha, long nowMs,
+                                   double cx, double cy, double cz) {
+        double u = spot.u;
+        double v = spot.v;
+        if (WeakSpotConfig.weakSpotTrailEnabled) {
+            for (MarkerMotion.Afterimage image : spot.motion.afterimages(nowMs)) {
+                float a = (float) image.alpha(nowMs) * alpha;
+                drawDisk(spot, image.u, image.v, spot.radius, cx, cy, cz, disk[0], disk[1], disk[2], 0.35F * a);
+                drawRing(spot, image.u, image.v, spot.radius, cx, cy, cz, ring[0], ring[1], ring[2], 0.5F * a);
+            }
+            double[] p = spot.motion.position(nowMs);
+            u = p[0];
+            v = p[1];
+        }
+        drawDisk(spot, u, v, spot.radius, cx, cy, cz, disk[0], disk[1], disk[2], 0.45F * alpha);
+        drawRing(spot, u, v, spot.radius, cx, cy, cz, ring[0], ring[1], ring[2], 0.9F * alpha);
+        drawDisk(spot, u, v, spot.radius * 0.3, cx, cy, cz, center[0], center[1], center[2], 0.9F * alpha);
+        double head = WeakSpotConfig.weakSpotTrailEnabled ? spot.motion.headHighlight(nowMs) : 0;
+        if (head > 0) {
+            drawDisk(spot, u, v, spot.radius, cx, cy, cz, 1.0F, 1.0F, 1.0F, (float) (HEAD_WHITE * head) * alpha);
+        }
     }
 
     /** 長押しをやめた後、残り FADE_TICKS で薄くする。 */

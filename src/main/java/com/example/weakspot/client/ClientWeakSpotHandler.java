@@ -5,6 +5,7 @@ import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.config.SyncedSettings;
+import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
 import java.util.Arrays;
 import java.util.Random;
@@ -229,7 +230,9 @@ public final class ClientWeakSpotHandler {
         WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
 
         SyncedSettings settings = ClientSettings.get();
-        spot.relocate(settings.edgeMargin, settings.minMoveDistance, RANDOM);
+        // 同じ面の中の移動なので、演出がオンならマーカーを動かす（当たり判定は移動先ですぐに行う）
+        spot.relocate(settings.edgeMargin, settings.minMoveDistance, RANDOM, WeakSpotConfig.weakSpotTrailEnabled,
+                Minecraft.getSystemTime());
     }
 
     /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */

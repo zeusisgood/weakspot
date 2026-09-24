@@ -171,6 +171,10 @@ public final class WeakSpotConfig {
     @Config.Comment("[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）")
     public static boolean comboMilestoneEffects = true;
 
+    @Config.Comment({"[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）",
+            "見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く"})
+    public static boolean weakSpotTrailEnabled = true;
+
     private WeakSpotConfig() {
     }
 

@@ -51,3 +51,4 @@ weakspot.general.combodisplayenabled.tooltip=[クライアント] 連続ヒッ�
 weakspot.general.comboscale.tooltip=[クライアント] コンボの数字の大きさの倍率
 weakspot.general.comboposition.tooltip=[クライアント] コンボの表示の位置\nBELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央。ボスバーがあればその下）
 weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）
+weakspot.general.weakspottrailenabled.tooltip=[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）\n見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く

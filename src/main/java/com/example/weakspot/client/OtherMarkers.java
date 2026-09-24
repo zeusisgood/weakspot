@@ -2,8 +2,10 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.common.MarkerSendPolicy;
 import com.example.weakspot.config.SyncedSettings;
+import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.MarkerMessage;
 import com.example.weakspot.network.MarkerMessage.MarkerData;
 import java.util.ArrayList;
@@ -69,6 +71,14 @@ final class OtherMarkers {
         }
         WeakSpot spot = WeakSpot.at(HitKind.MINING, mc.world, data.pos, state, data.face, data.u, data.v,
                 ClientSettings.get().weakSpotRadiusRatio);
+        Received previous = MARKERS.get(entityId);
+        boolean sameSurface = previous != null && previous.spot.sameSurface(spot);
+        if (MarkerMotion.animates(WeakSpotConfig.weakSpotTrailEnabled, previous != null, sameSurface)) {
+            // 最後に知っている位置から、届いた位置へ動かす（間引かれて途中の移動がまとめて届いても同じ）。
+            // 同じ位置の送り直しなら動かさない
+            spot = previous.spot;
+            spot.moveTo(data.u, data.v, true, Minecraft.getSystemTime());
+        }
         MARKERS.put(entityId, new Received(data, tick, spot));
     }
 
