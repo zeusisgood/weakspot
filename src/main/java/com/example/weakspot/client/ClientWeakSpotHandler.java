@@ -2,6 +2,7 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.BlockHealthBar;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.config.SyncedSettings;
@@ -81,6 +82,7 @@ public final class ClientWeakSpotHandler {
             return;
         }
         clientTick++;
+        MiningProgress.sample(mc.playerController);
         int broken = STREAK.expire(clientTick);
         if (broken > 0) {
             ComboHud.onBreak(broken, clientTick);
@@ -116,7 +118,24 @@ public final class ClientWeakSpotHandler {
         }
         framePartialTicks = event.getPartialTicks();
         updateAim(mc);
-        WeakSpotRenderer.render(mc, spot, clientTick, event.getPartialTicks());
+        double health = WeakSpotConfig.blockHealthBarEnabled ? healthBarRemaining(mc, event.getPartialTicks()) : -1;
+        WeakSpotRenderer.render(mc, spot, health, clientTick, event.getPartialTicks());
+    }
+
+    /**
+     * 耐久バーに出す、掘っているブロックの残りの耐久（0〜1）。出さないときは -1。
+     * 採掘の弱点がこのフレームの照準の面に出ていて（弱点が出るブロックで、クリエイティブでない）、
+     * そのブロックを今掘っているときだけ出す。長押しをやめた・壊れたときは、掘っていない扱いになってすぐに消える。
+     */
+    private static double healthBarRemaining(Minecraft mc, float partialTicks) {
+        RayTraceResult target = mc.objectMouseOver;
+        if (spot == null || spot.lastActiveTick != clientTick || mc.player.capabilities.isCreativeMode
+                || target == null || target.typeOfHit != RayTraceResult.Type.BLOCK
+                || !spot.matches(HitKind.MINING, target.getBlockPos(), target.sideHit)) {
+            return -1;
+        }
+        double progress = MiningProgress.progress(mc.playerController, spot.pos, partialTicks);
+        return progress < 0 ? -1 : BlockHealthBar.remaining(progress);
     }
 
     private static void updateAim(Minecraft mc) {
@@ -253,6 +272,7 @@ public final class ClientWeakSpotHandler {
 
     private static void reset() {
         spot = null;
+        MiningProgress.clear();
         boostPos = null;
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
         boostHitTick = Long.MIN_VALUE / 2;

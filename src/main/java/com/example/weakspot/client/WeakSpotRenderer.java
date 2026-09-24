@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.BlockHealthBar;
 import com.example.weakspot.common.MarkerColor;
 import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.config.WeakSpotConfig;
@@ -18,6 +19,7 @@ import org.lwjgl.opengl.GL11;
 /**
  * 弱点の円と、ヒット時に広がって消えるリングを描く。他のプレイヤーのマークは、設定の色と濃さで同じ形に描く。
  * マーカーは表示位置（WeakSpot.motion。移動の演出と残像）に描き、当たり判定の位置（u, v）とは分けている。
+ * 掘っているブロックの残りの耐久バーは、自分の採掘の弱点と同じ面の下の余白に、マーカーより先に（下に）描く。
  */
 final class WeakSpotRenderer {
 
@@ -31,6 +33,12 @@ final class WeakSpotRenderer {
     private static final float[] OWN_CENTER = {1.0F, 0.95F, 0.7F};
     /** 動いている最中のマーカーに重ねる白の濃さ（動き始め）。 */
     private static final double HEAD_WHITE = 0.5;
+
+    /** 耐久バーの、残りの耐久（緑 #3DDC84）と、バーの全体の背景（黒 #1E1E1E、半透明）。 */
+    private static final float[] HEALTH_FILL = {0x3D / 255F, 0xDC / 255F, 0x84 / 255F, 1.0F};
+    private static final float[] HEALTH_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
+    /** 耐久バーはマーカー（LIFT）より少し低く浮かせる。 */
+    private static final double HEALTH_LIFT = 0.002;
 
     /** 他のプレイヤーのマークの色が読めないときの色（水色 #3FA9FF）。 */
     private static final int DEFAULT_OTHER_COLOR = 0x3FA9FF;
@@ -67,7 +75,8 @@ final class WeakSpotRenderer {
         FLASHES.clear();
     }
 
-    static void render(Minecraft mc, WeakSpot spot, long tick, float partialTicks) {
+    /** health は耐久バーの残りの耐久（0〜1。spot の面に描く）。負ならバーを描かない。 */
+    static void render(Minecraft mc, WeakSpot spot, double health, long tick, float partialTicks) {
         Entity camera = mc.getRenderViewEntity();
         if (camera == null) {
             return;
@@ -93,6 +102,9 @@ final class WeakSpotRenderer {
         GlStateManager.depthMask(false);
         GlStateManager.glLineWidth(2.0F);
 
+        if (spot != null && health >= 0) {
+            drawHealthBar(spot, health, cx, cy, cz);
+        }
         long nowMs = Minecraft.getSystemTime();
         if (!others.isEmpty()) {
             int rgb = MarkerColor.parse(WeakSpotConfig.otherMarkerColor, DEFAULT_OTHER_COLOR);
@@ -152,6 +164,32 @@ final class WeakSpotRenderer {
         if (head > 0) {
             drawDisk(spot, u, v, spot.radius, cx, cy, cz, 1.0F, 1.0F, 1.0F, (float) (HEAD_WHITE * head) * alpha);
         }
+    }
+
+    /**
+     * 面の「下」の辺に沿って、背景（バーの全体）と、左から残りの耐久の分の緑を描く。
+     * 上面・下面の「下」は、プレイヤーに一番近い辺（視点の x, z はカメラの位置と同じ）。
+     */
+    private static void drawHealthBar(WeakSpot spot, double health, double cx, double cy, double cz) {
+        int sign = spot.face.getAxisDirection().getOffset();
+        BlockHealthBar bar = BlockHealthBar.place(spot.axis, sign, spot.rect, cx, cz);
+        drawQuad(spot, bar.rect(1), HEALTH_LIFT, cx, cy, cz, HEALTH_BACK);
+        if (health > 0) {
+            drawQuad(spot, bar.rect(health), HEALTH_LIFT * 1.25, cx, cy, cz, HEALTH_FILL);
+        }
+    }
+
+    /** 面の (u, v) の矩形 {minU, minV, maxU, maxV} を塗る。 */
+    private static void drawQuad(WeakSpot spot, double[] r, double lift, double cx, double cy, double cz,
+                                 float[] rgba) {
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        vertex(buffer, spot.worldPoint(r[0], r[1], lift), cx, cy, cz, rgba[0], rgba[1], rgba[2], rgba[3]);
+        vertex(buffer, spot.worldPoint(r[2], r[1], lift), cx, cy, cz, rgba[0], rgba[1], rgba[2], rgba[3]);
+        vertex(buffer, spot.worldPoint(r[2], r[3], lift), cx, cy, cz, rgba[0], rgba[1], rgba[2], rgba[3]);
+        vertex(buffer, spot.worldPoint(r[0], r[3], lift), cx, cy, cz, rgba[0], rgba[1], rgba[2], rgba[3]);
+        tessellator.draw();
     }
 
     /** 長押しをやめた後、残り FADE_TICKS で薄くする。 */

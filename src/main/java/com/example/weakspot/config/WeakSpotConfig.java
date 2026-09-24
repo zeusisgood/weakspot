@@ -175,6 +175,10 @@ public final class WeakSpotConfig {
             "見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く"})
     public static boolean weakSpotTrailEnabled = true;
 
+    @Config.Comment({"[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか",
+            "自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る"})
+    public static boolean blockHealthBarEnabled = true;
+
     private WeakSpotConfig() {
     }
 
