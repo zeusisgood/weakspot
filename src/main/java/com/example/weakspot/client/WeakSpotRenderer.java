@@ -21,6 +21,7 @@ import org.lwjgl.opengl.GL11;
  * 弱点の円と、ヒット時に広がって消えるリングを描く。他のプレイヤーのマークは、設定の色と濃さで同じ形に描く。
  * マーカーは表示位置（WeakSpot.motion。移動の演出と残像）に描き、当たり判定の位置（u, v）とは分けている。
  * 掘っているブロックの残りの耐久バーは、自分の採掘の弱点と同じ面の下の余白に、マーカーより先に（下に）描く。
+ * 自分の動物の弱点は、体に隠れた部分も薄く透かして描く（animalSpotSeeThrough）。
  */
 final class WeakSpotRenderer {
 
@@ -34,6 +35,8 @@ final class WeakSpotRenderer {
     private static final float[] OWN_CENTER = {1.0F, 0.95F, 0.7F};
     /** 動いている最中のマーカーに重ねる白の濃さ（動き始め）。 */
     private static final double HEAD_WHITE = 0.5;
+    /** 動物の弱点の、体に隠れた部分を透かして描くときの濃さ（通常の濃さに掛ける）。 */
+    private static final float SEE_THROUGH_ALPHA = 0.35F;
 
     /** 耐久バーの、残りの耐久（緑 #3DDC84）と、バーの全体の背景（黒 #1E1E1E、半透明）。 */
     private static final float[] HEALTH_FILL = {0x3D / 255F, 0xDC / 255F, 0x84 / 255F, 1.0F};
@@ -128,6 +131,12 @@ final class WeakSpotRenderer {
             float alpha = spotAlpha(spot, tick, partialTicks);
             if (alpha > 0) {
                 drawMarker(spot, MarkerShape.CIRCLE, OWN_DISK, OWN_RING, OWN_CENTER, alpha, nowMs, cx, cy, cz);
+                if (seeThrough(spot)) {
+                    GlStateManager.disableDepth();
+                    drawMarker(spot, MarkerShape.CIRCLE, OWN_DISK, OWN_RING, OWN_CENTER,
+                            alpha * SEE_THROUGH_ALPHA, nowMs, cx, cy, cz);
+                    GlStateManager.enableDepth();
+                }
             }
         }
         for (Iterator<Flash> it = FLASHES.iterator(); it.hasNext(); ) {
@@ -138,6 +147,12 @@ final class WeakSpotRenderer {
             }
             double radius = flash.spot.radius * (1 + progress * 1.2);
             drawRing(flash.spot, flash.u, flash.v, radius, cx, cy, cz, 1.0F, 1.0F, 1.0F, 1 - progress);
+            if (seeThrough(flash.spot)) {
+                GlStateManager.disableDepth();
+                drawRing(flash.spot, flash.u, flash.v, radius, cx, cy, cz, 1.0F, 1.0F, 1.0F,
+                        (1 - progress) * SEE_THROUGH_ALPHA);
+                GlStateManager.enableDepth();
+            }
         }
 
         if (spot != null && growth >= 0) {
@@ -185,6 +200,14 @@ final class WeakSpotRenderer {
     }
 
     private static final float[] WHITE = {1.0F, 1.0F, 1.0F};
+
+    /**
+     * 自分の動物の弱点は、体の模型が当たり判定の箱より外に出ていると（ニワトリなど）体に隠れるので、
+     * 深度テストを切って薄くもう一度描く。他のプレイヤーのマークは、壁越しに見えてしまうので透かさない。
+     */
+    private static boolean seeThrough(WeakSpot spot) {
+        return spot.entity != null && WeakSpotConfig.animalSpotSeeThrough;
+    }
 
     /** 形の中を塗る。RING は輪の部分（内側の半径との間）だけ塗る。 */
     private static void drawFill(WeakSpot spot, MarkerShape shape, double u, double v, double radius,

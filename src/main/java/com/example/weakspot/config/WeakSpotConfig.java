@@ -276,6 +276,10 @@ public final class WeakSpotConfig {
             "オフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える"})
     public static boolean weakSpotsEnabled = true;
 
+    @Config.Comment({"[クライアント] 自分の動物の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか",
+            "ニワトリなど、体が当たり判定より大きい動物で見やすくなる。他のプレイヤーのマークは透かさない"})
+    public static boolean animalSpotSeeThrough = true;
+
     private WeakSpotConfig() {
     }
 
