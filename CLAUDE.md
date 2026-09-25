@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
 仕様書は `doc/spec/` にある（**一覧と版ごとの 1 行の要約は `doc/spec/README.md`**。新しい版の仕様書を作ったら、そこの表の一番上に 1 行足す）。仕様の正本は `doc/spec/SPEC_v1.0.md`（MVP）と、版ごとの差分の仕様書。仕様書に書かれていないことは、その前の版と現行実装のまま。仕様と食い違う実装が必要な場合は、リリースの流れの「止まる条件」に従い、push せずにユーザーに確認する。
 
-**文書の置き場所**（1.8.6 のあとに整理した）: `README.md` は入門だけ（ダウンロード・対応する版・操作・種類の一覧・最近の更新 3 件・文書へのリンク）。詳しい遊び方は `doc/play.md`、インストールは `doc/install.md`、設定の一覧と管理コマンドは `doc/config.md`、開発は `doc/development.md`、更新履歴は `CHANGELOG.md`、文書の案内は `doc/README.md`。遊び方の説明（`doc/play.md`）には版の注記（「（1.7.0）」など）を書かない（更新履歴に書く）。
+**文書の置き場所**（1.8.6 のあとに整理した）: `README.md` は入門だけ（ダウンロード・対応する版・操作・種類の一覧・最近の更新 3 件・文書へのリンク）。詳しい遊び方は `doc/play.md`、インストールは `doc/install.md`、設定の一覧と管理コマンドは `doc/config.md`、開発は `doc/development.md`、更新履歴は `CHANGELOG.md`、文書の案内は `doc/README.md`。遊び方の説明（`doc/play.md`）には版の注記（「（1.7.0）」など）を書かない（更新履歴に書く）。 README と `CHANGELOG.md` の文章は、ひらがなに開きすぎず漢字を適度に使う（ユーザーの指示。例「当てると速くなる」→「当てると各動作が加速」、「変わっていない」→「変更なし」、更新履歴は体言止めでよい）。
 
 ## 開発環境・コマンド
 
