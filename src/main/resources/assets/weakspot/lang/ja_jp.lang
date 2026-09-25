@@ -113,3 +113,6 @@ weakspot.guide.11.title=キー
 weakspot.guide.11.text=%s キー: 弱点のオン・オフ（建築中など、邪魔なときに）。%s キー: 統計の画面。ヒット音の楽器と音量、設定の画面、このガイドも、ここから開けます。
 weakspot.guide.12.title=マルチプレイ
 weakspot.guide.12.text=近くの仲間が当てている弱点は、別の色の輪で見えます。仲間が当てたときのヒット音も聞こえます。色や形、音量は、設定で変えられます。
+weakspot.version.clientOlder=あなたの弱点破壊 Mod は %s です（サーバーは %s）。一部の機能が正しく動かないことがあります。新しい版に更新してください
+weakspot.version.serverOlder=サーバーの弱点破壊 Mod は %s です（あなたは %s）。一部の機能が正しく動かないことがあります。サーバーの管理者に更新を頼んでください
+weakspot.version.op=%s さんの弱点破壊 Mod は %s です（サーバーは %s）

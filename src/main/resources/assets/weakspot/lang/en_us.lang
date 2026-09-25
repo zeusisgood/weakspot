@@ -113,3 +113,6 @@ weakspot.guide.11.title=Keys
 weakspot.guide.11.text=%s: turn weak spots on or off (handy while building). %s: the stats screen, where you can also change hit sounds, open the settings and read this guide.
 weakspot.guide.12.title=Multiplayer
 weakspot.guide.12.text=Weak spots that nearby friends are hitting show as rings in another color, and you hear their hits too. Colors, shapes and volume can be changed in the settings.
+weakspot.version.clientOlder=Your Weak Spot Mining mod is %s (the server has %s). Some features may not work right. Please update it.
+weakspot.version.serverOlder=The server's Weak Spot Mining mod is %s (you have %s). Some features may not work right. Ask the server admin to update it.
+weakspot.version.op=%s joined with Weak Spot Mining %s (the server has %s).
