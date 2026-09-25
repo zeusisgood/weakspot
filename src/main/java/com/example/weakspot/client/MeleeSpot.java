@@ -5,7 +5,7 @@ import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
@@ -82,7 +82,7 @@ final class MeleeSpot {
         }
         int streak = ClientWeakSpotHandler.registerHit(HitKind.MELEE);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.MELEE, streak));
-        MeleeCharge.add(mc.player, settings.meleeChargePerHit * MachineComboBoost.factor(streak),
+        MeleeCharge.add(mc.player, settings.meleeChargePerHit * ComboFactor.factor(streak),
                 settings.meleeChargeMax);
         SPOT.relocate(mc.player);
     }

@@ -2,7 +2,7 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
 import net.minecraft.client.Minecraft;
@@ -76,7 +76,7 @@ final class PortalSpot {
         }
         int streak = ClientWeakSpotHandler.registerHit(HitKind.PORTAL);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.PORTAL, streak));
-        double ticks = settings.portalHitTicks * MachineComboBoost.factor(streak);
+        double ticks = settings.portalHitTicks * ComboFactor.factor(streak);
         EntityPlayerSP player = mc.player;
         player.timeInPortal = Math.min(1.0F, player.timeInPortal + (float) (ticks * NAUSEA_PER_TICK));
         SPOT.relocate(player);

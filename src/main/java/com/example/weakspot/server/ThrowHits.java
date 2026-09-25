@@ -3,7 +3,7 @@ package com.example.weakspot.server;
 import com.example.weakspot.ThrowCharge;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +43,7 @@ public final class ThrowHits {
         }
         LAST_HIT.put(player.getUniqueID(), now);
         int combo = ServerStats.countStreak(player);
-        ThrowCharge.add(player, WeakSpotConfig.throwChargePerHit * MachineComboBoost.factor(combo));
+        ThrowCharge.add(player, WeakSpotConfig.throwChargePerHit * ComboFactor.factor(combo));
         ServerStats.recordKindHit(player, HitKind.THROW);
         VehicleHits.boostFromRider(player, combo);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);

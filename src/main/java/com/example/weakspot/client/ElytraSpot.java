@@ -2,7 +2,7 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.HitMessage;
 import net.minecraft.client.Minecraft;
@@ -86,7 +86,7 @@ final class ElytraSpot {
         }
         int streak = ClientWeakSpotHandler.registerHit(HitKind.ELYTRA);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.ELYTRA, streak));
-        dash(mc, settings.elytraBoostPower * MachineComboBoost.factor(streak));
+        dash(mc, settings.elytraBoostPower * ComboFactor.factor(streak));
         SPOT.relocate(mc.player);
     }
 

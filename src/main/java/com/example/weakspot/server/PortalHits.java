@@ -3,7 +3,7 @@ package com.example.weakspot.server;
 import com.example.weakspot.Reflect;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -66,7 +66,7 @@ public final class PortalHits {
         }
         LAST_HIT.put(player.getUniqueID(), now);
         int combo = ServerStats.countStreak(player);
-        int added = (int) Math.round(WeakSpotConfig.portalHitTicks * MachineComboBoost.factor(combo));
+        int added = (int) Math.round(WeakSpotConfig.portalHitTicks * ComboFactor.factor(combo));
         try {
             portalCounter.setInt(player, Math.min(player.getMaxInPortalTime(), counter + added));
         } catch (IllegalAccessException | RuntimeException e) {

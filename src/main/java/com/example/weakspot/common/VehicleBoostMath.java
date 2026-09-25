@@ -1,7 +1,7 @@
 package com.example.weakspot.common;
 
 /**
- * 乗り物の加速の倍率（1.6.0）。vehicleBoostMultiplier × コンボの掛け数（MachineComboBoost.factor）。
+ * 乗り物の加速の倍率（1.6.0）。vehicleBoostMultiplier × コンボの掛け数（ComboFactor.factor）。
  * 上限 max は 0 以下なら無し（初期値。ユーザーの判断）。
  */
 public final class VehicleBoostMath {
@@ -10,7 +10,7 @@ public final class VehicleBoostMath {
     }
 
     public static double multiplier(double base, double max, int combo) {
-        double value = base * MachineComboBoost.factor(combo);
+        double value = base * ComboFactor.factor(combo);
         return max > 0 ? Math.min(value, max) : value;
     }
 

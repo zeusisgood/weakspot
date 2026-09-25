@@ -4,7 +4,7 @@ import com.example.weakspot.MeleeCharge;
 import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.common.RepairSettlement;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public final class MeleeHits {
         }
         LAST_HIT.put(player.getUniqueID(), now);
         int combo = ServerStats.countStreak(player);
-        MeleeCharge.add(player, WeakSpotConfig.meleeChargePerHit * MachineComboBoost.factor(combo),
+        MeleeCharge.add(player, WeakSpotConfig.meleeChargePerHit * ComboFactor.factor(combo),
                 WeakSpotConfig.meleeChargeMax);
         ServerStats.recordKindHit(player, HitKind.MELEE);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);

@@ -3,7 +3,7 @@ package com.example.weakspot.common;
 import java.util.Random;
 
 /**
- * 収穫のコンボのおまけ（1.7.0）。収穫物の数にコンボの掛け数（MachineComboBoost.factor）を掛け、端数は確率で 1 つ足す
+ * 収穫のコンボのおまけ（1.7.0）。収穫物の数にコンボの掛け数（ComboFactor.factor）を掛け、端数は確率で 1 つ足す
  * （×1.25 なら 4 回に 1 回 +1）。上限はない。Minecraft に依存しない。
  */
 public final class HarvestBonus {

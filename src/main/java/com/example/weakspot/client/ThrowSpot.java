@@ -4,7 +4,7 @@ import com.example.weakspot.ThrowCharge;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
@@ -73,7 +73,7 @@ final class ThrowSpot {
         }
         int streak = ClientWeakSpotHandler.registerHit(HitKind.THROW);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.THROW, streak));
-        ThrowCharge.add(mc.player, settings.throwChargePerHit * MachineComboBoost.factor(streak));
+        ThrowCharge.add(mc.player, settings.throwChargePerHit * ComboFactor.factor(streak));
         VehicleSpot.onRiderHit(streak);
         SPOT.relocate(mc.player);
     }
