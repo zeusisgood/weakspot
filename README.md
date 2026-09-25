@@ -3,7 +3,7 @@
 Fortnite の資材集めにある「弱点（クリティカル）を叩くと速く壊せる」仕組みを Minecraft に持ち込む Mod です。
 
 - 対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**
-- 最新版: **1.6.2**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
+- 最新版: **1.6.3**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
 
 ## 遊び方
 
@@ -203,7 +203,7 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 - 動物の弱点のマークも、同じ見た目・色・形で見えます（動物の足元のバーは見えません）。
 - 機械・成長のマークは 1.3.6 から見えます（叩いている人が 1.3.6 以降なら、見る側は 1.3.x のどれでも見えます）。
 - 釣り・弓・近接・乗り物・食事・睡眠の弱点は、他のプレイヤーには見えません。
-- 近くのほかのプレイヤーのコンボが **10 以上**になると、その人の頭の上（名前の上）に「**25 HIT**」のように出ます（1.6.0。色はコンボの表示と同じ段階の色）。しゃがんでいる人の分は出ません。各自の設定 `othersComboDisplay` で消せます。
+- 近くのほかのプレイヤーのコンボが **10 以上**になると、その人の頭の上（名前の上）に「**25 HIT**」のように出ます（1.6.0。色はコンボの表示と同じ段階の色）。しゃがんで機械を叩いている人の分も出ます（1.6.3）。各自の設定 `othersComboDisplay` で消せます。
 
 ## ヒット音
 
@@ -475,7 +475,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 | `server/` | 管理コマンド、破壊速度ブースト、成長・機械・動物・釣り・弓・近接のヒット、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
 | `config/` | 設定 |
 
-仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）、[doc/SPEC_v1.4.2.md](doc/SPEC_v1.4.2.md)（1.4.2 での機械の加速の強化とコンボの演出）、[doc/SPEC_v1.4.3.md](doc/SPEC_v1.4.3.md)（1.4.3 での育たないときの知らせ）、[doc/SPEC_v1.4.4.md](doc/SPEC_v1.4.4.md)（1.4.4 でのレッドストーンの部品の加速）、[doc/SPEC_v1.5.md](doc/SPEC_v1.5.md)（1.5.0 での近接の弱点の大きさ）、[doc/SPEC_v1.5.1.md](doc/SPEC_v1.5.1.md)（1.5.1 での版の違いの知らせ）、[doc/SPEC_v1.5.2.md](doc/SPEC_v1.5.2.md)（1.5.2 でのディスペンサーの連射の見せ方）、[doc/SPEC_v1.5.3.md](doc/SPEC_v1.5.3.md)（1.5.3 での加速中の機械の粒子）、[doc/SPEC_v1.5.4.md](doc/SPEC_v1.5.4.md)（1.5.4 での弓の弱点の距離）、[doc/SPEC_v1.5.5.md](doc/SPEC_v1.5.5.md)（1.5.5 での近接の弱点の見える距離）、[doc/SPEC_v1.6.md](doc/SPEC_v1.6.md)（1.6.0 での機械の速さの表示・進み具合のバー・頭の上のコンボ・乗り物・食事・睡眠の弱点）、[doc/SPEC_v1.6.1.md](doc/SPEC_v1.6.1.md)（1.6.1 での節目の受け取り直し）、[doc/SPEC_v1.6.2.md](doc/SPEC_v1.6.2.md)（1.6.2 での寝ている間のマーカーの範囲）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
+仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）、[doc/SPEC_v1.4.2.md](doc/SPEC_v1.4.2.md)（1.4.2 での機械の加速の強化とコンボの演出）、[doc/SPEC_v1.4.3.md](doc/SPEC_v1.4.3.md)（1.4.3 での育たないときの知らせ）、[doc/SPEC_v1.4.4.md](doc/SPEC_v1.4.4.md)（1.4.4 でのレッドストーンの部品の加速）、[doc/SPEC_v1.5.md](doc/SPEC_v1.5.md)（1.5.0 での近接の弱点の大きさ）、[doc/SPEC_v1.5.1.md](doc/SPEC_v1.5.1.md)（1.5.1 での版の違いの知らせ）、[doc/SPEC_v1.5.2.md](doc/SPEC_v1.5.2.md)（1.5.2 でのディスペンサーの連射の見せ方）、[doc/SPEC_v1.5.3.md](doc/SPEC_v1.5.3.md)（1.5.3 での加速中の機械の粒子）、[doc/SPEC_v1.5.4.md](doc/SPEC_v1.5.4.md)（1.5.4 での弓の弱点の距離）、[doc/SPEC_v1.5.5.md](doc/SPEC_v1.5.5.md)（1.5.5 での近接の弱点の見える距離）、[doc/SPEC_v1.6.md](doc/SPEC_v1.6.md)（1.6.0 での機械の速さの表示・進み具合のバー・頭の上のコンボ・乗り物・食事・睡眠の弱点）、[doc/SPEC_v1.6.1.md](doc/SPEC_v1.6.1.md)（1.6.1 での節目の受け取り直し）、[doc/SPEC_v1.6.2.md](doc/SPEC_v1.6.2.md)（1.6.2 での寝ている間のマーカーの範囲）、[doc/SPEC_v1.6.3.md](doc/SPEC_v1.6.3.md)（1.6.3 での頭の上のコンボ数の修正）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
 
 ## バージョンの方針
 
@@ -484,6 +484,11 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - 迷ったときは、マイナーを上げます。
 
 ## 更新履歴
+
+### 1.6.3
+
+- 頭の上のコンボ数が、しゃがんでいる人（機械を叩いている人など）に出なかったのを直した
+- クライアントだけの修正。通信内容は変わっていない。1.6.x 同士は、そのまま接続できる
 
 ### 1.6.2
 
