@@ -14,10 +14,11 @@
 ## 0. バージョンと互換性
 
 - バージョンは 1.6.4（またはその後のパッチ）→ **1.7.0**（`build.gradle` の `version` と `WeakSpotMod.VERSION` の2か所を、そろえて変える）
-- **通信内容が変わる**（`HitKind` に `LADDER` を足す、`SyncedSettings` にはしごの設定を足す、`StatsMessage` に `ladderHits` を足す）。そのため 1.6.x とは接続できない
+- **通信内容が変わる**（`HitKind` に `LADDER`・`ELYTRA`・`ENCHANT` を足す、`SyncedSettings` にはしご・エリトラ・エンチャントの設定を足す、`StatsMessage` に `ladderHits`・`elytraHits`・`enchantHits` を足す、`MilestoneMessage` に節目の種類を足す）。そのため 1.6.x とは接続できない
   - `WeakSpotMod.ACCEPTED_VERSIONS` を `[1.7,1.8)` にする
   - README の更新履歴に、1.6.x とは接続できないこと（サーバーとクライアントを同時に更新すること）を書く
-- 1.6.x と接続できないので、はしごの弱点は `ServerFeatures.since` で囲まなくてよい（1.7.x のサーバーはすべて持つ）
+- 1.6.x と接続できないので、この仕様書の機能は `ServerFeatures.since` で囲まなくてよい（1.7.x のサーバーはすべて持つ）
+- 設定 `milestones` / `milestoneXp` / `milestoneRepair` の初期値を変える（§4）。古い初期値のままのファイルは、`WeakSpotConfig.migrate` の `configVersion` 5 で新しい初期値に置き換える（書き換えてある値はそのまま）
 
 ## 1. はしごの弱点（新しい種類 `HitKind.LADDER`）
 
@@ -29,7 +30,7 @@
 - 乗り物・食事と同じく、**HUD に画面上で一定の大きさの円**で出し（`client/HudSpot`）、**照準を合わせるだけでヒット**（クリックは要らない）
 - 向き: **照準の真上か真下だけ**（`HudSpot` の「上下だけ」。馬・豚と同じ。pitch を 10〜20 度ずらし、yaw は毎フレームの視線に合わせる）
   - 理由: はしごは前に進むキーではしごに押し付けて登るので、左右に向きを変えると、はしごから横に外れてしまう。上下だけなら、狙っても進む向きは変わらない
-  - ※ 相談では「照準から 10〜20 度（全方向）」で決めていた。上下だけにするかは、ユーザーに確認する（§5）
+  - ※ 相談では「照準から 10〜20 度（全方向）」で決めていた。上下だけにするかは、ユーザーに確認する（§8）
 - 円の色は**木の茶色 `#C8A060`**（弓のオレンジ `#FF8C42`、乗り物の水色 `#55CCFF`、食事の緑 `#7CFC00` と見分ける）
 - ヒットの間隔は `ladderMinHitIntervalTicks`（**[サーバー]**、`SyncedSettings`。初期値 6）
 
@@ -82,33 +83,167 @@
 - 速く降りたとき、はしごの下で落下のダメージを受けないか（バニラははしごの上で `fallDistance` を 0 にするが、足した `move` の分がはしごを外れた tick に残らないか）
 - Mod の登れるブロックで `isOnLadder` がクライアントとサーバーで同じ結果になるか
 
-## 2. README とガイドの本
+## 2. エリトラの弱点（新しい種類 `HitKind.ELYTRA`）
 
-- README に「はしご」の節を足す（乗り物の節にならう）。設定表の `[サーバー]` に 5 つ、`[クライアント]` に `ladderBoostBarEnabled` を足す。統計の一覧に「はしごヒット数」
-- ガイドの本に 16 ページ目「はしご」を足す（`GuideBook.PAGES` を 16 に）。案:
-  - 日本語: 「はしごやツタを登り降りしている間、照準の真上か真下に茶色の弱点が出ます。照準を合わせると登り降りが速くなり、コンボが続くほど速くなります。」
-  - 英語: "While climbing up or down a ladder or vine, a brown weak spot appears straight above or below your crosshair. Aim at it to climb faster; the longer your combo, the faster you go."
+### 2.1 対象と出し方（クライアント、`client/ElytraSpot`）
+
+- 対象: エリトラで滑空している間（`EntityLivingBase#isElytraFlying`）
+- 次のときは出さない: 何かを使っている（弓を引く・食べる）、クリエイティブ・スペクテイター、弱点の一時オフ（HOME キー）、設定 `elytraWeakSpotEnabled` が false
+- 乗り物・食事と同じく、**HUD に画面上で一定の大きさの円**で出し（`client/HudSpot`）、**照準を合わせるだけでヒット**
+- 向き: 照準から **10〜20 度の全方向**（弓と同じ。`BowMath.offsetRange`）。エリトラは見ている向きに飛ぶので、狙うと飛ぶ向きが少しぶれる。これも操作のうちとする
+- 円の色は**空の青 `#7FB2FF`**
+- ヒットの間隔は `elytraMinHitIntervalTicks`（**[サーバー]**、`SyncedSettings`。初期値 6）
+
+### 2.2 効果（花火のような一押し）
+
+- **当てた瞬間に、見ている向きへ勢いを足す**（花火のロケットのように「ぐんっ」と出る。時間で続く加速ではない）
+  - 足す速さ = `elytraBoostPower`（初期値 0.5 ブロック/tick）× コンボの掛け数（`MachineComboBoost.factor`。25 で ×1.25 … 1000 で ×4）
+  - 足したあとの速さは **4 ブロック/tick まで**（定数。サーバーの「動きが速すぎる」の判定と、チャンクの読み込みが追いつかないのを避けるため）。越えたら向きを変えずに 4 に縮める
+  - 目安: バニラの花火は、しばらくかけて約 1.7 ブロック/tick まで上げる。初期値では、2〜3 回当てると花火 1 本くらいの速さになる
+- **速さはクライアントで足す**（エリトラの動きは本人のクライアントが決めるので、ボート・はしごと同じ方式）: ヒットしたとき、`EntityPlayerSP` の `motionX/Y/Z` に足す
+- サーバーは効果をかけない。ヒットの検証、コンボ、統計、ヒット音の転送だけを受け持つ
+- 当てたときに、花火と同じ煙の粒子（`FIREWORKS_SPARK`）を自分の足元に少し出す（自分の画面だけ）
+- 残り時間のゲージはない（時間で続く加速ではないため）
+
+### 2.3 通信・検証（サーバー、`server/ElytraHits`）
+
+- ヒットは `HitMessage`（種類に `ELYTRA`、対象なし）
+- サーバーは、オン・オフ、`elytraWeakSpotEnabled`、クリエイティブ・スペクテイターでない、**直前 10 tick のどこかで `isElytraFlying` だった**（はしごと同じく `PlayerTickEvent` で覚える）、間隔（2 tick 甘く）を確かめて受け付ける
+- 受け付けたら `ServerStats.countStreak`、統計の `elytraHits`、`ServerBoostTracker.notifyNearbyPlayers`（鳴らす位置はプレイヤー）
+
+### 2.4 設定
+
+| キー | 種類 | 初期値 | 説明 |
+|---|---|---|---|
+| `elytraWeakSpotEnabled` | [サーバー]（同期） | true | エリトラの弱点を出すか |
+| `elytraBoostPower` | [サーバー]（同期） | 0.5 | 1 ヒットで足す速さ（ブロック/tick。コンボで上乗せ）。0.1〜2.0 |
+| `elytraMinHitIntervalTicks` | [サーバー]（同期） | 6 | ヒットの最小間隔（tick） |
+
+### 2.5 実装時の確認事項
+
+- マルチで、速く飛んでもサーバーに引き戻されない（`moved too quickly` / `moved wrongly`）か。コンボ 1000 で確かめる
+- 4 ブロック/tick でチャンクの読み込みが追いつくか（追いつかなければ上限を下げて、仕様書を直す）
+
+## 3. エンチャントの弱点（新しい種類 `HitKind.ENCHANT`）
+
+### 3.1 出し方（クライアント、`client/EnchantSpot`）
+
+- エンチャント台の画面（`GuiEnchantment`）で、**候補が出ている間**（台に物が置いてあり、3 つの候補のどれかにレベルが出ている）、画面にマーカーを出し、**クリックで当てる**（睡眠と同じ。`GuiScreenEvent.DrawScreenEvent.Post` で描き、`MouseInputEvent.Pre` で左クリックの押下が円の中ならキャンセルしてヒット）
+- 位置: エンチャント台の画面の**枠（176×166）の外**のランダムな位置（枠の中に出すと、スロットや候補のクリックを邪魔するため）。枠から 8 GUI ピクセル以上離し、画面の端から 16 以上内側。当てたら、前の位置から画面の高さの 1/4 以上離れた所へ動かす（残像つき、`weakSpotTrailEnabled`）
+- 大きさは睡眠と同じ。色は**紫 `#B070FF`**
+- 弱点の一時オフ（HOME キー）・設定 `enchantWeakSpotEnabled` が false のときは出さない
+- ヒットの間隔は `enchantMinHitIntervalTicks`（**[サーバー]**、`SyncedSettings`。初期値 6）
+
+### 3.2 注釈（ユーザーの提案）
+
+- エンチャント台の画面の枠のすぐ上に、紫 `#B070FF` の小さい文字で、1 行の注釈を出す:
+  - 日本語: 「◎ に当てると、候補を引き直せます（n 回）」
+  - 英語: "Hit the ◎ to reroll the offers (n)"
+  - n は、この画面を開いてから引き直した回数。0 回のときは「（n 回）」を付けない
+- 候補が出ていない間（台が空）は、「物を置くと、弱点で候補を引き直せます」を出す（マーカーは出さない）
+- 翻訳キーは `weakspot.enchant.hint` / `weakspot.enchant.hintCount` / `weakspot.enchant.hintEmpty`
+- 設定は足さない（弱点の一時オフの間は、注釈も出さない）
+
+### 3.3 効果（候補の引き直し）
+
+- 1 ヒットで、**3 つの候補を引き直す**。**何もいらない**（ラピスラズリも経験値も減らない）。必要なレベルは下げない
+- 仕組み（サーバー、`server/EnchantHits`）: バニラの候補は、プレイヤーの「エンチャントの種」（`EntityPlayer` の非公開の `xpSeed`。バニラはエンチャントするたびに引き直す）と、台のまわりの本棚の数で決まる。ヒットで
+  1. プレイヤーの `xpSeed` を新しい乱数にする（`Reflect.field`。MCP `xpSeed`、SRG は実装時に `fields.csv` で調べる）
+  2. 開いているコンテナ（`ContainerEnchantment`）の `xpSeed` も同じ値にする
+  3. `onCraftMatrixChanged(tableInventory)` を呼んで、候補を計算し直す（バニラの送信でクライアントの画面に届く）
+- 種は保存されるプレイヤーの値なので、画面を閉じても引き直したまま（バニラでエンチャントしたあとと同じ）
+- 読めない（リフレクションに失敗した）ときは、エンチャントの弱点だけ出さない（サーバーは受け付けない。クライアントは、`SyncedSettings` の `enchantWeakSpotEnabled` をサーバーが false にして送る）
+
+### 3.4 通信・検証
+
+- ヒットは `HitMessage`（種類に `ENCHANT`、対象なし）
+- サーバーは、オン・オフ、`enchantWeakSpotEnabled`、開いているコンテナが `ContainerEnchantment` で台に物が置いてあること、間隔（2 tick 甘く）を確かめる
+- 受け付けたら `ServerStats.countStreak`、統計の `enchantHits`、`ServerBoostTracker.notifyNearbyPlayers`（鳴らす位置はエンチャント台）
+
+### 3.5 設定
+
+| キー | 種類 | 初期値 | 説明 |
+|---|---|---|---|
+| `enchantWeakSpotEnabled` | [サーバー]（同期） | true | エンチャントの弱点を出すか |
+| `enchantMinHitIntervalTicks` | [サーバー]（同期） | 6 | ヒットの最小間隔（tick） |
+
+## 4. 節目を増やす
+
+### 4.1 3 つの節目
+
+| 節目 | 数えるもの | 数字 | ごほうび |
+|---|---|---|---|
+| **採掘**（今まであるもの） | 累計の採掘ヒット数（`hits`） | `milestones`（初期値を §4.2 に変える） | 経験値（`milestoneXp`）とツールの耐久回復（`milestoneRepair`）。今までどおり |
+| **種類ごと**（新しい） | それぞれの累計のヒット数: 成長 `growthHits`・機械 `machineHits`・動物 `animalHits`・釣り `fishingHits`・弓 `bowHits`・近接 `critHits`・乗り物 `vehicleHits`・食事 `eatHits`・睡眠 `sleepHits`・はしご `ladderHits`・エリトラ `elytraHits`・エンチャント `enchantHits` | **採掘と同じ** `milestones` | **経験値だけ**（`milestoneXp`） |
+| **合計**（新しい） | すべての種類の累計のヒット数の合計 | `totalMilestones`（§4.2） | 経験値（`totalMilestoneXp`） |
+
+- 1 回のヒットで、種類ごとの節目と合計の節目に同時に達したら、両方のごほうびをもらう。演出は合計のほうを出し、チャットは両方
+- 判定は今と同じ `Milestones.reached`（増えたあとの値が節目の数字と一致したか）。どの累計も 1 ヒットで 1 ずつ増える
+- 統計の累計のリセット（`/weakspot reset`、統計画面）で、種類ごと・合計の節目も受け取り直せる（1.6.1 の採掘と同じ）
+- 設定 `kindMilestonesEnabled`（[サーバー]、サーバーだけ。初期値 true）と `totalMilestonesEnabled`（同じく true）で止められる
+
+### 4.2 数字（「もっと刻む」）
+
+- **`milestones`（採掘と種類ごと）** の初期値（30 個）:
+  50 / 100 / 250 / 500 / **777** / 1000 / 1500 / 2000 / 2500 / 3000 / 4000 / 5000 / 6000 / 7000 / **7777** / 8000 / 9000 / 10000 / 15000 / 20000 / 25000 / 30000 / 40000 / 50000 / 60000 / 70000 / **77777** / 80000 / 90000 / 100000
+  - **100000 より先は 50000 ごと**（150000、200000 …）。新しい設定 `milestoneRepeatInterval`（[サーバー]、サーバーだけ。初期値 50000、0 = 繰り返さない）。ごほうびは `milestoneXp` / `milestoneRepair` の最後の値
+- **`milestoneXp` / `milestoneRepair`** の初期値（同じ順。2 つとも同じ値）:
+  5 / 10 / 15 / 20 / **77** / 30 / 40 / 40 / 40 / 40 / 40 / 50 / 50 / 50 / **777** / 50 / 50 / 100 / 100 / 100 / 150 / 150 / 150 / 200 / 200 / 200 / **7777** / 200 / 200 / 1000（繰り返しの分も 1000）
+- **`totalMilestones`（合計）** の初期値: 1000 / 5000 / **7777** / 10000 / 25000 / 50000 / **77777** / 100000 / 250000 / 500000 / **777777** / 1000000。1000000 より先は 500000 ごと（`totalMilestoneRepeatInterval`、初期値 500000）
+- **`totalMilestoneXp`** の初期値: 100 / 200 / **777** / 300 / 500 / 700 / **7777** / 1000 / 1500 / 2000 / **7777** / 5000（繰り返しの分も 5000）
+- 配列の長さが合わないときは、今と同じく起動時にログで警告する（足りない分のごほうびは 0）
+
+### 4.3 演出（クライアント、`MilestoneEffects`）
+
+- 今の演出（タイトル、チャット 1 行、花火、音階の駆け上がり）を、3 つの節目で使う。タイトルの文字:
+  - 採掘: 今までどおり「n ヒット！」
+  - 種類ごと: 「**弓 n ヒット！**」（種類の名前を付ける。翻訳キー `weakspot.kind.<種類>`）
+  - 合計: 「**合計 n ヒット！**」。花火を 3 発、タイトルを金 `#FFD700` にして長く出す（コンボ 1000 と同じくらい派手に）
+- **7 だけが並ぶ数（777、7777、77777、777777）は虹色**で派手にする（今の 777 と同じ。数字で判定する）
+- `MilestoneMessage` に節目の種類（採掘・種類ごと（`HitKind`）・合計）を足す
+
+### 4.4 README・ガイドの本
+
+- ガイドの本の 3 ページ目「耐久回復と節目」の「100、777、1000、10000回」を、「50 回から 10 万回まで細かく、その先も」「採掘以外の種類と、全部の合計にも節目がある」に書き直す
+
+## 5. README とガイドの本
+
+- README に「はしご」「エリトラ」「エンチャント」の節を足す（乗り物・睡眠の節にならう）。節目の節を §4 に合わせて書き直す
+- 設定表の `[サーバー]` に、はしご 5 つ・エリトラ 3 つ・エンチャント 2 つ・節目の `kindMilestonesEnabled` / `totalMilestonesEnabled` / `milestoneRepeatInterval` / `totalMilestones` / `totalMilestoneXp` / `totalMilestoneRepeatInterval` を足し、`milestones` / `milestoneXp` / `milestoneRepair` の初期値を直す。`[クライアント]` に `ladderBoostBarEnabled`
+- 統計の一覧に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」
+- ガイドの本に 3 ページ足す（`GuideBook.PAGES` を 18 に）。案:
+  - 16「はしご」: 「はしごやツタを登り降りしている間、照準の真上か真下に茶色の弱点が出ます。照準を合わせると登り降りが速くなり、コンボが続くほど速くなります。」 / "While climbing up or down a ladder or vine, a brown weak spot appears straight above or below your crosshair. Aim at it to climb faster; the longer your combo, the faster you go."
+  - 17「エリトラ」: 「エリトラで飛んでいる間、照準の近くに青い弱点が出ます。照準を合わせると、花火のように前へ押し出されます。コンボが続くほど強く押されます。」 / "While gliding with an elytra, a blue weak spot appears near your crosshair. Aim at it for a firework-like push forward; the longer your combo, the stronger the push."
+  - 18「エンチャント」: 「エンチャント台に物を置くと、画面のまわりに紫のマーカーが出ます。クリックで当てるたびに、3つの候補が引き直されます。ラピスラズリも経験値も減りません。」 / "Put an item in an enchanting table and a purple marker appears around the screen. Click it to reroll the three offers. It costs no lapis and no experience."
+  - 3「耐久回復と節目」を §4.4 のとおり直す
 - 「最新版」の行と「更新履歴」（1.6.x とは接続できないこと）、「開発」の節の仕様書へのリンク
 
-## 3. `CLAUDE.md` に書くこと
+## 6. `CLAUDE.md` に書くこと
 
 - 「仕様の正本」の一覧の、この仕様書の「下書き」の注記を外す。現行のバージョンを 1.7.0、範囲を `[1.7,1.8)` に
 - 「両方に Mod が必要」の説明に、1.7.0 で通信内容が変わったので 1.6.x と接続できないことを足す
-- `HitKind` の一覧に `LADDER` を足す。はしごの弱点（`client/LadderSpot`・`server/LadderHits`）の説明を、乗り物の弱点の説明にならって足す（速さはクライアントで足す、サーバーは検証だけ、直前 10 tick の `isOnLadder`）
-- 統計の一覧に `ladderHits`（1.7.0）を足す
+- `HitKind` の一覧に `LADDER`・`ELYTRA`・`ENCHANT` を足す。はしご（`client/LadderSpot`・`server/LadderHits`）・エリトラ（`client/ElytraSpot`・`server/ElytraHits`）・エンチャント（`client/EnchantSpot`・`server/EnchantHits`）の説明を、乗り物・睡眠の弱点の説明にならって足す（はしご・エリトラは速さをクライアントで足し、サーバーは検証だけ。エンチャントは `xpSeed` を引き直す）
+- 統計の一覧に `ladderHits`・`elytraHits`・`enchantHits`（1.7.0）を足す
+- 節目の説明（`ServerStats`・`MiningRewards`・`MilestoneEffects`）に、種類ごと・合計の節目と、繰り返しの節目、7 並びの虹色を足す。設定の移行に `configVersion` 5（節目の初期値）を足す
 - 「次の作業」の節を片付ける
 
-## 4. 入れないこと
+## 7. 入れないこと
 
 - 弓・食事の弱点のヒットで、はしごの加速を続ける（乗り物の騎射にあたるもの）: はしごの上で弓を引く・食べることは少ないので入れない
-- 他のプレイヤーにはしごの弱点のマークを見せる: 乗り物・食事と同じく見せない
+- 他のプレイヤーにはしご・エリトラ・エンチャントの弱点のマークを見せる: 乗り物・食事と同じく見せない
+- エンチャントの必要なレベルを下げる: ユーザーの判断で、引き直しだけにする
+- 引き直しにラピスラズリを使う・回数を限る: ユーザーの判断で、何もいらない・回数の制限なし
+- サーバーのランキング（`/weakspot top`）: 1.7.0 には入れない
 
-## 5. ユーザーに確認してもらうこと
+## 8. ユーザーに確認してもらうこと
 
-- （下書きの確認）弱点の向きを「照準の真上か真下だけ」にしてよいか（相談では 10〜20 度の全方向）
-- はしご・ツタを登り降りすると、照準の真上か真下に茶色の弱点が出て、照準を合わせると速くなること。止まると弱点が消えること
-- コンボが上がるとさらに速くなること（初期値では上限なし。`ladderBoostMaxMultiplier` に 3 などを書くと、その倍率で止まること）
-- 照準の上に茶色の残り時間のゲージが出ること。`ladderBoostBarEnabled` をオフにすると出ないこと
-- 速く降りても、下で落下のダメージを受けないこと。マルチで、速く登っても引き戻されない・キックされないこと
-- 統計画面と `/weakspot stats` に「はしごヒット数」が出ること
+- （下書きの確認）はしごの弱点の向きを「照準の真上か真下だけ」にしてよいか（相談では 10〜20 度の全方向）
+- （下書きの確認）エリトラの押す強さ（初期値 0.5、上限 4 ブロック/tick）、節目の数字とごほうびの経験値の量
+- はしご・ツタを登り降りすると、照準の真上か真下に茶色の弱点が出て、照準を合わせると速くなること。止まると弱点が消えること。照準の上に茶色のゲージが出ること
+- はしごでコンボが上がるとさらに速くなること（`ladderBoostMaxMultiplier` に 3 などを書くと、その倍率で止まること）。速く降りても落下のダメージを受けないこと
+- エリトラで飛ぶと、照準の近くに青い弱点が出て、当てると前へ押し出されること。コンボが上がると強く押されること。マルチで引き戻されない・キックされないこと
+- エンチャント台に物を置くと、画面の枠の外に紫のマーカーと、枠の上に注釈が出ること。当てるたびに候補が変わり、ラピスも経験値も減らないこと。回数が注釈に出ること
+- 弓などを 50 回当てると「弓 50 ヒット！」の節目が出て、経験値がもらえること。全種類の合計 1000 回で「合計 1000 ヒット！」が派手に出ること。7777 などが虹色になること
+- 古い `weakspot.cfg`（節目が 100 / 777 / 1000 / 10000 のまま）が、新しい初期値に置き換わること。自分で書き換えた値は、そのまま残ること
+- 統計画面と `/weakspot stats` に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」が出ること
 - 1.6.x のサーバー・クライアントとは接続できないこと
