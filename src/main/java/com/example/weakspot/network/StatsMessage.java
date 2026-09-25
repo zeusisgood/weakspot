@@ -33,56 +33,33 @@ public class StatsMessage implements IMessage {
         write(buf, total);
     }
 
+    /** 並びは MiningStats#writeTo（1.8.5 までと同じ並び）。 */
     private static MiningStats read(ByteBuf buf) {
-        MiningStats stats = new MiningStats();
-        stats.hits = buf.readLong();
-        stats.blocksBroken = buf.readLong();
-        stats.blocksBrokenWithHit = buf.readLong();
-        stats.maxHitsOnBlock = buf.readLong();
-        stats.savedTicks = buf.readDouble();
-        stats.growthHits = buf.readLong();
-        stats.machineHits = buf.readLong();
-        stats.maxStreak = buf.readLong();
-        stats.animalHits = buf.readLong();
-        stats.fishingHits = buf.readLong();
-        stats.bowHits = buf.readLong();
-        stats.critHits = buf.readLong();
-        stats.vehicleHits = buf.readLong();
-        stats.eatHits = buf.readLong();
-        stats.sleepHits = buf.readLong();
-        stats.ladderHits = buf.readLong();
-        stats.elytraHits = buf.readLong();
-        stats.enchantHits = buf.readLong();
-        stats.harvestHits = buf.readLong();
-        stats.throwHits = buf.readLong();
-        stats.sprintHits = buf.readLong();
-        stats.portalHits = buf.readLong();
-        return stats;
+        return MiningStats.readFrom(new MiningStats.Reader() {
+            @Override
+            public long readLong() {
+                return buf.readLong();
+            }
+
+            @Override
+            public double readDouble() {
+                return buf.readDouble();
+            }
+        });
     }
 
     private static void write(ByteBuf buf, MiningStats stats) {
-        buf.writeLong(stats.hits);
-        buf.writeLong(stats.blocksBroken);
-        buf.writeLong(stats.blocksBrokenWithHit);
-        buf.writeLong(stats.maxHitsOnBlock);
-        buf.writeDouble(stats.savedTicks);
-        buf.writeLong(stats.growthHits);
-        buf.writeLong(stats.machineHits);
-        buf.writeLong(stats.maxStreak);
-        buf.writeLong(stats.animalHits);
-        buf.writeLong(stats.fishingHits);
-        buf.writeLong(stats.bowHits);
-        buf.writeLong(stats.critHits);
-        buf.writeLong(stats.vehicleHits);
-        buf.writeLong(stats.eatHits);
-        buf.writeLong(stats.sleepHits);
-        buf.writeLong(stats.ladderHits);
-        buf.writeLong(stats.elytraHits);
-        buf.writeLong(stats.enchantHits);
-        buf.writeLong(stats.harvestHits);
-        buf.writeLong(stats.throwHits);
-        buf.writeLong(stats.sprintHits);
-        buf.writeLong(stats.portalHits);
+        stats.writeTo(new MiningStats.Writer() {
+            @Override
+            public void writeLong(long value) {
+                buf.writeLong(value);
+            }
+
+            @Override
+            public void writeDouble(double value) {
+                buf.writeDouble(value);
+            }
+        });
     }
 
     public static class Handler implements IMessageHandler<StatsMessage, IMessage> {

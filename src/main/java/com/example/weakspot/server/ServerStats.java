@@ -119,57 +119,30 @@ public final class ServerStats {
         return mine;
     }
 
+    /** 保存のキーは MiningStats#saveKey（1.8.5 までと同じ名前）。 */
     private static MiningStats read(NBTTagCompound tag) {
         MiningStats stats = new MiningStats();
-        stats.hits = tag.getLong("hits");
         stats.blocksBroken = tag.getLong("blocksBroken");
         stats.blocksBrokenWithHit = tag.getLong("blocksBrokenWithHit");
         stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
         stats.savedTicks = tag.getDouble("savedTicks");
-        stats.growthHits = tag.getLong("growthHits");
-        stats.machineHits = tag.getLong("machineHits");
         stats.maxStreak = tag.getLong("maxStreak");
-        stats.animalHits = tag.getLong("animalHits");
-        stats.fishingHits = tag.getLong("fishingHits");
-        stats.bowHits = tag.getLong("bowHits");
-        stats.critHits = tag.getLong("critHits");
-        stats.vehicleHits = tag.getLong("vehicleHits");
-        stats.eatHits = tag.getLong("eatHits");
-        stats.sleepHits = tag.getLong("sleepHits");
-        stats.ladderHits = tag.getLong("ladderHits");
-        stats.elytraHits = tag.getLong("elytraHits");
-        stats.enchantHits = tag.getLong("enchantHits");
-        stats.harvestHits = tag.getLong("harvestHits");
-        stats.throwHits = tag.getLong("throwHits");
-        stats.sprintHits = tag.getLong("sprintHits");
-        stats.portalHits = tag.getLong("portalHits");
+        for (HitKind kind : HitKind.values()) {
+            stats.setCount(kind, tag.getLong(MiningStats.saveKey(kind)));
+        }
         return stats;
     }
 
     private static NBTTagCompound write(MiningStats stats) {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setLong("hits", stats.hits);
         tag.setLong("blocksBroken", stats.blocksBroken);
         tag.setLong("blocksBrokenWithHit", stats.blocksBrokenWithHit);
         tag.setLong("maxHitsOnBlock", stats.maxHitsOnBlock);
         tag.setDouble("savedTicks", stats.savedTicks);
-        tag.setLong("growthHits", stats.growthHits);
-        tag.setLong("machineHits", stats.machineHits);
         tag.setLong("maxStreak", stats.maxStreak);
-        tag.setLong("animalHits", stats.animalHits);
-        tag.setLong("fishingHits", stats.fishingHits);
-        tag.setLong("bowHits", stats.bowHits);
-        tag.setLong("critHits", stats.critHits);
-        tag.setLong("vehicleHits", stats.vehicleHits);
-        tag.setLong("eatHits", stats.eatHits);
-        tag.setLong("sleepHits", stats.sleepHits);
-        tag.setLong("ladderHits", stats.ladderHits);
-        tag.setLong("elytraHits", stats.elytraHits);
-        tag.setLong("enchantHits", stats.enchantHits);
-        tag.setLong("harvestHits", stats.harvestHits);
-        tag.setLong("throwHits", stats.throwHits);
-        tag.setLong("sprintHits", stats.sprintHits);
-        tag.setLong("portalHits", stats.portalHits);
+        for (HitKind kind : HitKind.values()) {
+            tag.setLong(MiningStats.saveKey(kind), stats.count(kind));
+        }
         return tag;
     }
 }

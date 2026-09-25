@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.Collections;
@@ -95,10 +96,12 @@ public final class WeakSpotCommand extends CommandBase {
                 stats.hits, stats.blocksBroken, stats.blocksBrokenWithHit,
                 Double.isNaN(average) ? "-" : String.format("%.2f", average),
                 stats.maxHitsOnBlock, String.format("%.1f", stats.savedSeconds()),
-                stats.growthHits, stats.machineHits, stats.maxStreak, stats.animalHits, stats.fishingHits,
-                stats.bowHits, stats.critHits, stats.vehicleHits, stats.eatHits, stats.sleepHits,
-                stats.ladderHits, stats.elytraHits, stats.enchantHits, stats.harvestHits, stats.throwHits,
-                stats.sprintHits, stats.portalHits, stats.totalHits()));
+                stats.count(HitKind.GROWTH), stats.count(HitKind.MACHINE), stats.maxStreak,
+                stats.count(HitKind.ANIMAL), stats.count(HitKind.FISHING), stats.count(HitKind.BOW),
+                stats.count(HitKind.MELEE), stats.count(HitKind.VEHICLE), stats.count(HitKind.EAT),
+                stats.count(HitKind.SLEEP), stats.count(HitKind.LADDER), stats.count(HitKind.ELYTRA),
+                stats.count(HitKind.ENCHANT), stats.count(HitKind.HARVEST), stats.count(HitKind.THROW),
+                stats.count(HitKind.SPRINT), stats.count(HitKind.PORTAL), stats.totalHits()));
     }
 
     @Override

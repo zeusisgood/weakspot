@@ -26,12 +26,12 @@ public class MiningStatsTest {
     @Test
     public void growthAndMachineHitsDoNotCountAsMiningHits() {
         MiningStats stats = new MiningStats();
-        stats.recordGrowthHit();
-        stats.recordMachineHit();
-        stats.recordMachineHit();
+        stats.recordKindHit(HitKind.GROWTH);
+        stats.recordKindHit(HitKind.MACHINE);
+        stats.recordKindHit(HitKind.MACHINE);
         assertEquals(0, stats.hits);
-        assertEquals(1, stats.growthHits);
-        assertEquals(2, stats.machineHits);
+        assertEquals(1, stats.count(HitKind.GROWTH));
+        assertEquals(2, stats.count(HitKind.MACHINE));
         assertEquals(0, stats.savedTicks, 1e-9);
     }
 
@@ -45,15 +45,15 @@ public class MiningStatsTest {
         MiningStats stats = new MiningStats();
         stats.recordHit(12);
         stats.recordBlockBroken(1);
-        stats.recordGrowthHit();
-        stats.recordMachineHit();
+        stats.recordKindHit(HitKind.GROWTH);
+        stats.recordKindHit(HitKind.MACHINE);
         stats.reset();
         assertEquals(0, stats.hits);
         assertEquals(0, stats.blocksBroken);
         assertEquals(0, stats.maxHitsOnBlock);
         assertEquals(0, stats.savedTicks, 1e-9);
-        assertEquals(0, stats.growthHits);
-        assertEquals(0, stats.machineHits);
+        assertEquals(0, stats.count(HitKind.GROWTH));
+        assertEquals(0, stats.count(HitKind.MACHINE));
     }
 
     @Test
@@ -82,22 +82,22 @@ public class MiningStatsTest {
     @Test
     public void animalHitsAreCountedSeparatelyAndReset() {
         MiningStats stats = new MiningStats();
-        stats.recordAnimalHit();
-        stats.recordAnimalHit();
-        assertEquals(2, stats.animalHits);
+        stats.recordKindHit(HitKind.ANIMAL);
+        stats.recordKindHit(HitKind.ANIMAL);
+        assertEquals(2, stats.count(HitKind.ANIMAL));
         assertEquals(0, stats.hits);
         stats.reset();
-        assertEquals(0, stats.animalHits);
+        assertEquals(0, stats.count(HitKind.ANIMAL));
     }
 
     @Test
     public void fishingHitsAreCountedSeparatelyAndReset() {
         MiningStats stats = new MiningStats();
-        stats.recordFishingHit();
-        assertEquals(1, stats.fishingHits);
+        stats.recordKindHit(HitKind.FISHING);
+        assertEquals(1, stats.count(HitKind.FISHING));
         assertEquals(0, stats.hits);
         stats.reset();
-        assertEquals(0, stats.fishingHits);
+        assertEquals(0, stats.count(HitKind.FISHING));
     }
 
     @Test
@@ -113,9 +113,58 @@ public class MiningStatsTest {
         for (HitKind kind : HitKind.values()) {
             assertEquals(kind == HitKind.HARVEST ? 2 : 1, stats.count(kind));
         }
-        assertEquals(1, stats.critHits);
+        assertEquals(1, stats.count(HitKind.MELEE));
         assertEquals(HitKind.values().length + 1, stats.totalHits());
         stats.reset();
         assertEquals(0, stats.totalHits());
+    }
+
+    @Test
+    public void saveKeysKeepTheirOldNames() {
+        assertEquals("hits", MiningStats.saveKey(HitKind.MINING));
+        assertEquals("critHits", MiningStats.saveKey(HitKind.MELEE));
+        assertEquals("portalHits", MiningStats.saveKey(HitKind.PORTAL));
+    }
+
+    @Test
+    public void writeAndReadRoundTrip() {
+        MiningStats stats = new MiningStats();
+        stats.recordHit(3);
+        stats.recordBlockBroken(4);
+        stats.recordStreak(9);
+        for (HitKind kind : HitKind.values()) {
+            for (int i = 0; i < kind.ordinal(); i++) {
+                stats.recordKindHit(kind);
+            }
+        }
+        java.util.ArrayDeque<Object> values = new java.util.ArrayDeque<>();
+        stats.writeTo(new MiningStats.Writer() {
+            @Override
+            public void writeLong(long value) {
+                values.add(value);
+            }
+
+            @Override
+            public void writeDouble(double value) {
+                values.add(value);
+            }
+        });
+        MiningStats back = MiningStats.readFrom(new MiningStats.Reader() {
+            @Override
+            public long readLong() {
+                return (Long) values.poll();
+            }
+
+            @Override
+            public double readDouble() {
+                return (Double) values.poll();
+            }
+        });
+        assertTrue(values.isEmpty());
+        assertEquals(stats.maxStreak, back.maxStreak);
+        assertEquals(stats.savedTicks, back.savedTicks, 0);
+        for (HitKind kind : HitKind.values()) {
+            assertEquals(kind.name(), stats.count(kind), back.count(kind));
+        }
     }
 }

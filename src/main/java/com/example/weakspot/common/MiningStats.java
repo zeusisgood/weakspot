@@ -15,10 +15,6 @@ public final class MiningStats {
     public long maxHitsOnBlock;
     /** ヒットで得た追加進捗の合計（通常速度の tick 数）。短縮できた時間の推定に使う。 */
     public double savedTicks;
-    /** 作物・苗木の弱点に当てた回数。 */
-    public long growthHits;
-    /** 機械の弱点に当てた回数。 */
-    public long machineHits;
 
     /** 種類を問わない連続ヒット（コンボ）の最大。サーバーが HitStreak で数える。 */
     public long maxStreak;
@@ -28,112 +24,30 @@ public final class MiningStats {
         maxStreak = Math.max(maxStreak, count);
     }
 
-    /** 動物の弱点に当てた回数。 */
-    public long animalHits;
-
-    public void recordAnimalHit() {
-        animalHits++;
-    }
-
-    /** 釣りの弱点に当てた回数。 */
-    public long fishingHits;
-
-    public void recordFishingHit() {
-        fishingHits++;
-    }
-
-    /** 弓の弱点に当てた回数。 */
-    public long bowHits;
-
-    public void recordBowHit() {
-        bowHits++;
-    }
-
-    /** 近接の弱点に当てた回数（1.8.0。保存のキーは今までどおり critHits。1.7.x まではクリティカルにした回数）。 */
-    public long critHits;
-
-    public void recordCritHit() {
-        critHits++;
-    }
-
-    /** 乗り物の弱点に当てた回数（1.6.0）。 */
-    public long vehicleHits;
-
-    public void recordVehicleHit() {
-        vehicleHits++;
-    }
-
-    /** 食事・飲み物の弱点に当てた回数（1.6.0）。 */
-    public long eatHits;
-
-    public void recordEatHit() {
-        eatHits++;
-    }
-
-    /** 寝ている間の弱点に当てた回数（1.6.0）。 */
-    public long sleepHits;
-
-    public void recordSleepHit() {
-        sleepHits++;
-    }
-
-    /** はしご・エリトラ・エンチャント・収穫・投げる物・走りの弱点に当てた回数（1.7.0）。 */
-    public long ladderHits;
-    public long elytraHits;
-    public long enchantHits;
-    public long harvestHits;
-    public long throwHits;
-    public long sprintHits;
-    /** ネザーゲートの弱点に当てた回数（1.8.0）。 */
-    public long portalHits;
-
     /**
-     * 採掘以外の種類のヒットを 1 つ数える（1.7.0）。近接はクリティカルにした回数。採掘は recordHit で数える
-     * （短縮できた時間も足すため）。
+     * 採掘以外の種類ごとの、弱点に当てた回数（HitKind の番号で引く。採掘の欄は使わず、hits を使う。1.8.6 で配列にした）。
+     * 近接は、1.8.0 から「近接の弱点に当てた回数」（1.7.x まではクリティカルにした回数。保存のキーは今も critHits）。
      */
+    private final long[] kindHits = new long[HitKind.values().length];
+
+    /** 採掘以外の種類のヒットを 1 つ数える（1.7.0）。採掘は recordHit で数える（短縮できた時間も足すため）。 */
     public void recordKindHit(HitKind kind) {
-        switch (kind) {
-            case GROWTH: growthHits++; break;
-            case MACHINE: machineHits++; break;
-            case ANIMAL: animalHits++; break;
-            case FISHING: fishingHits++; break;
-            case BOW: bowHits++; break;
-            case MELEE: critHits++; break;
-            case VEHICLE: vehicleHits++; break;
-            case EAT: eatHits++; break;
-            case SLEEP: sleepHits++; break;
-            case LADDER: ladderHits++; break;
-            case ELYTRA: elytraHits++; break;
-            case ENCHANT: enchantHits++; break;
-            case HARVEST: harvestHits++; break;
-            case THROW: throwHits++; break;
-            case SPRINT: sprintHits++; break;
-            case PORTAL: portalHits++; break;
-            default: break;
+        if (kind != HitKind.MINING) {
+            kindHits[kind.ordinal()]++;
         }
     }
 
-    /** その種類のヒット数（採掘は hits、近接は critHits）。種類ごとの節目に使う（1.7.0）。 */
+    /** その種類のヒット数（採掘は hits）。種類ごとの節目に使う（1.7.0）。 */
     public long count(HitKind kind) {
-        switch (kind) {
-            case MINING: return hits;
-            case GROWTH: return growthHits;
-            case MACHINE: return machineHits;
-            case ANIMAL: return animalHits;
-            case FISHING: return fishingHits;
-            case BOW: return bowHits;
-            case MELEE: return critHits;
-            case VEHICLE: return vehicleHits;
-            case EAT: return eatHits;
-            case SLEEP: return sleepHits;
-            case LADDER: return ladderHits;
-            case ELYTRA: return elytraHits;
-            case ENCHANT: return enchantHits;
-            case HARVEST: return harvestHits;
-            case THROW: return throwHits;
-            case SPRINT: return sprintHits;
-            case PORTAL: return portalHits;
-            default: return 0;
+        return kind == HitKind.MINING ? hits : kindHits[kind.ordinal()];
+    }
+
+    /** 読み込み用。 */
+    public void setCount(HitKind kind, long value) {
+        if (kind == HitKind.MINING) {
+            hits = value;
+        } else {
+            kindHits[kind.ordinal()] = value;
         }
     }
 
@@ -149,14 +63,6 @@ public final class MiningStats {
     public void recordHit(double extraTicks) {
         hits++;
         savedTicks += Math.max(0, extraTicks);
-    }
-
-    public void recordGrowthHit() {
-        growthHits++;
-    }
-
-    public void recordMachineHit() {
-        machineHits++;
     }
 
     public void recordBlockBroken(int hitsOnBlock) {
@@ -182,22 +88,72 @@ public final class MiningStats {
         blocksBrokenWithHit = 0;
         maxHitsOnBlock = 0;
         savedTicks = 0;
-        growthHits = 0;
-        machineHits = 0;
         maxStreak = 0;
-        animalHits = 0;
-        fishingHits = 0;
-        bowHits = 0;
-        critHits = 0;
-        vehicleHits = 0;
-        eatHits = 0;
-        sleepHits = 0;
-        ladderHits = 0;
-        elytraHits = 0;
-        enchantHits = 0;
-        harvestHits = 0;
-        throwHits = 0;
-        sprintHits = 0;
-        portalHits = 0;
+        java.util.Arrays.fill(kindHits, 0);
+    }
+
+    /**
+     * その種類の保存のキー（PlayerPersisted の weakspot の中。1.8.6 までの名前のまま）。
+     * 近接は critHits（中身は 1.8.0 から近接の弱点に当てた回数）。
+     */
+    public static String saveKey(HitKind kind) {
+        if (kind == HitKind.MINING) {
+            return "hits";
+        }
+        return kind == HitKind.MELEE ? "critHits" : kind.key() + "Hits";
+    }
+
+    /** 送るときの書き先（StatsMessage が ByteBuf につなぐ）。 */
+    public interface Writer {
+        void writeLong(long value);
+
+        void writeDouble(double value);
+    }
+
+    /** 受け取るときの読み元。 */
+    public interface Reader {
+        long readLong();
+
+        double readDouble();
+    }
+
+    /**
+     * 送る並び。1.8.5 までの手書きの並び（maxStreak が機械のあとに入る）と同じにして、通信の中身を変えない。
+     * 種類を足すと通信が変わる（マイナー）。
+     */
+    public void writeTo(Writer out) {
+        out.writeLong(hits);
+        out.writeLong(blocksBroken);
+        out.writeLong(blocksBrokenWithHit);
+        out.writeLong(maxHitsOnBlock);
+        out.writeDouble(savedTicks);
+        for (HitKind kind : HitKind.values()) {
+            if (kind == HitKind.MINING) {
+                continue;
+            }
+            out.writeLong(kindHits[kind.ordinal()]);
+            if (kind == HitKind.MACHINE) {
+                out.writeLong(maxStreak);
+            }
+        }
+    }
+
+    public static MiningStats readFrom(Reader in) {
+        MiningStats stats = new MiningStats();
+        stats.hits = in.readLong();
+        stats.blocksBroken = in.readLong();
+        stats.blocksBrokenWithHit = in.readLong();
+        stats.maxHitsOnBlock = in.readLong();
+        stats.savedTicks = in.readDouble();
+        for (HitKind kind : HitKind.values()) {
+            if (kind == HitKind.MINING) {
+                continue;
+            }
+            stats.kindHits[kind.ordinal()] = in.readLong();
+            if (kind == HitKind.MACHINE) {
+                stats.maxStreak = in.readLong();
+            }
+        }
+        return stats;
     }
 }
