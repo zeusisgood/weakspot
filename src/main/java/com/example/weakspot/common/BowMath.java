@@ -22,6 +22,11 @@ public final class BowMath {
      * 照準が真上・真下まで行かないように）。この範囲の中では、前の弱点と反対側に出す（交互）。
      */
     public static final double HORIZON_BAND_DEGREES = 20.0;
+    /**
+     * 弱点が照準からこの角度（度）より離れたら、照準の近くに出し直す（1.8.2。ボートで曲がった、大きく振り向いた、など）。
+     * 弱点の距離の上限 MAX_OFFSET_DEGREES より外。
+     */
+    public static final double RELOCATE_DEGREES = 35.0;
     /** 過剰チャージ（引き切ったあとのヒット）1回で上げる、矢のダメージの割合（1.3.4）。 */
     public static final double OVERCHARGE_PER_HIT = 0.10;
     /** 過剰チャージの上限のヒット数（+50%）。 */
@@ -124,6 +129,23 @@ public final class BowMath {
             }
         }
         return best != null ? best : anyBest;
+    }
+
+    /**
+     * 弱点 (spotYaw, spotPitch) が照準 (lookYaw, lookPitch) から離れすぎたか（1.8.2）。useYaw / usePitch は、
+     * どちらの向きで測るか（上下だけの弱点は pitch だけ、左右だけは yaw だけ、全方向は両方 = 向きの間の角度）。
+     */
+    public static boolean isTooFar(double spotYaw, double spotPitch, double lookYaw, double lookPitch,
+                                   boolean useYaw, boolean usePitch) {
+        double distance;
+        if (useYaw && usePitch) {
+            distance = angleBetween(spotYaw, spotPitch, lookYaw, lookPitch);
+        } else if (useYaw) {
+            distance = Math.abs(wrapDegrees(spotYaw - lookYaw));
+        } else {
+            distance = Math.abs(spotPitch - lookPitch);
+        }
+        return distance > RELOCATE_DEGREES;
     }
 
     /** delta が sign の側か（sign が 0 なら、どちらでもよい）。 */

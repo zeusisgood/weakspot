@@ -77,6 +77,24 @@ final class VehicleSpot {
         return Math.hypot(vehicle.posX - vehicle.prevPosX, vehicle.posZ - vehicle.prevPosZ) >= MOVING_SPEED;
     }
 
+    /** 前の tick のボートと、その yaw（1.8.2。曲がった分だけ弱点を回す）。 */
+    private static Entity lastBoat;
+    private static float lastBoatYaw;
+
+    /** 自分が操っているボートが曲がった分だけ、弱点を回す（ボートは乗っている人の視線も回すため）。 */
+    private static void followBoat(EntityPlayerSP player) {
+        Entity vehicle = player.getRidingEntity();
+        if (!(vehicle instanceof EntityBoat) || vehicle.getControllingPassenger() != player) {
+            lastBoat = null;
+            return;
+        }
+        if (vehicle == lastBoat) {
+            SPOT.rotateYaw(vehicle.rotationYaw - lastBoatYaw);
+        }
+        lastBoat = vehicle;
+        lastBoatYaw = vehicle.rotationYaw;
+    }
+
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -84,6 +102,7 @@ final class VehicleSpot {
             return;
         }
         if (event.phase == TickEvent.Phase.START) {
+            followBoat(mc.player);
             if (!eligible(mc)) {
                 SPOT.clear();
             } else {

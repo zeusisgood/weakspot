@@ -135,4 +135,17 @@ public class MarkerMotionTest {
         long t = MarkerMotion.timeToReach(0.5);
         assertEquals(0.5, MarkerMotion.progress(t), 0.05);
     }
+
+    @Test
+    public void shiftMovesEverything() {
+        MarkerMotion motion = new MarkerMotion(0, 0);
+        motion.moveTo(10, 0, 1000);
+        motion.shift(5, 1);
+        double[] end = motion.position(1000 + MarkerMotion.MOVE_MS);
+        assertEquals(15, end[0], 1e-9);
+        assertEquals(1, end[1], 1e-9);
+        for (MarkerMotion.Afterimage image : motion.afterimages(1000 + MarkerMotion.MOVE_MS / 2)) {
+            assertTrue(image.u >= 5 - 1e-9);
+        }
+    }
 }

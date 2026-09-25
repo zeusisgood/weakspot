@@ -107,6 +107,12 @@ final class BowSpot {
         EntityPlayerSP player = mc.player;
         if (!spotWanted(player)) {
             hasSpot = false;
+        } else if (hasSpot && BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, true, true)) {
+            // 照準から離れすぎた弱点は、今の照準の近くに出し直す（1.8.2。ヒットには数えない）
+            double[] next = next(player, yaw, pitch);
+            yaw = next[0];
+            pitch = next[1];
+            MOTION.jumpTo(yaw, pitch);
         } else if (!hasSpot) {
             // 引き始めた。今の視線の近くに出す
             double[] next = next(player, player.rotationYaw, player.rotationPitch);

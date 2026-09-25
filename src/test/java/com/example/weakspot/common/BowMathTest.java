@@ -213,4 +213,16 @@ public class BowMathTest {
         assertTrue(BowMath.nextHorizontalYaw(0, 0, 1, 70, random) > 0);
         assertTrue(BowMath.nextHorizontalYaw(0, 0, -1, 70, random) < 0);
     }
+
+    @Test
+    public void tooFarSpotsAreRelocated() {
+        assertFalse(BowMath.isTooFar(20, 0, 0, 0, true, true));
+        assertTrue(BowMath.isTooFar(40, 0, 0, 0, true, true));
+        // 上下だけは pitch だけで測る（yaw は視線に合わせるので、ずれていても離れていない）
+        assertFalse(BowMath.isTooFar(90, 10, 0, 0, false, true));
+        assertTrue(BowMath.isTooFar(0, 40, 0, 0, false, true));
+        // 左右だけは yaw だけ。一周をまたいでも正しく測る
+        assertFalse(BowMath.isTooFar(170, 50, -170, 0, true, false));
+        assertTrue(BowMath.isTooFar(130, 0, -170, 0, true, false));
+    }
 }

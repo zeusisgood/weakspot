@@ -85,12 +85,30 @@ final class HudSpot {
 
     private void ensure(EntityPlayer player, int newMode) {
         if (has && mode == newMode) {
+            // 照準から離れすぎた弱点は、今の照準の近くに出し直す（1.8.2。ヒットには数えない。その場で切り替える）
+            if (BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL,
+                    mode != HORIZONTAL)) {
+                next(player, yaw, pitch);
+                motion.jumpTo(yaw, pitch);
+            }
             return;
         }
         mode = newMode;
         next(player, player.rotationYaw, player.rotationPitch);
         motion.jumpTo(yaw, pitch);
         has = true;
+    }
+
+    /**
+     * 弱点の yaw を delta 度だけ回す（1.8.2。ボートが曲がると、乗っている人の視線も回るので、弱点も一緒に回す）。
+     * 表示の移動と残像も、同じだけずらす。
+     */
+    void rotateYaw(double delta) {
+        if (!has || delta == 0) {
+            return;
+        }
+        yaw += delta;
+        motion.shift(delta, 0);
     }
 
     /** 当てたあと、次の位置へ動かす。 */

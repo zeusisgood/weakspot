@@ -54,6 +54,20 @@ public final class MarkerMotion {
     }
 
     /**
+     * 移動の途中も残像も含めて、全体を (du, dv) だけずらす（1.8.2。ボートが曲がったとき、弱点を一緒に回す）。
+     */
+    public void shift(double du, double dv) {
+        fromU += du;
+        fromV += dv;
+        toU += du;
+        toV += dv;
+        for (int i = 0; i < afterimages.size(); i++) {
+            Afterimage image = afterimages.get(i);
+            afterimages.set(i, new Afterimage(image.u + du, image.v + dv, image.bornMs));
+        }
+    }
+
+    /**
      * 移動先 (u, v) へ動かし始める。始点は前の移動先（判定上の位置）。移動中なら前の移動は打ち切るが、
      * 前の移動の残像はそのまま消えていく。移動先が今と同じなら何もしない。
      */
