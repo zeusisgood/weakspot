@@ -87,8 +87,8 @@ final class WeakSpotRenderer {
      * growth は作物の成長バーの進み具合（0〜1。spot のブロックの足元に描く）。負ならバーを描かない。
      * animal は動物の足元のバーの進み具合（0〜1。spot の動物の足元に描く）。負ならバーを描かない。
      */
-    static void render(Minecraft mc, WeakSpot spot, double health, double growth, double animal, long tick,
-                       float partialTicks) {
+    static void render(Minecraft mc, WeakSpot spot, double health, double growth, double animal, boolean machineBar,
+                       long tick, float partialTicks) {
         Entity camera = mc.getRenderViewEntity();
         if (camera == null) {
             return;
@@ -166,6 +166,9 @@ final class WeakSpotRenderer {
         }
         if (spot != null && spot.entity != null && animal >= 0) {
             AnimalBar.draw(spot.entity, animal, partialTicks, cx, cy, cz);
+        }
+        if (spot != null && machineBar) {
+            MachineBars.draw(spot.pos, tick + partialTicks, cx, cy, cz);
         }
 
         GlStateManager.glLineWidth(1.0F);

@@ -9,6 +9,7 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
+import com.example.weakspot.server.MachineStates;
 import com.example.weakspot.network.HitMessage;
 import java.util.Arrays;
 import java.util.Random;
@@ -154,7 +155,8 @@ public final class ClientWeakSpotHandler {
             // 一時オフ。J を押した直後のフレームでも、自分の弱点を出さない
             stopOwnWeakSpots();
         }
-        WeakSpotRenderer.render(mc, spot, health, growth, animal, clientTick, event.getPartialTicks());
+        WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.weakSpotsEnabled && machineBar(mc),
+                clientTick, event.getPartialTicks());
     }
 
     /**
@@ -171,6 +173,19 @@ public final class ClientWeakSpotHandler {
         }
         double progress = MiningProgress.progress(mc.playerController, spot.pos, partialTicks);
         return progress < 0 ? -1 : BlockHealthBar.remaining(progress);
+    }
+
+    /**
+     * 機械の進み具合のバーを出すか（1.6.0）。機械の弱点がかまど・醸造台・スポナーに出ていて、このフレームで照準が
+     * 合っているとき。出すときは、サーバーに値を問い合わせる（間隔があいていなければ送らない）。
+     */
+    private static boolean machineBar(Minecraft mc) {
+        if (!WeakSpotConfig.machineBarEnabled || !machineSpotActive()
+                || !MachineStates.hasBar(mc.world.getTileEntity(spot.pos))) {
+            return false;
+        }
+        MachineBars.query(spot.pos, clientTick, false);
+        return true;
     }
 
     /** 成長バーに出す作物の進み具合（0〜1）。成長の弱点が今出ているときだけ。出さないときは -1。 */
@@ -464,6 +479,11 @@ public final class ClientWeakSpotHandler {
         HitKind kind = spot.kind;
         WeakSpotRenderer.addFlash(spot, clientTick);
         int hitStreak = registerHit(kind);
+        if (kind == HitKind.MACHINE && WeakSpotConfig.machineBarEnabled
+                && MachineStates.hasBar(mc.world.getTileEntity(spot.pos))) {
+            // ヒットで進んだ分を、すぐに見に行く
+            MachineBars.query(spot.pos, clientTick, true);
+        }
         if (kind == HitKind.MINING) {
             boostHitTick = clientTick;
             boostPos = spot.pos;
@@ -505,6 +525,7 @@ public final class ClientWeakSpotHandler {
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
         boostHitTick = Long.MIN_VALUE / 2;
         AnimalStates.clear();
+        MachineBars.clear();
         FishingSpot.clear();
         BowSpot.clear();
         lastPlayer = null;

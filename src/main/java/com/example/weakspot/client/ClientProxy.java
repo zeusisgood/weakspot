@@ -46,6 +46,12 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void onMachineState(BlockPos pos, float progress, float fuel) {
+        Minecraft.getMinecraft().addScheduledTask(
+                () -> MachineBars.receive(pos, progress, fuel, ClientWeakSpotHandler.clientTick));
+    }
+
+    @Override
     public void onFishingState(boolean waiting, float progress) {
         Minecraft.getMinecraft().addScheduledTask(() -> FishingSpot.receive(waiting, progress));
     }

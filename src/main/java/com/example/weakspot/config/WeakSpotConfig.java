@@ -342,6 +342,10 @@ public final class WeakSpotConfig {
             "自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る"})
     public static boolean blockHealthBarEnabled = true;
 
+    @Config.Comment({"[クライアント] かまど・醸造台・スポナーの上に、進み具合（黄）と燃料（橙）のバーを表示するか（1.6.0）",
+            "機械の弱点を出している間（しゃがんで素手で右クリックを押しっぱなしにしている間）だけ出る"})
+    public static boolean machineBarEnabled = true;
+
     @Config.Comment({"[クライアント] 作物の足元に、成長の進み具合を黄色のバーで表示するか",
             "成長の弱点を出している間（素手で右クリックを押しっぱなしにしている間）だけ出る"})
     public static boolean growthBarEnabled = true;

@@ -71,6 +71,7 @@ key.weakspot.toggle=弱点のオン・オフ
 weakspot.toggle.on=弱点: オン
 weakspot.toggle.off=弱点: オフ
 weakspot.toggle.offReminder=弱点: オフ（%s で切り替え）
+weakspot.general.machinebarenabled.tooltip=[クライアント] かまど・醸造台・スポナーの上に、進み具合（黄）と燃料（橙）のバーを表示するか\n機械の弱点を出している間（しゃがんで素手で右クリックを押しっぱなしにしている間）だけ出る
 weakspot.general.growthbarenabled.tooltip=[クライアント] 作物の足元に、成長の進み具合を黄色のバーで表示するか\n成長の弱点を出している間（素手で右クリックを押しっぱなしにしている間）だけ出る
 weakspot.general.othermarkershape.tooltip=[クライアント] 他のプレイヤーの弱点マークの形\nCIRCLE（塗りつぶした円）, RING（中抜きの輪）, DIAMOND（ひし形）, SQUARE（四角）。自分のマークは円のまま
 weakspot.general.weakspotsenabled.tooltip=[クライアント] 自分の弱点のオン・オフ（弱点のオン・オフのキーで切り替わる）\nオフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える

@@ -6,6 +6,8 @@ import com.example.weakspot.network.AnimalStateMessage;
 import com.example.weakspot.network.FishingQueryMessage;
 import com.example.weakspot.network.FishingStateMessage;
 import com.example.weakspot.network.HitMessage;
+import com.example.weakspot.network.MachineQueryMessage;
+import com.example.weakspot.network.MachineStateMessage;
 import com.example.weakspot.network.MarkerMessage;
 import com.example.weakspot.network.MilestoneMessage;
 import com.example.weakspot.network.OtherHitMessage;
@@ -15,6 +17,7 @@ import com.example.weakspot.network.StatsMessage;
 import com.example.weakspot.network.StatsRequestMessage;
 import com.example.weakspot.network.SwitchMessage;
 import com.example.weakspot.server.MachineAccelerator;
+import com.example.weakspot.server.MachineStates;
 import com.example.weakspot.server.WeakSpotCommand;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -62,6 +65,8 @@ public class WeakSpotMod {
         network.registerMessage(AnimalStateMessage.Handler.class, AnimalStateMessage.class, 10, Side.CLIENT);
         network.registerMessage(FishingQueryMessage.Handler.class, FishingQueryMessage.class, 11, Side.SERVER);
         network.registerMessage(FishingStateMessage.Handler.class, FishingStateMessage.class, 12, Side.CLIENT);
+        network.registerMessage(MachineQueryMessage.Handler.class, MachineQueryMessage.class, 13, Side.SERVER);
+        network.registerMessage(MachineStateMessage.Handler.class, MachineStateMessage.class, 14, Side.CLIENT);
     }
 
     @Mod.EventHandler
@@ -73,6 +78,7 @@ public class WeakSpotMod {
     @Mod.EventHandler
     public void serverStopped(FMLServerStoppedEvent event) {
         MachineAccelerator.clear();
+        MachineStates.clear();
     }
 
     @Mod.EventHandler

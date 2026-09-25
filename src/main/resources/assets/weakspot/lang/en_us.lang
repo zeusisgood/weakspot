@@ -71,6 +71,7 @@ key.weakspot.toggle=Toggle Weak Spots
 weakspot.toggle.on=Weak Spots: On
 weakspot.toggle.off=Weak Spots: Off
 weakspot.toggle.offReminder=Weak Spots: Off (press %s to toggle)
+weakspot.general.machinebarenabled.tooltip=[Client] Show progress (yellow) and fuel (orange) bars above furnaces, brewing stands and spawners.\nOnly while their machine weak spot is shown (sneak and hold right click with empty hands).
 weakspot.general.growthbarenabled.tooltip=[Client] Show a yellow growth bar at the foot of a crop while its weak spot is shown.\nOnly while you hold right click with an empty hand on it.
 weakspot.general.othermarkershape.tooltip=[Client] Shape of other players' weak spot markers.\nCIRCLE (filled), RING (hollow), DIAMOND, SQUARE. Your own marker stays a filled circle.
 weakspot.general.weakspotsenabled.tooltip=[Client] Turn your own weak spots on or off (the Toggle Weak Spots key switches it).\nWhile off, your weak spots do not appear and the game plays as usual. Other players' markers are still shown.
