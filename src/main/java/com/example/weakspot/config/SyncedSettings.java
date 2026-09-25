@@ -1,5 +1,6 @@
 package com.example.weakspot.config;
 
+import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.GrowthFilters;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
@@ -65,6 +66,8 @@ public final class SyncedSettings {
     /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
     public double machineBoostMultiplier;
     public double machineBoostMaxMultiplier;
+    /** 値を送ったサーバーの Mod の版（1.6.0。ServerFeatures）。自分の設定の値なら、自分の版。 */
+    public String serverVersion;
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -124,6 +127,7 @@ public final class SyncedSettings {
         s.meleeWeakSpotScale = WeakSpotConfig.meleeWeakSpotScale;
         s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
         s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
+        s.serverVersion = WeakSpotMod.VERSION;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -170,6 +174,7 @@ public final class SyncedSettings {
         buf.writeDouble(meleeWeakSpotScale);
         buf.writeDouble(machineBoostMultiplier);
         buf.writeDouble(machineBoostMaxMultiplier);
+        ByteBufUtils.writeUTF8String(buf, serverVersion);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -216,6 +221,7 @@ public final class SyncedSettings {
         s.meleeWeakSpotScale = buf.readDouble();
         s.machineBoostMultiplier = buf.readDouble();
         s.machineBoostMaxMultiplier = buf.readDouble();
+        s.serverVersion = ByteBufUtils.readUTF8String(buf);
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;
