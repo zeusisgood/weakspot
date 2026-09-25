@@ -95,7 +95,7 @@ weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒッ
 weakspot.command.stats.total=  累計: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、食事ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投げる物ヒット %s、走りヒット %s、ゲートヒット %s、合計ヒット %s
 weakspot.command.reset=[弱点] %s の統計の累計を消しました
 
-# ガイドの本（1.4.1）。README の遊び方を変えたら、ここも合わせて直す。1ページは150文字くらいまで
+# ガイドの本（1.4.1。1.8.5 から章立て）。遊び方（doc/play.md）を変えたら、ここも合わせて直す。1 ページは 14 行まで
 weakspot.stats.guide=ガイド
 weakspot.guide.cover.title=弱点破壊
 weakspot.guide.cover.subtitle=遊び方ガイド

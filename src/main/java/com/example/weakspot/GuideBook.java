@@ -18,7 +18,7 @@ import net.minecraft.util.text.event.ClickEvent;
  * 遊び方のガイドの本（1.4.1。両側）。サーバーは初めてのログインで渡し、クライアントは統計画面の「ガイド」で開く。
  * ページは翻訳キーの文章なので、読む人のクライアントの言語で出る。キーの名前は、読む人の操作設定から出す。
  * 1.8.5 から、表紙・目次（クリックで飛ぶ）・章ごとのページで、各ページは小見出し（■）で分ける。
- * README の遊び方を変えたら、lang の weakspot.guide.* も合わせて直す（CLAUDE.md）。
+ * 遊び方（doc/play.md）を変えたら、lang の weakspot.guide.* も合わせて直す（CLAUDE.md）。
  */
 public final class GuideBook {
 

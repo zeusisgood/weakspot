@@ -95,7 +95,7 @@ weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s
 weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
 weakspot.command.reset=[Weak Spot] Reset the all-time stats of %s
 
-# The guide book (1.4.1). Update it along with the README's how-to-play. Keep each page short enough to fit.
+# The guide book (1.4.1, chapters since 1.8.5). Update it along with doc/play.md. Keep each page within 14 lines.
 weakspot.stats.guide=Guide
 weakspot.guide.cover.title=Weak Spot Mining
 weakspot.guide.cover.subtitle=How to play
