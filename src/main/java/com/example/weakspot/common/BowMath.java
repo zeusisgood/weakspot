@@ -17,6 +17,11 @@ public final class BowMath {
     public static final double MAX_OFFSET_FOV_FRACTION = 0.7;
     /** ヒットのあと、前の向きから最低でも離れる角度（度）。 */
     public static final double MIN_MOVE_DEGREES = 8.0;
+    /**
+     * 照準が水平からこの角度（度）より上か下を向いていたら、次の弱点は水平に戻る側に出す（1.8.1。当て続けても
+     * 照準が真上・真下まで行かないように）。この範囲の中では、前の弱点と反対側に出す（交互）。
+     */
+    public static final double HORIZON_BAND_DEGREES = 20.0;
     /** 過剰チャージ（引き切ったあとのヒット）1回で上げる、矢のダメージの割合（1.3.4）。 */
     public static final double OVERCHARGE_PER_HIT = 0.10;
     /** 過剰チャージの上限のヒット数（+50%）。 */
@@ -73,6 +78,16 @@ public final class BowMath {
      */
     public static double[] nextSpot(double lookYaw, double lookPitch, double prevYaw, double prevPitch,
                                     double fovDegrees, Random random) {
+        return nextSpot(lookYaw, lookPitch, prevYaw, prevPitch, 0, 0, fovDegrees, random);
+    }
+
+    /**
+     * 向きを決めた次の弱点の向き（1.8.1）。yawSign は視線より yaw が増える側（+1）か減る側（-1）、pitchSign は視線より
+     * 下（+1。pitch が増える）か上（-1）。0 ならどちらでもよい。決めた側の、10〜20 度の輪の 4 分の 1（斜めを含む）に出す。
+     * その側に前の向きから離れた所が取れなければ、一番離れた所。
+     */
+    public static double[] nextSpot(double lookYaw, double lookPitch, double prevYaw, double prevPitch,
+                                    int yawSign, int pitchSign, double fovDegrees, Random random) {
         double[] range = offsetRange(fovDegrees);
         double[] look = vector(lookYaw, lookPitch);
         // 視線に垂直な2本の軸
@@ -81,7 +96,8 @@ public final class BowMath {
         double[] top = cross(side, look);
         double[] best = null;
         double bestMove = -1;
-        for (int i = 0; i < 40; i++) {
+        double[] anyBest = null;
+        for (int i = 0; i < 200; i++) {
             double offset = Math.toRadians(range[0] + random.nextDouble() * (range[1] - range[0]));
             double around = random.nextDouble() * 2 * Math.PI;
             double s = Math.sin(offset);
@@ -92,6 +108,12 @@ public final class BowMath {
             }
             double[] r = rotation(normalize(d));
             r[0] = prevYaw + wrapDegrees(r[0] - prevYaw);
+            if (anyBest == null) {
+                anyBest = r;
+            }
+            if (!onSide(wrapDegrees(r[0] - lookYaw), yawSign) || !onSide(r[1] - lookPitch, pitchSign)) {
+                continue;
+            }
             double move = angleBetween(r[0], r[1], prevYaw, prevPitch);
             if (move >= MIN_MOVE_DEGREES) {
                 return r;
@@ -101,7 +123,41 @@ public final class BowMath {
                 best = r;
             }
         }
-        return best;
+        return best != null ? best : anyBest;
+    }
+
+    /** delta が sign の側か（sign が 0 なら、どちらでもよい）。 */
+    private static boolean onSide(double delta, int sign) {
+        return sign == 0 || delta * sign >= 0;
+    }
+
+    /**
+     * 次の弱点を、照準の上（-1）と下（+1）のどちらに出すか（1.8.1）。keepNearHorizon なら、照準が水平から
+     * HORIZON_BAND_DEGREES より上を向いていれば下、下を向いていれば上（水平に戻る側）。そうでなければ、
+     * 前の側 prevSign の反対（交互）。最初（prevSign が 0）はランダム。エリトラは keepNearHorizon を false にする。
+     */
+    public static int nextPitchSign(double lookPitch, int prevSign, boolean keepNearHorizon, Random random) {
+        if (keepNearHorizon) {
+            if (lookPitch > HORIZON_BAND_DEGREES) {
+                return -1;
+            }
+            if (lookPitch < -HORIZON_BAND_DEGREES) {
+                return 1;
+            }
+        }
+        return alternate(prevSign, random);
+    }
+
+    /** 次の弱点を、照準の左右のどちらに出すか（1.8.1。前の側の反対。最初はランダム）。 */
+    public static int nextYawSign(int prevSign, Random random) {
+        return alternate(prevSign, random);
+    }
+
+    private static int alternate(int prevSign, Random random) {
+        if (prevSign == 0) {
+            return random.nextBoolean() ? 1 : -1;
+        }
+        return -Integer.signum(prevSign);
     }
 
     /**
@@ -110,12 +166,18 @@ public final class BowMath {
      * 前の pitch から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
      */
     public static double nextVerticalPitch(double lookPitch, double prevPitch, double fovDegrees, Random random) {
+        return nextVerticalPitch(lookPitch, prevPitch, 0, fovDegrees, random);
+    }
+
+    /** 上（-1）か下（+1）を決めた版（1.8.1。0 ならランダム）。 */
+    public static double nextVerticalPitch(double lookPitch, double prevPitch, int pitchSign, double fovDegrees,
+                                           Random random) {
         double[] range = offsetRange(fovDegrees);
         double best = lookPitch;
         double bestMove = -1;
         for (int i = 0; i < 40; i++) {
             double offset = range[0] + random.nextDouble() * (range[1] - range[0]);
-            double sign = random.nextBoolean() ? 1 : -1;
+            double sign = pitchSign != 0 ? pitchSign : random.nextBoolean() ? 1 : -1;
             double pitch = lookPitch + sign * offset;
             if (Math.abs(pitch) > 90) {
                 pitch = lookPitch - sign * offset;
@@ -139,12 +201,18 @@ public final class BowMath {
      * 前の yaw との差は、一周（360 度）をまたいでも正しく測る。
      */
     public static double nextHorizontalYaw(double lookYaw, double prevYaw, double fovDegrees, Random random) {
+        return nextHorizontalYaw(lookYaw, prevYaw, 0, fovDegrees, random);
+    }
+
+    /** 左右を決めた版（1.8.1。yawSign は yaw が増える側 +1 か減る側 -1。0 ならランダム）。 */
+    public static double nextHorizontalYaw(double lookYaw, double prevYaw, int yawSign, double fovDegrees,
+                                           Random random) {
         double[] range = offsetRange(fovDegrees);
         double best = lookYaw;
         double bestMove = -1;
         for (int i = 0; i < 40; i++) {
             double offset = range[0] + random.nextDouble() * (range[1] - range[0]);
-            double yaw = lookYaw + (random.nextBoolean() ? 1 : -1) * offset;
+            double yaw = lookYaw + (yawSign != 0 ? yawSign : random.nextBoolean() ? 1 : -1) * offset;
             double move = Math.abs(wrapDegrees(yaw - prevYaw));
             if (move >= MIN_MOVE_DEGREES) {
                 return yaw;

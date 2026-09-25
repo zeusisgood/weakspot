@@ -36,6 +36,11 @@ final class HudSpot {
 
     private boolean has;
     private int mode;
+    /** 前の弱点を出した側（1.8.1。上下 -1 / +1、左右 -1 / +1、0 はまだない）。次は反対側に出す。 */
+    private int pitchSide;
+    private int yawSide;
+    /** 照準が水平から離れすぎたら水平の側に出すか（1.8.1。エリトラだけ false）。 */
+    private boolean keepNearHorizon = true;
     private double yaw;
     private double pitch;
     private double eyeX;
@@ -51,6 +56,12 @@ final class HudSpot {
     HudSpot(HitKind kind, int defaultRgb) {
         this.kind = kind;
         this.defaultRgb = defaultRgb;
+    }
+
+    /** 上下も左右も交互だけにする（水平に戻す決まりを使わない。1.8.1。エリトラ）。 */
+    HudSpot alternateOnly() {
+        keepNearHorizon = false;
+        return this;
     }
 
     boolean has() {
@@ -93,15 +104,21 @@ final class HudSpot {
     }
 
     private void next(EntityPlayer player, double prevYaw, double prevPitch) {
+        // 1.8.1: 交互に出し、照準が水平から離れすぎたら水平の側に出す（真上・真下まで行かないように）
         if (mode == VERTICAL) {
+            pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
             yaw = player.rotationYaw;
-            pitch = BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, screen.fovDegrees(), random);
+            pitch = BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, pitchSide, screen.fovDegrees(),
+                    random);
         } else if (mode == HORIZONTAL) {
-            yaw = BowMath.nextHorizontalYaw(player.rotationYaw, prevYaw, screen.fovDegrees(), random);
+            yawSide = BowMath.nextYawSign(yawSide, random);
+            yaw = BowMath.nextHorizontalYaw(player.rotationYaw, prevYaw, yawSide, screen.fovDegrees(), random);
             pitch = player.rotationPitch;
         } else {
-            double[] n = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch,
-                    screen.fovDegrees(), random);
+            pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
+            yawSide = BowMath.nextYawSign(yawSide, random);
+            double[] n = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch, yawSide,
+                    pitchSide, screen.fovDegrees(), random);
             yaw = n[0];
             pitch = n[1];
         }

@@ -64,6 +64,9 @@ final class BowSpot {
     private static double yaw;
     private static double pitch;
     private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
+    /** 前の弱点を出した側（1.8.1。上下・左右とも -1 / +1、0 はまだない）。 */
+    private static int pitchSide;
+    private static int yawSide;
     /** このフレームの、目の位置。 */
     private static double eyeX;
     private static double eyeY;
@@ -119,12 +122,15 @@ final class BowSpot {
      * 真上・真下の弱点の yaw は、出した時点の視線の yaw（弓を引いている短い間なので、向きを追いかけない）。
      */
     private static double[] next(EntityPlayerSP player, double prevYaw, double prevPitch) {
+        // 1.8.1: 交互に出し、照準が水平から離れすぎたら水平の側に出す（真上・真下まで行かないように）
+        pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, true, RANDOM);
         if (VehicleTargets.isSteeredByLook(player)) {
-            return new double[] {player.rotationYaw,
-                    BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, SCREEN.fovDegrees(), RANDOM)};
+            return new double[] {player.rotationYaw, BowMath.nextVerticalPitch(player.rotationPitch, prevPitch,
+                    pitchSide, SCREEN.fovDegrees(), RANDOM)};
         }
-        return BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch, SCREEN.fovDegrees(),
-                RANDOM);
+        yawSide = BowMath.nextYawSign(yawSide, RANDOM);
+        return BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch, yawSide, pitchSide,
+                SCREEN.fovDegrees(), RANDOM);
     }
 
     /** 弱点を出すか。引き切る前と、引き切ったあとの過剰チャージが上限に届くまで。 */

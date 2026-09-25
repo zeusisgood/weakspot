@@ -226,3 +226,4 @@ weakspot.general.meleechargebarenabled.tooltip=[Client] Show the melee charge ga
 weakspot.guide.22.title=Nether Portals
 weakspot.guide.22.text=Stand in a nether portal and a gold weak spot appears near your crosshair. Each hit cuts a second off the wait; the longer your combo, the sooner you travel.
 weakspot.news.1.8.0=Melee weak spots now charge your next attack; added nether portal weak spots
+weakspot.news.1.8.1=HUD weak spots now alternate sides and no longer drift straight up or down

@@ -37,7 +37,7 @@ final class ElytraSpot {
     private static final int SPARKS = 8;
     private static final int CLOUDS_PER_TICK = 2;
 
-    private static final HudSpot SPOT = new HudSpot(HitKind.ELYTRA, RGB);
+    private static final HudSpot SPOT = new HudSpot(HitKind.ELYTRA, RGB).alternateOnly();
     private static long dashTick = Long.MIN_VALUE / 2;
 
     private ElytraSpot() {

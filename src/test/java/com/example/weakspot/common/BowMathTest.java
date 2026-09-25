@@ -149,4 +149,68 @@ public class BowMathTest {
         assertEquals(170, BowMath.wrapDegrees(-190), 1e-9);
         assertEquals(0, BowMath.wrapDegrees(720), 1e-9);
     }
+
+    @Test
+    public void pitchSideAlternatesNearTheHorizon() {
+        Random random = new Random(1);
+        assertEquals(-1, BowMath.nextPitchSign(0, 1, true, random));
+        assertEquals(1, BowMath.nextPitchSign(10, -1, true, random));
+        int first = BowMath.nextPitchSign(0, 0, true, random);
+        assertTrue(first == 1 || first == -1);
+    }
+
+    @Test
+    public void pitchSideReturnsTowardTheHorizon() {
+        Random random = new Random(1);
+        // 下（pitch が正）を向きすぎていたら上（-1）、上を向きすぎていたら下（+1）。前の側に関係ない
+        assertEquals(-1, BowMath.nextPitchSign(25, -1, true, random));
+        assertEquals(1, BowMath.nextPitchSign(-25, 1, true, random));
+        // エリトラ（交互だけ）は、水平から離れていても交互
+        assertEquals(1, BowMath.nextPitchSign(25, -1, false, random));
+    }
+
+    @Test
+    public void verticalSpotsNeverDriftToStraightUpOrDown() {
+        Random random = new Random(7);
+        double look = 0;
+        double prev = 0;
+        int side = 0;
+        for (int i = 0; i < 500; i++) {
+            side = BowMath.nextPitchSign(look, side, true, random);
+            double pitch = BowMath.nextVerticalPitch(look, prev, side, 70, random);
+            // プレイヤーは弱点に照準を合わせる
+            prev = pitch;
+            look = pitch;
+            assertTrue(Math.abs(look) <= BowMath.HORIZON_BAND_DEGREES + BowMath.MAX_OFFSET_DEGREES + 1e-9);
+        }
+    }
+
+    @Test
+    public void yawSideAlternates() {
+        Random random = new Random(1);
+        assertEquals(-1, BowMath.nextYawSign(1, random));
+        assertEquals(1, BowMath.nextYawSign(-1, random));
+    }
+
+    @Test
+    public void spotsLandOnTheChosenQuadrant() {
+        Random random = new Random(5);
+        for (int i = 0; i < 100; i++) {
+            int yawSign = random.nextBoolean() ? 1 : -1;
+            int pitchSign = random.nextBoolean() ? 1 : -1;
+            double[] r = BowMath.nextSpot(30, 5, 30, 5, yawSign, pitchSign, 70, random);
+            assertTrue(BowMath.wrapDegrees(r[0] - 30) * yawSign >= 0);
+            assertTrue((r[1] - 5) * pitchSign >= 0);
+            double offset = BowMath.angleBetween(r[0], r[1], 30, 5);
+            double[] range = BowMath.offsetRange(70);
+            assertTrue(offset >= range[0] - 1e-6 && offset <= range[1] + 1e-6);
+        }
+    }
+
+    @Test
+    public void horizontalYawFollowsTheChosenSide() {
+        Random random = new Random(2);
+        assertTrue(BowMath.nextHorizontalYaw(0, 0, 1, 70, random) > 0);
+        assertTrue(BowMath.nextHorizontalYaw(0, 0, -1, 70, random) < 0);
+    }
 }
