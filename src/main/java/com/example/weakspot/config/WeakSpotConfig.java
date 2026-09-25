@@ -250,6 +250,18 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int bowMinHitIntervalTicks = 4;
 
+    @Config.Comment({"[サーバー] 食事・飲み物の弱点のオン・オフ（1.6.0）",
+            "食べている・飲んでいる間、照準の近くに弱点が出る。当てると、食べ終わるまでの時間が縮む"})
+    public static boolean eatWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] 食事・飲み物の弱点に1回当てるごとに縮める時間（tick）。バニラの食事は 32 tick なので、16 なら 2 ヒットで食べ終わる")
+    @Config.RangeInt(min = 0, max = 64)
+    public static int eatHitTicks = 16;
+
+    @Config.Comment("[サーバー] 食事・飲み物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int eatMinHitIntervalTicks = 4;
+
     @Config.Comment({"[サーバー] 乗り物の弱点のオン・オフ（1.6.0）",
             "馬・豚・トロッコ・ボートに乗って動いている間、照準の近くに弱点が出る。当てると、その乗り物が少しの間速くなる"})
     public static boolean vehicleWeakSpotEnabled = true;

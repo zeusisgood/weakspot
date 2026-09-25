@@ -3,6 +3,7 @@ package com.example.weakspot.network;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.server.AnimalHits;
 import com.example.weakspot.server.BowHits;
+import com.example.weakspot.server.EatHits;
 import com.example.weakspot.server.FishingHits;
 import com.example.weakspot.server.MeleeHits;
 import com.example.weakspot.server.RightClickHits;
@@ -87,6 +88,8 @@ public class HitMessage implements IMessage {
                     BowHits.onHit(player, streak);
                 } else if (kind == HitKind.MELEE) {
                     MeleeHits.onHit(player, entityId, streak);
+                } else if (kind == HitKind.EAT) {
+                    EatHits.onHit(player, streak);
                 } else if (kind == HitKind.VEHICLE) {
                     VehicleHits.onHit(player, entityId, streak);
                 } else {

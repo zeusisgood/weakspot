@@ -66,6 +66,10 @@ public final class SyncedSettings {
     /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
     public double machineBoostMultiplier;
     public double machineBoostMaxMultiplier;
+    /** 食事・飲み物の弱点（1.6.0）。 */
+    public boolean eatWeakSpotEnabled;
+    public int eatHitTicks;
+    public int eatMinHitIntervalTicks;
     /** 乗り物の弱点（1.6.0）。 */
     public boolean vehicleWeakSpotEnabled;
     public double vehicleBoostMultiplier;
@@ -134,6 +138,9 @@ public final class SyncedSettings {
         s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
         s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
         s.serverVersion = WeakSpotMod.VERSION;
+        s.eatWeakSpotEnabled = WeakSpotConfig.eatWeakSpotEnabled;
+        s.eatHitTicks = WeakSpotConfig.eatHitTicks;
+        s.eatMinHitIntervalTicks = WeakSpotConfig.eatMinHitIntervalTicks;
         s.vehicleWeakSpotEnabled = WeakSpotConfig.vehicleWeakSpotEnabled;
         s.vehicleBoostMultiplier = WeakSpotConfig.vehicleBoostMultiplier;
         s.vehicleBoostMaxMultiplier = WeakSpotConfig.vehicleBoostMaxMultiplier;
@@ -186,6 +193,9 @@ public final class SyncedSettings {
         buf.writeDouble(machineBoostMultiplier);
         buf.writeDouble(machineBoostMaxMultiplier);
         ByteBufUtils.writeUTF8String(buf, serverVersion);
+        buf.writeBoolean(eatWeakSpotEnabled);
+        buf.writeInt(eatHitTicks);
+        buf.writeInt(eatMinHitIntervalTicks);
         buf.writeBoolean(vehicleWeakSpotEnabled);
         buf.writeDouble(vehicleBoostMultiplier);
         buf.writeDouble(vehicleBoostMaxMultiplier);
@@ -238,6 +248,9 @@ public final class SyncedSettings {
         s.machineBoostMultiplier = buf.readDouble();
         s.machineBoostMaxMultiplier = buf.readDouble();
         s.serverVersion = ByteBufUtils.readUTF8String(buf);
+        s.eatWeakSpotEnabled = buf.readBoolean();
+        s.eatHitTicks = buf.readInt();
+        s.eatMinHitIntervalTicks = buf.readInt();
         s.vehicleWeakSpotEnabled = buf.readBoolean();
         s.vehicleBoostMultiplier = buf.readDouble();
         s.vehicleBoostMaxMultiplier = buf.readDouble();
