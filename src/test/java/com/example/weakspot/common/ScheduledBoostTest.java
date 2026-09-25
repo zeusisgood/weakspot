@@ -27,6 +27,15 @@ public class ScheduledBoostTest {
     }
 
     @Test
+    public void dispenseCountForFactorMatchesTheHud() {
+        assertEquals(2, ScheduledBoost.dispenseCountForFactor(1.0));
+        assertEquals(2, ScheduledBoost.dispenseCountForFactor(1.5));
+        assertEquals(3, ScheduledBoost.dispenseCountForFactor(2.0));
+        assertEquals(4, ScheduledBoost.dispenseCountForFactor(3.0));
+        assertEquals(5, ScheduledBoost.dispenseCountForFactor(4.0));
+    }
+
+    @Test
     public void dispenseCountIsCapped() {
         assertEquals(ScheduledBoost.MAX_DISPENSES, ScheduledBoost.dispenseCount(400, 4));
         // 上限の設定で倍率が抑えられると、回数も減る

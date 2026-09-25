@@ -76,5 +76,6 @@ public final class MachineAccelerator {
     /** サーバーが止まったら記録を捨てる（シングルプレイで別のワールドに入り直したときに持ち越さない）。 */
     public static void clear() {
         BOOSTS.clear();
+        ScheduledTicks.clear();
     }
 }

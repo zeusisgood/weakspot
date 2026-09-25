@@ -8,6 +8,8 @@ public final class ScheduledBoost {
 
     /** ディスペンサー・ドロッパーの、1回の予約での発射の上限。 */
     public static final int MAX_DISPENSES = 5;
+    /** 余分の発射の間隔（tick）。まとめて出すと音と煙が重なって連射に見えないので、分けて出す（1.5.2）。 */
+    public static final int BURST_INTERVAL_TICKS = 2;
 
     private ScheduledBoost() {
     }
@@ -26,5 +28,10 @@ public final class ScheduledBoost {
             return 1;
         }
         return (int) Math.max(1, Math.min(MAX_DISPENSES, Math.floor(1 + multiplier / baseMultiplier)));
+    }
+
+    /** コンボの掛け数からの発射の回数（HUD の「発射 ×n」。サーバーの上限の設定は考えない）。 */
+    public static int dispenseCountForFactor(double comboFactor) {
+        return dispenseCount(comboFactor, 1);
     }
 }

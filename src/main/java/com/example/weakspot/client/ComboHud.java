@@ -7,6 +7,7 @@ import com.example.weakspot.common.ComboTier;
 import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.ScheduledBoost;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.awt.Color;
 import net.minecraft.client.Minecraft;
@@ -72,6 +73,9 @@ final class ComboHud {
     /** 「機械 ×n」の掛け数が上がった瞬間（光らせる）と、その段階の数。 */
     private static double factorStepTime = Double.NEGATIVE_INFINITY;
     private static int factorStepCombo;
+    /** 「発射 ×n」の回数が上がった瞬間（光らせる）と、その段階の数。 */
+    private static double shotsStepTime = Double.NEGATIVE_INFINITY;
+    private static int shotsStepCombo;
     /** 1000 のタイトルを出し始めた clientTick と、その数（0 なら出していない）。 */
     private static long titleTick;
     private static int titleCombo;
@@ -92,6 +96,11 @@ final class ComboHud {
         if (MachineComboBoost.factor(newCombo) > MachineComboBoost.factor(newCombo - 1)) {
             factorStepTime = time;
             factorStepCombo = newCombo;
+            if (ScheduledBoost.dispenseCountForFactor(MachineComboBoost.factor(newCombo))
+                    > ScheduledBoost.dispenseCountForFactor(MachineComboBoost.factor(newCombo - 1))) {
+                shotsStepTime = time;
+                shotsStepCombo = newCombo;
+            }
         }
         if (MILESTONES.reached(newCombo) && WeakSpotConfig.comboDisplayEnabled
                 && WeakSpotConfig.comboMilestoneEffects) {
@@ -158,6 +167,7 @@ final class ComboHud {
         stepTime = Double.NEGATIVE_INFINITY;
         stepCombo = 0;
         factorStepTime = Double.NEGATIVE_INFINITY;
+        shotsStepTime = Double.NEGATIVE_INFINITY;
         titleCombo = 0;
         MILESTONES.reset();
     }
@@ -194,7 +204,12 @@ final class ComboHud {
                     bounce, HitStreak.remainingFraction(now - lastHitTime),
                     ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= 250, now);
             double factor = MachineComboBoost.factor(combo);
-            if (factor > 1 && ClientWeakSpotHandler.machineSpotActive()) {
+            if (ClientWeakSpotHandler.dispenserSpotActive()) {
+                // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2）
+                drawMachineLabel(mc, bottom, I18n.format("weakspot.combo.shots",
+                        ScheduledBoost.dispenseCountForFactor(factor)),
+                        ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
+            } else if (factor > 1 && ClientWeakSpotHandler.machineSpotActive()) {
                 drawMachineLabel(mc, bottom, I18n.format("weakspot.combo.machine", MachineComboBoost.label(factor)),
                         ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
             }

@@ -12,6 +12,7 @@ import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
 import java.util.Arrays;
 import java.util.Random;
+import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -436,6 +437,12 @@ public final class ClientWeakSpotHandler {
     /** 機械の弱点が出ていて、このフレームで照準が合っているか（コンボの「機械 ×n」の表示）。 */
     static boolean machineSpotActive() {
         return spot != null && spot.kind == HitKind.MACHINE && spot.lastActiveTick == clientTick;
+    }
+
+    /** 機械の弱点がディスペンサー・ドロッパーに出ていて、このフレームで照準が合っているか（「発射 ×n」の表示）。 */
+    static boolean dispenserSpotActive() {
+        return machineSpotActive() && Minecraft.getMinecraft().world != null
+                && Minecraft.getMinecraft().world.getBlockState(spot.pos).getBlock() instanceof BlockDispenser;
     }
 
     static boolean canHitNow(HitKind kind, int minInterval) {
