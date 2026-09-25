@@ -5,6 +5,7 @@ import com.example.weakspot.common.GrowthFilters;
 import com.example.weakspot.server.EnchantHits;
 import com.example.weakspot.server.PortalHits;
 import io.netty.buffer.ByteBuf;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -130,248 +131,115 @@ public final class SyncedSettings {
         return filters;
     }
 
+    /**
+     * 送る項目と並び（1.8.6 で一覧にした。並びは 1.8.5 までの手書きの write と同じで、通信の中身を変えない）。
+     * 項目を足すときは、フィールドとこの一覧の両方に足す（通信が変わるので、マイナー）。フィールドの名前が
+     * WeakSpotConfig の同じ名前の項目から値を取る（serverVersion は自分の版）。
+     */
+    static final String[] WIRE = {
+            "boostMultiplier", "boostDurationTicks", "minHitIntervalTicks",
+            "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance",
+            "weakSpotMinRadius", "weakSpotMaxRadiusRatio", "minFaceSize",
+            "lingerTicks", "growthMinHitIntervalTicks", "growthMinRadius",
+            "growthExcludedBlocks", "growthExtraBlocks", "machineMinHitIntervalTicks",
+            "excludedBlocks", "animalBabyEnabled", "animalBreedingEnabled",
+            "sheepWoolEnabled", "chickenEggEnabled", "villagerTradeResetEnabled",
+            "animalBabyHits", "animalBreedingHits", "sheepWoolHits",
+            "chickenEggHits", "villagerTradeResetHits", "animalMinHitIntervalTicks",
+            "animalExcludedEntities", "animalSneakRequiredEntities", "fishingWeakSpotEnabled",
+            "fishingHits", "fishingMinHitIntervalTicks", "bowWeakSpotEnabled",
+            "bowHitTicks", "bowMinHitIntervalTicks", "meleeWeakSpotEnabled",
+            "meleeMinHitIntervalTicks", "meleeChargePerHit", "meleeChargeMax",
+            "portalWeakSpotEnabled", "portalHitTicks", "portalMinHitIntervalTicks",
+            "machineBoostMultiplier", "machineBoostMaxMultiplier", "serverVersion",
+            "sleepWeakSpotEnabled", "sleepMinHitIntervalTicks", "eatWeakSpotEnabled",
+            "eatHitTicks", "eatMinHitIntervalTicks", "vehicleWeakSpotEnabled",
+            "vehicleBoostMultiplier", "vehicleBoostMaxMultiplier", "vehicleBoostDurationTicks",
+            "vehicleMinHitIntervalTicks", "markerShareRange", "markerSendMinIntervalTicks",
+            "ladderWeakSpotEnabled", "ladderBoostMultiplier", "ladderBoostMaxMultiplier",
+            "ladderBoostDurationTicks", "ladderMinHitIntervalTicks", "elytraWeakSpotEnabled",
+            "elytraBoostPower", "elytraMinHitIntervalTicks", "enchantWeakSpotEnabled",
+            "enchantMinHitIntervalTicks", "harvestWeakSpotEnabled", "harvestMinHitIntervalTicks",
+            "throwWeakSpotEnabled", "throwChargePerHit", "throwMinHitIntervalTicks",
+            "sprintWeakSpotEnabled", "sprintBoostMultiplier", "sprintBoostMaxMultiplier",
+            "sprintBoostDurationTicks", "sprintMinHitIntervalTicks"
+    };
+    private static final Field[] FIELDS = new Field[WIRE.length];
+
+    static {
+        try {
+            for (int i = 0; i < WIRE.length; i++) {
+                FIELDS[i] = SyncedSettings.class.getField(WIRE[i]);
+            }
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
     /** この側の weakspot.cfg の値。 */
     public static SyncedSettings fromConfig() {
         SyncedSettings s = new SyncedSettings();
-        s.boostMultiplier = WeakSpotConfig.boostMultiplier;
-        s.boostDurationTicks = WeakSpotConfig.boostDurationTicks;
-        s.minHitIntervalTicks = WeakSpotConfig.minHitIntervalTicks;
-        s.weakSpotRadiusRatio = WeakSpotConfig.weakSpotRadiusRatio;
-        s.edgeMargin = WeakSpotConfig.edgeMargin;
-        s.minMoveDistance = WeakSpotConfig.minMoveDistance;
-        s.weakSpotMinRadius = WeakSpotConfig.weakSpotMinRadius;
-        s.weakSpotMaxRadiusRatio = WeakSpotConfig.weakSpotMaxRadiusRatio;
-        s.minFaceSize = WeakSpotConfig.minFaceSize;
-        s.lingerTicks = WeakSpotConfig.lingerTicks;
-        s.growthMinHitIntervalTicks = WeakSpotConfig.growthMinHitIntervalTicks;
-        s.growthMinRadius = WeakSpotConfig.growthMinRadius;
-        s.growthExcludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.growthExcludedBlocks));
-        s.growthExtraBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.growthExtraBlocks));
-        s.machineMinHitIntervalTicks = WeakSpotConfig.machineMinHitIntervalTicks;
-        s.excludedBlocks = new HashSet<>(Arrays.asList(WeakSpotConfig.excludedBlocks));
-        s.animalBabyEnabled = WeakSpotConfig.animalBabyEnabled;
-        s.animalBreedingEnabled = WeakSpotConfig.animalBreedingEnabled;
-        s.sheepWoolEnabled = WeakSpotConfig.sheepWoolEnabled;
-        s.chickenEggEnabled = WeakSpotConfig.chickenEggEnabled;
-        s.villagerTradeResetEnabled = WeakSpotConfig.villagerTradeResetEnabled;
-        s.animalBabyHits = WeakSpotConfig.animalBabyHits;
-        s.animalBreedingHits = WeakSpotConfig.animalBreedingHits;
-        s.sheepWoolHits = WeakSpotConfig.sheepWoolHits;
-        s.chickenEggHits = WeakSpotConfig.chickenEggHits;
-        s.villagerTradeResetHits = WeakSpotConfig.villagerTradeResetHits;
-        s.animalMinHitIntervalTicks = WeakSpotConfig.animalMinHitIntervalTicks;
-        s.animalExcludedEntities = new HashSet<>(Arrays.asList(WeakSpotConfig.animalExcludedEntities));
-        s.animalSneakRequiredEntities = new HashSet<>(Arrays.asList(WeakSpotConfig.animalSneakRequiredEntities));
-        s.fishingWeakSpotEnabled = WeakSpotConfig.fishingWeakSpotEnabled;
-        s.fishingHits = WeakSpotConfig.fishingHits;
-        s.fishingMinHitIntervalTicks = WeakSpotConfig.fishingMinHitIntervalTicks;
-        s.bowWeakSpotEnabled = WeakSpotConfig.bowWeakSpotEnabled;
-        s.bowHitTicks = WeakSpotConfig.bowHitTicks;
-        s.bowMinHitIntervalTicks = WeakSpotConfig.bowMinHitIntervalTicks;
-        s.meleeWeakSpotEnabled = WeakSpotConfig.meleeWeakSpotEnabled;
-        s.meleeMinHitIntervalTicks = WeakSpotConfig.meleeMinHitIntervalTicks;
-        s.meleeChargePerHit = WeakSpotConfig.meleeChargePerHit;
-        s.meleeChargeMax = WeakSpotConfig.meleeChargeMax;
-        s.portalWeakSpotEnabled = WeakSpotConfig.portalWeakSpotEnabled && PortalHits.isAvailable();
-        s.portalHitTicks = WeakSpotConfig.portalHitTicks;
-        s.portalMinHitIntervalTicks = WeakSpotConfig.portalMinHitIntervalTicks;
-        s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
-        s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
+        try {
+            for (Field field : FIELDS) {
+                if (field.getName().equals("serverVersion")) {
+                    continue;
+                }
+                Object value = WeakSpotConfig.class.getField(field.getName()).get(null);
+                field.set(s, value instanceof String[] ? new HashSet<>(Arrays.asList((String[]) value)) : value);
+            }
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
         s.serverVersion = WeakSpotMod.VERSION;
-        s.sleepWeakSpotEnabled = WeakSpotConfig.sleepWeakSpotEnabled;
-        s.sleepMinHitIntervalTicks = WeakSpotConfig.sleepMinHitIntervalTicks;
-        s.eatWeakSpotEnabled = WeakSpotConfig.eatWeakSpotEnabled;
-        s.eatHitTicks = WeakSpotConfig.eatHitTicks;
-        s.eatMinHitIntervalTicks = WeakSpotConfig.eatMinHitIntervalTicks;
-        s.vehicleWeakSpotEnabled = WeakSpotConfig.vehicleWeakSpotEnabled;
-        s.vehicleBoostMultiplier = WeakSpotConfig.vehicleBoostMultiplier;
-        s.vehicleBoostMaxMultiplier = WeakSpotConfig.vehicleBoostMaxMultiplier;
-        s.vehicleBoostDurationTicks = WeakSpotConfig.vehicleBoostDurationTicks;
-        s.vehicleMinHitIntervalTicks = WeakSpotConfig.vehicleMinHitIntervalTicks;
-        s.markerShareRange = WeakSpotConfig.markerShareRange;
-        s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
-        s.ladderWeakSpotEnabled = WeakSpotConfig.ladderWeakSpotEnabled;
-        s.ladderBoostMultiplier = WeakSpotConfig.ladderBoostMultiplier;
-        s.ladderBoostMaxMultiplier = WeakSpotConfig.ladderBoostMaxMultiplier;
-        s.ladderBoostDurationTicks = WeakSpotConfig.ladderBoostDurationTicks;
-        s.ladderMinHitIntervalTicks = WeakSpotConfig.ladderMinHitIntervalTicks;
-        s.elytraWeakSpotEnabled = WeakSpotConfig.elytraWeakSpotEnabled;
-        s.elytraBoostPower = WeakSpotConfig.elytraBoostPower;
-        s.elytraMinHitIntervalTicks = WeakSpotConfig.elytraMinHitIntervalTicks;
-        s.enchantWeakSpotEnabled = WeakSpotConfig.enchantWeakSpotEnabled && EnchantHits.isAvailable();
-        s.enchantMinHitIntervalTicks = WeakSpotConfig.enchantMinHitIntervalTicks;
-        s.harvestWeakSpotEnabled = WeakSpotConfig.harvestWeakSpotEnabled;
-        s.harvestMinHitIntervalTicks = WeakSpotConfig.harvestMinHitIntervalTicks;
-        s.throwWeakSpotEnabled = WeakSpotConfig.throwWeakSpotEnabled;
-        s.throwChargePerHit = WeakSpotConfig.throwChargePerHit;
-        s.throwMinHitIntervalTicks = WeakSpotConfig.throwMinHitIntervalTicks;
-        s.sprintWeakSpotEnabled = WeakSpotConfig.sprintWeakSpotEnabled;
-        s.sprintBoostMultiplier = WeakSpotConfig.sprintBoostMultiplier;
-        s.sprintBoostMaxMultiplier = WeakSpotConfig.sprintBoostMaxMultiplier;
-        s.sprintBoostDurationTicks = WeakSpotConfig.sprintBoostDurationTicks;
-        s.sprintMinHitIntervalTicks = WeakSpotConfig.sprintMinHitIntervalTicks;
+        // 読み書きできないときは、クライアントに弱点を出させない
+        s.portalWeakSpotEnabled &= PortalHits.isAvailable();
+        s.enchantWeakSpotEnabled &= EnchantHits.isAvailable();
         return s;
     }
 
     public void write(ByteBuf buf) {
-        buf.writeDouble(boostMultiplier);
-        buf.writeInt(boostDurationTicks);
-        buf.writeInt(minHitIntervalTicks);
-        buf.writeDouble(weakSpotRadiusRatio);
-        buf.writeDouble(edgeMargin);
-        buf.writeDouble(minMoveDistance);
-        buf.writeDouble(weakSpotMinRadius);
-        buf.writeDouble(weakSpotMaxRadiusRatio);
-        buf.writeDouble(minFaceSize);
-        buf.writeInt(lingerTicks);
-        buf.writeInt(growthMinHitIntervalTicks);
-        buf.writeDouble(growthMinRadius);
-        writeStrings(buf, growthExcludedBlocks);
-        writeStrings(buf, growthExtraBlocks);
-        buf.writeInt(machineMinHitIntervalTicks);
-        writeStrings(buf, excludedBlocks);
-        buf.writeBoolean(animalBabyEnabled);
-        buf.writeBoolean(animalBreedingEnabled);
-        buf.writeBoolean(sheepWoolEnabled);
-        buf.writeBoolean(chickenEggEnabled);
-        buf.writeBoolean(villagerTradeResetEnabled);
-        buf.writeInt(animalBabyHits);
-        buf.writeInt(animalBreedingHits);
-        buf.writeInt(sheepWoolHits);
-        buf.writeInt(chickenEggHits);
-        buf.writeInt(villagerTradeResetHits);
-        buf.writeInt(animalMinHitIntervalTicks);
-        writeStrings(buf, animalExcludedEntities);
-        writeStrings(buf, animalSneakRequiredEntities);
-        buf.writeBoolean(fishingWeakSpotEnabled);
-        buf.writeInt(fishingHits);
-        buf.writeInt(fishingMinHitIntervalTicks);
-        buf.writeBoolean(bowWeakSpotEnabled);
-        buf.writeInt(bowHitTicks);
-        buf.writeInt(bowMinHitIntervalTicks);
-        buf.writeBoolean(meleeWeakSpotEnabled);
-        buf.writeInt(meleeMinHitIntervalTicks);
-        buf.writeDouble(meleeChargePerHit);
-        buf.writeDouble(meleeChargeMax);
-        buf.writeBoolean(portalWeakSpotEnabled);
-        buf.writeInt(portalHitTicks);
-        buf.writeInt(portalMinHitIntervalTicks);
-        buf.writeDouble(machineBoostMultiplier);
-        buf.writeDouble(machineBoostMaxMultiplier);
-        ByteBufUtils.writeUTF8String(buf, serverVersion);
-        buf.writeBoolean(sleepWeakSpotEnabled);
-        buf.writeInt(sleepMinHitIntervalTicks);
-        buf.writeBoolean(eatWeakSpotEnabled);
-        buf.writeInt(eatHitTicks);
-        buf.writeInt(eatMinHitIntervalTicks);
-        buf.writeBoolean(vehicleWeakSpotEnabled);
-        buf.writeDouble(vehicleBoostMultiplier);
-        buf.writeDouble(vehicleBoostMaxMultiplier);
-        buf.writeInt(vehicleBoostDurationTicks);
-        buf.writeInt(vehicleMinHitIntervalTicks);
-        buf.writeDouble(markerShareRange);
-        buf.writeInt(markerSendMinIntervalTicks);
-        buf.writeBoolean(ladderWeakSpotEnabled);
-        buf.writeDouble(ladderBoostMultiplier);
-        buf.writeDouble(ladderBoostMaxMultiplier);
-        buf.writeInt(ladderBoostDurationTicks);
-        buf.writeInt(ladderMinHitIntervalTicks);
-        buf.writeBoolean(elytraWeakSpotEnabled);
-        buf.writeDouble(elytraBoostPower);
-        buf.writeInt(elytraMinHitIntervalTicks);
-        buf.writeBoolean(enchantWeakSpotEnabled);
-        buf.writeInt(enchantMinHitIntervalTicks);
-        buf.writeBoolean(harvestWeakSpotEnabled);
-        buf.writeInt(harvestMinHitIntervalTicks);
-        buf.writeBoolean(throwWeakSpotEnabled);
-        buf.writeDouble(throwChargePerHit);
-        buf.writeInt(throwMinHitIntervalTicks);
-        buf.writeBoolean(sprintWeakSpotEnabled);
-        buf.writeDouble(sprintBoostMultiplier);
-        buf.writeDouble(sprintBoostMaxMultiplier);
-        buf.writeInt(sprintBoostDurationTicks);
-        buf.writeInt(sprintMinHitIntervalTicks);
+        try {
+            for (Field field : FIELDS) {
+                Class<?> type = field.getType();
+                if (type == double.class) {
+                    buf.writeDouble(field.getDouble(this));
+                } else if (type == int.class) {
+                    buf.writeInt(field.getInt(this));
+                } else if (type == boolean.class) {
+                    buf.writeBoolean(field.getBoolean(this));
+                } else if (type == String.class) {
+                    ByteBufUtils.writeUTF8String(buf, (String) field.get(this));
+                } else {
+                    @SuppressWarnings("unchecked")
+                    Set<String> strings = (Set<String>) field.get(this);
+                    writeStrings(buf, strings);
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     public static SyncedSettings read(ByteBuf buf) {
         SyncedSettings s = new SyncedSettings();
-        s.boostMultiplier = buf.readDouble();
-        s.boostDurationTicks = buf.readInt();
-        s.minHitIntervalTicks = buf.readInt();
-        s.weakSpotRadiusRatio = buf.readDouble();
-        s.edgeMargin = buf.readDouble();
-        s.minMoveDistance = buf.readDouble();
-        s.weakSpotMinRadius = buf.readDouble();
-        s.weakSpotMaxRadiusRatio = buf.readDouble();
-        s.minFaceSize = buf.readDouble();
-        s.lingerTicks = buf.readInt();
-        s.growthMinHitIntervalTicks = buf.readInt();
-        s.growthMinRadius = buf.readDouble();
-        s.growthExcludedBlocks = readStrings(buf);
-        s.growthExtraBlocks = readStrings(buf);
-        s.machineMinHitIntervalTicks = buf.readInt();
-        s.excludedBlocks = readStrings(buf);
-        s.animalBabyEnabled = buf.readBoolean();
-        s.animalBreedingEnabled = buf.readBoolean();
-        s.sheepWoolEnabled = buf.readBoolean();
-        s.chickenEggEnabled = buf.readBoolean();
-        s.villagerTradeResetEnabled = buf.readBoolean();
-        s.animalBabyHits = buf.readInt();
-        s.animalBreedingHits = buf.readInt();
-        s.sheepWoolHits = buf.readInt();
-        s.chickenEggHits = buf.readInt();
-        s.villagerTradeResetHits = buf.readInt();
-        s.animalMinHitIntervalTicks = buf.readInt();
-        s.animalExcludedEntities = readStrings(buf);
-        s.animalSneakRequiredEntities = readStrings(buf);
-        s.fishingWeakSpotEnabled = buf.readBoolean();
-        s.fishingHits = buf.readInt();
-        s.fishingMinHitIntervalTicks = buf.readInt();
-        s.bowWeakSpotEnabled = buf.readBoolean();
-        s.bowHitTicks = buf.readInt();
-        s.bowMinHitIntervalTicks = buf.readInt();
-        s.meleeWeakSpotEnabled = buf.readBoolean();
-        s.meleeMinHitIntervalTicks = buf.readInt();
-        s.meleeChargePerHit = buf.readDouble();
-        s.meleeChargeMax = buf.readDouble();
-        s.portalWeakSpotEnabled = buf.readBoolean();
-        s.portalHitTicks = buf.readInt();
-        s.portalMinHitIntervalTicks = buf.readInt();
-        s.machineBoostMultiplier = buf.readDouble();
-        s.machineBoostMaxMultiplier = buf.readDouble();
-        s.serverVersion = ByteBufUtils.readUTF8String(buf);
-        s.sleepWeakSpotEnabled = buf.readBoolean();
-        s.sleepMinHitIntervalTicks = buf.readInt();
-        s.eatWeakSpotEnabled = buf.readBoolean();
-        s.eatHitTicks = buf.readInt();
-        s.eatMinHitIntervalTicks = buf.readInt();
-        s.vehicleWeakSpotEnabled = buf.readBoolean();
-        s.vehicleBoostMultiplier = buf.readDouble();
-        s.vehicleBoostMaxMultiplier = buf.readDouble();
-        s.vehicleBoostDurationTicks = buf.readInt();
-        s.vehicleMinHitIntervalTicks = buf.readInt();
-        s.markerShareRange = buf.readDouble();
-        s.markerSendMinIntervalTicks = buf.readInt();
-        s.ladderWeakSpotEnabled = buf.readBoolean();
-        s.ladderBoostMultiplier = buf.readDouble();
-        s.ladderBoostMaxMultiplier = buf.readDouble();
-        s.ladderBoostDurationTicks = buf.readInt();
-        s.ladderMinHitIntervalTicks = buf.readInt();
-        s.elytraWeakSpotEnabled = buf.readBoolean();
-        s.elytraBoostPower = buf.readDouble();
-        s.elytraMinHitIntervalTicks = buf.readInt();
-        s.enchantWeakSpotEnabled = buf.readBoolean();
-        s.enchantMinHitIntervalTicks = buf.readInt();
-        s.harvestWeakSpotEnabled = buf.readBoolean();
-        s.harvestMinHitIntervalTicks = buf.readInt();
-        s.throwWeakSpotEnabled = buf.readBoolean();
-        s.throwChargePerHit = buf.readDouble();
-        s.throwMinHitIntervalTicks = buf.readInt();
-        s.sprintWeakSpotEnabled = buf.readBoolean();
-        s.sprintBoostMultiplier = buf.readDouble();
-        s.sprintBoostMaxMultiplier = buf.readDouble();
-        s.sprintBoostDurationTicks = buf.readInt();
-        s.sprintMinHitIntervalTicks = buf.readInt();
+        try {
+            for (Field field : FIELDS) {
+                Class<?> type = field.getType();
+                if (type == double.class) {
+                    field.setDouble(s, buf.readDouble());
+                } else if (type == int.class) {
+                    field.setInt(s, buf.readInt());
+                } else if (type == boolean.class) {
+                    field.setBoolean(s, buf.readBoolean());
+                } else if (type == String.class) {
+                    field.set(s, ByteBufUtils.readUTF8String(buf));
+                } else {
+                    field.set(s, readStrings(buf));
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
         return s;
     }
 
