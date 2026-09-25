@@ -84,23 +84,66 @@
 - タブ補完: 1 つ目の引数に `bug` を出す（サーバーの `stats` / `reset` / `reload` の補完と合わさる）
 - サーバーの使い方の表示（`weakspot.command.usage`）の末尾に「| /weakspot bug（不具合の報告の方法）」を足す
 
-### 3.2 出す案内
+### 3.2 自動で取得する環境
+
+- コマンドを打った瞬間に、自分のクライアントで次を集める（ユーザーの判断: Mod の一覧も載せる）
+  - Mod の版（`WeakSpotMod.VERSION`）、サーバーの Mod の版（`SyncedSettings.serverVersion`。まだ届いていなければ「不明」）、ソロかマルチか
+  - Minecraft の版（1.12.2）、Forge の版（`ForgeVersion.getVersion()`）
+  - Java の版と提供元（`java.version` / `java.vendor`）、OS（`os.name` / `os.version` / `os.arch`）
+  - 言語の設定（`gameSettings.language`）
+  - 入れている Mod の一覧（`Loader.instance().getActiveModList()` の名前・modid・版。Minecraft・Forge・FML 自身などは除く）
+- 集めた環境は、次の 2 つの形で使う（ユーザーの判断: 両方）
+
+### 3.3 報告の画面に最初から書き込む（issue のリンク）
+
+- `[GitHub の issue を開く]` のリンクは、GitHub の新しい issue の画面に、タイトルと本文を入れた状態で開く（`https://github.com/zeusisgood/weakspot/issues/new?title=…&body=…`。URL エンコードする）
+  - タイトル: `[1.7.1] `（版だけを入れておき、続きを書いてもらう）
+  - 本文（見出しは読む人の言語。翻訳キー `weakspot.bug.template.*`）:
+    ```
+    ## 何をしたか
+    
+    ## 何が起きたか
+    
+    ## どうなるはずだったか
+    
+    ## 環境（自動で入れました）
+    - Mod: 1.7.1 / サーバーの Mod: 1.7.1（ソロ）
+    - Minecraft 1.12.2 / Forge 14.23.5.2860
+    - Java 1.8.0_xxx（Oracle Corporation） / Windows 10 10.0 (amd64)
+    - 言語: ja_jp
+    
+    <details><summary>Mod の一覧（n 個）</summary>
+    
+    - JourneyMap (journeymap) 5.7.1
+    - ...
+    </details>
+    ```
+- URL が長くなりすぎるとき（6000 文字を超えるとき）は、Mod の一覧をリンクから外し、本文に「Mod の一覧はクリップボードにコピーしました。ここに貼り付けてください」と書く（GitHub と ブラウザーが長すぎる URL を受け付けないため）
+- 送る前に、本文は報告する人が見て、消したり書き足したりできる
+
+### 3.4 クリップボードにコピー
+
+- コマンドを打った瞬間に、§3.3 の「環境」と「Mod の一覧」の部分（見出しなしの文章）をクリップボードにコピーする（`GuiScreen.setClipboardString`）。Discord などに貼るとき用
+- チャットに「環境をクリップボードにコピーしました」と出す
+
+### 3.5 チャットに出す案内
 
 ```
 [弱点] 不具合の報告の方法
- 1. ここから報告できます: [GitHub の issue を開く]
+ 1. ここから報告できます: [GitHub の issue を開く]（環境を書き込んだ状態で開きます）
  2. 書いてほしいこと: 何をしたか / 何が起きたか / どうなるはずだったか
- 3. 今の環境（この画面を撮るか、書き写してください）
-    Mod 1.7.1 / サーバーの Mod 1.7.1（ソロ） / Minecraft 1.12.2 / Forge 14.23.5.2860
+ 3. 今の環境（クリップボードにもコピーしました）
+    Mod 1.7.1 / サーバーの Mod 1.7.1（ソロ） / Minecraft 1.12.2 / Forge 14.23.5.2860 / Mod 42 個
  4. あると助かるもの: 落ちたときは crash-reports フォルダーの一番新しいファイル、
-    落ちないときは logs/latest.log、画面の写真（F2）、ほかに入れている Mod の一覧
- 5. 報告には GitHub のアカウントが要ります
+    落ちないときは logs/latest.log、画面の写真（F2）
+ 5. 報告には GitHub のアカウントが要ります。ログやクラッシュレポートは、自動では送られません
 ```
 
 - 見出しは金 `#FFAA00`、本文は白 `#FFFFFF`、補足（5）は灰 `#AAAAAA`
-- `[GitHub の issue を開く]` は水色 `#55FFFF` に下線で、クリックで `https://github.com/zeusisgood/weakspot/issues/new` を開く
-- 3 の環境は自動で埋める: Mod の版（`WeakSpotMod.VERSION`）、サーバーの Mod の版（`SyncedSettings.serverVersion`。ソロなら「（ソロ）」、マルチなら「（マルチ）」を付ける。まだ届いていなければ「不明」）、Minecraft の版、Forge の版（`ForgeVersion.getVersion()`）
+- `[GitHub の issue を開く]` は水色 `#55FFFF` に下線
+- チャットの 3 は短くまとめる（Mod の一覧は数だけ。全部はリンクとクリップボードに入っている）
 - 文章は翻訳キー `weakspot.bug.*`（両方の lang）
+- 環境を集める・本文を作る・URL の長さで一覧を外す、の計算は `common/BugReport` に置き、単体テストを書く（URL エンコードと長さの判定）
 
 ## 4. README とガイドの本
 
@@ -120,5 +163,7 @@
 - 走り・弓・乗り物・食事・はしご・エリトラ・投げる物の弱点と、睡眠・エンチャントのマーカーが、採掘の弱点と同じ塗りつぶしの丸に見えること。「弱点」タブで形を変えると、その形が塗られて見えること
 - 1.7.0 から入れ替えて、最初にワールドに入ったときに、お知らせが 1 回だけ出ること。2 回目以降・別のワールドでは出ないこと。`[変更点を見る]` でブラウザーが開くこと。`/weakspot bug` をクリックするとチャット欄に入ること
 - 新しく入れた環境（`config/weakspot.cfg` がない）では、お知らせが出ないこと
-- ソロ（チートなし）とマルチの両方で `/weakspot bug` が使え、案内と今の環境が出ること。`[GitHub の issue を開く]` でブラウザーが開くこと
+- ソロ（チートなし）とマルチの両方で `/weakspot bug` が使え、案内と今の環境が出ること
+- `[GitHub の issue を開く]` で、タイトルに版、本文に見出しと環境・Mod の一覧が入った状態で開くこと（Mod が多いときは一覧が外れ、「貼り付けてください」と書かれること）
+- `/weakspot bug` を打ったあと、メモ帳などに貼り付けると、環境と Mod の一覧が貼られること
 - `/weakspot stats <名前>` など、ほかの `/weakspot` が今までどおり動くこと（OP のとき）
