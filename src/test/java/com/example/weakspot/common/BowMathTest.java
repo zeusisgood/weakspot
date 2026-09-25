@@ -89,4 +89,27 @@ public class BowMathTest {
         assertTrue(BowMath.canOvercharge(4));
         assertFalse(BowMath.canOvercharge(5));
     }
+
+    @Test
+    public void offsetRangeIsCappedByTheFieldOfView() {
+        double[] wide = BowMath.offsetRange(70);
+        assertEquals(10.0, wide[0], 1e-9);
+        assertEquals(20.0, wide[1], 1e-9);
+        double[] narrow = BowMath.offsetRange(30);
+        assertEquals(10.5, narrow[1], 1e-9);
+        assertEquals(5.25, narrow[0], 1e-9);
+        double[] unknown = BowMath.offsetRange(0);
+        assertEquals(20.0, unknown[1], 1e-9);
+    }
+
+    @Test
+    public void nextSpotStaysWithinTheNarrowRange() {
+        java.util.Random random = new java.util.Random(7);
+        for (int i = 0; i < 200; i++) {
+            double[] next = BowMath.nextSpot(30, -10, 30, -10, 30, random);
+            double offset = BowMath.angleBetween(30, -10, next[0], next[1]);
+            assertTrue("offset " + offset, offset <= 10.5 + 1e-6);
+            assertTrue("offset " + offset, offset >= 5.25 - 1e-6);
+        }
+    }
 }

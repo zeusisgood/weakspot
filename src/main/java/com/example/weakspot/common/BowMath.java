@@ -10,11 +10,13 @@ public final class BowMath {
 
     /** バニラの弓を引き切るまでの時間（tick）。ゲージと「引き切った」の基準。 */
     public static final int FULL_DRAW_TICKS = 20;
-    /** 弱点を出す、視線からずらす角度の範囲（度）。 */
-    public static final double MIN_OFFSET_DEGREES = 3.0;
-    public static final double MAX_OFFSET_DEGREES = 8.0;
+    /** 弱点を出す、視線からずらす角度の範囲（度）。1.5.4 で 3〜8 から広げた（近すぎて照準を動かさずに当たったため）。 */
+    public static final double MIN_OFFSET_DEGREES = 10.0;
+    public static final double MAX_OFFSET_DEGREES = 20.0;
+    /** ずらす角度の上限を、縦の視野角の半分のこの割合までに抑える（画面からはみ出さないように）。 */
+    public static final double MAX_OFFSET_FOV_FRACTION = 0.7;
     /** ヒットのあと、前の向きから最低でも離れる角度（度）。 */
-    public static final double MIN_MOVE_DEGREES = 4.0;
+    public static final double MIN_MOVE_DEGREES = 8.0;
     /** 過剰チャージ（引き切ったあとのヒット）1回で上げる、矢のダメージの割合（1.3.4）。 */
     public static final double OVERCHARGE_PER_HIT = 0.10;
     /** 過剰チャージの上限のヒット数（+50%）。 */
@@ -46,12 +48,32 @@ public final class BowMath {
     }
 
     /**
+     * ずらす角度の範囲 {下限, 上限}（度）。上限は min(MAX_OFFSET, 縦の視野角の半分 × MAX_OFFSET_FOV_FRACTION)、
+     * 下限は min(MIN_OFFSET, 上限の半分)。視野角が分からない（0 以下）ときは、そのままの範囲。
+     */
+    public static double[] offsetRange(double fovDegrees) {
+        double max = MAX_OFFSET_DEGREES;
+        if (fovDegrees > 0) {
+            max = Math.min(max, fovDegrees / 2 * MAX_OFFSET_FOV_FRACTION);
+        }
+        return new double[] {Math.min(MIN_OFFSET_DEGREES, max / 2), max};
+    }
+
+    /** 視野角を考えない版（MIN_OFFSET〜MAX_OFFSET）。 */
+    public static double[] nextSpot(double lookYaw, double lookPitch, double prevYaw, double prevPitch,
+                                    Random random) {
+        return nextSpot(lookYaw, lookPitch, prevYaw, prevPitch, 0, random);
+    }
+
+    /**
      * 次の弱点の向き {yaw, pitch}（度）。今の視線 (lookYaw, lookPitch) から MIN_OFFSET〜MAX_OFFSET 度ずれた向きで、
      * 前の向き (prevYaw, prevPitch) から MIN_MOVE 度以上離れる。最初の弱点は prev に視線を渡す。
+     * ずらす角度は、縦の視野角 fovDegrees で抑える（offsetRange）。
      * yaw は、前の向きとの差が ±180 度に収まるように返す（表示の移動が遠回りしないように）。
      */
     public static double[] nextSpot(double lookYaw, double lookPitch, double prevYaw, double prevPitch,
-                                    Random random) {
+                                    double fovDegrees, Random random) {
+        double[] range = offsetRange(fovDegrees);
         double[] look = vector(lookYaw, lookPitch);
         // 視線に垂直な2本の軸
         double[] up = Math.abs(look[1]) > 0.99 ? new double[] {1, 0, 0} : new double[] {0, 1, 0};
@@ -60,8 +82,7 @@ public final class BowMath {
         double[] best = null;
         double bestMove = -1;
         for (int i = 0; i < 40; i++) {
-            double offset = Math.toRadians(MIN_OFFSET_DEGREES
-                    + random.nextDouble() * (MAX_OFFSET_DEGREES - MIN_OFFSET_DEGREES));
+            double offset = Math.toRadians(range[0] + random.nextDouble() * (range[1] - range[0]));
             double around = random.nextDouble() * 2 * Math.PI;
             double s = Math.sin(offset);
             double c = Math.cos(offset);

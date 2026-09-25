@@ -105,7 +105,7 @@ final class BowSpot {
         } else if (!hasSpot) {
             // 引き始めた。今の視線の近くに出す
             double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, player.rotationYaw,
-                    player.rotationPitch, RANDOM);
+                    player.rotationPitch, SCREEN.fovDegrees(), RANDOM);
             yaw = next[0];
             pitch = next[1];
             MOTION.jumpTo(yaw, pitch);
@@ -171,7 +171,8 @@ final class BowSpot {
             hasSpot = false;
             return;
         }
-        double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, yaw, pitch, RANDOM);
+        double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, yaw, pitch, SCREEN.fovDegrees(),
+                RANDOM);
         yaw = next[0];
         pitch = next[1];
         if (WeakSpotConfig.weakSpotTrailEnabled) {
