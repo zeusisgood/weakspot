@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 自分の弱点の、種類ごとの色と形（1.7.0。統計画面の「弱点」タブ、設定 myMarkerColors / myMarkerShapes）。
+ * 自分の弱点の、種類ごとの色と形（1.7.0。統計画面の「弱点マーカー」タブ、設定 myMarkerColors / myMarkerShapes）。
  * 書いていない種類は、色は初期値（種類ごとの今までの色）、形は円。
  */
 public final class MarkerLook {
 
-    /** 「弱点」タブの ▶ で順に切り替える 12 色。 */
+    /** 「弱点マーカー」タブの ▶ で順に切り替える 12 色。 */
     static final int[] PRESETS = {0xFF5926, 0xFF3DCB, 0xFF8C42, 0xFFE14D, 0x7CFC00, 0x2ED3B7, 0x55CCFF, 0x7FB2FF,
             0xB070FF, 0xC8A060, 0xF0F0F0, 0xFF5A5F};
 
@@ -27,7 +27,7 @@ public final class MarkerLook {
     private MarkerLook() {
     }
 
-    /** 種類ごとの初期値の色（「弱点」タブの見本。ブロック・生き物・弓・釣りの弱点は橙赤、ほかは種類ごとの色）。 */
+    /** 種類ごとの初期値の色（「弱点マーカー」タブの見本。ブロック・生き物・弓・釣りの弱点は橙赤、ほかは種類ごとの色）。 */
     static int defaultColor(HitKind kind) {
         switch (kind) {
             case HARVEST: return 0xFF3DCB;

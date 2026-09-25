@@ -35,7 +35,7 @@ public final class ServerSwitches {
         return SWITCHES.isEnabled(player.getUniqueID());
     }
 
-    /** オンで、その種類も自分でオフにしていないか（1.7.0。統計画面の「弱点」タブ）。 */
+    /** オンで、その種類も自分でオフにしていないか（1.7.0。統計画面の「弱点マーカー」タブ）。 */
     public static boolean isEnabled(EntityPlayer player, HitKind kind) {
         return isEnabled(player) && !KindMask.isDisabled(DISABLED_KINDS.getOrDefault(player.getUniqueID(), 0), kind);
     }

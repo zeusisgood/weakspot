@@ -5,7 +5,7 @@ import com.example.weakspot.common.KindMask;
 import com.example.weakspot.config.WeakSpotConfig;
 
 /**
- * 自分の弱点の種類ごとのオン・オフ（1.7.0。統計画面の「弱点」タブ、設定 disabledKinds）。
+ * 自分の弱点の種類ごとのオン・オフ（1.7.0。統計画面の「弱点マーカー」タブ、設定 disabledKinds）。
  * HOME キーの一時オフ（weakSpotsEnabled）がオフなら、どの種類もオフ。
  */
 public final class KindSwitches {
@@ -32,12 +32,12 @@ public final class KindSwitches {
         return cachedMask;
     }
 
-    /** 自分でオフにしているか（一時オフは見ない。「弱点」タブの表示）。 */
+    /** 自分でオフにしているか（一時オフは見ない。「弱点マーカー」タブの表示）。 */
     static boolean isDisabledByPlayer(HitKind kind) {
         return KindMask.isDisabled(disabledMask(), kind);
     }
 
-    /** 「弱点」タブのボタンで切り替えて、保存する。 */
+    /** 「弱点マーカー」タブのボタンで切り替えて、保存する。 */
     static void toggle(HitKind kind) {
         WeakSpotConfig.disabledKinds = KindMask.toKeys(KindMask.toggled(disabledMask(), kind));
         WeakSpotConfig.save();

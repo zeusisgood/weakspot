@@ -35,6 +35,11 @@ public final class ToggleKeyHandler {
     private ToggleKeyHandler() {
     }
 
+    /** 弱点のオン・オフのキーの、今の割り当ての名前（1.8.3。「すべてオフ中（HOME キー）」の表示）。 */
+    static String keyName() {
+        return TOGGLE.getDisplayName();
+    }
+
     static void register() {
         ClientRegistry.registerKeyBinding(TOGGLE);
     }

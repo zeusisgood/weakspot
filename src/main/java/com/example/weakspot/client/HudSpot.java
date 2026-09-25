@@ -51,7 +51,7 @@ final class HudSpot {
 
     /**
      * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。1.7.0 から、色と形は種類ごとの設定
-     * （MarkerLook。統計画面の「弱点」タブ）で変えられる。
+     * （MarkerLook。統計画面の「弱点マーカー」タブ）で変えられる。
      */
     HudSpot(HitKind kind, int defaultRgb) {
         this.kind = kind;

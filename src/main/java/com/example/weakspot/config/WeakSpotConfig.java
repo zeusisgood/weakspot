@@ -565,17 +565,17 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 走りを加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0）"})
     public static boolean sprintBoostBarEnabled = true;
 
-    @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（1.7.0。統計画面の「弱点」タブで変えられる）",
+    @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（1.7.0。統計画面の「弱点マーカー」タブで変えられる）",
             "1 行に 1 つ、mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra,",
             "enchant, harvest, throw, sprint, portal のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
     public static String[] disabledKinds = {};
 
     @Config.Comment({"[クライアント] 自分の弱点の色（1.7.0）。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）",
-            "書いていない種類は初期値の色。統計画面の「弱点」タブで変えられる"})
+            "書いていない種類は初期値の色。統計画面の「弱点マーカー」タブで変えられる"})
     public static String[] myMarkerColors = {};
 
     @Config.Comment({"[クライアント] 自分の弱点の形（1.7.0）。1 行に「種類=形」（例: bow=diamond）",
-            "形は circle, ring, diamond, square。書いていない種類は円。統計画面の「弱点」タブで変えられる"})
+            "形は circle, ring, diamond, square。書いていない種類は円。統計画面の「弱点マーカー」タブで変えられる"})
     public static String[] myMarkerShapes = {};
 
     @Config.Comment("[クライアント] 版が変わって初めてワールドに入ったときに、チャットに更新のお知らせを出すか（1.7.1）")

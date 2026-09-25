@@ -28,7 +28,7 @@ import org.lwjgl.input.Mouse;
 /**
  * 統計画面（K キー）。「統計」タブは、サーバーから届いた「今回」と「累計」を並べて表示するだけ。
  * 「サウンド」タブは、ヒット音の楽器と音量を変えて試聴する部品で、クライアントだけで完結する（サーバーとは通信しない）。
- * 「弱点」タブ（1.7.0）は、種類ごとのオン・オフ（KindSwitches。サーバーにも伝わる）と、自分の弱点の色と形（MarkerLook）。
+ * 「弱点マーカー」タブ（1.7.0。1.8.3 で「弱点」から改名し、色と形に ◀ を足した）は、種類ごとのオン・オフ（KindSwitches。サーバーにも伝わる）と、自分の弱点の色と形（MarkerLook）。
  * 値は weakspot.cfg にそのまま保存するので、Forge の設定画面と同じ値になる。
  * 行が画面に入りきらないタブ（統計・弱点）は、マウスのホイールで送る。
  */
@@ -42,10 +42,14 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_TAB_STATS = 10;
     private static final int BUTTON_TAB_SOUND = 11;
     private static final int BUTTON_TAB_KINDS = 12;
-    /** 「弱点」タブの行のボタン（+ 種類の番号）。 */
+    /** 「弱点マーカー」タブの行のボタン（+ 種類の番号）。 */
     private static final int BUTTON_KIND_TOGGLE = 100;
     private static final int BUTTON_KIND_COLOR = 200;
     private static final int BUTTON_KIND_SHAPE = 300;
+    /** 色と形を 1 つ前に戻す ◀ と、形の ▶（1.8.3）。 */
+    private static final int BUTTON_KIND_COLOR_PREV = 400;
+    private static final int BUTTON_KIND_SHAPE_PREV = 500;
+    private static final int BUTTON_KIND_SHAPE_NEXT = 600;
     private static final int KIND_ROW_HEIGHT = 22;
     private static final int TAB_STATS = 0;
     private static final int TAB_SOUND = 1;
@@ -138,10 +142,14 @@ final class StatsScreen extends GuiScreen {
         bottom = Math.min(height - 28, top + 226);
         for (HitKind kind : HitKind.values()) {
             int i = kind.ordinal();
-            add(new GuiButton(BUTTON_KIND_TOGGLE + i, center - 64, 0, 40, 20, ""));
-            add(new GuiButton(BUTTON_KIND_COLOR + i, center + 54, 0, 20, 20, "\u25B6"));
-            add(new GuiButton(BUTTON_KIND_SHAPE + i, center + 78, 0, 76, 20, ""));
-            GuiTextField field = new GuiTextField(BUTTON_KIND_COLOR + 50 + i, fontRenderer, center - 2, 0, 52, 18);
+            // 1 行: [名前][オン/オフ][■][◀][入力欄][▶] [◀][形][▶]（1.8.3。幅は center ± 154 に収める）
+            add(new GuiButton(BUTTON_KIND_TOGGLE + i, center - 64, 0, 36, 20, ""));
+            add(new GuiButton(BUTTON_KIND_COLOR_PREV + i, center - 14, 0, 12, 20, "\u25C0"));
+            add(new GuiButton(BUTTON_KIND_COLOR + i, center + 50, 0, 12, 20, "\u25B6"));
+            add(new GuiButton(BUTTON_KIND_SHAPE_PREV + i, center + 66, 0, 12, 20, "\u25C0"));
+            add(new GuiButton(BUTTON_KIND_SHAPE + i, center + 80, 0, 54, 20, ""));
+            add(new GuiButton(BUTTON_KIND_SHAPE_NEXT + i, center + 136, 0, 12, 20, "\u25B6"));
+            GuiTextField field = new GuiTextField(BUTTON_KIND_COLOR + 50 + i, fontRenderer, center, 0, 48, 18);
             field.setMaxStringLength(7);
             Integer custom = MarkerLook.customColor(kind);
             field.setText(custom == null ? "" : String.format("#%06X", custom));
@@ -178,12 +186,12 @@ final class StatsScreen extends GuiScreen {
         layoutKindRows();
     }
 
-    /** 画面に入る「弱点」タブの行の数。 */
+    /** 画面に入る「弱点マーカー」タブの行の数。 */
     private int visibleKindRows() {
         return Math.max(1, (bottom - 4 - (top + 52)) / KIND_ROW_HEIGHT);
     }
 
-    /** 「弱点」タブの行のボタンを、今の送り位置に並べる（見えない行は隠す）。 */
+    /** 「弱点マーカー」タブの行のボタンを、今の送り位置に並べる（見えない行は隠す）。 */
     private void layoutKindRows() {
         int rows = visibleKindRows();
         kindsScroll = Math.max(0, Math.min(kindsScroll, HitKind.values().length - rows));
@@ -199,7 +207,9 @@ final class StatsScreen extends GuiScreen {
                     button.visible = shown;
                     button.y = y;
                     button.enabled = server;
-                } else if (button.id == BUTTON_KIND_COLOR + i || button.id == BUTTON_KIND_SHAPE + i) {
+                } else if (button.id == BUTTON_KIND_COLOR + i || button.id == BUTTON_KIND_SHAPE + i
+                        || button.id == BUTTON_KIND_COLOR_PREV + i || button.id == BUTTON_KIND_SHAPE_PREV + i
+                        || button.id == BUTTON_KIND_SHAPE_NEXT + i) {
                     // サーバーで無効な種類は、色と形を隠して「サーバーで無効」と出す
                     button.visible = shown && server;
                     button.y = y;
@@ -247,33 +257,42 @@ final class StatsScreen extends GuiScreen {
         }
     }
 
-    /** ▶ で、初期値 → 12 色 → 初期値と順に切り替える。 */
-    private void nextColor(HitKind kind) {
+    /**
+     * ▶（direction = 1）で次、◀（-1）で前の色に切り替える。「初期値」→ 12 色 → 「初期値」の輪（1.8.3 で ◀ を足した）。
+     * 今の色が 12 色にないとき（打ち込んだ色）は、▶ で最初、◀ で最後の色にする。
+     */
+    private void stepColor(HitKind kind, int direction) {
         Integer custom = MarkerLook.customColor(kind);
-        int index = -1;
-        for (int j = 0; custom != null && j < MarkerLook.PRESETS.length; j++) {
-            if (MarkerLook.PRESETS[j] == custom) {
-                index = j;
+        int count = MarkerLook.PRESETS.length;
+        // 輪の位置: 0 = 初期値、1〜count = 12 色
+        int position = -1;
+        if (custom == null) {
+            position = 0;
+        } else {
+            for (int j = 0; j < count; j++) {
+                if (MarkerLook.PRESETS[j] == custom) {
+                    position = j + 1;
+                }
             }
         }
-        Integer next;
-        if (custom == null || index < 0) {
-            next = MarkerLook.PRESETS[0];
-        } else if (index + 1 < MarkerLook.PRESETS.length) {
-            next = MarkerLook.PRESETS[index + 1];
+        int next;
+        if (position < 0) {
+            next = direction > 0 ? 1 : count;
         } else {
-            next = null;
+            next = Math.floorMod(position + direction, count + 1);
         }
-        MarkerLook.setColor(kind, next);
+        Integer rgb = next == 0 ? null : Integer.valueOf(MarkerLook.PRESETS[next - 1]);
+        MarkerLook.setColor(kind, rgb);
         int i = kind.ordinal();
-        colorFields[i].setText(next == null ? "" : String.format("#%06X", next));
+        colorFields[i].setText(rgb == null ? "" : String.format("#%06X", rgb));
         colorInvalid[i] = false;
     }
 
-    /** 形を、円 → 輪 → ひし形 → 四角 → 円と順に切り替える。 */
-    private void nextShape(HitKind kind) {
+    /** 形を、▶ で 円 → 輪 → ひし形 → 四角 → 円、◀ で逆に切り替える。 */
+    private void stepShape(HitKind kind, int direction) {
         MarkerShape[] shapes = MarkerShape.values();
-        MarkerLook.setShape(kind, shapes[(MarkerLook.shape(kind).ordinal() + 1) % shapes.length]);
+        int next = Math.floorMod(MarkerLook.shape(kind).ordinal() + direction, shapes.length);
+        MarkerLook.setShape(kind, shapes[next]);
         updateKindLabels();
     }
 
@@ -358,16 +377,22 @@ final class StatsScreen extends GuiScreen {
         }
     }
 
-    /** 「弱点」タブの行のボタン。 */
+    /** 「弱点マーカー」タブの行のボタン。 */
     private void kindButton(int id) {
         HitKind[] kinds = HitKind.values();
         if (id >= BUTTON_KIND_TOGGLE && id < BUTTON_KIND_TOGGLE + kinds.length) {
             KindSwitches.toggle(kinds[id - BUTTON_KIND_TOGGLE]);
             updateKindLabels();
         } else if (id >= BUTTON_KIND_COLOR && id < BUTTON_KIND_COLOR + kinds.length) {
-            nextColor(kinds[id - BUTTON_KIND_COLOR]);
+            stepColor(kinds[id - BUTTON_KIND_COLOR], 1);
+        } else if (id >= BUTTON_KIND_COLOR_PREV && id < BUTTON_KIND_COLOR_PREV + kinds.length) {
+            stepColor(kinds[id - BUTTON_KIND_COLOR_PREV], -1);
         } else if (id >= BUTTON_KIND_SHAPE && id < BUTTON_KIND_SHAPE + kinds.length) {
-            nextShape(kinds[id - BUTTON_KIND_SHAPE]);
+            stepShape(kinds[id - BUTTON_KIND_SHAPE], 1);
+        } else if (id >= BUTTON_KIND_SHAPE_NEXT && id < BUTTON_KIND_SHAPE_NEXT + kinds.length) {
+            stepShape(kinds[id - BUTTON_KIND_SHAPE_NEXT], 1);
+        } else if (id >= BUTTON_KIND_SHAPE_PREV && id < BUTTON_KIND_SHAPE_PREV + kinds.length) {
+            stepShape(kinds[id - BUTTON_KIND_SHAPE_PREV], -1);
         }
     }
 
@@ -524,10 +549,12 @@ final class StatsScreen extends GuiScreen {
         int center = width / 2;
         drawString(fontRenderer, I18n.format("weakspot.kinds.column.kind"), center - 154, top + 40, 0xAAAAAA);
         drawString(fontRenderer, I18n.format("weakspot.kinds.column.onOff"), center - 64, top + 40, 0xAAAAAA);
-        drawString(fontRenderer, I18n.format("weakspot.kinds.column.color"), center - 16, top + 40, 0xAAAAAA);
-        drawString(fontRenderer, I18n.format("weakspot.kinds.column.shape"), center + 78, top + 40, 0xAAAAAA);
+        drawString(fontRenderer, I18n.format("weakspot.kinds.column.color"), center - 26, top + 40, 0xAAAAAA);
+        drawString(fontRenderer, I18n.format("weakspot.kinds.column.shape"), center + 66, top + 40, 0xAAAAAA);
         if (!WeakSpotConfig.weakSpotsEnabled) {
-            drawRight(I18n.format("weakspot.kinds.pausedAll"), center + 154, top + 40, 0xFFFF55);
+            // 題の行の右に出す（列の見出しと重ならないように）
+            drawRight(I18n.format("weakspot.kinds.pausedAll", ToggleKeyHandler.keyName()), center + 154, top,
+                    0xFFFF55);
         }
         SyncedSettings settings = ClientSettings.get();
         int rows = visibleKindRows();
@@ -541,14 +568,14 @@ final class StatsScreen extends GuiScreen {
             drawString(fontRenderer, I18n.format("weakspot.kind." + kind.key()), center - 154, y + 6,
                     server ? 0xFFFFFF : 0x808080);
             if (!server) {
-                drawString(fontRenderer, I18n.format("weakspot.kinds.serverDisabled"), center - 16, y + 6, 0x808080);
+                drawString(fontRenderer, I18n.format("weakspot.kinds.serverDisabled"), center - 26, y + 6, 0x808080);
                 continue;
             }
             int rgb = MarkerLook.color(kind, MarkerLook.defaultColor(kind));
             // 見本（今の色）
-            drawRect(center - 16, y + 5, center - 6, y + 15, 0xFF000000 | rgb);
+            drawRect(center - 26, y + 5, center - 16, y + 15, 0xFF000000 | rgb);
             GuiTextField field = colorFields[kind.ordinal()];
-            field.x = center - 2;
+            field.x = center;
             field.drawTextBox();
             if (colorInvalid[kind.ordinal()]) {
                 int x0 = field.x - 1;

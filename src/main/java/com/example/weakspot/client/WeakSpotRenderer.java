@@ -131,7 +131,7 @@ final class WeakSpotRenderer {
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks);
             if (alpha > 0) {
-                // 自分の弱点の色と形は、種類ごとの設定（1.7.0。統計画面の「弱点」タブ）
+                // 自分の弱点の色と形は、種類ごとの設定（1.7.0。統計画面の「弱点マーカー」タブ）
                 float[][] look = MarkerLook.palette(spot.kind, OWN_DISK, OWN_RING, OWN_CENTER);
                 MarkerShape shape = MarkerLook.shape(spot.kind);
                 drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
