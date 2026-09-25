@@ -4,11 +4,14 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.server.AnimalHits;
 import com.example.weakspot.server.BowHits;
 import com.example.weakspot.server.EatHits;
+import com.example.weakspot.server.EnchantHits;
 import com.example.weakspot.server.FishingHits;
 import com.example.weakspot.server.MeleeHits;
+import com.example.weakspot.server.MoveHits;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerBoostTracker;
 import com.example.weakspot.server.SleepHits;
+import com.example.weakspot.server.ThrowHits;
 import com.example.weakspot.server.VehicleHits;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -95,6 +98,12 @@ public class HitMessage implements IMessage {
                     EatHits.onHit(player, streak);
                 } else if (kind == HitKind.VEHICLE) {
                     VehicleHits.onHit(player, entityId, streak);
+                } else if (kind == HitKind.LADDER || kind == HitKind.ELYTRA || kind == HitKind.SPRINT) {
+                    MoveHits.onHit(player, kind, streak);
+                } else if (kind == HitKind.THROW) {
+                    ThrowHits.onHit(player, streak);
+                } else if (kind == HitKind.ENCHANT) {
+                    EnchantHits.onHit(player, streak);
                 } else {
                     RightClickHits.onHit(player, kind, pos, streak);
                 }

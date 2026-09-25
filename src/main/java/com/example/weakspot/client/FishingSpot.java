@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.FishingMath;
 import com.example.weakspot.common.HitKind;
@@ -97,7 +98,7 @@ final class FishingSpot {
 
     /** 自分の、弱点を出せる浮き（釣り竿を持っていて、水に浮いている）。なければ null。 */
     private static EntityFishHook activeHook(Minecraft mc) {
-        if (mc.player == null || mc.world == null || !WeakSpotConfig.weakSpotsEnabled
+        if (mc.player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.FISHING)
                 || mc.player.capabilities.isCreativeMode || mc.player.isSpectator()) {
             return null;
         }
@@ -249,13 +250,15 @@ final class FishingSpot {
         GlStateManager.glLineWidth(2.0F);
 
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        float[][] look = MarkerLook.palette(HitKind.FISHING, DISK, RING, new float[] {1.0F, 0.95F, 0.7F});
+        MarkerShape shape = MarkerLook.shape(HitKind.FISHING);
         if (trail) {
             for (MarkerMotion.Afterimage image : MOTION.afterimages(nowMs)) {
                 double[] p = SCREEN.project(hookX + image.u, hookY + LIFT, hookZ + image.v);
                 if (p != null) {
                     float a = (float) image.alpha(nowMs);
-                    ScreenProjection.fill(p[0] / scale, p[1] / scale, radius, DISK, 0.35F * a);
-                    ScreenProjection.outline(p[0] / scale, p[1] / scale, radius, RING, 0.5F * a);
+                    ScreenProjection.fillShape(p[0] / scale, p[1] / scale, radius, shape, look[0], 0.35F * a);
+                    ScreenProjection.outlineShape(p[0] / scale, p[1] / scale, radius, shape, look[1], 0.5F * a);
                 }
             }
         }
@@ -270,12 +273,14 @@ final class FishingSpot {
         if (p != null) {
             double gx = p[0] / scale;
             double gy = p[1] / scale;
-            ScreenProjection.fill(gx, gy, radius, DISK, 0.45F);
-            ScreenProjection.outline(gx, gy, radius, RING, 0.9F);
-            ScreenProjection.fill(gx, gy, radius * 0.3, new float[] {1.0F, 0.95F, 0.7F}, 0.9F);
+            ScreenProjection.fillShape(gx, gy, radius, shape, look[0], 0.45F);
+            ScreenProjection.outlineShape(gx, gy, radius, shape, look[1], 0.9F);
+            if (shape.hasCenterDot()) {
+                ScreenProjection.fill(gx, gy, radius * 0.3, look[2], 0.9F);
+            }
             double head = trail ? MOTION.headHighlight(nowMs) : 0;
             if (head > 0) {
-                ScreenProjection.fill(gx, gy, radius, new float[] {1, 1, 1}, (float) (0.5 * head));
+                ScreenProjection.fillShape(gx, gy, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));
             }
         }
         // 浮きの下の、魚が寄ってくるまでの進み具合のバー

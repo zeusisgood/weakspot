@@ -1,6 +1,7 @@
 package com.example.weakspot.server;
 
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.common.MiningStats;
 import java.util.HashMap;
@@ -64,6 +65,15 @@ public final class ServerStats {
         return count;
     }
 
+    /**
+     * このヒットを数えたら何になるか（数えない。1.7.0。収穫のおまけは、収穫できたときだけヒットに数えるので、先に見る）。
+     */
+    public static int peekStreak(EntityPlayerMP player) {
+        HitStreak streak = STREAKS.get(player.getUniqueID());
+        long now = player.mcServer.getTickCounter();
+        return streak == null ? 1 : streak.count(now) + 1;
+    }
+
     /** そのプレイヤーの連続ヒット（まだ一度もヒットしていなければ null）。頭の上のコンボ（ComboRelay）が読む。 */
     static HitStreak streak(EntityPlayer player) {
         return STREAKS.get(player.getUniqueID());
@@ -83,6 +93,15 @@ public final class ServerStats {
         MiningStats total = total(player);
         change.accept(total);
         data(player).setTag(TAG_TOTAL, write(total));
+    }
+
+    /**
+     * 採掘以外の種類のヒットを、「今回」と累計に数え、種類ごと・合計の節目を判定する（1.7.0）。
+     * 近接はクリティカルにしたときに呼ぶ。
+     */
+    public static void recordKindHit(EntityPlayerMP player, HitKind kind) {
+        record(player, stats -> stats.recordKindHit(kind));
+        MiningRewards.onKindHit(player, kind);
     }
 
     /** 画面の「累計をリセット」と /weakspot reset。節目も累計で数えるので、節目をもう一度受け取れる（1.6.1）。 */
@@ -117,6 +136,12 @@ public final class ServerStats {
         stats.vehicleHits = tag.getLong("vehicleHits");
         stats.eatHits = tag.getLong("eatHits");
         stats.sleepHits = tag.getLong("sleepHits");
+        stats.ladderHits = tag.getLong("ladderHits");
+        stats.elytraHits = tag.getLong("elytraHits");
+        stats.enchantHits = tag.getLong("enchantHits");
+        stats.harvestHits = tag.getLong("harvestHits");
+        stats.throwHits = tag.getLong("throwHits");
+        stats.sprintHits = tag.getLong("sprintHits");
         return stats;
     }
 
@@ -137,6 +162,12 @@ public final class ServerStats {
         tag.setLong("vehicleHits", stats.vehicleHits);
         tag.setLong("eatHits", stats.eatHits);
         tag.setLong("sleepHits", stats.sleepHits);
+        tag.setLong("ladderHits", stats.ladderHits);
+        tag.setLong("elytraHits", stats.elytraHits);
+        tag.setLong("enchantHits", stats.enchantHits);
+        tag.setLong("harvestHits", stats.harvestHits);
+        tag.setLong("throwHits", stats.throwHits);
+        tag.setLong("sprintHits", stats.sprintHits);
         return tag;
     }
 }

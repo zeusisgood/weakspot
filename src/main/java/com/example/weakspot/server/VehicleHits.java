@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.VehicleBoostMath;
@@ -67,7 +68,7 @@ public final class VehicleHits {
         }
         LAST_HIT.put(player.getUniqueID(), now);
         int combo = ServerStats.countStreak(player);
-        ServerStats.record(player, stats -> stats.recordVehicleHit());
+        ServerStats.recordKindHit(player, HitKind.VEHICLE);
         boost(vehicle, combo);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(vehicle), streak);
     }
@@ -80,7 +81,7 @@ public final class VehicleHits {
     }
 
     private static boolean canBoost(EntityPlayerMP player) {
-        return ServerSwitches.isEnabled(player) && !player.capabilities.isCreativeMode && !player.isSpectator()
+        return ServerSwitches.isEnabled(player, HitKind.VEHICLE) && !player.capabilities.isCreativeMode && !player.isSpectator()
                 && WeakSpotConfig.vehicleWeakSpotEnabled && VehicleTargets.kind(player) != null;
     }
 

@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
-/** 右クリックの弱点（作物・苗木、機械）のヒット通知の検証と効果（論理サーバー）。 */
+/** 右クリックの弱点（作物・苗木、機械、1.7.0 から収穫）のヒット通知の検証と効果（論理サーバー）。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class RightClickHits {
 
@@ -56,7 +56,7 @@ public final class RightClickHits {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。streak は他のプレイヤーのヒット音の音階に使う。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos, int streak) {
-        if (!ServerSwitches.isEnabled(player)) {
+        if (!ServerSwitches.isEnabled(player, kind)) {
             return;
         }
         Clicking clicking = CLICKING.get(player.getUniqueID());
@@ -78,9 +78,18 @@ public final class RightClickHits {
         }
         clicking.lastHitTick[kind.ordinal()] = now;
 
-        // 機械の倍率はこのヒットを数えたあとのコンボで決めるので、先に数える
+        // 機械の倍率・収穫のおまけはこのヒットを数えたあとのコンボで決めるので、先に数える
+        if (kind == HitKind.HARVEST) {
+            // 収穫できなかった（保護された土地など）ときは、ヒットに数えない
+            int combo = ServerStats.peekStreak(player);
+            if (!HarvestHits.harvest(player, world, pos, combo)) {
+                return;
+            }
+        }
         int combo = ServerStats.countStreak(player);
-        if (kind == HitKind.GROWTH) {
+        if (kind == HitKind.HARVEST) {
+            ServerStats.recordKindHit(player, HitKind.HARVEST);
+        } else if (kind == HitKind.GROWTH) {
             IBlockState before = world.getBlockState(pos);
             BlockPos target = RightClickTargets.growthTarget(world, pos, before);
             IBlockState targetBefore = world.getBlockState(target);
@@ -88,17 +97,24 @@ public final class RightClickHits {
             // 柱が伸びると一番上の節が変わるので、前の一番上の節と、叩いたブロックの両方を比べる
             boolean changed = world.getBlockState(pos) != before || world.getBlockState(target) != targetBefore;
             GrowthWarnings.onGrowthHit(player, world, pos, changed);
-            ServerStats.record(player, stats -> stats.recordGrowthHit());
+            ServerStats.recordKindHit(player, HitKind.GROWTH);
         } else if (kind == HitKind.MACHINE) {
             MachineAccelerator.hit(world, pos, combo);
-            ServerStats.record(player, stats -> stats.recordMachineHit());
+            ServerStats.recordKindHit(player, HitKind.MACHINE);
         }
         // 採掘と同じく、近くの他のプレイヤーにもヒット音を鳴らす
         ServerBoostTracker.notifyNearbyPlayers(player, pos, streak);
     }
 
     private static int minHitInterval(HitKind kind) {
-        return kind == HitKind.MACHINE ? WeakSpotConfig.machineMinHitIntervalTicks : WeakSpotConfig.growthMinHitIntervalTicks;
+        switch (kind) {
+            case MACHINE:
+                return WeakSpotConfig.machineMinHitIntervalTicks;
+            case HARVEST:
+                return WeakSpotConfig.harvestMinHitIntervalTicks;
+            default:
+                return WeakSpotConfig.growthMinHitIntervalTicks;
+        }
     }
 
     /** バニラが右クリックを受け付ける距離と同じ（REACH_DISTANCE + 3 をブロックの中心から測る）。 */

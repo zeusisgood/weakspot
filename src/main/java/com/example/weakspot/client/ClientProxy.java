@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.CommonProxy;
 import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.SyncedSettings;
@@ -67,7 +68,12 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void onMilestone(int milestone) {
-        Minecraft.getMinecraft().addScheduledTask(() -> MilestoneEffects.show(milestone));
+    public boolean isKindEnabled(HitKind kind) {
+        return KindSwitches.isEnabled(kind);
+    }
+
+    @Override
+    public void onMilestone(int type, int kindId, long milestone) {
+        Minecraft.getMinecraft().addScheduledTask(() -> MilestoneEffects.show(type, kindId, milestone));
     }
 }

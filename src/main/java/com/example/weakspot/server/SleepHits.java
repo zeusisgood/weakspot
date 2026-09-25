@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.SleepTime;
 import com.example.weakspot.config.WeakSpotConfig;
@@ -31,7 +32,7 @@ public final class SleepHits {
 
     public static void onHit(EntityPlayerMP player, int streak) {
         World world = player.world;
-        if (!ServerSwitches.isEnabled(player) || player.isSpectator() || !WeakSpotConfig.sleepWeakSpotEnabled
+        if (!ServerSwitches.isEnabled(player, HitKind.SLEEP) || player.isSpectator() || !WeakSpotConfig.sleepWeakSpotEnabled
                 || !player.isPlayerSleeping() || !world.getGameRules().getBoolean("doDaylightCycle")
                 || !SleepTime.isNight(world.getWorldTime())) {
             return;
@@ -47,7 +48,7 @@ public final class SleepHits {
         // 20 tick ごとの時刻の送信を待たずに、すぐに知らせる（空の明るさがすぐに変わるように）
         player.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketTimeUpdate(
                 world.getTotalWorldTime(), world.getWorldTime(), true), world.provider.getDimension());
-        ServerStats.record(player, stats -> stats.recordSleepHit());
+        ServerStats.recordKindHit(player, HitKind.SLEEP);
         ServerStats.countStreak(player);
         BlockPos bed = player.bedLocation != null ? player.bedLocation : new BlockPos(player);
         ServerBoostTracker.notifyNearbyPlayers(player, bed, streak);

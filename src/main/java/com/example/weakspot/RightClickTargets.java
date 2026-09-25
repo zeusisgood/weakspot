@@ -4,7 +4,6 @@ import com.example.weakspot.common.GrowthFilters;
 import com.example.weakspot.common.GrowthRoom;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.SyncedSettings;
-import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerSwitches;
 import java.util.Arrays;
@@ -13,7 +12,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockCocoa;
+import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.BlockNetherWart;
 import net.minecraft.block.BlockObserver;
 import net.minecraft.block.BlockRedstoneDiode;
 import net.minecraft.block.BlockReed;
@@ -33,6 +35,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 /**
  * 右クリックの弱点（作物・苗木などの植物、機械）の対象の判定。クライアントとサーバーで同じ条件を使う。
  * しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木（しゃがんでいても、機械でなければ作物・苗木）。
+ * 実った作物は収穫（1.7.0）。
  * 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -59,7 +62,31 @@ public final class RightClickTargets {
         if (isGrowable(world, pos, state, settings)) {
             return HitKind.GROWTH;
         }
+        if (isHarvestable(state, settings)) {
+            return HitKind.HARVEST;
+        }
         return null;
+    }
+
+    /**
+     * 収穫の弱点の対象か（1.7.0）。実った作物: BlockCrops（と、それを継承した Mod の作物）で isMaxAge、
+     * ネザーウォートの age 3、カカオ豆の age 2。
+     */
+    public static boolean isHarvestable(IBlockState state, SyncedSettings settings) {
+        if (!settings.harvestWeakSpotEnabled) {
+            return false;
+        }
+        Block block = state.getBlock();
+        if (block instanceof BlockCrops) {
+            return ((BlockCrops) block).isMaxAge(state);
+        }
+        if (block instanceof BlockNetherWart) {
+            return state.getValue(BlockNetherWart.AGE) >= 3;
+        }
+        if (block instanceof BlockCocoa) {
+            return state.getValue(BlockCocoa.AGE) >= 2;
+        }
+        return false;
     }
 
     /**
@@ -157,12 +184,11 @@ public final class RightClickTargets {
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         EntityPlayer player = event.getEntityPlayer();
         World world = event.getWorld();
-        if (world.isRemote ? !WeakSpotConfig.weakSpotsEnabled : !ServerSwitches.isEnabled(player)) {
-            // 弱点の一時オフ（HOME キー）: 通常の右クリックのままにする。サーバーは、クライアントから届いた状態を見る
-            return;
-        }
         HitKind kind = classify(world, player, event.getPos(), settings(world));
-        if (kind == null) {
+        if (kind == null
+                || (world.isRemote ? !WeakSpotMod.proxy.isKindEnabled(kind) : !ServerSwitches.isEnabled(player, kind))) {
+            // 弱点の一時オフ（HOME キー）、その種類のオフ（1.7.0）: 通常の右クリックのままにする。
+            // サーバーは、クライアントから届いた状態を見る
             return;
         }
         event.setCanceled(true);

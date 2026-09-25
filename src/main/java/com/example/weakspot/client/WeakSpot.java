@@ -107,7 +107,7 @@ final class WeakSpot {
         if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
             return null;
         }
-        double minRadius = kind == HitKind.GROWTH
+        double minRadius = kind == HitKind.GROWTH || kind == HitKind.HARVEST
                 ? Math.max(settings.weakSpotMinRadius, settings.growthMinRadius)
                 : settings.weakSpotMinRadius;
         WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio, minRadius,

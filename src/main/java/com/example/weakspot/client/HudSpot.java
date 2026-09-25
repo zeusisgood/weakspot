@@ -2,7 +2,10 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.common.BowMath;
 import com.example.weakspot.common.FishingMath;
+import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.MarkerColor;
 import com.example.weakspot.common.MarkerMotion;
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
@@ -21,9 +24,8 @@ final class HudSpot {
     private static final double SPOT_DISTANCE = 16.0;
 
     private final ScreenProjection screen = new ScreenProjection();
-    private final float[] disk;
-    private final float[] ring;
-    private final float[] center;
+    private final HitKind kind;
+    private final int defaultRgb;
     private final MarkerMotion motion = new MarkerMotion(0, 0);
     private final Random random = new Random();
 
@@ -36,18 +38,13 @@ final class HudSpot {
     private double eyeZ;
     private double viewYaw;
 
-    /** rgb は円の色。輪と中心は、それを白に寄せた色。 */
-    HudSpot(int rgb) {
-        disk = rgb(rgb, 0);
-        ring = rgb(rgb, 0.5F);
-        center = rgb(rgb, 0.8F);
-    }
-
-    private static float[] rgb(int rgb, float toWhite) {
-        float r = (rgb >> 16 & 0xFF) / 255F;
-        float g = (rgb >> 8 & 0xFF) / 255F;
-        float b = (rgb & 0xFF) / 255F;
-        return new float[] {r + (1 - r) * toWhite, g + (1 - g) * toWhite, b + (1 - b) * toWhite};
+    /**
+     * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。1.7.0 から、色と形は種類ごとの設定
+     * （MarkerLook。統計画面の「弱点」タブ）で変えられる。
+     */
+    HudSpot(HitKind kind, int defaultRgb) {
+        this.kind = kind;
+        this.defaultRgb = defaultRgb;
     }
 
     boolean has() {
@@ -133,13 +130,14 @@ final class HudSpot {
         long nowMs = Minecraft.getSystemTime();
         double radius = FishingMath.SPOT_SCREEN_RADIUS;
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        int rgb = MarkerLook.color(kind, defaultRgb);
+        MarkerShape shape = MarkerLook.shape(kind);
         if (trail) {
             for (MarkerMotion.Afterimage image : motion.afterimages(nowMs)) {
                 double[] p = project(vertical ? viewYaw : image.u, image.v);
                 if (p != null) {
-                    float a = (float) image.alpha(nowMs);
-                    ScreenProjection.fill(p[0] / scale, p[1] / scale, radius, disk, 0.35F * a);
-                    ScreenProjection.outline(p[0] / scale, p[1] / scale, radius, ring, 0.5F * a);
+                    ScreenProjection.afterimage(p[0] / scale, p[1] / scale, radius, shape, rgb,
+                            (float) image.alpha(nowMs));
                 }
             }
         }
@@ -156,14 +154,33 @@ final class HudSpot {
         }
         double gx = p[0] / scale;
         double gy = p[1] / scale;
-        ScreenProjection.fill(gx, gy, radius, disk, 0.45F);
-        ScreenProjection.outline(gx, gy, radius, ring, 0.9F);
-        ScreenProjection.fill(gx, gy, radius * 0.3, center, 0.9F);
+        ScreenProjection.marker(gx, gy, radius, shape, rgb, 0.45F, 1);
         double head = trail ? motion.headHighlight(nowMs) : 0;
         if (head > 0) {
-            ScreenProjection.fill(gx, gy, radius, new float[] {1, 1, 1}, (float) (0.5 * head));
+            ScreenProjection.fillShape(gx, gy, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));
         }
     }
+
+    /**
+     * 照準の上（above）か下に、残り時間・溜めのゲージを描く（1.7.0。乗り物・はしご・走りは上、投げる物は下）。
+     * fraction は 0〜1。beginOverlay と endOverlay の間で呼ぶ。
+     */
+    static void gauge(Minecraft mc, double fraction, int rgb, boolean above) {
+        ScaledResolution res = new ScaledResolution(mc);
+        double x0 = res.getScaledWidth() / 2.0 - GAUGE_WIDTH / 2.0;
+        double cy = res.getScaledHeight() / 2.0 + (above ? -GAUGE_OFFSET : GAUGE_OFFSET);
+        double y0 = cy - GAUGE_HEIGHT / 2.0;
+        ScreenProjection.rect(x0, y0, x0 + GAUGE_WIDTH, y0 + GAUGE_HEIGHT, GAUGE_BACK);
+        float[] fill = MarkerColor.towardWhite(rgb, 0);
+        ScreenProjection.rect(x0, y0, x0 + GAUGE_WIDTH * Math.max(0, Math.min(1, fraction)), y0 + GAUGE_HEIGHT,
+                new float[] {fill[0], fill[1], fill[2], 1});
+    }
+
+    /** ゲージの大きさと、照準の中心からの距離（乗り物のゲージ、弓の引きゲージと同じ）。背景は #1E1E1E 半透明。 */
+    static final int GAUGE_WIDTH = 40;
+    static final int GAUGE_HEIGHT = 3;
+    static final int GAUGE_OFFSET = 12;
+    private static final float[] GAUGE_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
 
     /** HUD に描く前の状態（BowSpot と同じ）。 */
     static void beginOverlay() {

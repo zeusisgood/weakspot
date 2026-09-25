@@ -136,10 +136,13 @@ final class WeakSpotRenderer {
                 alpha *= UNCHARGED_ALPHA;
             }
             if (alpha > 0) {
-                drawMarker(spot, MarkerShape.CIRCLE, OWN_DISK, OWN_RING, OWN_CENTER, alpha, nowMs, cx, cy, cz);
+                // 自分の弱点の色と形は、種類ごとの設定（1.7.0。統計画面の「弱点」タブ）
+                float[][] look = MarkerLook.palette(spot.kind, OWN_DISK, OWN_RING, OWN_CENTER);
+                MarkerShape shape = MarkerLook.shape(spot.kind);
+                drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
                 if (seeThrough(spot)) {
                     GlStateManager.disableDepth();
-                    drawMarker(spot, MarkerShape.CIRCLE, OWN_DISK, OWN_RING, OWN_CENTER,
+                    drawMarker(spot, shape, look[0], look[1], look[2],
                             alpha * SEE_THROUGH_ALPHA, nowMs, cx, cy, cz);
                     GlStateManager.enableDepth();
                 }

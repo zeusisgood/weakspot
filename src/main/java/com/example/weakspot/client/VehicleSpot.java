@@ -48,7 +48,7 @@ final class VehicleSpot {
     private static final float[] BAR_FILL = {0x55 / 255F, 0xCC / 255F, 0xFF / 255F, 1.0F};
     private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
 
-    private static final HudSpot SPOT = new HudSpot(RGB);
+    private static final HudSpot SPOT = new HudSpot(HitKind.VEHICLE, RGB);
 
     /** 自分の側で覚えている加速（ボートの速さと、ゲージのため）。 */
     private static double multiplier = 1;
@@ -66,7 +66,7 @@ final class VehicleSpot {
     /** 乗り物の弱点を出すか。 */
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
-        if (player == null || mc.world == null || !WeakSpotConfig.weakSpotsEnabled
+        if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.VEHICLE)
                 || player.capabilities.isCreativeMode || player.isSpectator() || player.isHandActive()) {
             return false;
         }

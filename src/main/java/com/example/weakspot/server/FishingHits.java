@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.Reflect;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.FishingMath;
@@ -156,7 +157,7 @@ public final class FishingHits {
 
     /** クライアントからのヒット通知（サーバースレッド）。照準の角度は確かめない（クライアントを信用する）。 */
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()) {
+        if (!ServerSwitches.isEnabled(player, HitKind.FISHING) || player.capabilities.isCreativeMode || player.isSpectator()) {
             return;
         }
         SyncedSettings settings = SyncedSettings.fromConfig();
@@ -178,7 +179,7 @@ public final class FishingHits {
         } catch (IllegalAccessException e) {
             return;
         }
-        ServerStats.record(player, stats -> stats.recordFishingHit());
+        ServerStats.recordKindHit(player, HitKind.FISHING);
         ServerStats.countStreak(player);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(hook), streak);
     }

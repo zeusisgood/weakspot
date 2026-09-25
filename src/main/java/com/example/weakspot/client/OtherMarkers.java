@@ -145,7 +145,7 @@ final class OtherMarkers {
         WeakSpot spot = ClientWeakSpotHandler.spot;
         MarkerData current = null;
         if (spot != null && (spot.kind == HitKind.MINING || spot.kind == HitKind.MACHINE
-                || spot.kind == HitKind.GROWTH)) {
+                || spot.kind == HitKind.GROWTH || spot.kind == HitKind.HARVEST)) {
             current = new MarkerData(spot.pos, spot.face, spot.u, spot.v);
         } else if (spot != null && spot.kind == HitKind.ANIMAL) {
             current = new MarkerData(spot.entity.getPosition(), spot.face, spot.u, spot.v, spot.entity.getEntityId());

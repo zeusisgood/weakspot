@@ -50,6 +50,12 @@ public class StatsMessage implements IMessage {
         stats.vehicleHits = buf.readLong();
         stats.eatHits = buf.readLong();
         stats.sleepHits = buf.readLong();
+        stats.ladderHits = buf.readLong();
+        stats.elytraHits = buf.readLong();
+        stats.enchantHits = buf.readLong();
+        stats.harvestHits = buf.readLong();
+        stats.throwHits = buf.readLong();
+        stats.sprintHits = buf.readLong();
         return stats;
     }
 
@@ -69,6 +75,12 @@ public class StatsMessage implements IMessage {
         buf.writeLong(stats.vehicleHits);
         buf.writeLong(stats.eatHits);
         buf.writeLong(stats.sleepHits);
+        buf.writeLong(stats.ladderHits);
+        buf.writeLong(stats.elytraHits);
+        buf.writeLong(stats.enchantHits);
+        buf.writeLong(stats.harvestHits);
+        buf.writeLong(stats.throwHits);
+        buf.writeLong(stats.sprintHits);
     }
 
     public static class Handler implements IMessageHandler<StatsMessage, IMessage> {

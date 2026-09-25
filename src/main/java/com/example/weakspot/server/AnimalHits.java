@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.AnimalTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.AnimalTimers;
@@ -118,7 +119,7 @@ public final class AnimalHits {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
     public static void onHit(EntityPlayerMP player, int entityId, int streak) {
-        if (!ServerSwitches.isEnabled(player)) {
+        if (!ServerSwitches.isEnabled(player, HitKind.ANIMAL)) {
             return;
         }
         Entity entity = player.world.getEntityByID(entityId);
@@ -141,7 +142,7 @@ public final class AnimalHits {
         }
         LAST_HIT.put(player.getUniqueID(), now);
         apply(entity, state.mask, settings);
-        ServerStats.record(player, stats -> stats.recordAnimalHit());
+        ServerStats.recordKindHit(player, HitKind.ANIMAL);
         ServerStats.countStreak(player);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(entity), streak);
     }

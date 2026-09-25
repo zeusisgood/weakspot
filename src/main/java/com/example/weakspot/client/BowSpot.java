@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.BowDraw;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
@@ -79,7 +80,7 @@ final class BowSpot {
 
     /** 弱点を出せるか（弓を引いていて、設定がオンで、クリエイティブ・スペクテイターでない）。 */
     private static boolean eligible(Minecraft mc) {
-        if (mc.player == null || mc.world == null || !WeakSpotConfig.weakSpotsEnabled
+        if (mc.player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.BOW)
                 || mc.player.capabilities.isCreativeMode || mc.player.isSpectator()) {
             return false;
         }
@@ -239,13 +240,15 @@ final class BowSpot {
         long nowMs = Minecraft.getSystemTime();
         double radius = FishingMath.SPOT_SCREEN_RADIUS;
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        float[][] look = MarkerLook.palette(HitKind.BOW, DISK, RING, CENTER);
+        MarkerShape shape = MarkerLook.shape(HitKind.BOW);
         if (trail) {
             for (MarkerMotion.Afterimage image : MOTION.afterimages(nowMs)) {
                 double[] p = project(image.u, image.v);
                 if (p != null) {
                     float a = (float) image.alpha(nowMs);
-                    ScreenProjection.fill(p[0] / scale, p[1] / scale, radius, DISK, 0.35F * a);
-                    ScreenProjection.outline(p[0] / scale, p[1] / scale, radius, RING, 0.5F * a);
+                    ScreenProjection.fillShape(p[0] / scale, p[1] / scale, radius, shape, look[0], 0.35F * a);
+                    ScreenProjection.outlineShape(p[0] / scale, p[1] / scale, radius, shape, look[1], 0.5F * a);
                 }
             }
         }
@@ -262,12 +265,14 @@ final class BowSpot {
         }
         double gx = p[0] / scale;
         double gy = p[1] / scale;
-        ScreenProjection.fill(gx, gy, radius, DISK, 0.45F);
-        ScreenProjection.outline(gx, gy, radius, RING, 0.9F);
-        ScreenProjection.fill(gx, gy, radius * 0.3, CENTER, 0.9F);
+        ScreenProjection.fillShape(gx, gy, radius, shape, look[0], 0.45F);
+        ScreenProjection.outlineShape(gx, gy, radius, shape, look[1], 0.9F);
+        if (shape.hasCenterDot()) {
+            ScreenProjection.fill(gx, gy, radius * 0.3, look[2], 0.9F);
+        }
         double head = trail ? MOTION.headHighlight(nowMs) : 0;
         if (head > 0) {
-            ScreenProjection.fill(gx, gy, radius, WHITE, (float) (0.5 * head));
+            ScreenProjection.fillShape(gx, gy, radius, shape, WHITE, (float) (0.5 * head));
         }
     }
 

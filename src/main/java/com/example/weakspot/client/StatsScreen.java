@@ -2,23 +2,35 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.GuideBook;
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.MarkerColor;
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.common.MiningStats;
+import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.HitSound;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.StatsRequestMessage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiScreenBook;
+import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.client.config.GuiSlider;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 /**
  * 統計画面（K キー）。「統計」タブは、サーバーから届いた「今回」と「累計」を並べて表示するだけ。
  * 「サウンド」タブは、ヒット音の楽器と音量を変えて試聴する部品で、クライアントだけで完結する（サーバーとは通信しない）。
+ * 「弱点」タブ（1.7.0）は、種類ごとのオン・オフ（KindSwitches。サーバーにも伝わる）と、自分の弱点の色と形（MarkerLook）。
  * 値は weakspot.cfg にそのまま保存するので、Forge の設定画面と同じ値になる。
+ * 行が画面に入りきらないタブ（統計・弱点）は、マウスのホイールで送る。
  */
 final class StatsScreen extends GuiScreen {
 
@@ -29,6 +41,15 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_GUIDE = 3;
     private static final int BUTTON_TAB_STATS = 10;
     private static final int BUTTON_TAB_SOUND = 11;
+    private static final int BUTTON_TAB_KINDS = 12;
+    /** 「弱点」タブの行のボタン（+ 種類の番号）。 */
+    private static final int BUTTON_KIND_TOGGLE = 100;
+    private static final int BUTTON_KIND_COLOR = 200;
+    private static final int BUTTON_KIND_SHAPE = 300;
+    private static final int KIND_ROW_HEIGHT = 22;
+    private static final int TAB_STATS = 0;
+    private static final int TAB_SOUND = 1;
+    private static final int TAB_KINDS = 2;
     private static final int BUTTON_MY_SOUND = 20;
     private static final int BUTTON_MY_VOLUME = 21;
     private static final int BUTTON_MY_PREVIEW = 22;
@@ -36,7 +57,7 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_OTHERS_VOLUME = 31;
     private static final int BUTTON_OTHERS_PREVIEW = 32;
 
-    /** 13 行（見出し + 統計 13 項目）が、一番小さい画面でも下のボタンに重ならない高さ。 */
+    /** 統計の 1 行の高さ。入りきらない行は、ホイールで送る。 */
     private static final int ROW_HEIGHT = 10;
     /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
@@ -45,11 +66,18 @@ final class StatsScreen extends GuiScreen {
     private static MiningStats session;
     private static MiningStats total;
     /** 最後に開いていたタブ（画面を開き直しても保つ）。 */
-    private static boolean soundTab;
+    private static int tab = TAB_STATS;
 
     private GuiButton resetButton;
     private GuiButton tabStats;
     private GuiButton tabSound;
+    private GuiButton tabKinds;
+    /** 統計・弱点のタブの、送った行の数。 */
+    private int statsScroll;
+    private int kindsScroll;
+    private int bottom;
+    private final GuiTextField[] colorFields = new GuiTextField[HitKind.values().length];
+    private final boolean[] colorInvalid = new boolean[HitKind.values().length];
     private GuiButton mySound;
     private GuiButton othersSound;
     private boolean confirmingReset;
@@ -81,11 +109,13 @@ final class StatsScreen extends GuiScreen {
         top = Math.max(6, height / 2 - 124);
         int center = width / 2;
 
-        tabStats = add(new GuiButton(BUTTON_TAB_STATS, center - 102, top + 14, 100, 20,
+        tabStats = add(new GuiButton(BUTTON_TAB_STATS, center - 154, top + 14, 74, 20,
                 I18n.format("weakspot.stats.tab.stats")));
-        tabSound = add(new GuiButton(BUTTON_TAB_SOUND, center + 2, top + 14, 100, 20,
+        tabSound = add(new GuiButton(BUTTON_TAB_SOUND, center - 76, top + 14, 74, 20,
                 I18n.format("weakspot.stats.tab.sound")));
-        add(new GuiButton(BUTTON_GUIDE, center + 106, top + 14, 48, 20, I18n.format("weakspot.stats.guide")));
+        tabKinds = add(new GuiButton(BUTTON_TAB_KINDS, center + 2, top + 14, 74, 20,
+                I18n.format("weakspot.stats.tab.kinds")));
+        add(new GuiButton(BUTTON_GUIDE, center + 80, top + 14, 74, 20, I18n.format("weakspot.stats.guide")));
 
         int y = top + 56;
         mySound = add(new GuiButton(BUTTON_MY_SOUND, center - 154, y, 120, 20, ""));
@@ -105,14 +135,27 @@ final class StatsScreen extends GuiScreen {
         }));
         add(new GuiButton(BUTTON_OTHERS_PREVIEW, center + 94, y, 60, 20, I18n.format("weakspot.sound.preview")));
 
-        int bottom = Math.min(height - 28, top + 226);
+        bottom = Math.min(height - 28, top + 226);
+        for (HitKind kind : HitKind.values()) {
+            int i = kind.ordinal();
+            add(new GuiButton(BUTTON_KIND_TOGGLE + i, center - 64, 0, 40, 20, ""));
+            add(new GuiButton(BUTTON_KIND_COLOR + i, center + 54, 0, 20, 20, "\u25B6"));
+            add(new GuiButton(BUTTON_KIND_SHAPE + i, center + 78, 0, 76, 20, ""));
+            GuiTextField field = new GuiTextField(BUTTON_KIND_COLOR + 50 + i, fontRenderer, center - 2, 0, 52, 18);
+            field.setMaxStringLength(7);
+            Integer custom = MarkerLook.customColor(kind);
+            field.setText(custom == null ? "" : String.format("#%06X", custom));
+            colorFields[i] = field;
+            colorInvalid[i] = false;
+        }
+
         resetButton = add(new GuiButton(BUTTON_RESET, center - 154, bottom, 100, 20, ""));
         add(new GuiButton(BUTTON_CONFIG, center - 50, bottom, 100, 20, I18n.format("weakspot.stats.openConfig")));
         add(new GuiButton(BUTTON_DONE, center + 54, bottom, 100, 20, I18n.format("gui.done")));
 
         setConfirmingReset(false);
         updateLabels();
-        showTab(soundTab);
+        showTab(tab);
     }
 
     private <T extends GuiButton> T add(T button) {
@@ -120,17 +163,133 @@ final class StatsScreen extends GuiScreen {
         return button;
     }
 
-    private void showTab(boolean sound) {
-        soundTab = sound;
-        tabStats.enabled = sound;
-        tabSound.enabled = !sound;
+    private void showTab(int newTab) {
+        tab = newTab;
+        tabStats.enabled = tab != TAB_STATS;
+        tabSound.enabled = tab != TAB_SOUND;
+        tabKinds.enabled = tab != TAB_KINDS;
         for (GuiButton button : buttonList) {
-            if (button.id >= BUTTON_MY_SOUND) {
-                button.visible = sound;
+            if (button.id >= BUTTON_MY_SOUND && button.id < BUTTON_KIND_TOGGLE) {
+                button.visible = tab == TAB_SOUND;
             }
         }
-        resetButton.visible = !sound;
+        resetButton.visible = tab == TAB_STATS;
         setConfirmingReset(false);
+        layoutKindRows();
+    }
+
+    /** 画面に入る「弱点」タブの行の数。 */
+    private int visibleKindRows() {
+        return Math.max(1, (bottom - 4 - (top + 52)) / KIND_ROW_HEIGHT);
+    }
+
+    /** 「弱点」タブの行のボタンを、今の送り位置に並べる（見えない行は隠す）。 */
+    private void layoutKindRows() {
+        int rows = visibleKindRows();
+        kindsScroll = Math.max(0, Math.min(kindsScroll, HitKind.values().length - rows));
+        SyncedSettings settings = ClientSettings.get();
+        for (HitKind kind : HitKind.values()) {
+            int i = kind.ordinal();
+            int row = i - kindsScroll;
+            boolean shown = tab == TAB_KINDS && row >= 0 && row < rows;
+            int y = top + 52 + row * KIND_ROW_HEIGHT;
+            boolean server = isEnabledOnServer(kind, settings);
+            for (GuiButton button : buttonList) {
+                if (button.id == BUTTON_KIND_TOGGLE + i) {
+                    button.visible = shown;
+                    button.y = y;
+                    button.enabled = server;
+                } else if (button.id == BUTTON_KIND_COLOR + i || button.id == BUTTON_KIND_SHAPE + i) {
+                    // サーバーで無効な種類は、色と形を隠して「サーバーで無効」と出す
+                    button.visible = shown && server;
+                    button.y = y;
+                }
+            }
+            colorFields[i].y = y + 1;
+            colorFields[i].setVisible(shown && server);
+            colorFields[i].setEnabled(server);
+        }
+        updateKindLabels();
+    }
+
+    private void updateKindLabels() {
+        for (HitKind kind : HitKind.values()) {
+            int i = kind.ordinal();
+            for (GuiButton button : buttonList) {
+                if (button.id == BUTTON_KIND_TOGGLE + i) {
+                    button.displayString = I18n.format(KindSwitches.isDisabledByPlayer(kind)
+                            ? "weakspot.kinds.off" : "weakspot.kinds.on");
+                } else if (button.id == BUTTON_KIND_SHAPE + i) {
+                    button.displayString = I18n.format("weakspot.kinds.shape."
+                            + MarkerLook.shape(kind).name().toLowerCase(java.util.Locale.ROOT));
+                }
+            }
+        }
+    }
+
+    /** サーバーの設定で、その種類の弱点が出るか（出ない種類は「サーバーで無効」と出して、押せなくする）。 */
+    private static boolean isEnabledOnServer(HitKind kind, SyncedSettings settings) {
+        switch (kind) {
+            case FISHING: return settings.fishingWeakSpotEnabled;
+            case BOW: return settings.bowWeakSpotEnabled;
+            case MELEE: return settings.meleeWeakSpotEnabled;
+            case VEHICLE: return settings.vehicleWeakSpotEnabled;
+            case EAT: return settings.eatWeakSpotEnabled;
+            case SLEEP: return settings.sleepWeakSpotEnabled;
+            case LADDER: return settings.ladderWeakSpotEnabled;
+            case ELYTRA: return settings.elytraWeakSpotEnabled;
+            case ENCHANT: return settings.enchantWeakSpotEnabled;
+            case HARVEST: return settings.harvestWeakSpotEnabled;
+            case THROW: return settings.throwWeakSpotEnabled;
+            case SPRINT: return settings.sprintWeakSpotEnabled;
+            default: return true;
+        }
+    }
+
+    /** ▶ で、初期値 → 12 色 → 初期値と順に切り替える。 */
+    private void nextColor(HitKind kind) {
+        Integer custom = MarkerLook.customColor(kind);
+        int index = -1;
+        for (int j = 0; custom != null && j < MarkerLook.PRESETS.length; j++) {
+            if (MarkerLook.PRESETS[j] == custom) {
+                index = j;
+            }
+        }
+        Integer next;
+        if (custom == null || index < 0) {
+            next = MarkerLook.PRESETS[0];
+        } else if (index + 1 < MarkerLook.PRESETS.length) {
+            next = MarkerLook.PRESETS[index + 1];
+        } else {
+            next = null;
+        }
+        MarkerLook.setColor(kind, next);
+        int i = kind.ordinal();
+        colorFields[i].setText(next == null ? "" : String.format("#%06X", next));
+        colorInvalid[i] = false;
+    }
+
+    /** 形を、円 → 輪 → ひし形 → 四角 → 円と順に切り替える。 */
+    private void nextShape(HitKind kind) {
+        MarkerShape[] shapes = MarkerShape.values();
+        MarkerLook.setShape(kind, shapes[(MarkerLook.shape(kind).ordinal() + 1) % shapes.length]);
+        updateKindLabels();
+    }
+
+    /** 入力欄のカラーコードを読む。空なら初期値に戻す。読めなければ受け付けず、枠を赤くする。 */
+    private void applyTypedColor(HitKind kind) {
+        int i = kind.ordinal();
+        String text = colorFields[i].getText().trim();
+        if (text.isEmpty()) {
+            MarkerLook.setColor(kind, null);
+            colorInvalid[i] = false;
+            return;
+        }
+        int rgb = MarkerColor.parse(text, -1);
+        colorInvalid[i] = rgb < 0;
+        if (rgb >= 0) {
+            MarkerLook.setColor(kind, rgb);
+        }
     }
 
     private void updateLabels() {
@@ -164,10 +323,13 @@ final class StatsScreen extends GuiScreen {
                 mc.displayGuiScreen(new GuiScreenBook(mc.player, GuideBook.create(), false));
                 break;
             case BUTTON_TAB_STATS:
-                showTab(false);
+                showTab(TAB_STATS);
                 break;
             case BUTTON_TAB_SOUND:
-                showTab(true);
+                showTab(TAB_SOUND);
+                break;
+            case BUTTON_TAB_KINDS:
+                showTab(TAB_KINDS);
                 break;
             case BUTTON_MY_SOUND:
                 WeakSpotConfig.myHitSound = WeakSpotConfig.myHitSound.next();
@@ -190,7 +352,80 @@ final class StatsScreen extends GuiScreen {
                 HitSounds.playScale(HitSounds::playOtherFlat, PREVIEW_TICKS_PER_NOTE, 0);
                 break;
             default:
+                kindButton(button.id);
                 break;
+        }
+    }
+
+    /** 「弱点」タブの行のボタン。 */
+    private void kindButton(int id) {
+        HitKind[] kinds = HitKind.values();
+        if (id >= BUTTON_KIND_TOGGLE && id < BUTTON_KIND_TOGGLE + kinds.length) {
+            KindSwitches.toggle(kinds[id - BUTTON_KIND_TOGGLE]);
+            updateKindLabels();
+        } else if (id >= BUTTON_KIND_COLOR && id < BUTTON_KIND_COLOR + kinds.length) {
+            nextColor(kinds[id - BUTTON_KIND_COLOR]);
+        } else if (id >= BUTTON_KIND_SHAPE && id < BUTTON_KIND_SHAPE + kinds.length) {
+            nextShape(kinds[id - BUTTON_KIND_SHAPE]);
+        }
+    }
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) throws IOException {
+        if (tab == TAB_KINDS) {
+            for (HitKind kind : HitKind.values()) {
+                GuiTextField field = colorFields[kind.ordinal()];
+                if (field.getVisible() && field.isFocused()) {
+                    if (keyCode == Keyboard.KEY_ESCAPE) {
+                        field.setFocused(false);
+                        return;
+                    }
+                    if (field.textboxKeyTyped(typedChar, keyCode)) {
+                        applyTypedColor(kind);
+                    }
+                    if (keyCode == Keyboard.KEY_RETURN) {
+                        field.setFocused(false);
+                    }
+                    return;
+                }
+            }
+        }
+        super.keyTyped(typedChar, keyCode);
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        if (tab == TAB_KINDS) {
+            for (GuiTextField field : colorFields) {
+                if (field.getVisible()) {
+                    field.mouseClicked(mouseX, mouseY, mouseButton);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateScreen() {
+        for (GuiTextField field : colorFields) {
+            field.updateCursorCounter();
+        }
+    }
+
+    /** 行が入りきらないタブは、ホイールで送る。 */
+    @Override
+    public void handleMouseInput() throws IOException {
+        super.handleMouseInput();
+        int wheel = Mouse.getEventDWheel();
+        if (wheel == 0) {
+            return;
+        }
+        int step = wheel > 0 ? -1 : 1;
+        if (tab == TAB_KINDS) {
+            kindsScroll += step;
+            layoutKindRows();
+        } else if (tab == TAB_STATS) {
+            statsScroll = Math.max(0, statsScroll + step);
         }
     }
 
@@ -212,8 +447,10 @@ final class StatsScreen extends GuiScreen {
         this.mouseY = mouseY;
         tooltip = null;
         drawCenteredString(fontRenderer, I18n.format("weakspot.stats.title"), width / 2, top, 0xFFFFFF);
-        if (soundTab) {
+        if (tab == TAB_SOUND) {
             drawSoundTab();
+        } else if (tab == TAB_KINDS) {
+            drawKindsTab();
         } else {
             drawStatsTab();
         }
@@ -239,22 +476,91 @@ final class StatsScreen extends GuiScreen {
         drawRight(I18n.format("weakspot.stats.column.total"), totalRight, y, 0xAAAAAA);
         y += ROW_HEIGHT;
 
-        y = row("weakspot.stats.hits", s -> Long.toString(s.hits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.blocks", s -> Long.toString(s.blocksBroken), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.blocksWithHit", s -> Long.toString(s.blocksBrokenWithHit), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.averageHits", StatsScreen::formatAverage, labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.maxHits", s -> Long.toString(s.maxHitsOnBlock), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.timeSaved", s -> formatDuration(s.savedSeconds()), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.growthHits", s -> Long.toString(s.growthHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.machineHits", s -> Long.toString(s.machineHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.animalHits", s -> Long.toString(s.animalHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.fishingHits", s -> Long.toString(s.fishingHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.bowHits", s -> Long.toString(s.bowHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.critHits", s -> Long.toString(s.critHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.vehicleHits", s -> Long.toString(s.vehicleHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.eatHits", s -> Long.toString(s.eatHits), labelX, sessionRight, totalRight, y);
-        y = row("weakspot.stats.sleepHits", s -> Long.toString(s.sleepHits), labelX, sessionRight, totalRight, y);
-        row("weakspot.stats.maxStreak", s -> Long.toString(s.maxStreak), labelX, sessionRight, totalRight, y);
+        List<Object[]> rows = new ArrayList<>();
+        rows.add(new Object[] {"weakspot.stats.hits", (Function<MiningStats, String>) s -> Long.toString(s.hits)});
+        rows.add(new Object[] {"weakspot.stats.blocks", (Function<MiningStats, String>) s -> Long.toString(s.blocksBroken)});
+        rows.add(new Object[] {"weakspot.stats.blocksWithHit",
+                (Function<MiningStats, String>) s -> Long.toString(s.blocksBrokenWithHit)});
+        rows.add(new Object[] {"weakspot.stats.averageHits", (Function<MiningStats, String>) StatsScreen::formatAverage});
+        rows.add(new Object[] {"weakspot.stats.maxHits", (Function<MiningStats, String>) s -> Long.toString(s.maxHitsOnBlock)});
+        rows.add(new Object[] {"weakspot.stats.timeSaved",
+                (Function<MiningStats, String>) s -> formatDuration(s.savedSeconds())});
+        for (HitKind kind : HitKind.values()) {
+            if (kind != HitKind.MINING) {
+                rows.add(new Object[] {statsKey(kind), (Function<MiningStats, String>) s -> Long.toString(s.count(kind))});
+            }
+        }
+        rows.add(new Object[] {"weakspot.stats.maxStreak", (Function<MiningStats, String>) s -> Long.toString(s.maxStreak)});
+        rows.add(new Object[] {"weakspot.stats.totalHits", (Function<MiningStats, String>) s -> Long.toString(s.totalHits())});
+
+        int fit = Math.max(1, (bottom - 4 - y) / ROW_HEIGHT);
+        statsScroll = Math.max(0, Math.min(statsScroll, rows.size() - fit));
+        for (int i = statsScroll; i < Math.min(rows.size(), statsScroll + fit); i++) {
+            @SuppressWarnings("unchecked")
+            Function<MiningStats, String> value = (Function<MiningStats, String>) rows.get(i)[1];
+            y = row((String) rows.get(i)[0], value, labelX, sessionRight, totalRight, y);
+        }
+        drawScrollHint(statsScroll > 0, statsScroll + fit < rows.size());
+    }
+
+    /** 種類ごとのヒット数の翻訳キー（近接はクリティカル数）。 */
+    private static String statsKey(HitKind kind) {
+        return kind == HitKind.MELEE ? "weakspot.stats.critHits" : "weakspot.stats." + kind.key() + "Hits";
+    }
+
+    /** まだ上・下に行があるとき、右端に ▲ ▼ を出す（ホイールで送れる）。 */
+    private void drawScrollHint(boolean up, boolean down) {
+        int x = width / 2 + 158;
+        if (up) {
+            drawString(fontRenderer, "\u25B2", x, top + 52, 0xAAAAAA);
+        }
+        if (down) {
+            drawString(fontRenderer, "\u25BC", x, bottom - 14, 0xAAAAAA);
+        }
+    }
+
+    private void drawKindsTab() {
+        int center = width / 2;
+        drawString(fontRenderer, I18n.format("weakspot.kinds.column.kind"), center - 154, top + 40, 0xAAAAAA);
+        drawString(fontRenderer, I18n.format("weakspot.kinds.column.onOff"), center - 64, top + 40, 0xAAAAAA);
+        drawString(fontRenderer, I18n.format("weakspot.kinds.column.color"), center - 16, top + 40, 0xAAAAAA);
+        drawString(fontRenderer, I18n.format("weakspot.kinds.column.shape"), center + 78, top + 40, 0xAAAAAA);
+        if (!WeakSpotConfig.weakSpotsEnabled) {
+            drawRight(I18n.format("weakspot.kinds.pausedAll"), center + 154, top + 40, 0xFFFF55);
+        }
+        SyncedSettings settings = ClientSettings.get();
+        int rows = visibleKindRows();
+        for (HitKind kind : HitKind.values()) {
+            int row = kind.ordinal() - kindsScroll;
+            if (row < 0 || row >= rows) {
+                continue;
+            }
+            int y = top + 52 + row * KIND_ROW_HEIGHT;
+            boolean server = isEnabledOnServer(kind, settings);
+            drawString(fontRenderer, I18n.format("weakspot.kind." + kind.key()), center - 154, y + 6,
+                    server ? 0xFFFFFF : 0x808080);
+            if (!server) {
+                drawString(fontRenderer, I18n.format("weakspot.kinds.serverDisabled"), center - 16, y + 6, 0x808080);
+                continue;
+            }
+            int rgb = MarkerLook.color(kind, MarkerLook.defaultColor(kind));
+            // 見本（今の色）
+            drawRect(center - 16, y + 5, center - 6, y + 15, 0xFF000000 | rgb);
+            GuiTextField field = colorFields[kind.ordinal()];
+            field.x = center - 2;
+            field.drawTextBox();
+            if (colorInvalid[kind.ordinal()]) {
+                int x0 = field.x - 1;
+                int y0 = field.y - 1;
+                drawHorizontalLine(x0, x0 + field.width + 1, y0, 0xFFFF4D4D);
+                drawHorizontalLine(x0, x0 + field.width + 1, y0 + field.height + 1, 0xFFFF4D4D);
+                drawVerticalLine(x0, y0, y0 + field.height + 1, 0xFFFF4D4D);
+                drawVerticalLine(x0 + field.width + 1, y0, y0 + field.height + 1, 0xFFFF4D4D);
+            } else if (field.getText().isEmpty() && !field.isFocused()) {
+                drawString(fontRenderer, I18n.format("weakspot.kinds.default"), field.x + 4, field.y + 5, 0x808080);
+            }
+        }
+        drawScrollHint(kindsScroll > 0, kindsScroll + rows < HitKind.values().length);
     }
 
     private int row(String labelKey, Function<MiningStats, String> value, int labelX, int sessionRight, int totalRight,

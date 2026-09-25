@@ -1,8 +1,8 @@
 package com.example.weakspot;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.AnimalTimers;
 import com.example.weakspot.config.SyncedSettings;
-import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.AnimalHits;
 import com.example.weakspot.server.ServerSwitches;
 import net.minecraft.entity.Entity;
@@ -88,7 +88,7 @@ public final class AnimalTargets {
     private static void cancelIfWeakSpotApplies(PlayerInteractEvent event, Entity target) {
         EntityPlayer player = event.getEntityPlayer();
         World world = event.getWorld();
-        if (world.isRemote ? !WeakSpotConfig.weakSpotsEnabled : !ServerSwitches.isEnabled(player)) {
+        if (world.isRemote ? !WeakSpotMod.proxy.isKindEnabled(HitKind.ANIMAL) : !ServerSwitches.isEnabled(player, HitKind.ANIMAL)) {
             return;
         }
         SyncedSettings settings = RightClickTargets.settings(world);

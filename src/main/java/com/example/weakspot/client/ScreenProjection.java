@@ -2,6 +2,8 @@ package com.example.weakspot.client;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import com.example.weakspot.common.MarkerColor;
+import com.example.weakspot.common.MarkerShape;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
@@ -126,6 +128,80 @@ final class ScreenProjection {
                     .color(rgb[0], rgb[1], rgb[2], a).endVertex();
         }
         tessellator.draw();
+    }
+
+    /**
+     * 形 shape の中を塗る（1.7.0。自分の弱点の形）。RING は輪の部分だけ塗る。大きさは弱点の半径に合わせる
+     * （ブロックの弱点の WeakSpotRenderer と同じ比率）。
+     */
+    static void fillShape(double x, double y, double radius, MarkerShape shape, float[] rgb, float a) {
+        if (shape == MarkerShape.CIRCLE) {
+            fill(x, y, radius, rgb, a);
+            return;
+        }
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        double outer = radius * shape.radiusScale;
+        if (shape.filled) {
+            buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
+            buffer.pos(x, y, 0).color(rgb[0], rgb[1], rgb[2], a).endVertex();
+            for (int i = 0; i <= shape.sides; i++) {
+                double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
+                buffer.pos(x + outer * Math.cos(angle), y + outer * Math.sin(angle), 0)
+                        .color(rgb[0], rgb[1], rgb[2], a).endVertex();
+            }
+        } else {
+            double inner = outer * MarkerShape.RING_INNER_RATIO;
+            buffer.begin(GL11.GL_TRIANGLE_STRIP, DefaultVertexFormats.POSITION_COLOR);
+            for (int i = 0; i <= shape.sides; i++) {
+                double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
+                buffer.pos(x + outer * Math.cos(angle), y + outer * Math.sin(angle), 0)
+                        .color(rgb[0], rgb[1], rgb[2], a).endVertex();
+                buffer.pos(x + inner * Math.cos(angle), y + inner * Math.sin(angle), 0)
+                        .color(rgb[0], rgb[1], rgb[2], a).endVertex();
+            }
+        }
+        tessellator.draw();
+    }
+
+    /** 形 shape の輪郭（1.7.0）。 */
+    static void outlineShape(double x, double y, double radius, MarkerShape shape, float[] rgb, float a) {
+        if (shape == MarkerShape.CIRCLE) {
+            outline(x, y, radius, rgb, a);
+            return;
+        }
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        double outer = radius * shape.radiusScale;
+        buffer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
+        for (int i = 0; i < shape.sides; i++) {
+            double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
+            buffer.pos(x + outer * Math.cos(angle), y + outer * Math.sin(angle), 0)
+                    .color(rgb[0], rgb[1], rgb[2], a).endVertex();
+        }
+        tessellator.draw();
+    }
+
+    /**
+     * 画面上のマーカーを 1 つ描く（1.7.0。HUD の弱点と、寝ている間・エンチャントの画面のマーカーで共通）。
+     * 形と色は種類ごとの設定（MarkerLook）。alphaScale は全体の濃さ。
+     */
+    static void marker(double x, double y, double radius, MarkerShape shape, int rgb, float diskAlpha,
+                       float alphaScale) {
+        float[] disk = MarkerColor.towardWhite(rgb, 0);
+        float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
+        float[] center = MarkerColor.towardWhite(rgb, 0.8F);
+        fillShape(x, y, radius, shape, disk, diskAlpha * alphaScale);
+        outlineShape(x, y, radius, shape, ring, 0.9F * alphaScale);
+        if (shape.hasCenterDot()) {
+            fill(x, y, radius * 0.3, center, 0.9F * alphaScale);
+        }
+    }
+
+    /** 残像（薄い形と輪郭）。 */
+    static void afterimage(double x, double y, double radius, MarkerShape shape, int rgb, float a) {
+        fillShape(x, y, radius, shape, MarkerColor.towardWhite(rgb, 0), 0.35F * a);
+        outlineShape(x, y, radius, shape, MarkerColor.towardWhite(rgb, 0.5F), 0.5F * a);
     }
 
     static void rect(double x0, double y0, double x1, double y1, float[] rgba) {

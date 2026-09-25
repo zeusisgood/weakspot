@@ -88,16 +88,46 @@ public final class WeakSpotConfig {
     public static int maxRepairPerBreak = 1;
 
     @Config.Comment({"[サーバー] 節目にする採掘ヒットの累計。達した瞬間に1回だけ、祝いの演出と報酬が出る",
-            "milestoneXp と milestoneRepair は、この順番に対応する"})
-    public static int[] milestones = {100, 777, 1000, 10000};
+            "milestoneXp と milestoneRepair は、この順番に対応する。種類ごとの節目（kindMilestonesEnabled）も同じ数字を使う"})
+    public static int[] milestones = {50, 100, 250, 500, 777, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000,
+            7777, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 40000, 50000, 60000, 70000, 77777, 80000, 90000,
+            100000};
 
     @Config.Comment({"[サーバー] 節目ごとにもらえる経験値（milestones の順に対応）",
             "数が足りない分は 0 として扱う"})
-    public static int[] milestoneXp = {10, 77, 30, 100};
+    public static int[] milestoneXp = {5, 10, 15, 20, 77, 30, 40, 40, 40, 40, 40, 50, 50, 50, 777, 50, 50, 100, 100,
+            100, 150, 150, 150, 200, 200, 200, 7777, 200, 200, 1000};
 
-    @Config.Comment({"[サーバー] 節目ごとに回復する、手に持っているツールの耐久（milestones の順に対応）",
+    @Config.Comment({"[サーバー] 節目ごとに回復する、手に持っているツールの耐久（milestones の順に対応。採掘の節目だけ）",
             "数が足りない分は 0 として扱う"})
-    public static int[] milestoneRepair = {10, 77, 30, 100};
+    public static int[] milestoneRepair = {5, 10, 15, 20, 77, 30, 40, 40, 40, 40, 40, 50, 50, 50, 777, 50, 50, 100,
+            100, 100, 150, 150, 150, 200, 200, 200, 7777, 200, 200, 1000};
+
+    @Config.Comment({"[サーバー] milestones の一番大きい数より先は、この数ごとに節目にする（1.7.0）。0 で繰り返さない",
+            "ごほうびは milestoneXp / milestoneRepair の最後の値"})
+    @Config.RangeInt(min = 0, max = 100000000)
+    public static int milestoneRepeatInterval = 50000;
+
+    @Config.Comment({"[サーバー] 採掘以外の種類ごとのヒット数でも、milestones の数字で節目にするか（1.7.0）",
+            "ごほうびは経験値（milestoneXp）だけ"})
+    public static boolean kindMilestonesEnabled = true;
+
+    @Config.Comment("[サーバー] すべての種類のヒット数の合計でも節目にするか（1.7.0）。数字は totalMilestones")
+    public static boolean totalMilestonesEnabled = true;
+
+    @Config.Comment({"[サーバー] 合計の節目にする、すべての種類のヒット数の合計（1.7.0）",
+            "totalMilestoneXp は、この順番に対応する"})
+    public static int[] totalMilestones = {1000, 5000, 7777, 10000, 25000, 50000, 77777, 100000, 250000, 500000,
+            777777, 1000000};
+
+    @Config.Comment({"[サーバー] 合計の節目ごとにもらえる経験値（totalMilestones の順に対応。1.7.0）",
+            "数が足りない分は 0 として扱う"})
+    public static int[] totalMilestoneXp = {100, 200, 777, 300, 500, 700, 7777, 1000, 1500, 2000, 7777, 5000};
+
+    @Config.Comment({"[サーバー] totalMilestones の一番大きい数より先は、この数ごとに合計の節目にする（1.7.0）。0 で繰り返さない",
+            "ごほうびは totalMilestoneXp の最後の値"})
+    @Config.RangeInt(min = 0, max = 100000000)
+    public static int totalMilestoneRepeatInterval = 500000;
 
     @Config.Comment({"[サーバー] 作物・苗木の弱点に1回当てるごとに、そのブロックに余分に呼ぶ randomTick の回数",
             "骨粉と違い、明るさや農地の水分などの成長条件は守ったまま速くなる"})
@@ -296,6 +326,94 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int vehicleMinHitIntervalTicks = 6;
 
+    @Config.Comment({"[サーバー] はしごの弱点のオン・オフ（1.7.0）",
+            "はしご・ツタを登り降りしている間、照準の真上か真下に弱点が出る。当てると、登り降りが少しの間速くなる"})
+    public static boolean ladderWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] はしごの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+    @Config.RangeDouble(min = 1.0, max = 100.0)
+    public static double ladderBoostMultiplier = 1.5;
+
+    @Config.Comment({"[サーバー] はしごの速さの倍率の上限。0 なら上限なし（初期値）", "速すぎて困るときに、3.0 などを書く"})
+    @Config.RangeDouble(min = 0.0, max = 100.0)
+    public static double ladderBoostMaxMultiplier = 0.0;
+
+    @Config.Comment("[サーバー] はしごの加速が続く時間（tick）。ヒットのたびに、この長さに戻す")
+    @Config.RangeInt(min = 1, max = 1200)
+    public static int ladderBoostDurationTicks = 40;
+
+    @Config.Comment("[サーバー] はしごのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int ladderMinHitIntervalTicks = 6;
+
+    @Config.Comment({"[サーバー] エリトラの弱点のオン・オフ（1.7.0）",
+            "エリトラで飛んでいる間、照準の近くに弱点が出る。当てると、見ている向きへ一気に飛び出す"})
+    public static boolean elytraWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] エリトラの弱点に1回当てるごとに足す速さ（ブロック/tick）。コンボの掛け数を上乗せする",
+            "速さの上限はない"})
+    @Config.RangeDouble(min = 0.1, max = 10.0)
+    public static double elytraBoostPower = 1.5;
+
+    @Config.Comment("[サーバー] エリトラのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int elytraMinHitIntervalTicks = 6;
+
+    @Config.Comment({"[サーバー] エンチャントの弱点のオン・オフ（1.7.0）",
+            "エンチャント台に物を置くと、画面にマーカーが出る。クリックで当てると、3 つの候補が引き直される（何も減らない）"})
+    public static boolean enchantWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] エンチャントのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int enchantMinHitIntervalTicks = 6;
+
+    @Config.Comment({"[サーバー] 収穫の弱点のオン・オフ（1.7.0）",
+            "実った作物を素手で右クリックしたままにすると弱点が出る。当てると、収穫して植え直す。",
+            "Quark など、右クリックで収穫する Mod と重なるときはオフにする"})
+    public static boolean harvestWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] 収穫のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int harvestMinHitIntervalTicks = 4;
+
+    @Config.Comment({"[サーバー] 収穫で、コンボの掛け数（25 で ×1.25 … 1000 で ×4）だけ収穫物を増やすか（種は増やさない）",
+            "サーバーだけが使う（クライアントには送らない）"})
+    public static boolean harvestComboBonus = true;
+
+    @Config.Comment({"[サーバー] 投げる物の弱点のオン・オフ（1.7.0）",
+            "エンダーパール・雪玉・卵・ポーション・エンチャントの瓶を持っている間、照準の近くに弱点が出る。",
+            "当てるたびに溜まり、次に投げた物が速く遠くへ飛ぶ（持ち替えるまで残り、投げたら使い切る）"})
+    public static boolean throwWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] 投げる物の弱点に1回当てるごとに溜まる量（投げる速さの倍率に足す）。コンボの掛け数を上乗せする",
+            "溜めの上限はない"})
+    @Config.RangeDouble(min = 0.1, max = 10.0)
+    public static double throwChargePerHit = 0.5;
+
+    @Config.Comment("[サーバー] 投げる物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int throwMinHitIntervalTicks = 4;
+
+    @Config.Comment({"[サーバー] 走りの弱点のオン・オフ（1.7.0）",
+            "地面を走っている間、照準の真上か真下に弱点が出る。当てると、少しの間速く走れる"})
+    public static boolean sprintWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] 走りの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+    @Config.RangeDouble(min = 1.0, max = 100.0)
+    public static double sprintBoostMultiplier = 1.5;
+
+    @Config.Comment({"[サーバー] 走りの速さの倍率の上限。0 なら上限なし（初期値）", "速すぎて困るときに、3.0 などを書く"})
+    @Config.RangeDouble(min = 0.0, max = 100.0)
+    public static double sprintBoostMaxMultiplier = 0.0;
+
+    @Config.Comment("[サーバー] 走りの加速が続く時間（tick）。ヒットのたびに、この長さに戻す")
+    @Config.RangeInt(min = 1, max = 1200)
+    public static int sprintBoostDurationTicks = 40;
+
+    @Config.Comment("[サーバー] 走りのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int sprintMinHitIntervalTicks = 6;
+
     @Config.Comment({"[サーバー] 近接の弱点のオン・オフ",
             "敵に出た弱点を、攻撃のゲージが溜まった状態で殴ると、クリティカルヒット（ジャンプ攻撃と同じ 1.5 倍）になる"})
     public static boolean meleeWeakSpotEnabled = true;
@@ -418,6 +536,28 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 乗り物を加速している間、照準の上に残り時間のゲージ（水色）を表示するか（1.6.0）"})
     public static boolean vehicleBoostBarEnabled = true;
 
+    @Config.Comment({"[クライアント] はしごを加速している間、照準の上に残り時間のゲージ（茶色）を表示するか（1.7.0）"})
+    public static boolean ladderBoostBarEnabled = true;
+
+    @Config.Comment({"[クライアント] 投げる物の溜めのゲージ（青緑）を、照準の下に表示するか（1.7.0）"})
+    public static boolean throwChargeBarEnabled = true;
+
+    @Config.Comment({"[クライアント] 走りを加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0）"})
+    public static boolean sprintBoostBarEnabled = true;
+
+    @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（1.7.0。統計画面の「弱点」タブで変えられる）",
+            "1 行に 1 つ、mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra,",
+            "enchant, harvest, throw, sprint のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
+    public static String[] disabledKinds = {};
+
+    @Config.Comment({"[クライアント] 自分の弱点の色（1.7.0）。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）",
+            "書いていない種類は初期値の色。統計画面の「弱点」タブで変えられる"})
+    public static String[] myMarkerColors = {};
+
+    @Config.Comment({"[クライアント] 自分の弱点の形（1.7.0）。1 行に「種類=形」（例: bow=diamond）",
+            "形は circle, ring, diamond, square。書いていない種類は円。統計画面の「弱点」タブで変えられる"})
+    public static String[] myMarkerShapes = {};
+
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
     public static int configVersion = 0;
 
@@ -436,9 +576,11 @@ public final class WeakSpotConfig {
      * 2: 1.2.4 で mushroomGrowChance の初期値を 0.2 にしたので、古い初期値 0.1 のままなら 0.2 にする（ほかの値は残す）。
      * 3: 1.3.7 で IC2 のゴムの木を成長の対象にしたので、growthExtraBlocks に ic2:rubber_wood を足す（書き戻したら尊重する）。
      * 4: 1.4.2 で machineBoostDurationTicks の初期値を 6 にしたので、古い初期値 4 のままなら 6 にする（ほかの値は残す）。
+     * 5: 1.7.0 で節目の数字を細かくしたので、milestones / milestoneXp / milestoneRepair が古い初期値のままなら、
+     *    新しい初期値にする（どれかを書き換えてあれば、3 つとも残す）。
      */
     public static void migrate() {
-        if (configVersion >= 4) {
+        if (configVersion >= 5) {
             return;
         }
         if (configVersion < 1) {
@@ -468,9 +610,24 @@ public final class WeakSpotConfig {
             LogManager.getLogger(WeakSpotMod.MODID).info(
                     "weakspot.cfg: changed machineBoostDurationTicks from the old default 4 to 6 (default since 1.4.2)");
         }
-        configVersion = 4;
+        if (configVersion < 5 && Arrays.equals(milestones, OLD_MILESTONES) && Arrays.equals(milestoneXp, OLD_MILESTONE_XP)
+                && Arrays.equals(milestoneRepair, OLD_MILESTONE_XP)) {
+            milestones = NEW_MILESTONES.clone();
+            milestoneXp = NEW_MILESTONE_XP.clone();
+            milestoneRepair = NEW_MILESTONE_XP.clone();
+            LogManager.getLogger(WeakSpotMod.MODID).info(
+                    "weakspot.cfg: replaced the old default milestones (100, 777, 1000, 10000) with the finer ones (since 1.7.0)");
+        }
+        configVersion = 5;
         save();
     }
+
+    /** 1.6.x までの節目の初期値（configVersion 5 の移行で使う）。milestoneRepair も milestoneXp と同じ値だった。 */
+    private static final int[] OLD_MILESTONES = {100, 777, 1000, 10000};
+    private static final int[] OLD_MILESTONE_XP = {10, 77, 30, 100};
+    /** 1.7.0 の節目の初期値（フィールドの初期値と同じ。移行で使う）。 */
+    private static final int[] NEW_MILESTONES = milestones.clone();
+    private static final int[] NEW_MILESTONE_XP = milestoneXp.clone();
 
     private static boolean reloadWarned;
 
@@ -530,6 +687,11 @@ public final class WeakSpotConfig {
                     "weakspot.cfg: milestones has {} entries but milestoneXp has {} and milestoneRepair has {}; "
                             + "missing amounts are treated as 0",
                     milestones.length, milestoneXp.length, milestoneRepair.length);
+        }
+        if (totalMilestoneXp.length != totalMilestones.length) {
+            LogManager.getLogger(WeakSpotMod.MODID).warn(
+                    "weakspot.cfg: totalMilestones has {} entries but totalMilestoneXp has {}; missing amounts are treated as 0",
+                    totalMilestones.length, totalMilestoneXp.length);
         }
     }
 

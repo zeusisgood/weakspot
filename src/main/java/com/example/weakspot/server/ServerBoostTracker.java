@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BoostMath;
 import com.example.weakspot.config.WeakSpotConfig;
@@ -107,7 +108,7 @@ public final class ServerBoostTracker {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
     public static void onHit(EntityPlayerMP player, BlockPos pos, int streak) {
-        if (player.capabilities.isCreativeMode || player.isSpectator() || !ServerSwitches.isEnabled(player)) {
+        if (player.capabilities.isCreativeMode || player.isSpectator() || !ServerSwitches.isEnabled(player, HitKind.MINING)) {
             return;
         }
         Mining mining = MINING.get(player.getUniqueID());
@@ -150,7 +151,7 @@ public final class ServerBoostTracker {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         EntityPlayer player = event.getEntityPlayer();
-        if (player.world.isRemote || !ServerSwitches.isEnabled(player)) {
+        if (player.world.isRemote || !ServerSwitches.isEnabled(player, HitKind.MINING)) {
             return;
         }
         Mining mining = MINING.get(player.getUniqueID());

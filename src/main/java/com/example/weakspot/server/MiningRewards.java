@@ -1,7 +1,9 @@
 package com.example.weakspot.server;
 
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.Milestones;
+import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.common.RepairSettlement;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.MilestoneMessage;
@@ -14,7 +16,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
-/** 採掘ヒットの報酬（耐久回復と節目）。成長・機械のヒットは対象外。 */
+/** 採掘ヒットの報酬（耐久回復と節目）と、1.7.0 からの種類ごと・合計の節目。耐久回復は採掘だけ。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MiningRewards {
 
@@ -26,17 +28,53 @@ public final class MiningRewards {
 
     /**
      * サーバーが採掘ヒットを受け付けて、統計に記録したあとに呼ぶ。節目だけを判定する（耐久回復は壊したときの onBlockBroken）。
-     * 節目は累計の採掘ヒット数で数える（1.6.1。累計をリセットすると、もう一度受け取れる）。
+     * 節目は累計の採掘ヒット数で数える（1.6.1。累計をリセットすると、もう一度受け取れる）。1.7.0 から、先は繰り返し、
+     * 合計の節目も判定する。
      */
     static void onMiningHit(EntityPlayerMP player) {
-        long hits = ServerStats.total(player).hits;
-        for (int index : Milestones.reached(WeakSpotConfig.milestones, hits)) {
-            int xp = Milestones.amountAt(WeakSpotConfig.milestoneXp, index);
-            if (xp > 0) {
-                player.addExperience(xp);
-            }
+        MiningStats total = ServerStats.total(player);
+        for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.milestones,
+                WeakSpotConfig.milestoneRepeatInterval, total.hits)) {
+            int index = (int) reached[1];
+            giveXp(player, Milestones.amountAt(WeakSpotConfig.milestoneXp, index));
             repairHeldTool(player, Milestones.amountAt(WeakSpotConfig.milestoneRepair, index));
-            WeakSpotMod.network.sendTo(new MilestoneMessage(WeakSpotConfig.milestones[index]), player);
+            WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.MINING, -1, reached[0]), player);
+        }
+        checkTotal(player, total);
+    }
+
+    /**
+     * 採掘以外の種類のヒットを数えたあとに呼ぶ（1.7.0）。種類ごとの節目（採掘と同じ数字、ごほうびは経験値だけ）と、
+     * 合計の節目を判定する。
+     */
+    static void onKindHit(EntityPlayerMP player, HitKind kind) {
+        MiningStats total = ServerStats.total(player);
+        if (WeakSpotConfig.kindMilestonesEnabled) {
+            for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.milestones,
+                    WeakSpotConfig.milestoneRepeatInterval, total.count(kind))) {
+                giveXp(player, Milestones.amountAt(WeakSpotConfig.milestoneXp, (int) reached[1]));
+                WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.KIND, kind.ordinal(), reached[0]),
+                        player);
+            }
+        }
+        checkTotal(player, total);
+    }
+
+    /** すべての種類のヒット数の合計の節目（1.7.0）。ごほうびは経験値だけ。 */
+    private static void checkTotal(EntityPlayerMP player, MiningStats total) {
+        if (!WeakSpotConfig.totalMilestonesEnabled) {
+            return;
+        }
+        for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.totalMilestones,
+                WeakSpotConfig.totalMilestoneRepeatInterval, total.totalHits())) {
+            giveXp(player, Milestones.amountAt(WeakSpotConfig.totalMilestoneXp, (int) reached[1]));
+            WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.TOTAL, -1, reached[0]), player);
+        }
+    }
+
+    private static void giveXp(EntityPlayerMP player, int xp) {
+        if (xp > 0) {
+            player.addExperience(xp);
         }
     }
 

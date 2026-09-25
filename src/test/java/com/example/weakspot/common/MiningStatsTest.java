@@ -99,4 +99,23 @@ public class MiningStatsTest {
         stats.reset();
         assertEquals(0, stats.fishingHits);
     }
+
+    @Test
+    public void countsEachKindAndTheTotal() {
+        MiningStats stats = new MiningStats();
+        stats.recordHit(0);
+        for (HitKind kind : HitKind.values()) {
+            if (kind != HitKind.MINING) {
+                stats.recordKindHit(kind);
+            }
+        }
+        stats.recordKindHit(HitKind.HARVEST);
+        for (HitKind kind : HitKind.values()) {
+            assertEquals(kind == HitKind.HARVEST ? 2 : 1, stats.count(kind));
+        }
+        assertEquals(1, stats.critHits);
+        assertEquals(HitKind.values().length + 1, stats.totalHits());
+        stats.reset();
+        assertEquals(0, stats.totalHits());
+    }
 }

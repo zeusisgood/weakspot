@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.RepairSettlement;
@@ -62,7 +63,7 @@ public final class MeleeHits {
 
     /** クライアントからのヒット通知（サーバースレッド）。照準の位置は確かめない（クライアントを信用する）。 */
     public static void onHit(EntityPlayerMP player, int entityId, int streak) {
-        if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()
+        if (!ServerSwitches.isEnabled(player, HitKind.MELEE) || player.capabilities.isCreativeMode || player.isSpectator()
                 || !WeakSpotConfig.meleeWeakSpotEnabled) {
             return;
         }
@@ -94,7 +95,7 @@ public final class MeleeHits {
         Pending pending = PENDING.remove(id);
         if (pending == null || pending.entityId != event.getTarget().getEntityId()
                 || player.world.getTotalWorldTime() - pending.tick > PENDING_TICKS
-                || !ServerSwitches.isEnabled(player) || !MeleeTargets.isTarget(event.getTarget())
+                || !ServerSwitches.isEnabled(player, HitKind.MELEE) || !MeleeTargets.isTarget(event.getTarget())
                 || !MeleeTargets.isCharged(player, 0.5F + JITTER_TICKS)) {
             return;
         }
@@ -113,8 +114,8 @@ public final class MeleeHits {
         }
         event.setResult(Event.Result.ALLOW);
         event.setDamageModifier(CRIT_MULTIPLIER);
-        ServerStats.record(player, stats -> stats.recordCritHit());
         if (player instanceof EntityPlayerMP) {
+            ServerStats.recordKindHit((EntityPlayerMP) player, HitKind.MELEE);
             repairWeapon((EntityPlayerMP) player);
         }
     }

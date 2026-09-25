@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.MarkerMotion;
@@ -45,7 +46,7 @@ final class SleepSpot {
 
     private static boolean eligible(Minecraft mc, GuiScreen gui) {
         if (!(gui instanceof GuiSleepMP) || mc.player == null || !mc.player.isPlayerSleeping()
-                || !WeakSpotConfig.weakSpotsEnabled || mc.player.isSpectator()) {
+                || !KindSwitches.isEnabled(HitKind.SLEEP) || mc.player.isSpectator()) {
             return false;
         }
         SyncedSettings settings = ClientSettings.get();
@@ -104,18 +105,22 @@ final class SleepSpot {
         ensure(gui);
         long nowMs = Minecraft.getSystemTime();
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        float[][] look = MarkerLook.palette(HitKind.SLEEP, DISK, RING, CENTER);
+        MarkerShape shape = MarkerLook.shape(HitKind.SLEEP);
         HudSpot.beginOverlay();
         if (trail) {
             for (MarkerMotion.Afterimage image : MOTION.afterimages(nowMs)) {
                 float a = (float) image.alpha(nowMs);
-                ScreenProjection.fill(image.u, image.v, RADIUS, DISK, 0.35F * a);
-                ScreenProjection.outline(image.u, image.v, RADIUS, RING, 0.5F * a);
+                ScreenProjection.fillShape(image.u, image.v, RADIUS, shape, look[0], 0.35F * a);
+                ScreenProjection.outlineShape(image.u, image.v, RADIUS, shape, look[1], 0.5F * a);
             }
         }
         double[] p = trail ? MOTION.position(nowMs) : new double[] {x, y};
-        ScreenProjection.fill(p[0], p[1], RADIUS, DISK, 0.55F);
-        ScreenProjection.outline(p[0], p[1], RADIUS, RING, 0.95F);
-        ScreenProjection.fill(p[0], p[1], RADIUS * 0.3, CENTER, 0.95F);
+        ScreenProjection.fillShape(p[0], p[1], RADIUS, shape, look[0], 0.55F);
+        ScreenProjection.outlineShape(p[0], p[1], RADIUS, shape, look[1], 0.95F);
+        if (shape.hasCenterDot()) {
+            ScreenProjection.fill(p[0], p[1], RADIUS * 0.3, look[2], 0.95F);
+        }
         HudSpot.endOverlay();
     }
 

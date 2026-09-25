@@ -121,6 +121,8 @@ public final class ClientWeakSpotHandler {
         switch (spot.kind) {
             case GROWTH:
                 return !RightClickTargets.isGrowable(world, spot.pos, state, ClientSettings.get());
+            case HARVEST:
+                return !RightClickTargets.isHarvestable(state, ClientSettings.get());
             case MACHINE:
                 return !RightClickTargets.isMachine(world, spot.pos, state, ClientSettings.get());
             default:
@@ -218,6 +220,10 @@ public final class ClientWeakSpotHandler {
         BowSpot.clear();
         VehicleSpot.clear();
         EatSpot.clear();
+        LadderSpot.clear();
+        SprintSpot.clear();
+        ElytraSpot.clear();
+        ThrowSpot.clear();
     }
 
     private static void updateAim(Minecraft mc) {
@@ -226,7 +232,8 @@ public final class ClientWeakSpotHandler {
             return;
         }
         if (!mc.playerController.getIsHittingBlock() && !player.isHandActive()
-                && !mc.gameSettings.keyBindUseItem.isKeyDown() && ClientSettings.get().meleeWeakSpotEnabled) {
+                && !mc.gameSettings.keyBindUseItem.isKeyDown() && ClientSettings.get().meleeWeakSpotEnabled
+                && KindSwitches.isEnabled(HitKind.MELEE)) {
             // 近接の弱点は、攻撃が届く距離より遠く（16 ブロック）の敵にも出す（当てられるのは届く距離だけ）
             RayTraceResult sight = MeleeSight.find(mc, framePartialTicks);
             if (sight != null && MeleeTargets.isTarget(sight.entityHit)) {
@@ -239,7 +246,7 @@ public final class ClientWeakSpotHandler {
             return;
         }
         if (target.typeOfHit == RayTraceResult.Type.ENTITY) {
-            if (!mc.playerController.getIsHittingBlock() && isHoldingUse(mc)) {
+            if (!mc.playerController.getIsHittingBlock() && isHoldingUse(mc) && KindSwitches.isEnabled(HitKind.ANIMAL)) {
                 aimAnimal(mc, target);
             }
             return;
@@ -248,7 +255,9 @@ public final class ClientWeakSpotHandler {
             return;
         }
         if (mc.playerController.getIsHittingBlock()) {
-            aimMining(mc, target);
+            if (KindSwitches.isEnabled(HitKind.MINING)) {
+                aimMining(mc, target);
+            }
         } else if (isHoldingUse(mc)) {
             aimRightClick(mc, target);
         }
@@ -287,13 +296,14 @@ public final class ClientWeakSpotHandler {
         BlockPos pos = target.getBlockPos();
         SyncedSettings settings = ClientSettings.get();
         HitKind kind = RightClickTargets.classify(mc.world, mc.player, pos, settings);
-        if (kind == null) {
+        if (kind == null || !KindSwitches.isEnabled(kind)) {
             return;
         }
         IBlockState state = mc.world.getBlockState(pos);
         AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
         // 1マス全体のブロック（IC2 のゴムの木の幹など）は、上面が隠れていることが多いので、照準の面に出す（1.4.0）
-        EnumFacing face = kind == HitKind.GROWTH && !isFullCube(box, pos) ? growthFace(mc, pos, box, target.sideHit)
+        boolean plant = kind == HitKind.GROWTH || kind == HitKind.HARVEST;
+        EnumFacing face = plant && !isFullCube(box, pos) ? growthFace(mc, pos, box, target.sideHit)
                 : target.sideHit;
         if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
             spot = WeakSpot.spawn(kind, mc.world, pos, state, face, target.hitVec, settings, RANDOM);
@@ -385,7 +395,7 @@ public final class ClientWeakSpotHandler {
         }
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.currentScreen != null || mc.player == null || spot == null || spot.kind != HitKind.MELEE
-                || !WeakSpotConfig.weakSpotsEnabled || clientTick - spot.lastActiveTick > 1
+                || !KindSwitches.isEnabled(HitKind.MELEE) || clientTick - spot.lastActiveTick > 1
                 || mc.player.isHandActive()) {
             return;
         }
@@ -409,7 +419,8 @@ public final class ClientWeakSpotHandler {
      */
     private static EnumFacing growthFace(Minecraft mc, BlockPos pos, AxisAlignedBB box, EnumFacing aimed) {
         Vec3d eye = mc.player.getPositionEyes(1.0F);
-        EnumFacing keep = spot != null && spot.kind == HitKind.GROWTH && spot.pos.equals(pos) && spot.box.equals(box)
+        EnumFacing keep = spot != null && (spot.kind == HitKind.GROWTH || spot.kind == HitKind.HARVEST)
+                && spot.entity == null && spot.pos.equals(pos) && spot.box.equals(box)
                 && WeakSpot.isFacing(box, spot.face, eye) ? spot.face : null;
         return WeakSpot.growthFace(box, eye, aimed, keep);
     }
@@ -428,6 +439,8 @@ public final class ClientWeakSpotHandler {
                 return settings.machineMinHitIntervalTicks;
             case ANIMAL:
                 return settings.animalMinHitIntervalTicks;
+            case HARVEST:
+                return settings.harvestMinHitIntervalTicks;
             default:
                 return settings.growthMinHitIntervalTicks;
         }
@@ -507,7 +520,7 @@ public final class ClientWeakSpotHandler {
     /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-        if (!event.getEntityPlayer().world.isRemote || suppressBoost || !WeakSpotConfig.weakSpotsEnabled) {
+        if (!event.getEntityPlayer().world.isRemote || suppressBoost || !KindSwitches.isEnabled(HitKind.MINING)) {
             return;
         }
         if (event.getEntityPlayer() != Minecraft.getMinecraft().player || !event.getPos().equals(boostPos)) {
@@ -533,6 +546,10 @@ public final class ClientWeakSpotHandler {
         EatSpot.clear();
         FishingSpot.clear();
         BowSpot.clear();
+        LadderSpot.clear();
+        SprintSpot.clear();
+        ElytraSpot.clear();
+        ThrowSpot.clear();
         lastPlayer = null;
         resetStreak();
         WeakSpotRenderer.clearFlashes();

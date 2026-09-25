@@ -1,6 +1,6 @@
 package com.example.weakspot.common;
 
-/** ヒットの種類。統計は種類ごとに数え、節目と耐久回復は採掘だけが対象。 */
+/** ヒットの種類。統計は種類ごとに数える。耐久回復は採掘だけ、節目は採掘・種類ごと・合計（1.7.0）。 */
 public enum HitKind {
     /** 左クリックの長押しで壊すブロック。 */
     MINING,
@@ -21,7 +21,36 @@ public enum HitKind {
     /** 食べる・飲む間、照準の近くに出る弱点に照準を合わせる（1.6.0）。 */
     EAT,
     /** 夜にベッドで寝ている間、寝ている画面に出るマーカーをクリックする（1.6.0）。 */
-    SLEEP;
+    SLEEP,
+    /** はしご・ツタを登り降りしている間、照準の真上か真下に出る弱点に照準を合わせる（1.7.0）。 */
+    LADDER,
+    /** エリトラで飛んでいる間、照準の近くに出る弱点に照準を合わせる（1.7.0）。 */
+    ELYTRA,
+    /** エンチャント台の画面に出るマーカーをクリックする（1.7.0）。 */
+    ENCHANT,
+    /** 素手で右クリックを押しっぱなしにした、実った作物（1.7.0）。 */
+    HARVEST,
+    /** 投げる物を持っている間、照準の近くに出る弱点に照準を合わせる（1.7.0）。 */
+    THROW,
+    /** 走っている間、照準の真上か真下に出る弱点に照準を合わせる（1.7.0）。 */
+    SPRINT;
+
+    /** 設定・翻訳キーに使う名前（小文字。"harvest" など）。 */
+    public String key() {
+        return name().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    /** key() から種類を探す。知らない名前なら null。 */
+    public static HitKind byKey(String key) {
+        if (key != null) {
+            for (HitKind kind : values()) {
+                if (kind.key().equals(key.trim().toLowerCase(java.util.Locale.ROOT))) {
+                    return kind;
+                }
+            }
+        }
+        return null;
+    }
 
     /** 通信用。範囲外なら null。 */
     public static HitKind byId(int id) {

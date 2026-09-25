@@ -2,6 +2,7 @@ package com.example.weakspot.config;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.GrowthFilters;
+import com.example.weakspot.server.EnchantHits;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -79,6 +80,32 @@ public final class SyncedSettings {
     public double vehicleBoostMaxMultiplier;
     public int vehicleBoostDurationTicks;
     public int vehicleMinHitIntervalTicks;
+    /** はしごの弱点（1.7.0。速さはクライアントで足すので、倍率・上限・時間も送る）。 */
+    public boolean ladderWeakSpotEnabled;
+    public double ladderBoostMultiplier;
+    public double ladderBoostMaxMultiplier;
+    public int ladderBoostDurationTicks;
+    public int ladderMinHitIntervalTicks;
+    /** エリトラの弱点（1.7.0。速さはクライアントで足す）。 */
+    public boolean elytraWeakSpotEnabled;
+    public double elytraBoostPower;
+    public int elytraMinHitIntervalTicks;
+    /** エンチャントの弱点（1.7.0）。サーバーが種を読み書きできないときは false で送る。 */
+    public boolean enchantWeakSpotEnabled;
+    public int enchantMinHitIntervalTicks;
+    /** 収穫の弱点（1.7.0）。おまけの有無はサーバーだけが使うので送らない。 */
+    public boolean harvestWeakSpotEnabled;
+    public int harvestMinHitIntervalTicks;
+    /** 投げる物の弱点（1.7.0。溜めのゲージをクライアントも進める）。 */
+    public boolean throwWeakSpotEnabled;
+    public double throwChargePerHit;
+    public int throwMinHitIntervalTicks;
+    /** 走りの弱点（1.7.0。残り時間のゲージのため、倍率・時間も送る）。 */
+    public boolean sprintWeakSpotEnabled;
+    public double sprintBoostMultiplier;
+    public double sprintBoostMaxMultiplier;
+    public int sprintBoostDurationTicks;
+    public int sprintMinHitIntervalTicks;
     /** 値を送ったサーバーの Mod の版（1.6.0。ServerFeatures）。自分の設定の値なら、自分の版。 */
     public String serverVersion;
     public double markerShareRange;
@@ -153,6 +180,26 @@ public final class SyncedSettings {
         s.vehicleMinHitIntervalTicks = WeakSpotConfig.vehicleMinHitIntervalTicks;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
+        s.ladderWeakSpotEnabled = WeakSpotConfig.ladderWeakSpotEnabled;
+        s.ladderBoostMultiplier = WeakSpotConfig.ladderBoostMultiplier;
+        s.ladderBoostMaxMultiplier = WeakSpotConfig.ladderBoostMaxMultiplier;
+        s.ladderBoostDurationTicks = WeakSpotConfig.ladderBoostDurationTicks;
+        s.ladderMinHitIntervalTicks = WeakSpotConfig.ladderMinHitIntervalTicks;
+        s.elytraWeakSpotEnabled = WeakSpotConfig.elytraWeakSpotEnabled;
+        s.elytraBoostPower = WeakSpotConfig.elytraBoostPower;
+        s.elytraMinHitIntervalTicks = WeakSpotConfig.elytraMinHitIntervalTicks;
+        s.enchantWeakSpotEnabled = WeakSpotConfig.enchantWeakSpotEnabled && EnchantHits.isAvailable();
+        s.enchantMinHitIntervalTicks = WeakSpotConfig.enchantMinHitIntervalTicks;
+        s.harvestWeakSpotEnabled = WeakSpotConfig.harvestWeakSpotEnabled;
+        s.harvestMinHitIntervalTicks = WeakSpotConfig.harvestMinHitIntervalTicks;
+        s.throwWeakSpotEnabled = WeakSpotConfig.throwWeakSpotEnabled;
+        s.throwChargePerHit = WeakSpotConfig.throwChargePerHit;
+        s.throwMinHitIntervalTicks = WeakSpotConfig.throwMinHitIntervalTicks;
+        s.sprintWeakSpotEnabled = WeakSpotConfig.sprintWeakSpotEnabled;
+        s.sprintBoostMultiplier = WeakSpotConfig.sprintBoostMultiplier;
+        s.sprintBoostMaxMultiplier = WeakSpotConfig.sprintBoostMaxMultiplier;
+        s.sprintBoostDurationTicks = WeakSpotConfig.sprintBoostDurationTicks;
+        s.sprintMinHitIntervalTicks = WeakSpotConfig.sprintMinHitIntervalTicks;
         return s;
     }
 
@@ -210,6 +257,26 @@ public final class SyncedSettings {
         buf.writeInt(vehicleMinHitIntervalTicks);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
+        buf.writeBoolean(ladderWeakSpotEnabled);
+        buf.writeDouble(ladderBoostMultiplier);
+        buf.writeDouble(ladderBoostMaxMultiplier);
+        buf.writeInt(ladderBoostDurationTicks);
+        buf.writeInt(ladderMinHitIntervalTicks);
+        buf.writeBoolean(elytraWeakSpotEnabled);
+        buf.writeDouble(elytraBoostPower);
+        buf.writeInt(elytraMinHitIntervalTicks);
+        buf.writeBoolean(enchantWeakSpotEnabled);
+        buf.writeInt(enchantMinHitIntervalTicks);
+        buf.writeBoolean(harvestWeakSpotEnabled);
+        buf.writeInt(harvestMinHitIntervalTicks);
+        buf.writeBoolean(throwWeakSpotEnabled);
+        buf.writeDouble(throwChargePerHit);
+        buf.writeInt(throwMinHitIntervalTicks);
+        buf.writeBoolean(sprintWeakSpotEnabled);
+        buf.writeDouble(sprintBoostMultiplier);
+        buf.writeDouble(sprintBoostMaxMultiplier);
+        buf.writeInt(sprintBoostDurationTicks);
+        buf.writeInt(sprintMinHitIntervalTicks);
     }
 
     public static SyncedSettings read(ByteBuf buf) {
@@ -267,6 +334,26 @@ public final class SyncedSettings {
         s.vehicleMinHitIntervalTicks = buf.readInt();
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
+        s.ladderWeakSpotEnabled = buf.readBoolean();
+        s.ladderBoostMultiplier = buf.readDouble();
+        s.ladderBoostMaxMultiplier = buf.readDouble();
+        s.ladderBoostDurationTicks = buf.readInt();
+        s.ladderMinHitIntervalTicks = buf.readInt();
+        s.elytraWeakSpotEnabled = buf.readBoolean();
+        s.elytraBoostPower = buf.readDouble();
+        s.elytraMinHitIntervalTicks = buf.readInt();
+        s.enchantWeakSpotEnabled = buf.readBoolean();
+        s.enchantMinHitIntervalTicks = buf.readInt();
+        s.harvestWeakSpotEnabled = buf.readBoolean();
+        s.harvestMinHitIntervalTicks = buf.readInt();
+        s.throwWeakSpotEnabled = buf.readBoolean();
+        s.throwChargePerHit = buf.readDouble();
+        s.throwMinHitIntervalTicks = buf.readInt();
+        s.sprintWeakSpotEnabled = buf.readBoolean();
+        s.sprintBoostMultiplier = buf.readDouble();
+        s.sprintBoostMaxMultiplier = buf.readDouble();
+        s.sprintBoostDurationTicks = buf.readInt();
+        s.sprintMinHitIntervalTicks = buf.readInt();
         return s;
     }
 

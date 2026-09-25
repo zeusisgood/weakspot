@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.BowDraw;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BowMath;
@@ -29,7 +30,7 @@ public final class BowHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player) || player.capabilities.isCreativeMode || player.isSpectator()
+        if (!ServerSwitches.isEnabled(player, HitKind.BOW) || player.capabilities.isCreativeMode || player.isSpectator()
                 || !WeakSpotConfig.bowWeakSpotEnabled || WeakSpotConfig.bowHitTicks <= 0) {
             return;
         }
@@ -53,7 +54,7 @@ public final class BowHits {
         } else {
             BowDraw.add(player, WeakSpotConfig.bowHitTicks);
         }
-        ServerStats.record(player, stats -> stats.recordBowHit());
+        ServerStats.recordKindHit(player, HitKind.BOW);
         int combo = ServerStats.countStreak(player);
         // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）
         VehicleHits.boostFromRider(player, combo);

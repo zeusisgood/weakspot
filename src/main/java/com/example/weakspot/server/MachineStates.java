@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.Reflect;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MachineProgress;
@@ -39,7 +40,7 @@ public final class MachineStates {
     }
 
     public static void onQuery(EntityPlayerMP player, BlockPos pos) {
-        if (!ServerSwitches.isEnabled(player)) {
+        if (!ServerSwitches.isEnabled(player, HitKind.MACHINE)) {
             return;
         }
         World world = player.world;

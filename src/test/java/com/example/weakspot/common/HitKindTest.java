@@ -19,4 +19,22 @@ public class HitKindTest {
         assertNull(HitKind.byId(-1));
         assertNull(HitKind.byId(HitKind.values().length));
     }
+
+    @Test
+    public void keyRoundTrip() {
+        for (HitKind kind : HitKind.values()) {
+            assertEquals(kind, HitKind.byKey(kind.key()));
+        }
+        assertEquals(HitKind.HARVEST, HitKind.byKey(" Harvest "));
+        assertNull(HitKind.byKey("nothing"));
+        assertNull(HitKind.byKey(null));
+    }
+
+    @Test
+    public void newKindsAreAppended() {
+        // 通信は番号で送るので、1.6.x までの種類の番号は変えない
+        assertEquals(9, HitKind.SLEEP.ordinal());
+        assertEquals(10, HitKind.LADDER.ordinal());
+        assertEquals(15, HitKind.SPRINT.ordinal());
+    }
 }

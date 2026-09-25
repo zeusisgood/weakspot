@@ -1,5 +1,6 @@
 package com.example.weakspot;
 
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.MiningStats;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.MarkerMessage.MarkerData;
@@ -53,7 +54,15 @@ public class CommonProxy {
         return false;
     }
 
-    /** 採掘ヒットの累計が節目に達した（サーバー → クライアントのパケットから呼ばれる）。 */
-    public void onMilestone(int milestone) {
+    /** 自分のその種類の弱点がオンか（1.7.0。一時オフと、種類ごとのオフ）。物理サーバーでは呼ばれない。 */
+    public boolean isKindEnabled(HitKind kind) {
+        return true;
+    }
+
+    /**
+     * ヒットの累計が節目に達した（サーバー → クライアントのパケットから呼ばれる）。type は MilestoneMessage の
+     * MINING / KIND / TOTAL、kindId は種類ごとの節目の HitKind の番号。
+     */
+    public void onMilestone(int type, int kindId, long milestone) {
     }
 }

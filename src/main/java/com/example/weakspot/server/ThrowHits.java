@@ -1,8 +1,9 @@
 package com.example.weakspot.server;
 
-import com.example.weakspot.common.HitKind;
-import com.example.weakspot.EatDraw;
+import com.example.weakspot.ThrowCharge;
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitKind;
+import com.example.weakspot.common.MachineComboBoost;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,35 +15,36 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * 食事・飲み物の弱点のヒット通知の検証と効果（論理サーバー。1.6.0）。食べている・飲んでいる最中に受け付け、
- * 食べ終わるまでの時間を eatHitTicks 縮める（EatDraw）。乗り物に乗っていれば、加速も続ける。照準の角度は確かめない。
+ * 投げる物の弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。メインハンドに投げる物を持っている間に受け付け、
+ * 次の 1 投の溜めを throwChargePerHit × コンボの掛け数だけ増やす（ThrowCharge。上限なし）。乗っていれば、乗り物の
+ * 加速も続ける（騎射と同じ）。照準の角度は確かめない。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
-public final class EatHits {
+public final class ThrowHits {
 
     private static final int INTERVAL_JITTER_TICKS = 2;
 
     private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
 
-    private EatHits() {
+    private ThrowHits() {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.EAT) || player.capabilities.isCreativeMode || player.isSpectator()
-                || !WeakSpotConfig.eatWeakSpotEnabled || WeakSpotConfig.eatHitTicks <= 0
-                || !EatDraw.isEating(player)) {
+        if (!ServerSwitches.isEnabled(player, HitKind.THROW) || player.capabilities.isCreativeMode
+                || player.isSpectator() || !WeakSpotConfig.throwWeakSpotEnabled
+                || !ThrowCharge.isHoldingThrowable(player) || player.isHandActive()) {
             return;
         }
         long now = player.world.getTotalWorldTime();
         Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.eatMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
+        int minInterval = Math.max(0, WeakSpotConfig.throwMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
         if (last != null && now - last < minInterval) {
             return;
         }
         LAST_HIT.put(player.getUniqueID(), now);
-        EatDraw.add(player, WeakSpotConfig.eatHitTicks);
-        ServerStats.recordKindHit(player, HitKind.EAT);
         int combo = ServerStats.countStreak(player);
+        ThrowCharge.add(player, WeakSpotConfig.throwChargePerHit * MachineComboBoost.factor(combo));
+        ServerStats.recordKindHit(player, HitKind.THROW);
         VehicleHits.boostFromRider(player, combo);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
@@ -50,5 +52,11 @@ public final class EatHits {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST_HIT.remove(event.player.getUniqueID());
+        ThrowCharge.clear(event.player);
+    }
+
+    @SubscribeEvent
+    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        ThrowCharge.clear(event.player);
     }
 }

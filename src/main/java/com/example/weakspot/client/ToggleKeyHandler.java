@@ -59,6 +59,7 @@ public final class ToggleKeyHandler {
     /** 最後にサーバーへ伝えた状態。null なら、このワールド（サーバー）にはまだ伝えていない。 */
     private static Boolean lastSent;
     private static Boolean lastSentParticles;
+    private static Integer lastSentKinds;
 
     /**
      * 弱点のオン・オフを、サーバーに伝える（ワールドに入ったとき、切り替えたとき。設定画面で変えたときも）。
@@ -68,14 +69,18 @@ public final class ToggleKeyHandler {
         if (mc.world == null || mc.player == null || mc.getConnection() == null) {
             lastSent = null;
             lastSentParticles = null;
+            lastSentKinds = null;
             return;
         }
         boolean on = WeakSpotConfig.weakSpotsEnabled;
         boolean particles = WeakSpotConfig.machineParticlesVisible;
-        if (lastSent == null || lastSent != on || lastSentParticles == null || lastSentParticles != particles) {
+        int kinds = KindSwitches.disabledMask();
+        if (lastSent == null || lastSent != on || lastSentParticles == null || lastSentParticles != particles
+                || lastSentKinds == null || lastSentKinds != kinds) {
             lastSent = on;
             lastSentParticles = particles;
-            WeakSpotMod.network.sendToServer(new SwitchMessage(on, particles));
+            lastSentKinds = kinds;
+            WeakSpotMod.network.sendToServer(new SwitchMessage(on, particles, kinds));
         }
     }
 

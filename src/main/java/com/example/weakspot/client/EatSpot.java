@@ -25,7 +25,7 @@ import net.minecraftforge.fml.relauncher.Side;
 final class EatSpot {
 
     /** 緑 #7CFC00。 */
-    private static final HudSpot SPOT = new HudSpot(0x7CFC00);
+    private static final HudSpot SPOT = new HudSpot(HitKind.EAT, 0x7CFC00);
 
     private EatSpot() {
     }
@@ -36,7 +36,7 @@ final class EatSpot {
 
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
-        if (player == null || mc.world == null || !WeakSpotConfig.weakSpotsEnabled
+        if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.EAT)
                 || player.capabilities.isCreativeMode || player.isSpectator()) {
             return false;
         }

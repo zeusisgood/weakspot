@@ -96,7 +96,9 @@ public final class WeakSpotCommand extends CommandBase {
                 Double.isNaN(average) ? "-" : String.format("%.2f", average),
                 stats.maxHitsOnBlock, String.format("%.1f", stats.savedSeconds()),
                 stats.growthHits, stats.machineHits, stats.maxStreak, stats.animalHits, stats.fishingHits,
-                stats.bowHits, stats.critHits, stats.vehicleHits, stats.eatHits, stats.sleepHits));
+                stats.bowHits, stats.critHits, stats.vehicleHits, stats.eatHits, stats.sleepHits,
+                stats.ladderHits, stats.elytraHits, stats.enchantHits, stats.harvestHits, stats.throwHits,
+                stats.sprintHits, stats.totalHits()));
     }
 
     @Override
