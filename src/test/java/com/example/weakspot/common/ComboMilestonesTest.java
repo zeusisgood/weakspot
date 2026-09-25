@@ -15,12 +15,21 @@ public class ComboMilestonesTest {
     public void trueOnlyAtTheSteps() {
         ComboMilestones milestones = new ComboMilestones();
         List<Integer> fired = new ArrayList<>();
-        for (int combo = 1; combo <= 120; combo++) {
+        for (int combo = 1; combo <= 3500; combo++) {
             if (milestones.reached(combo)) {
                 fired.add(combo);
             }
         }
-        assertEquals(Arrays.asList(10, 25, 50, 100), fired);
+        assertEquals(Arrays.asList(10, 25, 50, 100, 250, 500, 1000, 2000, 3000), fired);
+    }
+
+    @Test
+    public void glowColorsFrom250() {
+        assertEquals(-1, ComboMilestones.glowRgb(100));
+        assertEquals(0xFF55FF, ComboMilestones.glowRgb(250));
+        assertEquals(0x55FFFF, ComboMilestones.glowRgb(500));
+        assertEquals(0xFFD700, ComboMilestones.glowRgb(1000));
+        assertEquals(0xFFD700, ComboMilestones.glowRgb(3000));
     }
 
     @Test

@@ -15,6 +15,8 @@ public final class ComboDisplay {
     public static final int BOUNCE_TICKS = 4;
     /** ヒットした瞬間の大きさ（1 に戻る）。 */
     public static final double BOUNCE_PEAK = 1.4;
+    /** 250 以上の段階に達したヒットの大きさ（大きく弾ませる）。 */
+    public static final double BIG_BOUNCE_PEAK = 1.9;
     /** 段階の演出の光が消えるまでの時間。 */
     public static final int GLOW_TICKS = 12;
 
@@ -23,11 +25,16 @@ public final class ComboDisplay {
 
     /** ヒットからの経過に応じた大きさ。ヒットの瞬間が BOUNCE_PEAK で、BOUNCE_TICKS で 1 に戻る。 */
     public static double bounceScale(double ticksSinceHit) {
+        return bounceScale(ticksSinceHit, BOUNCE_PEAK);
+    }
+
+    /** ヒットからの経過に応じた大きさ。ヒットの瞬間が peak で、BOUNCE_TICKS で 1 に戻る。 */
+    public static double bounceScale(double ticksSinceHit, double peak) {
         if (ticksSinceHit < 0 || ticksSinceHit >= BOUNCE_TICKS) {
             return 1;
         }
         double t = 1 - ticksSinceHit / BOUNCE_TICKS;
-        return 1 + (BOUNCE_PEAK - 1) * t * t;
+        return 1 + (peak - 1) * t * t;
     }
 
     /** 途切れたコンボで「MAX」を残すか。 */
@@ -47,5 +54,19 @@ public final class ComboDisplay {
             return 0;
         }
         return Math.max(0, 1 - ticksSinceStep / GLOW_TICKS);
+    }
+
+    /** 虹色（100 以上）が一周する時間（ミリ秒）。段階が上がるほど速く流れる。 */
+    public static long rainbowPeriodMs(int combo) {
+        if (combo >= 1000) {
+            return 1200;
+        }
+        if (combo >= 500) {
+            return 2000;
+        }
+        if (combo >= 250) {
+            return 3000;
+        }
+        return 4000;
     }
 }

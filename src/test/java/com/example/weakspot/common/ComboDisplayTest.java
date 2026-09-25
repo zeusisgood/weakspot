@@ -42,4 +42,20 @@ public class ComboDisplayTest {
         assertEquals(0.0, ComboDisplay.glowAlpha(ComboDisplay.GLOW_TICKS), 1e-9);
         assertEquals(0.0, ComboDisplay.glowAlpha(-1), 1e-9);
     }
+
+    @Test
+    public void rainbowSpeedsUpWithTheSteps() {
+        assertEquals(4000, ComboDisplay.rainbowPeriodMs(100));
+        assertEquals(4000, ComboDisplay.rainbowPeriodMs(249));
+        assertEquals(3000, ComboDisplay.rainbowPeriodMs(250));
+        assertEquals(2000, ComboDisplay.rainbowPeriodMs(500));
+        assertEquals(1200, ComboDisplay.rainbowPeriodMs(1000));
+        assertEquals(1200, ComboDisplay.rainbowPeriodMs(4000));
+    }
+
+    @Test
+    public void bigBounceIsLarger() {
+        assertEquals(ComboDisplay.BIG_BOUNCE_PEAK, ComboDisplay.bounceScale(0, ComboDisplay.BIG_BOUNCE_PEAK), 1e-9);
+        assertEquals(1, ComboDisplay.bounceScale(ComboDisplay.BOUNCE_TICKS, ComboDisplay.BIG_BOUNCE_PEAK), 1e-9);
+    }
 }

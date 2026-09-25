@@ -57,12 +57,13 @@ public final class ServerStats {
 
     /**
      * 受け付けたヒット（採掘・成長・機械・動物・釣り・弓・近接のすべて）を、連続ヒットに数えて、最大を更新する。
-     * 種類とブロックをまたいで続き、40 tick ヒットがないと途切れる（HitStreak）。
+     * 種類とブロックをまたいで続き、40 tick ヒットがないと途切れる（HitStreak）。このヒットを数えたあとの数を返す。
      */
-    public static void countStreak(EntityPlayerMP player) {
+    public static int countStreak(EntityPlayerMP player) {
         long now = player.mcServer.getTickCounter();
         int count = STREAKS.computeIfAbsent(player.getUniqueID(), id -> new HitStreak()).hit(now);
         record(player, stats -> stats.recordStreak(count));
+        return count;
     }
 
     public static MiningStats session(EntityPlayer player) {

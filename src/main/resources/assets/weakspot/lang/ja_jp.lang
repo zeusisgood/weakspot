@@ -57,7 +57,9 @@ weakspot.combo.max=MAX %s
 weakspot.general.combodisplayenabled.tooltip=[クライアント] 連続ヒット（コンボ）の数を画面に表示するか\nヒット音の音階と同じ数え方（約2秒ヒットがないと途切れる）。2 以上で表示する
 weakspot.general.comboscale.tooltip=[クライアント] コンボの数字の大きさの倍率
 weakspot.general.comboposition.tooltip=[クライアント] コンボの表示の位置\nBELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央。ボスバーがあればその下）
-weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）
+weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100、250、500、1000（以降 1000 ごと）に達したときの演出（強調音と光）\n上の段階ほど派手になる（500 から花火、1000 からタイトル）
+weakspot.combo.machine=機械 ×%s
+weakspot.combo.title=%s COMBO!
 weakspot.general.blockhealthbarenabled.tooltip=[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか\n自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る
 weakspot.general.weakspottrailenabled.tooltip=[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）\n見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く
 

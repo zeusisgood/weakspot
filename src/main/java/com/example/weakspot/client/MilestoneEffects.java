@@ -18,6 +18,9 @@ final class MilestoneEffects {
             TextFormatting.AQUA, TextFormatting.BLUE, TextFormatting.LIGHT_PURPLE};
     private static final int[] RAINBOW_RGB = {0xFF5555, 0xFFAA00, 0xFFFF55, 0x55FF55, 0x55FFFF, 0x5555FF, 0xFF55FF};
 
+    /** 最後に節目のタイトルを出した clientTick（コンボの 1000 のタイトルは、これと重ならないようにする）。 */
+    static long lastShownTick = Long.MIN_VALUE / 2;
+
     private MilestoneEffects() {
     }
 
@@ -28,6 +31,7 @@ final class MilestoneEffects {
             return;
         }
         boolean lucky = milestone == LUCKY;
+        lastShownTick = ClientWeakSpotHandler.clientTick;
 
         String title = I18n.format("weakspot.milestone.title", milestone);
         mc.ingameGUI.displayTitle(null, null, 5, lucky ? 80 : 50, 20);
@@ -51,6 +55,27 @@ final class MilestoneEffects {
         }
     }
 
+    /**
+     * コンボの段階の花火（自分の画面だけ。粒子と音はクライアントだけで出し、エンティティは出さない）。
+     * count 発を、プレイヤーの頭の上に横に並べる。
+     */
+    static void comboFireworks(int count, int rgb) {
+        Minecraft mc = Minecraft.getMinecraft();
+        EntityPlayerSP player = mc.player;
+        if (player == null || mc.world == null) {
+            return;
+        }
+        for (int i = 0; i < count; i++) {
+            double dx = (i - (count - 1) / 2.0) * 1.5;
+            NBTTagCompound explosion = new NBTTagCompound();
+            explosion.setByte("Type", (byte) (count > 1 ? 1 : 0));
+            explosion.setBoolean("Flicker", count > 1);
+            explosion.setBoolean("Trail", count > 1);
+            explosion.setIntArray("Colors", new int[] {rgb, 0xFFFFFF});
+            mc.world.makeFireworks(player.posX + dx, player.posY + 2.5, player.posZ, 0, 0, 0, wrap(explosion));
+        }
+    }
+
     /** 1文字ずつ色を変える。 */
     private static String rainbow(String text) {
         StringBuilder sb = new StringBuilder();
@@ -71,6 +96,10 @@ final class MilestoneEffects {
                 ? new int[] {RAINBOW_RGB[index % RAINBOW_RGB.length], RAINBOW_RGB[(index + 3) % RAINBOW_RGB.length]}
                 : new int[] {0xFFAA00, 0xFFFF55};
         explosion.setIntArray("Colors", colors);
+        return wrap(explosion);
+    }
+
+    private static NBTTagCompound wrap(NBTTagCompound explosion) {
         NBTTagList explosions = new NBTTagList();
         explosions.appendTag(explosion);
         NBTTagCompound tag = new NBTTagCompound();

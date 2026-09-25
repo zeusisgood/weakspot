@@ -6,6 +6,7 @@ import com.example.weakspot.common.ComboMilestones;
 import com.example.weakspot.common.ComboTier;
 import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.common.HitStreak;
+import com.example.weakspot.common.MachineComboBoost;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.awt.Color;
 import net.minecraft.client.Minecraft;
@@ -26,7 +27,9 @@ import org.lwjgl.opengl.GL11;
 /**
  * 自分の連続ヒット（コンボ）の画面表示。数は ClientWeakSpotHandler.STREAK（ヒット音の音階と同じ数）。
  * 2 以上で「12 HIT」と出し、ヒットのたびに弾ませる。下のバーは途切れるまでの残り時間。
- * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、100 で強調音と光を出す。
+ * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、100、250、500、1000（以降 1000 ごと）で
+ * 強調音と光を出し、上の段階ほど派手にする（100 は和音、250 から駆け上がり、500 から花火、1000 からタイトル）。
+ * 機械の弱点に照準が合っている間は、コンボの掛け数（MachineComboBoost）を「機械 ×2.5」と下に出す。
  * 時間は ClientWeakSpotHandler.clientTick（一時停止中は止まる）で数える。F1 で HUD を隠している間は描かない。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -38,10 +41,22 @@ final class ComboHud {
     /** 残りがこの割合を切ったら、バーを点滅させる。 */
     private static final double LOW_FRACTION = 0.25;
     private static final int LOW_RGB = 0xFF3333;
-    /** 虹色が一周する時間（ミリ秒）。 */
-    private static final long RAINBOW_PERIOD_MS = 4000;
     /** 段階の演出の強調音を、ヒット音から少し遅らせる（tick）。 */
     private static final int ACCENT_DELAY_TICKS = 2;
+    /** 100 の和音（ド・ミ・ソ・上のド。連続ヒット数で表した音階の位置）。 */
+    private static final int[] CHORD = {1, 3, 5, HitPitch.SCALE_LENGTH};
+    /** 250 の駆け上がりの音の数（ドからソまで）。 */
+    private static final int SHORT_RUN = 5;
+    /** 「機械 ×n」の文字の大きさ（コンボの数字に対する割合）。 */
+    private static final float MACHINE_LABEL_SCALE = 0.75F;
+    private static final int MACHINE_LABEL_RGB = 0xFFFFFF;
+    /** 1000 のタイトル（フェードイン、表示、フェードアウトの tick）。バニラのタイトルと同じ長さ。 */
+    private static final int TITLE_IN = 5;
+    private static final int TITLE_STAY = 50;
+    private static final int TITLE_OUT = 20;
+    /** 節目のタイトルがこの tick 以内に出ていたら、1000 のタイトルは出さない（節目を優先する）。 */
+    private static final int TITLE_GUARD_TICKS = TITLE_IN + TITLE_STAY + TITLE_OUT;
+    private static final float TITLE_SCALE = 3;
 
     private static final ComboMilestones MILESTONES = new ComboMilestones();
 
@@ -52,6 +67,16 @@ final class ComboHud {
     private static int brokenCombo;
     private static double brokenTime;
     private static double stepTime = Double.NEGATIVE_INFINITY;
+    /** 最後に達した段階の数（光の色と弾みの大きさを決める）。 */
+    private static int stepCombo;
+    /** 「機械 ×n」の掛け数が上がった瞬間（光らせる）と、その段階の数。 */
+    private static double factorStepTime = Double.NEGATIVE_INFINITY;
+    private static int factorStepCombo;
+    /** 1000 のタイトルを出し始めた clientTick と、その数（0 なら出していない）。 */
+    private static long titleTick;
+    private static int titleCombo;
+    /** 最後に描いたコンボの数字の中心の x（「機械 ×n」をその下にそろえる）。 */
+    private static float lastCx;
     /** このフレームのボスバーの下端（TOP_CENTER のときに避ける）。 */
     private static int bossBottom;
 
@@ -64,11 +89,57 @@ final class ComboHud {
         lastHitTime = time;
         // 新しいコンボが始まったら、残していた数は消す
         brokenCombo = 0;
+        if (MachineComboBoost.factor(newCombo) > MachineComboBoost.factor(newCombo - 1)) {
+            factorStepTime = time;
+            factorStepCombo = newCombo;
+        }
         if (MILESTONES.reached(newCombo) && WeakSpotConfig.comboDisplayEnabled
                 && WeakSpotConfig.comboMilestoneEffects) {
             stepTime = time;
+            stepCombo = newCombo;
+            playStep(newCombo);
+        }
+    }
+
+    /** 段階の演出。上の段階ほど足していく。 */
+    private static void playStep(int step) {
+        if (step >= ComboMilestones.GRAND_STEP) {
+            for (int i = 0; i < HitPitch.TWO_OCTAVE_LENGTH; i++) {
+                float pitch = HitPitch.twoOctave(i);
+                HitSounds.schedule(ACCENT_DELAY_TICKS + i, () -> HitSounds.playOwnPitch(pitch));
+            }
+            playChord(ACCENT_DELAY_TICKS + HitPitch.TWO_OCTAVE_LENGTH + 1);
+            HitSounds.schedule(ACCENT_DELAY_TICKS, () -> {
+                MilestoneEffects.comboFireworks(3, ComboMilestones.glowRgb(step));
+                long now = ClientWeakSpotHandler.clientTick;
+                // 累計の節目のタイトルが出ていたら、そちらを優先する
+                if (now - MilestoneEffects.lastShownTick > TITLE_GUARD_TICKS) {
+                    titleTick = now;
+                    titleCombo = step;
+                }
+            });
+        } else if (step >= 500) {
+            HitSounds.playScale(HitSounds::playOwn, 1, ACCENT_DELAY_TICKS);
+            HitSounds.schedule(ACCENT_DELAY_TICKS,
+                    () -> MilestoneEffects.comboFireworks(1, ComboMilestones.glowRgb(step)));
+        } else if (step >= 250) {
+            for (int i = 0; i < SHORT_RUN; i++) {
+                int note = i + 1;
+                HitSounds.schedule(ACCENT_DELAY_TICKS + i, () -> HitSounds.playOwn(note));
+            }
+        } else if (step >= 100) {
+            playChord(ACCENT_DELAY_TICKS);
+        } else {
             HitSounds.schedule(ACCENT_DELAY_TICKS, () -> HitSounds.playOwn(HitPitch.SCALE_LENGTH));
         }
+    }
+
+    private static void playChord(int delay) {
+        HitSounds.schedule(delay, () -> {
+            for (int note : CHORD) {
+                HitSounds.playOwn(note);
+            }
+        });
     }
 
     /** 40 tick ヒットがなく途切れた。 */
@@ -85,6 +156,9 @@ final class ComboHud {
         combo = 0;
         brokenCombo = 0;
         stepTime = Double.NEGATIVE_INFINITY;
+        stepCombo = 0;
+        factorStepTime = Double.NEGATIVE_INFINITY;
+        titleCombo = 0;
         MILESTONES.reset();
     }
 
@@ -111,10 +185,19 @@ final class ComboHud {
             return;
         }
         double now = ClientWeakSpotHandler.clientTick + event.getPartialTicks();
+        drawTitle(mc, event.getResolution(), now);
         if (combo >= ComboDisplay.MIN_SHOWN) {
-            draw(mc, event.getResolution(), I18n.format("weakspot.combo.hit", combo), colorOf(combo), 1,
-                    ComboDisplay.bounceScale(now - lastHitTime), HitStreak.remainingFraction(now - lastHitTime),
-                    ComboDisplay.glowAlpha(now - stepTime), now);
+            boolean big = stepCombo >= 250 && lastHitTime == stepTime;
+            double bounce = ComboDisplay.bounceScale(now - lastHitTime,
+                    big ? ComboDisplay.BIG_BOUNCE_PEAK : ComboDisplay.BOUNCE_PEAK);
+            float bottom = draw(mc, event.getResolution(), I18n.format("weakspot.combo.hit", combo), colorOf(combo), 1,
+                    bounce, HitStreak.remainingFraction(now - lastHitTime),
+                    ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= 250, now);
+            double factor = MachineComboBoost.factor(combo);
+            if (factor > 1 && ClientWeakSpotHandler.machineSpotActive()) {
+                drawMachineLabel(mc, bottom, I18n.format("weakspot.combo.machine", MachineComboBoost.label(factor)),
+                        ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
+            }
         } else if (brokenCombo > 0) {
             double alpha = ComboDisplay.fadeAlpha(brokenCombo, now - brokenTime);
             if (alpha <= 0) {
@@ -124,16 +207,73 @@ final class ComboHud {
             String text = ComboDisplay.showsMax(brokenCombo)
                     ? I18n.format("weakspot.combo.max", brokenCombo)
                     : I18n.format("weakspot.combo.hit", brokenCombo);
-            draw(mc, event.getResolution(), text, colorOf(brokenCombo), alpha, 1, -1, 0, now);
+            draw(mc, event.getResolution(), text, colorOf(brokenCombo), alpha, 1, -1, 0, 0, false, now);
         }
+    }
+
+    /** 段階の光の色（250 以上は段階の色、それより下はその数の色）。 */
+    private static int glowRgb(int step) {
+        int rgb = ComboMilestones.glowRgb(step);
+        return rgb >= 0 ? rgb : colorOf(step);
+    }
+
+    /** 「機械 ×2.5」。top はコンボの表示の下端、cx はその中心。 */
+    private static void drawMachineLabel(Minecraft mc, float top, String text, double glow, int glowRgb) {
+        FontRenderer font = mc.fontRenderer;
+        float scale = (float) WeakSpotConfig.comboScale * MACHINE_LABEL_SCALE;
+        float width = font.getStringWidth(text) * scale;
+        float height = font.FONT_HEIGHT * scale;
+        float cy = top + 2 * scale + height / 2;
+        if (glow > 0) {
+            float pad = (float) (1 + 4 * (1 - glow)) * scale;
+            fillRect(lastCx - width / 2 - pad, cy - height / 2 - pad, lastCx + width / 2 + pad, cy + height / 2 + pad,
+                    glowRgb, 0.5 * glow);
+        }
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(lastCx, cy, 0);
+        GlStateManager.scale(scale, scale, 1);
+        int rgb = glow > 0.5 ? glowRgb : MACHINE_LABEL_RGB;
+        font.drawStringWithShadow(text, -font.getStringWidth(text) / 2F, -font.FONT_HEIGHT / 2F + 1, 0xFF000000 | rgb);
+        GlStateManager.popMatrix();
+        GlStateManager.color(1, 1, 1, 1);
+    }
+
+    /** 1000（以降 1000 ごと）のタイトル。画面の中央の少し上に、金色で大きく出す。 */
+    private static void drawTitle(Minecraft mc, ScaledResolution res, double now) {
+        if (titleCombo == 0) {
+            return;
+        }
+        double t = now - titleTick;
+        if (t < 0 || t >= TITLE_GUARD_TICKS || MilestoneEffects.lastShownTick >= titleTick) {
+            titleCombo = 0;
+            return;
+        }
+        double alpha = t < TITLE_IN ? t / TITLE_IN
+                : t < TITLE_IN + TITLE_STAY ? 1 : 1 - (t - TITLE_IN - TITLE_STAY) / TITLE_OUT;
+        int a = (int) Math.round(Math.max(0, Math.min(1, alpha)) * 255);
+        if (a < 8) {
+            return;
+        }
+        FontRenderer font = mc.fontRenderer;
+        String text = TextFormatting.BOLD + I18n.format("weakspot.combo.title", titleCombo);
+        GlStateManager.enableBlend();
+        GlStateManager.pushMatrix();
+        GlStateManager.translate(res.getScaledWidth() / 2F, res.getScaledHeight() / 2F - 40, 0);
+        GlStateManager.scale(TITLE_SCALE, TITLE_SCALE, 1);
+        font.drawStringWithShadow(text, -font.getStringWidth(text) / 2F, -font.FONT_HEIGHT / 2F,
+                a << 24 | ComboMilestones.glowRgb(ComboMilestones.GRAND_STEP));
+        GlStateManager.popMatrix();
+        GlStateManager.color(1, 1, 1, 1);
     }
 
     /**
      * @param barFraction 残り時間のバー（0〜1）。負なら描かない
      * @param glow 段階の演出の光の濃さ（0 なら描かない）
+     * @param strongGlow 250 以上の段階の強い光
+     * @return 描いたものの下端（「機械 ×n」をその下に出す）
      */
-    private static void draw(Minecraft mc, ScaledResolution res, String text, int rgb, double alpha, double bounce,
-                             double barFraction, double glow, double now) {
+    private static float draw(Minecraft mc, ScaledResolution res, String text, int rgb, double alpha, double bounce,
+                              double barFraction, double glow, int glowRgb, boolean strongGlow, double now) {
         FontRenderer font = mc.fontRenderer;
         float scale = (float) WeakSpotConfig.comboScale;
         String shown = TextFormatting.BOLD + text;
@@ -160,6 +300,8 @@ final class ComboHud {
                 cy = res.getScaledHeight() / 2F + CROSSHAIR_GAP + textHeight / 2;
                 break;
         }
+        lastCx = cx;
+        float bottom = cy + textHeight / 2;
 
         GlStateManager.enableBlend();
         GlStateManager.tryBlendFuncSeparate(
@@ -167,9 +309,9 @@ final class ComboHud {
                 GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
 
         if (glow > 0) {
-            float pad = (float) (2 + 6 * (1 - glow)) * scale;
+            float pad = (float) (strongGlow ? 3 + 12 * (1 - glow) : 2 + 6 * (1 - glow)) * scale;
             fillRect(cx - textWidth / 2 - pad, cy - textHeight / 2 - pad, cx + textWidth / 2 + pad,
-                    cy + textHeight / 2 + pad, rgb, 0.5 * glow * alpha);
+                    cy + textHeight / 2 + pad, glowRgb, (strongGlow ? 0.8 : 0.5) * glow * alpha);
         }
         if (barFraction >= 0) {
             float width = BAR_WIDTH * scale;
@@ -181,6 +323,7 @@ final class ComboHud {
             double barAlpha = low && (long) (now / 2) % 2 == 0 ? 0.5 : 1;
             fillRect(left, top, left + (float) (width * barFraction), top + barHeight, low ? LOW_RGB : rgb,
                     barAlpha * alpha);
+            bottom = top + barHeight;
         }
 
         int a = (int) Math.round(alpha * 255);
@@ -195,6 +338,7 @@ final class ComboHud {
             GlStateManager.popMatrix();
         }
         GlStateManager.color(1, 1, 1, 1);
+        return bottom;
     }
 
     private static int colorOf(int value) {
@@ -202,7 +346,8 @@ final class ComboHud {
         if (tier != ComboTier.RAINBOW) {
             return tier.rgb;
         }
-        float hue = (Minecraft.getSystemTime() % RAINBOW_PERIOD_MS) / (float) RAINBOW_PERIOD_MS;
+        long period = ComboDisplay.rainbowPeriodMs(value);
+        float hue = (Minecraft.getSystemTime() % period) / (float) period;
         return Color.HSBtoRGB(hue, 0.55F, 1.0F) & 0xFFFFFF;
     }
 

@@ -433,6 +433,11 @@ public final class ClientWeakSpotHandler {
     }
 
     /** 前のヒットから minInterval tick あいているか（釣り・弓の弱点からも使う）。 */
+    /** 機械の弱点が出ていて、このフレームで照準が合っているか（コンボの「機械 ×n」の表示）。 */
+    static boolean machineSpotActive() {
+        return spot != null && spot.kind == HitKind.MACHINE && spot.lastActiveTick == clientTick;
+    }
+
     static boolean canHitNow(HitKind kind, int minInterval) {
         return canHit(kind, minInterval);
     }

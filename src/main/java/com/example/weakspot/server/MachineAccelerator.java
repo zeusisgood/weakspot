@@ -2,6 +2,7 @@ package com.example.weakspot.server;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MachineBoost;
+import com.example.weakspot.common.MachineComboBoost;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -30,11 +31,13 @@ public final class MachineAccelerator {
     private MachineAccelerator() {
     }
 
-    /** サーバーが機械ヒットを受け付けたときに呼ぶ。 */
-    static void hit(World world, BlockPos pos) {
+    /** サーバーが機械ヒットを受け付けたときに呼ぶ。combo はこのヒットを数えたあとの、そのプレイヤーの連続ヒット数。 */
+    static void hit(World world, BlockPos pos, int combo) {
+        double multiplier = MachineComboBoost.multiplier(WeakSpotConfig.machineBoostMultiplier,
+                WeakSpotConfig.machineBoostMaxMultiplier, combo);
         BOOSTS.computeIfAbsent(world.provider.getDimension(), d -> new HashMap<>())
                 .computeIfAbsent(pos, p -> new MachineBoost())
-                .hit(WeakSpotConfig.machineBoostMultiplier, WeakSpotConfig.machineBoostDurationTicks);
+                .hit(multiplier, WeakSpotConfig.machineBoostDurationTicks);
     }
 
     /** バニラのタイルエンティティの更新が終わった後（ワールドの tick の最後）に、余分に update() を呼ぶ。 */

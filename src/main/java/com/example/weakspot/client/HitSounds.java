@@ -65,12 +65,21 @@ final class HitSounds {
         playFlat(WeakSpotConfig.othersHitSound, WeakSpotConfig.othersHitVolume, streak);
     }
 
+    /** 自分のヒット音の楽器で、ピッチを直接決めて鳴らす（コンボの 1000 の駆け上がり）。 */
+    static void playOwnPitch(float pitch) {
+        playFlatPitch(WeakSpotConfig.myHitSound, WeakSpotConfig.myHitVolume, pitch);
+    }
+
     private static void playFlat(HitSound sound, double volume, int streak) {
+        playFlatPitch(sound, volume, HitPitch.forStreak(streak));
+    }
+
+    private static void playFlatPitch(HitSound sound, double volume, float pitch) {
         if (volume <= 0) {
             return;
         }
         Minecraft.getMinecraft().getSoundHandler().playSound(new PositionedSoundRecord(
-                soundOf(sound).getSoundName(), SoundCategory.PLAYERS, (float) volume, HitPitch.forStreak(streak),
+                soundOf(sound).getSoundName(), SoundCategory.PLAYERS, (float) volume, pitch,
                 false, 0, ISound.AttenuationType.NONE, 0, 0, 0));
     }
 

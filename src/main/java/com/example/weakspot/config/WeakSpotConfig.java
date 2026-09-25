@@ -135,9 +135,15 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double machineBoostMultiplier = 4.0;
 
-    @Config.Comment("[サーバー] 機械の加速が続く時間（tick）")
+    @Config.Comment({"[サーバー] 機械の倍率の上限。コンボが続くと machineBoostMultiplier に掛け数を掛ける",
+            "（25 で ×1.25、50 で ×1.5、100 で ×2、250 で ×2.5、500 で ×3、1000 で ×4）。その結果をこの値で抑える",
+            "機械 Mod の不具合やサーバーの負荷が気になるときに下げる。machineBoostMultiplier より小さいときも、こちらを優先する"})
+    @Config.RangeDouble(min = 1.0, max = 100.0)
+    public static double machineBoostMaxMultiplier = 16.0;
+
+    @Config.Comment("[サーバー] 機械の加速が続く時間（tick）。machineMinHitIntervalTicks 以上なら、最短の間隔で当て続けると途切れない")
     @Config.RangeInt(min = 0, max = 200)
-    public static int machineBoostDurationTicks = 4;
+    public static int machineBoostDurationTicks = 6;
 
     @Config.Comment("[サーバー] 機械のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
@@ -304,7 +310,7 @@ public final class WeakSpotConfig {
             "BELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央）"})
     public static ComboPosition comboPosition = ComboPosition.BELOW_CROSSHAIR;
 
-    @Config.Comment("[クライアント] コンボが 10、25、50、100 に達したときの演出（強調音と光）")
+    @Config.Comment("[クライアント] コンボが 10、25、50、100、250、500、1000（以降 1000 ごと）に達したときの演出（強調音・光・花火・タイトル）")
     public static boolean comboMilestoneEffects = true;
 
     @Config.Comment({"[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）",
@@ -352,9 +358,10 @@ public final class WeakSpotConfig {
      * 1: 1.2.2 でキノコを成長の対象にしたので、growthExcludedBlocks からキノコを取り除く（書き戻したら尊重する）。
      * 2: 1.2.4 で mushroomGrowChance の初期値を 0.2 にしたので、古い初期値 0.1 のままなら 0.2 にする（ほかの値は残す）。
      * 3: 1.3.7 で IC2 のゴムの木を成長の対象にしたので、growthExtraBlocks に ic2:rubber_wood を足す（書き戻したら尊重する）。
+     * 4: 1.4.2 で machineBoostDurationTicks の初期値を 6 にしたので、古い初期値 4 のままなら 6 にする（ほかの値は残す）。
      */
     public static void migrate() {
-        if (configVersion >= 3) {
+        if (configVersion >= 4) {
             return;
         }
         if (configVersion < 1) {
@@ -370,14 +377,21 @@ public final class WeakSpotConfig {
             LogManager.getLogger(WeakSpotMod.MODID).info(
                     "weakspot.cfg: changed mushroomGrowChance from the old default 0.1 to 0.2 (default since 1.2.4)");
         }
-        List<String> extra = new ArrayList<>(Arrays.asList(growthExtraBlocks));
-        if (!extra.contains("ic2:rubber_wood")) {
-            extra.add("ic2:rubber_wood");
-            growthExtraBlocks = extra.toArray(new String[0]);
-            LogManager.getLogger(WeakSpotMod.MODID).info(
-                    "weakspot.cfg: added ic2:rubber_wood to growthExtraBlocks (IC2 rubber wood resin holes since 1.3.7)");
+        if (configVersion < 3) {
+            List<String> extra = new ArrayList<>(Arrays.asList(growthExtraBlocks));
+            if (!extra.contains("ic2:rubber_wood")) {
+                extra.add("ic2:rubber_wood");
+                growthExtraBlocks = extra.toArray(new String[0]);
+                LogManager.getLogger(WeakSpotMod.MODID).info(
+                        "weakspot.cfg: added ic2:rubber_wood to growthExtraBlocks (IC2 rubber wood resin holes since 1.3.7)");
+            }
         }
-        configVersion = 3;
+        if (configVersion < 4 && machineBoostDurationTicks == 4) {
+            machineBoostDurationTicks = 6;
+            LogManager.getLogger(WeakSpotMod.MODID).info(
+                    "weakspot.cfg: changed machineBoostDurationTicks from the old default 4 to 6 (default since 1.4.2)");
+        }
+        configVersion = 4;
         save();
     }
 

@@ -78,14 +78,15 @@ public final class RightClickHits {
         }
         clicking.lastHitTick[kind.ordinal()] = now;
 
+        // 機械の倍率はこのヒットを数えたあとのコンボで決めるので、先に数える
+        int combo = ServerStats.countStreak(player);
         if (kind == HitKind.GROWTH) {
             grow(world, pos, settings);
             ServerStats.record(player, stats -> stats.recordGrowthHit());
         } else if (kind == HitKind.MACHINE) {
-            MachineAccelerator.hit(world, pos);
+            MachineAccelerator.hit(world, pos, combo);
             ServerStats.record(player, stats -> stats.recordMachineHit());
         }
-        ServerStats.countStreak(player);
         // 採掘と同じく、近くの他のプレイヤーにもヒット音を鳴らす
         ServerBoostTracker.notifyNearbyPlayers(player, pos, streak);
     }
