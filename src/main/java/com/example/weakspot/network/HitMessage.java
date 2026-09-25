@@ -1,19 +1,7 @@
 package com.example.weakspot.network;
 
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.server.AnimalHits;
-import com.example.weakspot.server.BowHits;
-import com.example.weakspot.server.EatHits;
-import com.example.weakspot.server.EnchantHits;
-import com.example.weakspot.server.FishingHits;
-import com.example.weakspot.server.MeleeHits;
-import com.example.weakspot.server.MoveHits;
-import com.example.weakspot.server.PortalHits;
-import com.example.weakspot.server.RightClickHits;
-import com.example.weakspot.server.ServerBoostTracker;
-import com.example.weakspot.server.SleepHits;
-import com.example.weakspot.server.ThrowHits;
-import com.example.weakspot.server.VehicleHits;
+import com.example.weakspot.server.HitHandlers;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -82,35 +70,7 @@ public class HitMessage implements IMessage {
             if (kind == null) {
                 return null;
             }
-            player.getServerWorld().addScheduledTask(() -> {
-                if (kind == HitKind.MINING) {
-                    ServerBoostTracker.onHit(player, pos, streak);
-                } else if (kind == HitKind.ANIMAL) {
-                    AnimalHits.onHit(player, entityId, streak);
-                } else if (kind == HitKind.FISHING) {
-                    FishingHits.onHit(player, streak);
-                } else if (kind == HitKind.BOW) {
-                    BowHits.onHit(player, streak);
-                } else if (kind == HitKind.MELEE) {
-                    MeleeHits.onHit(player, streak);
-                } else if (kind == HitKind.SLEEP) {
-                    SleepHits.onHit(player, streak);
-                } else if (kind == HitKind.EAT) {
-                    EatHits.onHit(player, streak);
-                } else if (kind == HitKind.VEHICLE) {
-                    VehicleHits.onHit(player, entityId, streak);
-                } else if (kind == HitKind.LADDER || kind == HitKind.ELYTRA || kind == HitKind.SPRINT) {
-                    MoveHits.onHit(player, kind, streak);
-                } else if (kind == HitKind.PORTAL) {
-                    PortalHits.onHit(player, streak);
-                } else if (kind == HitKind.THROW) {
-                    ThrowHits.onHit(player, streak);
-                } else if (kind == HitKind.ENCHANT) {
-                    EnchantHits.onHit(player, streak);
-                } else {
-                    RightClickHits.onHit(player, kind, pos, streak);
-                }
-            });
+            player.getServerWorld().addScheduledTask(() -> HitHandlers.onHit(player, kind, pos, entityId, streak));
             return null;
         }
     }
