@@ -15,8 +15,8 @@ import net.minecraft.util.math.Vec3d;
  */
 final class MeleeSight {
 
-    /** 近接の弱点が見える距離（ブロック）。 */
-    static final double SIGHT_DISTANCE = 16.0;
+    /** 近接の弱点が見える距離（ブロック）。1.5.5 で 16 から 32 に。 */
+    static final double SIGHT_DISTANCE = 32.0;
 
     private MeleeSight() {
     }
