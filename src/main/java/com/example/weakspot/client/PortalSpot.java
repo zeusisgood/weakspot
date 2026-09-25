@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.ComboFactor;
@@ -44,7 +45,7 @@ final class PortalSpot {
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.PORTAL)
-                || player.capabilities.isCreativeMode || player.isSpectator() || player.isHandActive()
+                || !PlayerRules.canUse(player) || player.isHandActive()
                 || player.isRiding()) {
             return false;
         }

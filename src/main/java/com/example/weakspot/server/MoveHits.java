@@ -30,8 +30,6 @@ public final class MoveHits {
 
     /** 登っている・飛んでいる・走っていたことを認める、直前の tick 数。 */
     private static final int RECENT_TICKS = 10;
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int INTERVAL_JITTER_TICKS = 2;
     /** 走りの加速の修正（固定の UUID。合計に (1 + 値) を掛ける）。クライアントの視野の抑えも、この UUID で見分ける。 */
     public static final UUID SPRINT_MODIFIER = UUID.fromString("5d3c2b1a-7e6f-4a8b-9c0d-1e2f3a4b5c6d");
     private static final int MULTIPLY_TOTAL = 2;
@@ -85,7 +83,7 @@ public final class MoveHits {
 
     /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, int streak) {
-        if (!ServerSwitches.isEnabled(player, kind) || player.capabilities.isCreativeMode || player.isSpectator()
+        if (!HitGate.allowed(player, kind)
                 || !isEnabledOnServer(kind)) {
             return;
         }
@@ -98,8 +96,7 @@ public final class MoveHits {
             return;
         }
         Long last = state.lastHit.get(kind);
-        int minInterval = Math.max(0, minHitInterval(kind) - INTERVAL_JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (last != null && !HitGate.intervalOk(now, last, minHitInterval(kind))) {
             return;
         }
         state.lastHit.put(kind, now);
@@ -162,10 +159,10 @@ public final class MoveHits {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        STATES.remove(event.player.getUniqueID());
-        setSprintModifier(event.player, 1);
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    static void forget(EntityPlayer player) {
+        STATES.remove(player.getUniqueID());
+        setSprintModifier(player, 1);
     }
 
     @SubscribeEvent

@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.FishingMath;
@@ -99,7 +100,7 @@ final class FishingSpot {
     /** 自分の、弱点を出せる浮き（釣り竿を持っていて、水に浮いている）。なければ null。 */
     private static EntityFishHook activeHook(Minecraft mc) {
         if (mc.player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.FISHING)
-                || mc.player.capabilities.isCreativeMode || mc.player.isSpectator()) {
+                || !PlayerRules.canUse(mc.player)) {
             return null;
         }
         SyncedSettings settings = ClientSettings.get();

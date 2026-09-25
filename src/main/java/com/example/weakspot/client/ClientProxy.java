@@ -70,6 +70,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public boolean serverAcceptsCreative() {
+        return ServerFeatures.since("1.8.6");
+    }
+
+    @Override
     public boolean isKindEnabled(HitKind kind) {
         return KindSwitches.isEnabled(kind);
     }

@@ -52,7 +52,7 @@ public final class RightClickTargets {
 
     /** 右クリックで出る弱点の種類。対象でなければ null。 */
     public static HitKind classify(World world, EntityPlayer player, BlockPos pos, SyncedSettings settings) {
-        if (player.capabilities.isCreativeMode || player.isSpectator() || !player.getHeldItemMainhand().isEmpty()) {
+        if (!PlayerRules.canUse(player) || !player.getHeldItemMainhand().isEmpty()) {
             return null;
         }
         IBlockState state = world.getBlockState(pos);

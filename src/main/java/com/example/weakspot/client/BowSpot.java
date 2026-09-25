@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.common.MarkerShape;
 import com.example.weakspot.BowDraw;
 import com.example.weakspot.VehicleTargets;
@@ -84,7 +85,7 @@ final class BowSpot {
     /** 弱点を出せるか（弓を引いていて、設定がオンで、クリエイティブ・スペクテイターでない）。 */
     private static boolean eligible(Minecraft mc) {
         if (mc.player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.BOW)
-                || mc.player.capabilities.isCreativeMode || mc.player.isSpectator()) {
+                || !PlayerRules.canUse(mc.player)) {
             return false;
         }
         SyncedSettings settings = ClientSettings.get();

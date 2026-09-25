@@ -5,9 +5,7 @@ import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.WeakSpotConfig;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
@@ -22,26 +20,21 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ThrowHits {
 
-    private static final int INTERVAL_JITTER_TICKS = 2;
 
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
 
     private ThrowHits() {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.THROW) || player.capabilities.isCreativeMode
-                || player.isSpectator() || !WeakSpotConfig.throwWeakSpotEnabled
+        if (!HitGate.allowed(player, HitKind.THROW) || !WeakSpotConfig.throwWeakSpotEnabled
                 || !ThrowCharge.isHoldingThrowable(player) || player.isHandActive()) {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.throwMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.THROW, WeakSpotConfig.throwMinHitIntervalTicks)) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.THROW);
         int combo = ServerStats.countStreak(player);
         ThrowCharge.add(player, WeakSpotConfig.throwChargePerHit * ComboFactor.factor(combo));
         ServerStats.recordKindHit(player, HitKind.THROW);
@@ -49,14 +42,14 @@ public final class ThrowHits {
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_HIT.remove(event.player.getUniqueID());
-        ThrowCharge.clear(event.player);
-    }
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         ThrowCharge.clear(event.player);
+    }
+
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    static void forget(EntityPlayer player) {
+        ThrowCharge.clear(player);
     }
 }

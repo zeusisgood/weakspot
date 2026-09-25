@@ -28,8 +28,6 @@ public final class RightClickHits {
      * 最後の右クリックからこの tick 以内のヒットだけを受け付ける（ネットワークの揺らぎを見込んだ余裕）。
      */
     private static final int RIGHT_CLICK_WINDOW_TICKS = 10;
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int INTERVAL_JITTER_TICKS = 2;
 
     private static final Map<UUID, Clicking> CLICKING = new HashMap<>();
 
@@ -56,7 +54,7 @@ public final class RightClickHits {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。streak は他のプレイヤーのヒット音の音階に使う。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos, int streak) {
-        if (!ServerSwitches.isEnabled(player, kind)) {
+        if (!HitGate.allowed(player, kind)) {
             return;
         }
         Clicking clicking = CLICKING.get(player.getUniqueID());
@@ -72,8 +70,7 @@ public final class RightClickHits {
         if (RightClickTargets.classify(world, player, pos, settings) != kind) {
             return;
         }
-        int minInterval = Math.max(0, minHitInterval(kind) - INTERVAL_JITTER_TICKS);
-        if (now - clicking.lastHitTick[kind.ordinal()] < minInterval) {
+        if (!HitGate.intervalOk(now, clicking.lastHitTick[kind.ordinal()], minHitInterval(kind))) {
             return;
         }
         clicking.lastHitTick[kind.ordinal()] = now;
@@ -149,9 +146,9 @@ public final class RightClickHits {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        CLICKING.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    static void forget(EntityPlayer player) {
+        CLICKING.remove(player.getUniqueID());
     }
 
     @SubscribeEvent

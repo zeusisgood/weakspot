@@ -5,14 +5,9 @@ import com.example.weakspot.BowDraw;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BowMath;
 import com.example.weakspot.config.WeakSpotConfig;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * 弓の弱点のヒット通知の検証と効果（論理サーバー）。弓を引いている最中に受け付け、引き切る前は弓の引きを
@@ -21,16 +16,11 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class BowHits {
 
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int INTERVAL_JITTER_TICKS = 2;
-
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
-
     private BowHits() {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.BOW) || player.capabilities.isCreativeMode || player.isSpectator()
+        if (!HitGate.allowed(player, HitKind.BOW)
                 || !WeakSpotConfig.bowWeakSpotEnabled || WeakSpotConfig.bowHitTicks <= 0) {
             return;
         }
@@ -43,12 +33,10 @@ public final class BowHits {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.bowMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.BOW, WeakSpotConfig.bowMinHitIntervalTicks)) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.BOW);
         if (full) {
             BowDraw.addOvercharge(player);
         } else {
@@ -61,8 +49,4 @@ public final class BowHits {
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_HIT.remove(event.player.getUniqueID());
-    }
 }

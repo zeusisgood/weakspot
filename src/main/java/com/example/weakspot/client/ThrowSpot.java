@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.ThrowCharge;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
@@ -42,7 +43,7 @@ final class ThrowSpot {
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.THROW)
-                || player.capabilities.isCreativeMode || player.isSpectator() || player.isHandActive()) {
+                || !PlayerRules.canUse(player) || player.isHandActive()) {
             return false;
         }
         return ClientSettings.get().throwWeakSpotEnabled && ThrowCharge.isHoldingThrowable(player);

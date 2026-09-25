@@ -5,16 +5,11 @@ import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * エンチャントの弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。エンチャント台の画面を開いて物を置いている間に
@@ -25,9 +20,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class EnchantHits {
 
-    private static final int INTERVAL_JITTER_TICKS = 2;
-
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
     /** EntityPlayer の非公開の xpSeed（SRG field_175152_f）。読めなければ、エンチャントの弱点を出さない。 */
     private static Field xpSeed;
     private static boolean resolved;
@@ -45,7 +37,7 @@ public final class EnchantHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.ENCHANT) || player.isSpectator()
+        if (!HitGate.allowed(player, HitKind.ENCHANT)
                 || !WeakSpotConfig.enchantWeakSpotEnabled || !isAvailable()
                 || !(player.openContainer instanceof ContainerEnchantment)) {
             return;
@@ -55,15 +47,13 @@ public final class EnchantHits {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.enchantMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.ENCHANT, WeakSpotConfig.enchantMinHitIntervalTicks)) {
             return;
         }
         if (!reroll(player, container)) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.ENCHANT);
         ServerStats.countStreak(player);
         ServerStats.recordKindHit(player, HitKind.ENCHANT);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
@@ -82,8 +72,4 @@ public final class EnchantHits {
         return true;
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_HIT.remove(event.player.getUniqueID());
-    }
 }

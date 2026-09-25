@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.MeleeCharge;
 import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.VehicleTargets;
@@ -49,7 +50,7 @@ final class MeleeSpot {
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.MELEE)
-                || player.capabilities.isCreativeMode || player.isSpectator() || player.isHandActive()) {
+                || !PlayerRules.canUse(player) || player.isHandActive()) {
             return false;
         }
         return ClientSettings.get().meleeWeakSpotEnabled && MeleeCharge.isHoldingWeapon(player) && enemyNear

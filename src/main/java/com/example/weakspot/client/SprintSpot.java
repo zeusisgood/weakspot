@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.VehicleBoostMath;
@@ -49,7 +50,7 @@ final class SprintSpot {
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.SPRINT)
-                || player.capabilities.isCreativeMode || player.isSpectator() || player.isHandActive()) {
+                || !PlayerRules.canUse(player) || player.isHandActive()) {
             return false;
         }
         return ClientSettings.get().sprintWeakSpotEnabled && player.isSprinting() && !player.isRiding()

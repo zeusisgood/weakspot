@@ -8,9 +8,7 @@ import com.example.weakspot.common.AnimalTimers.Timer;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.AnimalStateMessage;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.WeakHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
@@ -20,8 +18,6 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * 動物の弱点（子どもの成長、繁殖の待ち時間、羊毛、卵、村人の取引上限）の、状態の問い合わせへの返事と、
@@ -32,11 +28,7 @@ public final class AnimalHits {
 
     /** バニラが動物への右クリックを受け付ける距離（NetHandlerPlayServer#processUseEntity。見えていれば 6 ブロック）。 */
     private static final double REACH_SQ = 36.0;
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int INTERVAL_JITTER_TICKS = 2;
 
-    /** プレイヤーごとの最後のヒットの tick。 */
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
     /** 羊ごと・村人ごとのヒット数（メモリだけ。動物がいなくなれば消える）。 */
     private static final Map<Entity, AnimalTimers.HitCounter> WOOL_HITS = new WeakHashMap<>();
     private static final Map<Entity, AnimalTimers.HitCounter> TRADE_HITS = new WeakHashMap<>();
@@ -123,7 +115,7 @@ public final class AnimalHits {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
     public static void onHit(EntityPlayerMP player, int entityId, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.ANIMAL)) {
+        if (!HitGate.allowed(player, HitKind.ANIMAL)) {
             return;
         }
         Entity entity = player.world.getEntityByID(entityId);
@@ -135,16 +127,14 @@ public final class AnimalHits {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        int minInterval = Math.max(0, WeakSpotConfig.animalMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        Long last = LAST_HIT.get(player.getUniqueID());
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.ANIMAL, WeakSpotConfig.animalMinHitIntervalTicks)) {
             return;
         }
         State state = state(entity, settings);
         if (state.mask == 0) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.ANIMAL);
         apply(entity, state.mask, settings);
         ServerStats.recordKindHit(player, HitKind.ANIMAL);
         ServerStats.countStreak(player);
@@ -188,11 +178,4 @@ public final class AnimalHits {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_HIT.remove(event.player.getUniqueID());
-        if (event.player instanceof EntityPlayerMP) {
-            VillagerBreedHints.onLogout((EntityPlayerMP) event.player);
-        }
-    }
 }

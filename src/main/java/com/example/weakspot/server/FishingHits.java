@@ -21,7 +21,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
@@ -48,8 +47,6 @@ public final class FishingHits {
     private static final Field STATE = Reflect.field(EntityFishHook.class, "the fishing weak spot",
             "currentState", "field_190627_av");
 
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int INTERVAL_JITTER_TICKS = 2;
     /** 釣りのヒットを受け付けた直後の、左クリックを止める時間（tick）。 */
     private static final int SUPPRESS_TICKS = 3;
 
@@ -157,7 +154,7 @@ public final class FishingHits {
 
     /** クライアントからのヒット通知（サーバースレッド）。照準の角度は確かめない（クライアントを信用する）。 */
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.FISHING) || player.capabilities.isCreativeMode || player.isSpectator()) {
+        if (!HitGate.allowed(player, HitKind.FISHING)) {
             return;
         }
         SyncedSettings settings = SyncedSettings.fromConfig();
@@ -167,8 +164,7 @@ public final class FishingHits {
         }
         Track track = TRACKS.computeIfAbsent(player.getUniqueID(), id -> new Track());
         long now = player.world.getTotalWorldTime();
-        int minInterval = Math.max(0, WeakSpotConfig.fishingMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (now - track.lastHitTick < minInterval) {
+        if (!HitGate.intervalOk(now, track.lastHitTick, WeakSpotConfig.fishingMinHitIntervalTicks)) {
             return;
         }
         track.lastHitTick = now;
@@ -209,8 +205,8 @@ public final class FishingHits {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        TRACKS.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    static void forget(EntityPlayer player) {
+        TRACKS.remove(player.getUniqueID());
     }
 }

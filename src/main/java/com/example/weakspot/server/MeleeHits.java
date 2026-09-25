@@ -10,6 +10,7 @@ import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -27,10 +28,7 @@ public final class MeleeHits {
 
     /** クライアントは 16 ブロック以内の敵で出す。サーバーは位置のずれを見込んで少し甘くする。 */
     private static final double ENEMY_RANGE = 20;
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int JITTER_TICKS = 2;
 
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
     /** 耐久回復の数え方の余り（溜めた攻撃の回数）。メモリにだけ持ち、再ログインで 0 に戻る。 */
     private static final Map<UUID, Integer> REPAIR_CARRY = new HashMap<>();
 
@@ -39,18 +37,15 @@ public final class MeleeHits {
 
     /** クライアントからのヒット通知（サーバースレッド）。 */
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.MELEE) || player.capabilities.isCreativeMode
-                || player.isSpectator() || !WeakSpotConfig.meleeWeakSpotEnabled
+        if (!HitGate.allowed(player, HitKind.MELEE) || !WeakSpotConfig.meleeWeakSpotEnabled
                 || !MeleeCharge.isHoldingWeapon(player) || !MeleeTargets.hasEnemyNear(player, ENEMY_RANGE)) {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.meleeMinHitIntervalTicks - JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.MELEE, WeakSpotConfig.meleeMinHitIntervalTicks)) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.MELEE);
         int combo = ServerStats.countStreak(player);
         MeleeCharge.add(player, WeakSpotConfig.meleeChargePerHit * ComboFactor.factor(combo),
                 WeakSpotConfig.meleeChargeMax);
@@ -72,16 +67,15 @@ public final class MeleeHits {
         MiningRewards.repairHeldTool(player, result.repair);
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        UUID id = event.player.getUniqueID();
-        LAST_HIT.remove(id);
-        REPAIR_CARRY.remove(id);
-        MeleeCharge.clear(event.player);
-    }
 
     @SubscribeEvent
     public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         MeleeCharge.clear(event.player);
+    }
+
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    static void forget(EntityPlayer player) {
+        REPAIR_CARRY.remove(player.getUniqueID());
+        MeleeCharge.clear(player);
     }
 }

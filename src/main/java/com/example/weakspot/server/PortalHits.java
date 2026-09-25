@@ -6,15 +6,10 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * ネザーゲートの弱点のヒット通知の検証と効果（論理サーバー。1.8.0）。ゲートの中にいる間（非公開の portalCounter が
@@ -24,9 +19,6 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class PortalHits {
 
-    private static final int INTERVAL_JITTER_TICKS = 2;
-
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
     /** Entity の非公開の portalCounter（SRG field_82153_h）。読めなければ、ゲートの弱点を出さない。 */
     private static Field portalCounter;
     private static boolean resolved;
@@ -44,8 +36,7 @@ public final class PortalHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.PORTAL) || player.capabilities.isCreativeMode
-                || player.isSpectator() || player.isRiding() || !WeakSpotConfig.portalWeakSpotEnabled
+        if (!HitGate.allowed(player, HitKind.PORTAL) || player.isRiding() || !WeakSpotConfig.portalWeakSpotEnabled
                 || !isAvailable()) {
             return;
         }
@@ -59,12 +50,10 @@ public final class PortalHits {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.portalMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.PORTAL, WeakSpotConfig.portalMinHitIntervalTicks)) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.PORTAL);
         int combo = ServerStats.countStreak(player);
         int added = (int) Math.round(WeakSpotConfig.portalHitTicks * ComboFactor.factor(combo));
         try {
@@ -76,8 +65,4 @@ public final class PortalHits {
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_HIT.remove(event.player.getUniqueID());
-    }
 }

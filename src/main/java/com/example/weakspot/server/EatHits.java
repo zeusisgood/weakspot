@@ -4,14 +4,9 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.EatDraw;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.config.WeakSpotConfig;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * 食事・飲み物の弱点のヒット通知の検証と効果（論理サーバー。1.6.0）。食べている・飲んでいる最中に受け付け、
@@ -20,26 +15,20 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class EatHits {
 
-    private static final int INTERVAL_JITTER_TICKS = 2;
-
-    private static final Map<UUID, Long> LAST_HIT = new HashMap<>();
-
     private EatHits() {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!ServerSwitches.isEnabled(player, HitKind.EAT) || player.capabilities.isCreativeMode || player.isSpectator()
+        if (!HitGate.allowed(player, HitKind.EAT)
                 || !WeakSpotConfig.eatWeakSpotEnabled || WeakSpotConfig.eatHitTicks <= 0
                 || !EatDraw.isEating(player)) {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        Long last = LAST_HIT.get(player.getUniqueID());
-        int minInterval = Math.max(0, WeakSpotConfig.eatMinHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (last != null && now - last < minInterval) {
+        if (!HitGate.ready(player, HitKind.EAT, WeakSpotConfig.eatMinHitIntervalTicks)) {
             return;
         }
-        LAST_HIT.put(player.getUniqueID(), now);
+        HitGate.mark(player, HitKind.EAT);
         EatDraw.add(player, WeakSpotConfig.eatHitTicks);
         ServerStats.recordKindHit(player, HitKind.EAT);
         int combo = ServerStats.countStreak(player);
@@ -47,8 +36,4 @@ public final class EatHits {
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        LAST_HIT.remove(event.player.getUniqueID());
-    }
 }

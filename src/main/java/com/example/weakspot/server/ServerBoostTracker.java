@@ -29,8 +29,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ServerBoostTracker {
 
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    private static final int INTERVAL_JITTER_TICKS = 2;
 
     private static final Map<UUID, Mining> MINING = new HashMap<>();
 
@@ -108,7 +106,8 @@ public final class ServerBoostTracker {
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
     public static void onHit(EntityPlayerMP player, BlockPos pos, int streak) {
-        if (player.capabilities.isCreativeMode || player.isSpectator() || !ServerSwitches.isEnabled(player, HitKind.MINING)) {
+        // クリエイティブはブロックが一瞬で壊れるので、採掘の弱点は出ない
+        if (player.capabilities.isCreativeMode || !HitGate.allowed(player, HitKind.MINING)) {
             return;
         }
         Mining mining = MINING.get(player.getUniqueID());
@@ -119,8 +118,7 @@ public final class ServerBoostTracker {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        int minInterval = Math.max(0, WeakSpotConfig.minHitIntervalTicks - INTERVAL_JITTER_TICKS);
-        if (now - mining.lastHitTick < minInterval) {
+        if (!HitGate.intervalOk(now, mining.lastHitTick, WeakSpotConfig.minHitIntervalTicks)) {
             return;
         }
         mining.lastHitTick = now;
@@ -162,9 +160,9 @@ public final class ServerBoostTracker {
         event.setNewSpeed((float) (event.getNewSpeed() * BoostMath.serverSpeedFactor(mining.extraTicks, elapsed)));
     }
 
-    @SubscribeEvent
-    public static void onLogout(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent event) {
-        MINING.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    static void forget(EntityPlayer player) {
+        MINING.remove(player.getUniqueID());
     }
 
     @SubscribeEvent

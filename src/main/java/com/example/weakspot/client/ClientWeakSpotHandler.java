@@ -1,5 +1,6 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.AnimalTargets;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
@@ -226,7 +227,7 @@ public final class ClientWeakSpotHandler {
 
     private static void updateAim(Minecraft mc) {
         EntityPlayerSP player = mc.player;
-        if (player.capabilities.isCreativeMode || player.isSpectator()) {
+        if (!PlayerRules.canUse(player)) {
             return;
         }
         RayTraceResult target = mc.objectMouseOver;

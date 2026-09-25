@@ -1,11 +1,11 @@
 package com.example.weakspot.client;
 
+import com.example.weakspot.PlayerRules;
 import com.example.weakspot.EatDraw;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.SyncedSettings;
-import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -37,7 +37,7 @@ final class EatSpot {
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.EAT)
-                || player.capabilities.isCreativeMode || player.isSpectator()) {
+                || !PlayerRules.canUse(player)) {
             return false;
         }
         SyncedSettings settings = ClientSettings.get();
