@@ -124,13 +124,13 @@
 ### 6.2 効果（加速）
 
 - 1 ヒットで、**2 秒（`vehicleBoostDurationTicks`、初期値 40 tick）の間、速さ ×1.5**（`vehicleBoostMultiplier`、初期値 1.5）。当て続ければ途切れない（残り時間は、ヒットのたびに 40 tick に戻す）
-- **コンボの上乗せあり**: 倍率 = min(`vehicleBoostMultiplier` × コンボの掛け数（`MachineComboBoost.factor`。25 で ×1.25 … 1000 で ×4）, `vehicleBoostMaxMultiplier`（初期値 **3.0**）)
-  - 上限がないと、コンボ 1000 で 6 倍になり、トロッコ・ボートが制御できない速さになるため、初期値で抑える
+- **コンボの上乗せあり**: 倍率 = `vehicleBoostMultiplier` × コンボの掛け数（`MachineComboBoost.factor`。25 で ×1.25 … 1000 で ×4。初期値ならコンボ 1000 で **6 倍**）
+  - **上限は初期値では無効**（ユーザーの判断。速すぎて制御できないのも面白さとする）。設定 `vehicleBoostMaxMultiplier`（初期値 **0 = 上限なし**、0 か 1.0〜100.0）に数を書くと、その倍率で抑える
 - 乗り物ごとのかけ方:
   - 馬系・豚: 移動速度の値（`SharedMonsterAttributes.MOVEMENT_SPEED`）に、決まった UUID の一時的な修正（倍率 − 1、「合計に掛ける」種類）をサーバーでかけ、時間が来たら外す。修正は乗っている人のクライアントにも届き、そちらの動きの計算にも効く
   - トロッコ: サーバーで、レールの上の最高速度を倍率に合わせて上げ、進んでいる向きに毎 tick 押す（加速レールと同じ考え方）。レールから外れているときは押さない
   - ボート: ボートの動きは乗っている人のクライアントが決めているので、**クライアントで**、前向きの速さを倍率に合わせて足す（上限つき）。サーバーは受け付けたヒットを数えるだけ
-- 設定（すべて **[サーバー]**、`SyncedSettings` で送る。ボートの計算にクライアントが使うため）: `vehicleWeakSpotEnabled`（true）、`vehicleBoostMultiplier`（1.5）、`vehicleBoostMaxMultiplier`（3.0）、`vehicleBoostDurationTicks`（40）、`vehicleMinHitIntervalTicks`（6）
+- 設定（すべて **[サーバー]**、`SyncedSettings` で送る。ボートの計算にクライアントが使うため）: `vehicleWeakSpotEnabled`（true）、`vehicleBoostMultiplier`（1.5）、`vehicleBoostMaxMultiplier`（0 = 上限なし）、`vehicleBoostDurationTicks`（40）、`vehicleMinHitIntervalTicks`（6）
 
 ### 6.3 通信・統計など
 
@@ -167,5 +167,5 @@
 - ディスペンサーの「発射 ×n」が、上限を下げたときに、実際に出る数と合っていること
 - `machineParticlesVisible` をオフにすると、自分の画面にだけ機械の粒子が出なくなること（ほかの人には見えること）
 - かまど・醸造台・スポナーを叩くと、上に黄色の進み具合のバーが出て、加速で一気に進むこと。かまど・醸造台は、その下に橙の燃料のバーが出ること
-- 馬・豚に乗って走ると、照準の上か下に水色の弱点が出て、当てると速くなり、進む向きはぶれないこと。トロッコ・ボートは照準のまわりに出ること。コンボが上がるとさらに速くなり、3 倍で止まること。トロッコがカーブで脱線しないこと
+- 馬・豚に乗って走ると、照準の上か下に水色の弱点が出て、当てると速くなり、進む向きはぶれないこと。トロッコ・ボートは照準のまわりに出ること。コンボが上がるとさらに速くなること（初期値では上限なし。`vehicleBoostMaxMultiplier` に 3 などを書くと、その倍率で止まること）。トロッコがカーブで脱線しないこと
 - ほかのプレイヤーのコンボが 10 以上になると、頭の上に「n HIT」が出て、途切れると消えること
