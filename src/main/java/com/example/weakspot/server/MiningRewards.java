@@ -24,9 +24,12 @@ public final class MiningRewards {
     private MiningRewards() {
     }
 
-    /** サーバーが採掘ヒットを受け付けたときに呼ぶ。節目だけを判定する（耐久回復は壊したときの onBlockBroken）。 */
+    /**
+     * サーバーが採掘ヒットを受け付けて、統計に記録したあとに呼ぶ。節目だけを判定する（耐久回復は壊したときの onBlockBroken）。
+     * 節目は累計の採掘ヒット数で数える（1.6.1。累計をリセットすると、もう一度受け取れる）。
+     */
     static void onMiningHit(EntityPlayerMP player) {
-        long hits = ServerStats.addRewardHit(player);
+        long hits = ServerStats.total(player).hits;
         for (int index : Milestones.reached(WeakSpotConfig.milestones, hits)) {
             int xp = Milestones.amountAt(WeakSpotConfig.milestoneXp, index);
             if (xp > 0) {
