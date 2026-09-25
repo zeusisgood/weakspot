@@ -301,6 +301,7 @@ weakspot.news.1.8.2=Boat weak spots now follow your turns; weak spots far from t
 weakspot.news.1.8.3=Markers tab: step colors and shapes back with ◀; clearer wording across the UI
 weakspot.news.1.8.4=Sneak-right-click a villager to see why it cannot breed
 weakspot.news.1.8.5=The guide book now has chapters, clickable contents and headings
+weakspot.news.1.8.6=Weak spots now appear in creative mode too, plus internal cleanup
 weakspot.breed.line=Breeding: %s
 weakspot.breed.separator= / 
 weakspot.breed.ready=Ready to breed (it starts after a short wait)

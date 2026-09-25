@@ -301,6 +301,7 @@ weakspot.news.1.8.2=ボートで曲がっても弱点がついてくるように
 weakspot.news.1.8.3=「弱点マーカー」タブで色と形を前に戻せるようにし、画面の言い回しを直した
 weakspot.news.1.8.4=村人をしゃがんで右クリックすると、繁殖できない理由を出すようにした
 weakspot.news.1.8.5=ガイドの本を章と目次で整理し、見出しを付けて読みやすくした
+weakspot.news.1.8.6=クリエイティブでもすべての弱点が出るようにし、内部を整理した
 weakspot.breed.line=繁殖: %s
 weakspot.breed.separator=・
 weakspot.breed.ready=繁殖の条件はそろっています（少し待つと始まる）
