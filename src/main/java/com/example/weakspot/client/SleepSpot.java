@@ -3,6 +3,7 @@ package com.example.weakspot.client;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.MarkerMotion;
+import com.example.weakspot.common.SleepSpotArea;
 import com.example.weakspot.common.SleepTime;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
@@ -31,9 +32,6 @@ final class SleepSpot {
     private static final float[] RING = {1.0F, 0.98F, 0.85F};
     private static final float[] CENTER = {1.0F, 1.0F, 0.95F};
     private static final double RADIUS = 12;
-    /** 画面の縁から離す距離（GUI ピクセル）と、下の避ける範囲（ボタンとチャット欄。画面の高さに対する割合）。 */
-    private static final double MARGIN = 24;
-    private static final double BOTTOM_AVOID = 0.25;
 
     private static final Random RANDOM = new Random();
     private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
@@ -66,20 +64,33 @@ final class SleepSpot {
         MOTION.jumpTo(x, y);
     }
 
-    /** 画面の中のランダムな位置（下の 1/4 は避ける）。前の位置から画面の高さの 1/4 以上離す。 */
+    /**
+     * 画面の中央の範囲（1.6.2。SleepSpotArea。画面全体だと、次のマーカーが遠すぎるため）のランダムな位置。
+     * 前の位置から SleepSpotArea.minMove 以上離す（取れなければ、一番離れた位置）。
+     */
     private static void place(GuiScreen gui, double prevX, double prevY) {
-        double minX = MARGIN;
-        double maxX = Math.max(minX, gui.width - MARGIN);
-        double minY = MARGIN;
-        double maxY = Math.max(minY, gui.height * (1 - BOTTOM_AVOID) - RADIUS);
-        double minMove = gui.height / 4.0;
+        double[] area = SleepSpotArea.area(gui.width, gui.height, RADIUS);
+        double minMove = SleepSpotArea.minMove(gui.width, gui.height, RADIUS);
+        double bestX = x;
+        double bestY = y;
+        double bestMove = -1;
         for (int i = 0; i < 40; i++) {
-            x = minX + RANDOM.nextDouble() * (maxX - minX);
-            y = minY + RANDOM.nextDouble() * (maxY - minY);
-            if (Math.hypot(x - prevX, y - prevY) >= minMove) {
+            double nx = area[0] + RANDOM.nextDouble() * (area[1] - area[0]);
+            double ny = area[2] + RANDOM.nextDouble() * (area[3] - area[2]);
+            double move = Math.hypot(nx - prevX, ny - prevY);
+            if (move >= minMove) {
+                x = nx;
+                y = ny;
                 return;
             }
+            if (move > bestMove) {
+                bestMove = move;
+                bestX = nx;
+                bestY = ny;
+            }
         }
+        x = bestX;
+        y = bestY;
     }
 
     @SubscribeEvent
