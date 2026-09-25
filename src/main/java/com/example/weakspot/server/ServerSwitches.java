@@ -18,12 +18,22 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 public final class ServerSwitches {
 
     private static final PlayerSwitches<UUID> SWITCHES = new PlayerSwitches<>();
+    /** 機械の粒子を見るか（1.6.0。クライアントの machineParticlesVisible。届く前は見る）。 */
+    private static final PlayerSwitches<UUID> PARTICLES = new PlayerSwitches<>();
 
     private ServerSwitches() {
     }
 
     public static boolean isEnabled(EntityPlayer player) {
         return SWITCHES.isEnabled(player.getUniqueID());
+    }
+
+    public static boolean isParticlesVisible(EntityPlayer player) {
+        return PARTICLES.isEnabled(player.getUniqueID());
+    }
+
+    public static void setParticlesVisible(EntityPlayerMP player, boolean visible) {
+        PARTICLES.set(player.getUniqueID(), visible);
     }
 
     /** クライアントからオン・オフが届いた（サーバースレッド）。オフにした瞬間に、出ていたマークを消す。 */
@@ -37,5 +47,6 @@ public final class ServerSwitches {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         SWITCHES.forget(event.player.getUniqueID());
+        PARTICLES.forget(event.player.getUniqueID());
     }
 }

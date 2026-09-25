@@ -7,26 +7,33 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** クライアント → サーバー: 弱点のオン・オフ（HOME キー）の状態。ログイン時と、切り替えたときに送る。 */
+/**
+ * クライアント → サーバー: 弱点のオン・オフ（HOME キー）の状態と、機械の粒子を見るか（1.6.0、machineParticlesVisible）。
+ * ログイン時と、どちらかが変わったときに送る。
+ */
 public class SwitchMessage implements IMessage {
 
     private boolean enabled;
+    private boolean particlesVisible = true;
 
     public SwitchMessage() {
     }
 
-    public SwitchMessage(boolean enabled) {
+    public SwitchMessage(boolean enabled, boolean particlesVisible) {
         this.enabled = enabled;
+        this.particlesVisible = particlesVisible;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         enabled = buf.readBoolean();
+        particlesVisible = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeBoolean(enabled);
+        buf.writeBoolean(particlesVisible);
     }
 
     public static class Handler implements IMessageHandler<SwitchMessage, IMessage> {
@@ -35,7 +42,11 @@ public class SwitchMessage implements IMessage {
         public IMessage onMessage(SwitchMessage message, MessageContext ctx) {
             EntityPlayerMP player = ctx.getServerHandler().player;
             boolean enabled = message.enabled;
-            player.getServerWorld().addScheduledTask(() -> ServerSwitches.set(player, enabled));
+            boolean particlesVisible = message.particlesVisible;
+            player.getServerWorld().addScheduledTask(() -> {
+                ServerSwitches.set(player, enabled);
+                ServerSwitches.setParticlesVisible(player, particlesVisible);
+            });
             return null;
         }
     }

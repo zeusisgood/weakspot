@@ -58,6 +58,7 @@ public final class ToggleKeyHandler {
 
     /** 最後にサーバーへ伝えた状態。null なら、このワールド（サーバー）にはまだ伝えていない。 */
     private static Boolean lastSent;
+    private static Boolean lastSentParticles;
 
     /**
      * 弱点のオン・オフを、サーバーに伝える（ワールドに入ったとき、切り替えたとき。設定画面で変えたときも）。
@@ -66,12 +67,15 @@ public final class ToggleKeyHandler {
     static void syncToServer(Minecraft mc) {
         if (mc.world == null || mc.player == null || mc.getConnection() == null) {
             lastSent = null;
+            lastSentParticles = null;
             return;
         }
         boolean on = WeakSpotConfig.weakSpotsEnabled;
-        if (lastSent == null || lastSent != on) {
+        boolean particles = WeakSpotConfig.machineParticlesVisible;
+        if (lastSent == null || lastSent != on || lastSentParticles == null || lastSentParticles != particles) {
             lastSent = on;
-            WeakSpotMod.network.sendToServer(new SwitchMessage(on));
+            lastSentParticles = particles;
+            WeakSpotMod.network.sendToServer(new SwitchMessage(on, particles));
         }
     }
 

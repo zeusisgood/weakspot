@@ -11,6 +11,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -35,6 +37,8 @@ public final class MachineAccelerator {
     private static final Map<Integer, Map<BlockPos, MachineBoost>> BOOSTS = new HashMap<>();
     /** 粒子を面から外側へ出す距離（ブロック）。 */
     private static final double PARTICLE_OUTSET = 0.05;
+    /** 粒子を送るプレイヤーの距離（ブロック。バニラの粒子と同じ）。 */
+    private static final double PARTICLE_RANGE = 32;
 
     private MachineAccelerator() {
     }
@@ -121,7 +125,14 @@ public final class MachineAccelerator {
                     z = box.maxZ + PARTICLE_OUTSET;
                     break;
             }
-            ((WorldServer) world).spawnParticle(EnumParticleTypes.REDSTONE, x, y, z, 0, r, g, b, 1.0);
+            // 各自の設定（machineParticlesVisible）で見ない人には送らない（1.6.0）
+            for (EntityPlayer viewer : world.playerEntities) {
+                if (viewer instanceof EntityPlayerMP && ServerSwitches.isParticlesVisible(viewer)
+                        && viewer.getDistanceSq(x, y, z) <= PARTICLE_RANGE * PARTICLE_RANGE) {
+                    ((WorldServer) world).spawnParticle((EntityPlayerMP) viewer, EnumParticleTypes.REDSTONE, false,
+                            x, y, z, 0, r, g, b, 1.0);
+                }
+            }
         }
     }
 

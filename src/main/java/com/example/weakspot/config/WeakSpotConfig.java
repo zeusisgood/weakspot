@@ -149,8 +149,8 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double machineBoostMaxMultiplier = 16.0;
 
-    @Config.Comment({"[サーバー] 加速中の機械のまわりに、速さに合わせた色の粒子を出すか（近くのプレイヤー全員に見える）",
-            "サーバーだけが使う（クライアントには送らない）"})
+    @Config.Comment({"[サーバー] 加速中の機械のまわりに、速さに合わせた色の粒子を出すか（近くのプレイヤーに見える。",
+            "各自の machineParticlesVisible がオフの人には送らない）。サーバーだけが使う（クライアントには送らない）"})
     public static boolean machineBoostParticles = true;
 
     @Config.Comment("[サーバー] 機械の加速が続く時間（tick）。machineMinHitIntervalTicks 以上なら、最短の間隔で当て続けると途切れない")
@@ -333,6 +333,10 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）",
             "見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く"})
     public static boolean weakSpotTrailEnabled = true;
+
+    @Config.Comment({"[クライアント] 加速中の機械のまわりの色の粒子を、自分の画面に出すか（1.6.0）",
+            "自分の機械の粒子も、ほかのプレイヤーの機械の粒子も、同じ設定で消える"})
+    public static boolean machineParticlesVisible = true;
 
     @Config.Comment({"[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか",
             "自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る"})
