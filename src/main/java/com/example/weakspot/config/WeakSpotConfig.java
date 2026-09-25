@@ -254,6 +254,11 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int meleeMinHitIntervalTicks = 4;
 
+    @Config.Comment({"[サーバー] 近接の弱点の大きさの倍率。weakSpotRadiusRatio と weakSpotMinRadius に掛ける",
+            "上限（weakSpotMaxRadiusRatio）には掛けない（弱点が面からはみ出さないように）。ほかの種類の弱点は変わらない"})
+    @Config.RangeDouble(min = 1.0, max = 3.0)
+    public static double meleeWeakSpotScale = 1.5;
+
     @Config.Comment({"[サーバー] 近接の弱点のクリティカル何回ごとに、手に持っている物の耐久を回復するか。0 で回復しない",
             "余りはログアウトまで持ち越す。サーバーだけが使う（クライアントには送らない）"})
     @Config.RangeInt(min = 0, max = 100000)

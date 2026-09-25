@@ -60,6 +60,8 @@ public final class SyncedSettings {
     public int bowMinHitIntervalTicks;
     public boolean meleeWeakSpotEnabled;
     public int meleeMinHitIntervalTicks;
+    /** 近接の弱点の大きさの倍率（1.5.0）。 */
+    public double meleeWeakSpotScale;
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -116,6 +118,7 @@ public final class SyncedSettings {
         s.bowMinHitIntervalTicks = WeakSpotConfig.bowMinHitIntervalTicks;
         s.meleeWeakSpotEnabled = WeakSpotConfig.meleeWeakSpotEnabled;
         s.meleeMinHitIntervalTicks = WeakSpotConfig.meleeMinHitIntervalTicks;
+        s.meleeWeakSpotScale = WeakSpotConfig.meleeWeakSpotScale;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -159,6 +162,7 @@ public final class SyncedSettings {
         buf.writeInt(bowMinHitIntervalTicks);
         buf.writeBoolean(meleeWeakSpotEnabled);
         buf.writeInt(meleeMinHitIntervalTicks);
+        buf.writeDouble(meleeWeakSpotScale);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -202,6 +206,7 @@ public final class SyncedSettings {
         s.bowMinHitIntervalTicks = buf.readInt();
         s.meleeWeakSpotEnabled = buf.readBoolean();
         s.meleeMinHitIntervalTicks = buf.readInt();
+        s.meleeWeakSpotScale = buf.readDouble();
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;

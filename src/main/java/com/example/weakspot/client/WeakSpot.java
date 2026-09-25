@@ -156,8 +156,10 @@ final class WeakSpot {
         if (rect == null || WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
             return null;
         }
-        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio,
-                settings.weakSpotMinRadius, settings.weakSpotMaxRadiusRatio, settings.edgeMargin,
+        // 近接の弱点だけ大きくする（1.5.0）。上限には掛けないので、面からははみ出さない
+        double scale = kind == HitKind.MELEE ? settings.meleeWeakSpotScale : 1;
+        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio * scale,
+                settings.weakSpotMinRadius * scale, settings.weakSpotMaxRadiusRatio, settings.edgeMargin,
                 settings.minMoveDistance);
         WeakSpot spot = new WeakSpot(kind, entity, entity.getPosition(), face, 0, rect, layout, box);
         spot.follow(box);
