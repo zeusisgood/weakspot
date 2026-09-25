@@ -14,7 +14,7 @@
 ## 0. バージョンと互換性
 
 - バージョンは 1.6.4（またはその後のパッチ）→ **1.7.0**（`build.gradle` の `version` と `WeakSpotMod.VERSION` の2か所を、そろえて変える）
-- **通信内容が変わる**（`HitKind` に `LADDER`・`ELYTRA`・`ENCHANT` を足す、`SyncedSettings` にはしご・エリトラ・エンチャントの設定を足す、`StatsMessage` に `ladderHits`・`elytraHits`・`enchantHits` を足す、`MilestoneMessage` に節目の種類を足す）。そのため 1.6.x とは接続できない
+- **通信内容が変わる**（`HitKind` に `LADDER`・`ELYTRA`・`ENCHANT`・`HARVEST` を足す、`SyncedSettings` にはしご・エリトラ・エンチャント・収穫の設定を足す、`StatsMessage` に `ladderHits`・`elytraHits`・`enchantHits`・`harvestHits` を足す、`MilestoneMessage` に節目の種類を足す）。そのため 1.6.x とは接続できない
   - `WeakSpotMod.ACCEPTED_VERSIONS` を `[1.7,1.8)` にする
   - README の更新履歴に、1.6.x とは接続できないこと（サーバーとクライアントを同時に更新すること）を書く
 - 1.6.x と接続できないので、この仕様書の機能は `ServerFeatures.since` で囲まなくてよい（1.7.x のサーバーはすべて持つ）
@@ -178,7 +178,7 @@
 | 節目 | 数えるもの | 数字 | ごほうび |
 |---|---|---|---|
 | **採掘**（今まであるもの） | 累計の採掘ヒット数（`hits`） | `milestones`（初期値を §4.2 に変える） | 経験値（`milestoneXp`）とツールの耐久回復（`milestoneRepair`）。今までどおり |
-| **種類ごと**（新しい） | それぞれの累計のヒット数: 成長 `growthHits`・機械 `machineHits`・動物 `animalHits`・釣り `fishingHits`・弓 `bowHits`・近接 `critHits`・乗り物 `vehicleHits`・食事 `eatHits`・睡眠 `sleepHits`・はしご `ladderHits`・エリトラ `elytraHits`・エンチャント `enchantHits` | **採掘と同じ** `milestones` | **経験値だけ**（`milestoneXp`） |
+| **種類ごと**（新しい） | それぞれの累計のヒット数: 成長 `growthHits`・機械 `machineHits`・動物 `animalHits`・釣り `fishingHits`・弓 `bowHits`・近接 `critHits`・乗り物 `vehicleHits`・食事 `eatHits`・睡眠 `sleepHits`・はしご `ladderHits`・エリトラ `elytraHits`・エンチャント `enchantHits`・収穫 `harvestHits` | **採掘と同じ** `milestones` | **経験値だけ**（`milestoneXp`） |
 | **合計**（新しい） | すべての種類の累計のヒット数の合計 | `totalMilestones`（§4.2） | 経験値（`totalMilestoneXp`） |
 
 - 1 回のヒットで、種類ごとの節目と合計の節目に同時に達したら、両方のごほうびをもらう。演出は合計のほうを出し、チャットは両方
@@ -210,36 +210,93 @@
 
 - ガイドの本の 3 ページ目「耐久回復と節目」の「100、777、1000、10000回」を、「50 回から 10 万回まで細かく、その先も」「採掘以外の種類と、全部の合計にも節目がある」に書き直す
 
-## 5. README とガイドの本
+## 5. 収穫の弱点（新しい種類 `HitKind.HARVEST`）
 
-- README に「はしご」「エリトラ」「エンチャント」の節を足す（乗り物・睡眠の節にならう）。節目の節を §4 に合わせて書き直す
-- 設定表の `[サーバー]` に、はしご 5 つ・エリトラ 3 つ・エンチャント 2 つ・節目の `kindMilestonesEnabled` / `totalMilestonesEnabled` / `milestoneRepeatInterval` / `totalMilestones` / `totalMilestoneXp` / `totalMilestoneRepeatInterval` を足し、`milestones` / `milestoneXp` / `milestoneRepair` の初期値を直す。`[クライアント]` に `ladderBoostBarEnabled`
-- 統計の一覧に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」
-- ガイドの本に 3 ページ足す（`GuideBook.PAGES` を 18 に）。案:
+### 5.1 対象
+
+- **実った作物**:
+  - `BlockCrops` を継承したもの（小麦・ニンジン・ジャガイモ・ビートルートと、Mod の作物）で `isMaxAge` が true
+  - ネザーウォート（`age` = 3）、カカオ豆（`age` = 2）
+- 対象外: カボチャ・スイカ（茎は残して実だけ取るので、バニラどおり壊す）、サトウキビ・サボテン、`growthExtraBlocks` の作物（実った状態の決まった読み方がないため）
+- まだ育つ作物は、今までどおり成長の弱点の対象（実ったものとは重ならない）
+
+### 5.2 出し方（クライアント）
+
+- 成長の弱点と同じ操作: **素手（メインハンドが空）**で、実った作物に右クリックを**押しっぱなし**にすると出る。種・骨粉などを持っているときは出さない（バニラどおり）
+- 出す面・大きさ・当たり判定は成長の弱点と同じ（`FaceMath.growthFaceAxis`、`growthMinRadius`）。照準を合わせるだけでヒット（毎フレーム）
+- 色は**マゼンタ `#FF3DCB`**（輪と中心は、ほかのマークと同じく白に寄せる `MarkerColor.towardWhite`）
+  - 選んだ理由: バニラの作物は、黄（小麦）・橙（ニンジン）・黄土色（ジャガイモ）・赤（ビートルート・ネザーウォート）・茶（カカオ豆）と葉の緑。ピンク系の作物はないので、どれの上でもはっきり見える。成長の弱点（橙赤）とも見分けられ、「育てる」と「収穫する」がひと目で分かる
+- **押しっぱなしで続けて収穫してよい**（ユーザーの判断）: 収穫して植え直すと、その場で成長の弱点（年齢 0 の作物）に切り替わる。クライアントは、毎フレーム、そのブロックの状態から種類（成長・収穫）を決め、変わったら出し直す
+- 対象を右クリックしたら、成長と同じく `RightClickBlock` をキャンセルして、バニラの動作を止める（両側、`RightClickTargets`）
+- 他のプレイヤーには、成長の弱点と同じくブロックのマークとして見せる（`OtherMarkers`）
+- ヒットの間隔は `harvestMinHitIntervalTicks`（**[サーバー]**、`SyncedSettings`。初期値 4）
+
+### 5.3 効果（サーバー、`server/HarvestHits`）
+
+- 検証は成長と同じ（`RightClickHits`: 直前 10 tick 以内にそのブロックを右クリックしたか、届く距離か、間隔、オン・オフ、`harvestWeakSpotEnabled`、今も実っているか）
+- 受け付けたら、次の順に行う:
+  1. `BlockEvent.BreakEvent` を出す。キャンセルされたら（保護の Mod などで）収穫しない
+  2. 収穫物を作る: `Block#getDrops`（幸運 0）と、`ForgeEventFactory.fireBlockHarvesting`（ほかの Mod が収穫物を変えられるように）
+  3. **植え直し**: 収穫物から「種」を 1 つ取り除き、作物を年齢 0 に戻す（`BlockCrops#withAge(0)`、ネザーウォート・カカオ豆は `age` を 0 に。カカオ豆は向きを保つ）
+     - 「種」は、そのブロックをピックしたときの物（`Block#getItem`。小麦なら小麦の種、ニンジンならニンジン）
+     - 収穫物に種がなかったとき（バニラの小麦は 1 割くらいで種が出ない）は、**取り除かずにそのまま植え直す**（おまかせで決めた。不運で畑に穴が空かないように）
+  4. **コンボのおまけ**: 種を除いた収穫物の数に、コンボの掛け数（`MachineComboBoost.factor(コンボ)`。25 で ×1.25 … 1000 で ×4）を掛ける。端数は確率で 1 つ足す（×1.25 なら 4 回に 1 回 +1）。上限はない
+     - 増やすのは収穫物だけ。小麦の種・ビートルートの種のように、収穫物と別の種は増やさない（持ち物が種であふれないように）。ニンジン・ジャガイモ・ネザーウォート・カカオ豆は、植え直しに使った 1 つを除いた残りを増やす
+     - 計算（数と掛け数から、増やしたあとの数を決める。乱数を渡す）は `common/HarvestBonus` に置き、単体テストを書く
+  5. 収穫物をブロックの位置に落とす（`Block.spawnAsEntity`）。壊れる音と粒子（`World#playEvent(2001, …)`）を出す
+- `ServerStats.countStreak`（コンボ）を先に呼び、その数でおまけを決める。統計の `harvestHits` を足し、`ServerBoostTracker.notifyNearbyPlayers`（鳴らす位置は作物）
+
+### 5.4 設定
+
+| キー | 種類 | 初期値 | 説明 |
+|---|---|---|---|
+| `harvestWeakSpotEnabled` | [サーバー]（同期） | true | 収穫の弱点を出すか。Quark など、右クリックで収穫する Mod と重なるときはオフに |
+| `harvestMinHitIntervalTicks` | [サーバー]（同期） | 4 | ヒットの最小間隔（tick） |
+| `harvestComboBonus` | [サーバー]（サーバーだけ） | true | コンボのおまけで収穫物を増やすか |
+
+### 5.5 統計・節目
+
+- **収穫ヒット数**（`harvestHits`）を足す（`StatsMessage`、保存は `PlayerPersisted` の `weakspot` の新しいキー）。統計画面と `/weakspot stats` にも出す
+- 種類ごとの節目（§4）の対象にする
+
+### 5.6 実装時の確認事項
+
+- Quark など、右クリックで収穫する Mod と一緒に入れたとき、二重に収穫しないか（どちらが先に動くか）
+- Mod の作物（`BlockCrops` を継承したもの）で、ピックした物が種になっているか。なっていない作物は、種を取り除かずに植え直す（上の「種がなかったとき」と同じ）
+
+## 6. README とガイドの本
+
+- README に「はしご」「エリトラ」「エンチャント」「収穫」の節を足す（乗り物・睡眠の節にならう）。節目の節を §4 に合わせて書き直す
+- 設定表の `[サーバー]` に、はしご 5 つ・エリトラ 3 つ・エンチャント 2 つ・収穫 3 つ・節目の `kindMilestonesEnabled` / `totalMilestonesEnabled` / `milestoneRepeatInterval` / `totalMilestones` / `totalMilestoneXp` / `totalMilestoneRepeatInterval` を足し、`milestones` / `milestoneXp` / `milestoneRepair` の初期値を直す。`[クライアント]` に `ladderBoostBarEnabled`
+- 統計の一覧に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」「収穫ヒット数」
+- ガイドの本に 4 ページ足す（`GuideBook.PAGES` を 19 に）。案:
   - 16「はしご」: 「はしごやツタを登り降りしている間、照準の真上か真下に茶色の弱点が出ます。照準を合わせると登り降りが速くなり、コンボが続くほど速くなります。」 / "While climbing up or down a ladder or vine, a brown weak spot appears straight above or below your crosshair. Aim at it to climb faster; the longer your combo, the faster you go."
   - 17「エリトラ」: 「エリトラで飛んでいる間、照準の近くに青い弱点が出ます。照準を合わせると、見ている向きへ一気に飛び出します。コンボが続くほど勢いが増します。壁にぶつからないように。」 / "While gliding with an elytra, a blue weak spot appears near your crosshair. Aim at it to dash toward where you look; the longer your combo, the harder you dash. Mind the walls."
   - 18「エンチャント」: 「エンチャント台に物を置くと、画面のまわりに紫のマーカーが出ます。クリックで当てるたびに、3つの候補が引き直されます。ラピスラズリも経験値も減りません。」 / "Put an item in an enchanting table and a purple marker appears around the screen. Click it to reroll the three offers. It costs no lapis and no experience."
+  - 19「収穫」: 「実った作物を素手で右クリックしたままにすると、ピンクの弱点が出ます。当てると収穫して植え直し、すぐに育てる弱点に変わります。コンボが続くほど収穫が増えます。」 / "Hold right-click on a ripe crop with an empty hand and a pink weak spot appears. Hit it to harvest and replant; it turns right back into a growth weak spot. The longer your combo, the bigger the harvest."
   - 3「耐久回復と節目」を §4.4 のとおり直す
 - 「最新版」の行と「更新履歴」（1.6.x とは接続できないこと）、「開発」の節の仕様書へのリンク
 
-## 6. `CLAUDE.md` に書くこと
+## 7. `CLAUDE.md` に書くこと
 
 - 「仕様の正本」の一覧の、この仕様書の「下書き」の注記を外す。現行のバージョンを 1.7.0、範囲を `[1.7,1.8)` に
 - 「両方に Mod が必要」の説明に、1.7.0 で通信内容が変わったので 1.6.x と接続できないことを足す
-- `HitKind` の一覧に `LADDER`・`ELYTRA`・`ENCHANT` を足す。はしご（`client/LadderSpot`・`server/LadderHits`）・エリトラ（`client/ElytraSpot`・`server/ElytraHits`）・エンチャント（`client/EnchantSpot`・`server/EnchantHits`）の説明を、乗り物・睡眠の弱点の説明にならって足す（はしご・エリトラは速さをクライアントで足し、サーバーは検証だけ。エンチャントは `xpSeed` を引き直す）
-- 統計の一覧に `ladderHits`・`elytraHits`・`enchantHits`（1.7.0）を足す
+- `HitKind` の一覧に `LADDER`・`ELYTRA`・`ENCHANT`・`HARVEST` を足す。収穫（`server/HarvestHits`・`common/HarvestBonus`。成長と同じ操作・検証、実った作物で種類を切り替える、植え直し、コンボのおまけ）の説明を成長の弱点の説明のそばに足す。はしご（`client/LadderSpot`・`server/LadderHits`）・エリトラ（`client/ElytraSpot`・`server/ElytraHits`）・エンチャント（`client/EnchantSpot`・`server/EnchantHits`）の説明を、乗り物・睡眠の弱点の説明にならって足す（はしご・エリトラは速さをクライアントで足し、サーバーは検証だけ。エンチャントは `xpSeed` を引き直す）
+- 統計の一覧に `ladderHits`・`elytraHits`・`enchantHits`・`harvestHits`（1.7.0）を足す
 - 節目の説明（`ServerStats`・`MiningRewards`・`MilestoneEffects`）に、種類ごと・合計の節目と、繰り返しの節目、7 並びの虹色を足す。設定の移行に `configVersion` 5（節目の初期値）を足す
 - 「次の作業」の節を片付ける
 
-## 7. 入れないこと
+## 8. 入れないこと
 
 - 弓・食事の弱点のヒットで、はしごの加速を続ける（乗り物の騎射にあたるもの）: はしごの上で弓を引く・食べることは少ないので入れない
-- 他のプレイヤーにはしご・エリトラ・エンチャントの弱点のマークを見せる: 乗り物・食事と同じく見せない
+- 他のプレイヤーにはしご・エリトラ・エンチャントの弱点のマークを見せる: 乗り物・食事と同じく見せない（収穫は、成長と同じく見せる）
+- 右クリックですぐ収穫する形（弱点なし）: 収穫をヒットにして、コンボを切らさずに畑を回せるほうを選んだ（ユーザーの判断）
+- カボチャ・スイカの収穫: 茎を残して実を壊すだけなので、バニラどおり
 - エンチャントの必要なレベルを下げる: ユーザーの判断で、引き直しだけにする
 - 引き直しにラピスラズリを使う・回数を限る: ユーザーの判断で、何もいらない・回数の制限なし
 - サーバーのランキング（`/weakspot top`）: 1.7.0 には入れない
 
-## 8. ユーザーに確認してもらうこと
+## 9. ユーザーに確認してもらうこと
 
 - はしご・ツタを登り降りすると、照準の真上か真下に茶色の弱点が出て、照準を合わせると速くなること。止まると弱点が消えること。照準の上に茶色のゲージが出ること
 - はしごでコンボが上がるとさらに速くなること（`ladderBoostMaxMultiplier` に 3 などを書くと、その倍率で止まること）。速く降りても落下のダメージを受けないこと
@@ -247,5 +304,7 @@
 - エンチャント台に物を置くと、画面の枠の外に紫のマーカーと、枠の上に注釈が出ること。当てるたびに候補が変わり、ラピスも経験値も減らないこと。回数が注釈に出ること
 - 弓などを 50 回当てると「弓 50 ヒット！」の節目が出て、経験値がもらえること。全種類の合計 1000 回で「合計 1000 ヒット！」が派手に出ること。7777 などが虹色になること
 - 古い `weakspot.cfg`（節目が 100 / 777 / 1000 / 10000 のまま）が、新しい初期値に置き換わること。自分で書き換えた値は、そのまま残ること
-- 統計画面と `/weakspot stats` に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」が出ること
+- 実った小麦などを素手で右クリックしたままにすると、ピンクの弱点が出て、当てると収穫・植え直しされ、すぐに成長の弱点に変わること。押しっぱなしのまま、育てる・収穫するを続けられること
+- コンボが上がると、収穫物（小麦・ニンジンなど）が増えること。種は増えないこと。保護された土地では収穫できないこと
+- 統計画面と `/weakspot stats` に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」「収穫ヒット数」が出ること
 - 1.6.x のサーバー・クライアントとは接続できないこと
