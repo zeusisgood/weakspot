@@ -112,7 +112,11 @@ public final class AnimalHits {
         Entity entity = player.world.getEntityByID(entityId);
         State state = new State(0);
         if (entity != null && AnimalTargets.isCandidate(entity) && player.getDistanceSq(entity) < REACH_SQ) {
-            state = state(entity, SyncedSettings.fromConfig());
+            SyncedSettings settings = SyncedSettings.fromConfig();
+            state = state(entity, settings);
+            if (entity instanceof EntityVillager) {
+                VillagerBreedHints.onQuery(player, (EntityVillager) entity, settings);
+            }
         }
         WeakSpotMod.network.sendTo(new AnimalStateMessage(entityId, state), player);
     }
@@ -187,5 +191,8 @@ public final class AnimalHits {
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         LAST_HIT.remove(event.player.getUniqueID());
+        if (event.player instanceof EntityPlayerMP) {
+            VillagerBreedHints.onLogout((EntityPlayerMP) event.player);
+        }
     }
 }
