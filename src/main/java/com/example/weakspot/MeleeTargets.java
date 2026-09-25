@@ -6,13 +6,10 @@ import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
- * 近接の弱点の対象（両側で同じ条件）。敵（IMob を持つ生き物）だけ。動物・村人・プレイヤーは対象外。
- * 持っているアイテムは問わない（素手を含む）。
+ * 近接の弱点の敵（両側で同じ条件）。IMob を持つ生き物だけ。動物・村人・プレイヤーは対象外。
+ * 1.8.0 から、近くに敵がいる間だけ近接の弱点を出す（壁越しでもよい）。
  */
 public final class MeleeTargets {
-
-    /** バニラのクリティカルと同じ、攻撃のゲージの条件（EntityPlayer#attackTargetEntityWithCurrentItem の 0.9）。 */
-    public static final float CHARGED = 0.9F;
 
     private MeleeTargets() {
     }
@@ -22,10 +19,15 @@ public final class MeleeTargets {
                 && entity.isEntityAlive();
     }
 
-    /**
-     * 攻撃のゲージが溜まっているか。adjustTicks は、バニラと同じ 0.5 に、サーバーではネットワークの揺らぎの分を足す。
-     */
-    public static boolean isCharged(EntityPlayer player, float adjustTicks) {
-        return player.getCooledAttackStrength(adjustTicks) > CHARGED;
+    /** range ブロック以内に敵がいるか。 */
+    public static boolean hasEnemyNear(EntityPlayer player, double range) {
+        double rangeSq = range * range;
+        for (EntityLivingBase entity : player.world.getEntitiesWithinAABB(EntityLivingBase.class,
+                player.getEntityBoundingBox().grow(range), MeleeTargets::isTarget)) {
+            if (entity.getDistanceSq(player) <= rangeSq) {
+                return true;
+            }
+        }
+        return false;
     }
 }

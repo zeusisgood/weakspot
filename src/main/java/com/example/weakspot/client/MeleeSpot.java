@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
-import com.example.weakspot.ThrowCharge;
+import com.example.weakspot.MeleeCharge;
+import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
@@ -18,34 +19,41 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 投げる物の弱点（自分だけ。1.7.0）。エンダーパール・雪玉などをメインハンドに持っている間、照準から 10〜20 度
- * （馬・豚に乗っているときは真上か真下だけ）に青緑の弱点を出し、照準を合わせるだけでヒットにする。当てるたびに
- * 次の 1 投の溜めが増え（ThrowCharge。クライアントもサーバーの返事を待たずに進める）、照準の下にゲージを出す。
+ * 近接の弱点（自分だけ。1.8.0 で、敵の体の弱点から置き換えた）。剣か斧を持ち、16 ブロック以内に敵がいる間、照準の
+ * 左右だけに銀の弱点を出し（走りの弱点の上下と見分けるため）、照準を合わせるだけでヒットにする。当てるたびに
+ * 次の攻撃の溜めが増え（MeleeCharge。クライアントもサーバーの返事を待たずに溜める）、照準の下にゲージを出す。
+ * 馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
-final class ThrowSpot {
+final class MeleeSpot {
 
-    /** ティール #2ED3B7。 */
-    private static final int RGB = 0x2ED3B7;
-    /** ゲージ 1 本分の溜め（倍率 ×3）。越えた分は、1 本分ごとに赤い目盛りを 1 つ足す。 */
-    private static final double CHARGE_PER_BAR = 2.0;
+    /** 銀 #D0D8E0。 */
+    private static final int RGB = 0xD0D8E0;
+    /** 敵を探す距離（ブロック）。 */
+    private static final double ENEMY_RANGE = 16;
+    /** ゲージ 1 本分の溜め（倍率 ×2）。 */
+    private static final double CHARGE_PER_BAR = 1.0;
 
-    private static final HudSpot SPOT = new HudSpot(HitKind.THROW, RGB);
+    private static final HudSpot SPOT = new HudSpot(HitKind.MELEE, RGB);
+    /** 近くに敵がいるか（tick ごとに探し直す）。 */
+    private static boolean enemyNear;
 
-    private ThrowSpot() {
+    private MeleeSpot() {
     }
 
     static void clear() {
         SPOT.clear();
+        enemyNear = false;
     }
 
     private static boolean eligible(Minecraft mc) {
         EntityPlayerSP player = mc.player;
-        if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.THROW)
+        if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.MELEE)
                 || player.capabilities.isCreativeMode || player.isSpectator() || player.isHandActive()) {
             return false;
         }
-        return ClientSettings.get().throwWeakSpotEnabled && ThrowCharge.isHoldingThrowable(player);
+        return ClientSettings.get().meleeWeakSpotEnabled && MeleeCharge.isHoldingWeapon(player) && enemyNear
+                && !VehicleTargets.isSteeredByLook(player);
     }
 
     @SubscribeEvent
@@ -54,10 +62,11 @@ final class ThrowSpot {
         if (event.phase != TickEvent.Phase.START || mc.isGamePaused() || mc.player == null) {
             return;
         }
+        enemyNear = MeleeCharge.isHoldingWeapon(mc.player) && MeleeTargets.hasEnemyNear(mc.player, ENEMY_RANGE);
         if (!eligible(mc)) {
             SPOT.clear();
         } else {
-            SPOT.ensure(mc.player, VehicleTargets.isSteeredByLook(mc.player));
+            SPOT.ensureHorizontal(mc.player);
         }
     }
 
@@ -68,13 +77,13 @@ final class ThrowSpot {
             return;
         }
         SyncedSettings settings = ClientSettings.get();
-        if (!ClientWeakSpotHandler.canHitNow(HitKind.THROW, settings.throwMinHitIntervalTicks)) {
+        if (!ClientWeakSpotHandler.canHitNow(HitKind.MELEE, settings.meleeMinHitIntervalTicks)) {
             return;
         }
-        int streak = ClientWeakSpotHandler.registerHit(HitKind.THROW);
-        WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.THROW, streak));
-        ThrowCharge.add(mc.player, settings.throwChargePerHit * MachineComboBoost.factor(streak));
-        VehicleSpot.onRiderHit(streak);
+        int streak = ClientWeakSpotHandler.registerHit(HitKind.MELEE);
+        WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.MELEE, streak));
+        MeleeCharge.add(mc.player, settings.meleeChargePerHit * MachineComboBoost.factor(streak),
+                settings.meleeChargeMax);
         SPOT.relocate(mc.player);
     }
 
@@ -87,14 +96,14 @@ final class ThrowSpot {
         if (mc.player == null || mc.gameSettings.hideGUI) {
             return;
         }
-        double charge = ThrowCharge.isHoldingThrowable(mc.player) ? ThrowCharge.amount(mc.player) : 0;
-        boolean bar = WeakSpotConfig.throwChargeBarEnabled && charge > 0;
+        double charge = MeleeCharge.isHoldingWeapon(mc.player) ? MeleeCharge.amount(mc.player) : 0;
+        boolean bar = WeakSpotConfig.meleeChargeBarEnabled && charge > 0;
         if (!SPOT.has() && !bar) {
             return;
         }
         HudSpot.beginOverlay();
         SPOT.draw(mc);
-        int rgb = MarkerLook.color(HitKind.THROW, RGB);
+        int rgb = MarkerLook.color(HitKind.MELEE, RGB);
         String extra = bar ? ChargeGauge.drawBars(mc, charge, CHARGE_PER_BAR, rgb) : null;
         HudSpot.endOverlay();
         if (bar) {

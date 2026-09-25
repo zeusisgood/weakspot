@@ -32,13 +32,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ThrowCharge {
 
-    /** 溜めと、溜めたときに持っていたスロットと物。 */
-    private static final class Charge {
-        double amount;
-        int slot;
-        Item item;
-    }
-
     /** 投げた瞬間の倍率と tick（サーバー。同じ tick に出た投げた物に掛ける）。 */
     private static final class Thrown {
         final double multiplier;
@@ -50,7 +43,7 @@ public final class ThrowCharge {
         }
     }
 
-    private static final Map<EntityPlayer, Charge> CHARGES = Collections.synchronizedMap(new WeakHashMap<>());
+    private static final HeldCharge CHARGES = new HeldCharge(ThrowCharge::isThrowable);
     private static final Map<EntityLivingBase, Thrown> THROWN = Collections.synchronizedMap(new WeakHashMap<>());
 
     private ThrowCharge() {
@@ -66,50 +59,28 @@ public final class ThrowCharge {
 
     /** メインハンドに投げる物を持っているか。 */
     public static boolean isHoldingThrowable(EntityPlayer player) {
-        return isThrowable(player.getHeldItemMainhand());
+        return CHARGES.isHolding(player);
     }
 
-    /** ヒットで溜める（メインハンドに投げる物を持っているときだけ）。 */
+    /** ヒットで溜める（メインハンドに投げる物を持っているときだけ。上限なし）。 */
     public static void add(EntityPlayer player, double amount) {
-        if (!isHoldingThrowable(player) || amount <= 0) {
-            return;
-        }
-        Charge charge = current(player);
-        if (charge == null) {
-            charge = new Charge();
-            charge.slot = player.inventory.currentItem;
-            charge.item = player.getHeldItemMainhand().getItem();
-            CHARGES.put(player, charge);
-        }
-        charge.amount += amount;
+        CHARGES.add(player, amount, 0);
     }
 
     /** 今の溜め（持ち替えていたら 0）。 */
     public static double amount(EntityPlayer player) {
-        Charge charge = current(player);
-        return charge == null ? 0 : charge.amount;
-    }
-
-    /** 持ち替えていなければ、覚えている溜め。持ち替えていたら消して null。 */
-    private static Charge current(EntityPlayer player) {
-        Charge charge = CHARGES.get(player);
-        if (charge != null && (charge.slot != player.inventory.currentItem
-                || charge.item != player.getHeldItemMainhand().getItem())) {
-            CHARGES.remove(player);
-            return null;
-        }
-        return charge;
+        return CHARGES.amount(player);
     }
 
     public static void clear(EntityPlayer player) {
-        CHARGES.remove(player);
+        CHARGES.clear(player);
     }
 
     /** 持ち替えたら、溜めを消す（両側。毎 tick）。 */
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END && !CHARGES.isEmpty()) {
-            current(event.player);
+        if (event.phase == TickEvent.Phase.END) {
+            CHARGES.tick(event.player);
         }
     }
 
@@ -122,11 +93,10 @@ public final class ThrowCharge {
         if (event.getHand() != EnumHand.MAIN_HAND || !isThrowable(event.getItemStack())) {
             return;
         }
-        double amount = amount(player);
+        double amount = CHARGES.take(player);
         if (amount <= 0) {
             return;
         }
-        CHARGES.remove(player);
         if (!player.world.isRemote) {
             THROWN.put(player, new Thrown(1 + amount, player.world.getTotalWorldTime()));
         }

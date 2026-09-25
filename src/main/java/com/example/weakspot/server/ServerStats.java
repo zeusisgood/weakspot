@@ -142,6 +142,7 @@ public final class ServerStats {
         stats.harvestHits = tag.getLong("harvestHits");
         stats.throwHits = tag.getLong("throwHits");
         stats.sprintHits = tag.getLong("sprintHits");
+        stats.portalHits = tag.getLong("portalHits");
         return stats;
     }
 
@@ -168,6 +169,7 @@ public final class ServerStats {
         tag.setLong("harvestHits", stats.harvestHits);
         tag.setLong("throwHits", stats.throwHits);
         tag.setLong("sprintHits", stats.sprintHits);
+        tag.setLong("portalHits", stats.portalHits);
         return tag;
     }
 }

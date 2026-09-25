@@ -98,7 +98,7 @@ public final class WeakSpotCommand extends CommandBase {
                 stats.growthHits, stats.machineHits, stats.maxStreak, stats.animalHits, stats.fishingHits,
                 stats.bowHits, stats.critHits, stats.vehicleHits, stats.eatHits, stats.sleepHits,
                 stats.ladderHits, stats.elytraHits, stats.enchantHits, stats.harvestHits, stats.throwHits,
-                stats.sprintHits, stats.totalHits()));
+                stats.sprintHits, stats.portalHits, stats.totalHits()));
     }
 
     @Override

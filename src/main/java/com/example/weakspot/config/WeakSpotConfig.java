@@ -415,19 +415,36 @@ public final class WeakSpotConfig {
     public static int sprintMinHitIntervalTicks = 6;
 
     @Config.Comment({"[サーバー] 近接の弱点のオン・オフ",
-            "敵に出た弱点を、攻撃のゲージが溜まった状態で殴ると、クリティカルヒット（ジャンプ攻撃と同じ 1.5 倍）になる"})
+            "剣か斧を持って敵の近くにいる間、照準の左右に弱点が出る。当てるたびに溜まり、次に殴った攻撃が強くなる（1.8.0）"})
     public static boolean meleeWeakSpotEnabled = true;
 
     @Config.Comment("[サーバー] 近接のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
     public static int meleeMinHitIntervalTicks = 4;
 
-    @Config.Comment({"[サーバー] 近接の弱点の大きさの倍率。weakSpotRadiusRatio と weakSpotMinRadius に掛ける",
-            "上限（weakSpotMaxRadiusRatio）には掛けない（弱点が面からはみ出さないように）。ほかの種類の弱点は変わらない"})
-    @Config.RangeDouble(min = 1.0, max = 3.0)
-    public static double meleeWeakSpotScale = 1.5;
+    @Config.Comment({"[サーバー] 近接の弱点に1回当てるごとに溜まる量（1.8.0。次の攻撃の倍率に足す）。コンボの掛け数を上乗せする",
+            "溜めた攻撃はクリティカル（1.5 倍）になり、さらに (1 + 溜め) 倍になる"})
+    @Config.RangeDouble(min = 0.05, max = 10.0)
+    public static double meleeChargePerHit = 0.25;
 
-    @Config.Comment({"[サーバー] 近接の弱点のクリティカル何回ごとに、手に持っている物の耐久を回復するか。0 で回復しない",
+    @Config.Comment({"[サーバー] 近接の溜めの上限（1.8.0）。0 なら上限なし（初期値）", "強すぎて困るときに、2.0 などを書く"})
+    @Config.RangeDouble(min = 0.0, max = 1000.0)
+    public static double meleeChargeMax = 0.0;
+
+    @Config.Comment({"[サーバー] ネザーゲートの弱点のオン・オフ（1.8.0）",
+            "ゲートの中に立っている間、照準の近くに弱点が出る。当てると、移動までの待ち時間が縮む"})
+    public static boolean portalWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] ネザーゲートの弱点に1回当てるごとに縮める待ち時間（tick。1.8.0）。コンボの掛け数を上乗せする。バニラの待ち時間は 80 tick")
+    @Config.RangeInt(min = 1, max = 200)
+    public static int portalHitTicks = 20;
+
+    @Config.Comment("[サーバー] ネザーゲートのヒットを受け付ける最小間隔（tick。1.8.0）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int portalMinHitIntervalTicks = 4;
+
+
+    @Config.Comment({"[サーバー] 近接の溜めた攻撃が何回当たるごとに、手に持っている物の耐久を回復するか。0 で回復しない",
             "余りはログアウトまで持ち越す。サーバーだけが使う（クライアントには送らない）"})
     @Config.RangeInt(min = 0, max = 100000)
     public static int critsPerRepair = 5;
@@ -542,12 +559,15 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 投げる物の溜めのゲージ（青緑）を、照準の下に表示するか（1.7.0）"})
     public static boolean throwChargeBarEnabled = true;
 
+    @Config.Comment({"[クライアント] 近接の溜めのゲージ（銀）を、照準の下に表示するか（1.8.0）"})
+    public static boolean meleeChargeBarEnabled = true;
+
     @Config.Comment({"[クライアント] 走りを加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0）"})
     public static boolean sprintBoostBarEnabled = true;
 
     @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（1.7.0。統計画面の「弱点」タブで変えられる）",
             "1 行に 1 つ、mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra,",
-            "enchant, harvest, throw, sprint のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
+            "enchant, harvest, throw, sprint, portal のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
     public static String[] disabledKinds = {};
 
     @Config.Comment({"[クライアント] 自分の弱点の色（1.7.0）。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）",

@@ -3,6 +3,7 @@ package com.example.weakspot.config;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.GrowthFilters;
 import com.example.weakspot.server.EnchantHits;
+import com.example.weakspot.server.PortalHits;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -62,8 +63,13 @@ public final class SyncedSettings {
     public int bowMinHitIntervalTicks;
     public boolean meleeWeakSpotEnabled;
     public int meleeMinHitIntervalTicks;
-    /** 近接の弱点の大きさの倍率（1.5.0）。 */
-    public double meleeWeakSpotScale;
+    /** 近接の溜め（1.8.0。1.7.x までの meleeWeakSpotScale はなくした）。 */
+    public double meleeChargePerHit;
+    public double meleeChargeMax;
+    /** ネザーゲートの弱点（1.8.0）。サーバーが待ち時間を読み書きできないときは false で送る。 */
+    public boolean portalWeakSpotEnabled;
+    public int portalHitTicks;
+    public int portalMinHitIntervalTicks;
     /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
     public double machineBoostMultiplier;
     public double machineBoostMaxMultiplier;
@@ -164,7 +170,11 @@ public final class SyncedSettings {
         s.bowMinHitIntervalTicks = WeakSpotConfig.bowMinHitIntervalTicks;
         s.meleeWeakSpotEnabled = WeakSpotConfig.meleeWeakSpotEnabled;
         s.meleeMinHitIntervalTicks = WeakSpotConfig.meleeMinHitIntervalTicks;
-        s.meleeWeakSpotScale = WeakSpotConfig.meleeWeakSpotScale;
+        s.meleeChargePerHit = WeakSpotConfig.meleeChargePerHit;
+        s.meleeChargeMax = WeakSpotConfig.meleeChargeMax;
+        s.portalWeakSpotEnabled = WeakSpotConfig.portalWeakSpotEnabled && PortalHits.isAvailable();
+        s.portalHitTicks = WeakSpotConfig.portalHitTicks;
+        s.portalMinHitIntervalTicks = WeakSpotConfig.portalMinHitIntervalTicks;
         s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
         s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
         s.serverVersion = WeakSpotMod.VERSION;
@@ -241,7 +251,11 @@ public final class SyncedSettings {
         buf.writeInt(bowMinHitIntervalTicks);
         buf.writeBoolean(meleeWeakSpotEnabled);
         buf.writeInt(meleeMinHitIntervalTicks);
-        buf.writeDouble(meleeWeakSpotScale);
+        buf.writeDouble(meleeChargePerHit);
+        buf.writeDouble(meleeChargeMax);
+        buf.writeBoolean(portalWeakSpotEnabled);
+        buf.writeInt(portalHitTicks);
+        buf.writeInt(portalMinHitIntervalTicks);
         buf.writeDouble(machineBoostMultiplier);
         buf.writeDouble(machineBoostMaxMultiplier);
         ByteBufUtils.writeUTF8String(buf, serverVersion);
@@ -318,7 +332,11 @@ public final class SyncedSettings {
         s.bowMinHitIntervalTicks = buf.readInt();
         s.meleeWeakSpotEnabled = buf.readBoolean();
         s.meleeMinHitIntervalTicks = buf.readInt();
-        s.meleeWeakSpotScale = buf.readDouble();
+        s.meleeChargePerHit = buf.readDouble();
+        s.meleeChargeMax = buf.readDouble();
+        s.portalWeakSpotEnabled = buf.readBoolean();
+        s.portalHitTicks = buf.readInt();
+        s.portalMinHitIntervalTicks = buf.readInt();
         s.machineBoostMultiplier = buf.readDouble();
         s.machineBoostMaxMultiplier = buf.readDouble();
         s.serverVersion = ByteBufUtils.readUTF8String(buf);

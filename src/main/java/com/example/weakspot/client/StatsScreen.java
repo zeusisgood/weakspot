@@ -242,6 +242,7 @@ final class StatsScreen extends GuiScreen {
             case HARVEST: return settings.harvestWeakSpotEnabled;
             case THROW: return settings.throwWeakSpotEnabled;
             case SPRINT: return settings.sprintWeakSpotEnabled;
+            case PORTAL: return settings.portalWeakSpotEnabled;
             default: return true;
         }
     }

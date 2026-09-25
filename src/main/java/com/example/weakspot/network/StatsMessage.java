@@ -56,6 +56,7 @@ public class StatsMessage implements IMessage {
         stats.harvestHits = buf.readLong();
         stats.throwHits = buf.readLong();
         stats.sprintHits = buf.readLong();
+        stats.portalHits = buf.readLong();
         return stats;
     }
 
@@ -81,6 +82,7 @@ public class StatsMessage implements IMessage {
         buf.writeLong(stats.harvestHits);
         buf.writeLong(stats.throwHits);
         buf.writeLong(stats.sprintHits);
+        buf.writeLong(stats.portalHits);
     }
 
     public static class Handler implements IMessageHandler<StatsMessage, IMessage> {

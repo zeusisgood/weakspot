@@ -49,7 +49,7 @@ public final class MiningStats {
         bowHits++;
     }
 
-    /** 近接の弱点でクリティカルヒットにした回数（サーバーが実際にクリティカルにしたもの）。 */
+    /** 近接の弱点に当てた回数（1.8.0。保存のキーは今までどおり critHits。1.7.x まではクリティカルにした回数）。 */
     public long critHits;
 
     public void recordCritHit() {
@@ -84,6 +84,8 @@ public final class MiningStats {
     public long harvestHits;
     public long throwHits;
     public long sprintHits;
+    /** ネザーゲートの弱点に当てた回数（1.8.0）。 */
+    public long portalHits;
 
     /**
      * 採掘以外の種類のヒットを 1 つ数える（1.7.0）。近接はクリティカルにした回数。採掘は recordHit で数える
@@ -106,6 +108,7 @@ public final class MiningStats {
             case HARVEST: harvestHits++; break;
             case THROW: throwHits++; break;
             case SPRINT: sprintHits++; break;
+            case PORTAL: portalHits++; break;
             default: break;
         }
     }
@@ -129,6 +132,7 @@ public final class MiningStats {
             case HARVEST: return harvestHits;
             case THROW: return throwHits;
             case SPRINT: return sprintHits;
+            case PORTAL: return portalHits;
             default: return 0;
         }
     }
@@ -194,5 +198,6 @@ public final class MiningStats {
         harvestHits = 0;
         throwHits = 0;
         sprintHits = 0;
+        portalHits = 0;
     }
 }

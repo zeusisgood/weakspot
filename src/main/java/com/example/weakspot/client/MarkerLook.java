@@ -39,6 +39,8 @@ public final class MarkerLook {
             case ENCHANT: return 0xB070FF;
             case THROW: return 0x2ED3B7;
             case SPRINT: return 0xFF5A5F;
+            case MELEE: return 0xD0D8E0;
+            case PORTAL: return 0xFFD23F;
             default: return 0xFF5926;
         }
     }

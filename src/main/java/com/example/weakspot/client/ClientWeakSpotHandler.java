@@ -1,7 +1,6 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.AnimalTargets;
-import com.example.weakspot.MeleeTargets;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BlockHealthBar;
@@ -24,7 +23,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,7 +33,8 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * クライアント側の弱点処理。弱点の位置は自分のクライアントだけが持ち、他プレイヤーとは共有しない。
- * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械、動物）と、敵への攻撃（近接）の弱点を扱う。
+ * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械、動物、収穫）の弱点を扱う
+ * （近接は 1.8.0 から MeleeSpot）。
  * 弱点は一度に1つだけ。
  *
  * ヒット判定は毎フレーム行う（素早く照準を動かしたときに tick 単位だと取りこぼすため）。
@@ -110,9 +109,6 @@ public final class ClientWeakSpotHandler {
     private static boolean isGone(World world, WeakSpot spot) {
         if (spot.kind == HitKind.ANIMAL) {
             return spot.entity == null || spot.entity.isDead;
-        }
-        if (spot.kind == HitKind.MELEE) {
-            return spot.entity == null || !MeleeTargets.isTarget(spot.entity);
         }
         if (world.isAirBlock(spot.pos)) {
             return true;
@@ -224,22 +220,14 @@ public final class ClientWeakSpotHandler {
         SprintSpot.clear();
         ElytraSpot.clear();
         ThrowSpot.clear();
+        MeleeSpot.clear();
+        PortalSpot.clear();
     }
 
     private static void updateAim(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player.capabilities.isCreativeMode || player.isSpectator()) {
             return;
-        }
-        if (!mc.playerController.getIsHittingBlock() && !player.isHandActive()
-                && !mc.gameSettings.keyBindUseItem.isKeyDown() && ClientSettings.get().meleeWeakSpotEnabled
-                && KindSwitches.isEnabled(HitKind.MELEE)) {
-            // 近接の弱点は、攻撃が届く距離より遠く（16 ブロック）の敵にも出す（当てられるのは届く距離だけ）
-            RayTraceResult sight = MeleeSight.find(mc, framePartialTicks);
-            if (sight != null && MeleeTargets.isTarget(sight.entityHit)) {
-                aimMelee(mc, sight);
-                return;
-            }
         }
         RayTraceResult target = mc.objectMouseOver;
         if (target == null) {
@@ -353,67 +341,6 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 近接の弱点。視線の先 16 ブロック以内の敵（MeleeSight）に照準を合わせている間、照準が当たっている面に出す
-     * （面は、見えている間は変えない）。ここでは出すだけで、ヒットは左クリック（onMouse）で、バニラの照準の先
-     * （攻撃が届く距離）の敵に対してだけ判定する。攻撃のゲージが溜まっていない間は、薄く描く。
-     */
-    private static void aimMelee(Minecraft mc, RayTraceResult target) {
-        Entity entity = target.entityHit;
-        SyncedSettings settings = ClientSettings.get();
-        if (entity == null || !settings.meleeWeakSpotEnabled || !MeleeTargets.isTarget(entity)) {
-            return;
-        }
-        AxisAlignedBB box = entity.getEntityBoundingBox();
-        EnumFacing aimed = WeakSpot.faceAt(box, target.hitVec);
-        Vec3d eye = mc.player.getPositionEyes(1.0F);
-        if (spot == null || spot.kind != HitKind.MELEE || spot.entity != entity
-                || !WeakSpot.isFacing(box, spot.face, eye)) {
-            spot = WeakSpot.spawnOnEntity(HitKind.MELEE, entity, aimed, target.hitVec, settings, RANDOM);
-        }
-        if (spot == null) {
-            return;
-        }
-        spot.follow(box);
-        spot.lastActiveTick = clientTick;
-    }
-
-    /** 近接の弱点を、ヒットにできる状態か（攻撃のゲージが溜まっている）。溜まっていない間は、弱点を薄く描く。 */
-    static boolean isMeleeCharged() {
-        Minecraft mc = Minecraft.getMinecraft();
-        return mc.player != null && MeleeTargets.isCharged(mc.player, 0.5F);
-    }
-
-    /**
-     * 照準が近接の弱点に重なった左クリックを、ヒットにする。バニラの攻撃は止めない（MouseEvent は、攻撃のキーの処理より
-     * 先に来るので、ヒット通知が攻撃のパケットより先にサーバーへ届き、サーバーがその攻撃をクリティカルにする）。
-     * 攻撃のゲージが溜まっていないときは、普通の攻撃のまま（ヒットにも数えない）。
-     */
-    @SubscribeEvent
-    public static void onMouse(MouseEvent event) {
-        if (event.getButton() != 0 || !event.isButtonstate()) {
-            return;
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.currentScreen != null || mc.player == null || spot == null || spot.kind != HitKind.MELEE
-                || !KindSwitches.isEnabled(HitKind.MELEE) || clientTick - spot.lastActiveTick > 1
-                || mc.player.isHandActive()) {
-            return;
-        }
-        RayTraceResult target = mc.objectMouseOver;
-        if (target == null || target.typeOfHit != RayTraceResult.Type.ENTITY || target.entityHit != spot.entity
-                || !isMeleeCharged()) {
-            return;
-        }
-        // 当たり判定は、照準の点と同じ tick の箱で行う（描く時点の箱に合わせたままだと、少しずれる）
-        AxisAlignedBB box = spot.entity.getEntityBoundingBox();
-        spot.follow(box);
-        if (WeakSpot.faceAt(box, target.hitVec) == spot.face && spot.isHitBy(target.hitVec)
-                && canHit(HitKind.MELEE, ClientSettings.get().meleeMinHitIntervalTicks)) {
-            onHit(mc);
-        }
-    }
-
-    /**
      * 成長の弱点を出す面。同じ大きさの側面が複数あるとき（サトウキビなど）は、今の弱点の面が見えている間は変えない
      * （照準が隣の側面へ移ってもちらつかない）。見えなくなったとき（回り込んだとき）や出し直すときに選び直す。
      */
@@ -507,8 +434,6 @@ public final class ClientWeakSpotHandler {
             WeakSpotMod.network.sendToServer(HitMessage.entity(kind, spot.entity.getEntityId(), hitStreak));
             // ヒットで進んだ分を、すぐに見に行く
             AnimalStates.query(spot.entity.getEntityId(), clientTick, true);
-        } else if (kind == HitKind.MELEE) {
-            WeakSpotMod.network.sendToServer(HitMessage.entity(kind, spot.entity.getEntityId(), hitStreak));
         } else {
             WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
         }
@@ -550,6 +475,8 @@ public final class ClientWeakSpotHandler {
         SprintSpot.clear();
         ElytraSpot.clear();
         ThrowSpot.clear();
+        MeleeSpot.clear();
+        PortalSpot.clear();
         lastPlayer = null;
         resetStreak();
         WeakSpotRenderer.clearFlashes();

@@ -36,5 +36,6 @@ public class HitKindTest {
         assertEquals(9, HitKind.SLEEP.ordinal());
         assertEquals(10, HitKind.LADDER.ordinal());
         assertEquals(15, HitKind.SPRINT.ordinal());
+        assertEquals(16, HitKind.PORTAL.ordinal());
     }
 }

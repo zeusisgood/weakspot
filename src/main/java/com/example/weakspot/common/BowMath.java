@@ -133,6 +133,30 @@ public final class BowMath {
         return best;
     }
 
+    /**
+     * 照準の左右だけに出す弱点の次の yaw（度。1.8.0。近接の弱点）。pitch は使う側が視線に合わせる。
+     * 視線から offsetRange の角度だけ左か右（ランダム）にずらす。前の yaw から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
+     * 前の yaw との差は、一周（360 度）をまたいでも正しく測る。
+     */
+    public static double nextHorizontalYaw(double lookYaw, double prevYaw, double fovDegrees, Random random) {
+        double[] range = offsetRange(fovDegrees);
+        double best = lookYaw;
+        double bestMove = -1;
+        for (int i = 0; i < 40; i++) {
+            double offset = range[0] + random.nextDouble() * (range[1] - range[0]);
+            double yaw = lookYaw + (random.nextBoolean() ? 1 : -1) * offset;
+            double move = Math.abs(wrapDegrees(yaw - prevYaw));
+            if (move >= MIN_MOVE_DEGREES) {
+                return yaw;
+            }
+            if (move > bestMove) {
+                bestMove = move;
+                best = yaw;
+            }
+        }
+        return best;
+    }
+
     /** 1ヒットで実際に進める tick 数。引いた時間 used に足して、引き切り（FULL_DRAW_TICKS）を超えない。 */
     public static int addedTicks(int used, int hitTicks) {
         return Math.max(0, Math.min(hitTicks, FULL_DRAW_TICKS - used));

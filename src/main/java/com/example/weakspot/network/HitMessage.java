@@ -8,6 +8,7 @@ import com.example.weakspot.server.EnchantHits;
 import com.example.weakspot.server.FishingHits;
 import com.example.weakspot.server.MeleeHits;
 import com.example.weakspot.server.MoveHits;
+import com.example.weakspot.server.PortalHits;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerBoostTracker;
 import com.example.weakspot.server.SleepHits;
@@ -91,7 +92,7 @@ public class HitMessage implements IMessage {
                 } else if (kind == HitKind.BOW) {
                     BowHits.onHit(player, streak);
                 } else if (kind == HitKind.MELEE) {
-                    MeleeHits.onHit(player, entityId, streak);
+                    MeleeHits.onHit(player, streak);
                 } else if (kind == HitKind.SLEEP) {
                     SleepHits.onHit(player, streak);
                 } else if (kind == HitKind.EAT) {
@@ -100,6 +101,8 @@ public class HitMessage implements IMessage {
                     VehicleHits.onHit(player, entityId, streak);
                 } else if (kind == HitKind.LADDER || kind == HitKind.ELYTRA || kind == HitKind.SPRINT) {
                     MoveHits.onHit(player, kind, streak);
+                } else if (kind == HitKind.PORTAL) {
+                    PortalHits.onHit(player, streak);
                 } else if (kind == HitKind.THROW) {
                     ThrowHits.onHit(player, streak);
                 } else if (kind == HitKind.ENCHANT) {

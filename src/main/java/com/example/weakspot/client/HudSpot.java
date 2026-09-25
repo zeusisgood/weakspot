@@ -29,14 +29,20 @@ final class HudSpot {
     private final MarkerMotion motion = new MarkerMotion(0, 0);
     private final Random random = new Random();
 
+    /** 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0）。 */
+    private static final int FREE = 0;
+    private static final int VERTICAL = 1;
+    private static final int HORIZONTAL = 2;
+
     private boolean has;
-    private boolean vertical;
+    private int mode;
     private double yaw;
     private double pitch;
     private double eyeX;
     private double eyeY;
     private double eyeZ;
     private double viewYaw;
+    private double viewPitch;
 
     /**
      * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。1.7.0 から、色と形は種類ごとの設定
@@ -56,12 +62,21 @@ final class HudSpot {
         screen.invalidate();
     }
 
-    /** まだ出ていなければ、今の視線の近くに出す。 */
+    /** まだ出ていなければ、今の視線の近くに出す。verticalOnly なら照準の真上か真下だけ。 */
     void ensure(EntityPlayer player, boolean verticalOnly) {
-        if (has && vertical == verticalOnly) {
+        ensure(player, verticalOnly ? VERTICAL : FREE);
+    }
+
+    /** まだ出ていなければ、照準の左か右だけに出す（1.8.0。近接の弱点）。 */
+    void ensureHorizontal(EntityPlayer player) {
+        ensure(player, HORIZONTAL);
+    }
+
+    private void ensure(EntityPlayer player, int newMode) {
+        if (has && mode == newMode) {
             return;
         }
-        vertical = verticalOnly;
+        mode = newMode;
         next(player, player.rotationYaw, player.rotationPitch);
         motion.jumpTo(yaw, pitch);
         has = true;
@@ -78,9 +93,12 @@ final class HudSpot {
     }
 
     private void next(EntityPlayer player, double prevYaw, double prevPitch) {
-        if (vertical) {
+        if (mode == VERTICAL) {
             yaw = player.rotationYaw;
             pitch = BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, screen.fovDegrees(), random);
+        } else if (mode == HORIZONTAL) {
+            yaw = BowMath.nextHorizontalYaw(player.rotationYaw, prevYaw, screen.fovDegrees(), random);
+            pitch = player.rotationPitch;
         } else {
             double[] n = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch,
                     screen.fovDegrees(), random);
@@ -103,10 +121,11 @@ final class HudSpot {
         eyeY = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks + player.getEyeHeight();
         eyeZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
         viewYaw = player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * partialTicks;
+        viewPitch = player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * partialTicks;
         if (!screen.capture(mc, partialTicks) || mc.currentScreen != null) {
             return false;
         }
-        double[] p = project(vertical ? viewYaw : yaw, pitch);
+        double[] p = projectAt(yaw, pitch);
         if (p == null) {
             return false;
         }
@@ -114,6 +133,11 @@ final class HudSpot {
         double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, screen.fovDegrees(),
                 screen.viewportHeight());
         return FishingMath.isAimed(p[2], allowed);
+    }
+
+    /** 弱点の向き (u = yaw, v = pitch) を、出し方に合わせて視線で置き換えてから、画面に写す。 */
+    private double[] projectAt(double u, double v) {
+        return project(mode == VERTICAL ? viewYaw : u, mode == HORIZONTAL ? viewPitch : v);
     }
 
     private double[] project(double y, double p) {
@@ -134,7 +158,7 @@ final class HudSpot {
         MarkerShape shape = MarkerLook.shape(kind);
         if (trail) {
             for (MarkerMotion.Afterimage image : motion.afterimages(nowMs)) {
-                double[] p = project(vertical ? viewYaw : image.u, image.v);
+                double[] p = projectAt(image.u, image.v);
                 if (p != null) {
                     ScreenProjection.afterimage(p[0] / scale, p[1] / scale, radius, shape, rgb,
                             (float) image.alpha(nowMs));
@@ -148,7 +172,7 @@ final class HudSpot {
             u = m[0];
             v = m[1];
         }
-        double[] p = project(vertical ? viewYaw : u, v);
+        double[] p = projectAt(u, v);
         if (p == null) {
             return;
         }

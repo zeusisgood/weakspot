@@ -129,4 +129,24 @@ public class BowMathTest {
             assertTrue("pitch " + pitch, pitch <= 90 && pitch < 85);
         }
     }
+
+    @Test
+    public void horizontalYawIsBesideTheCrosshair() {
+        java.util.Random random = new java.util.Random(3);
+        double prev = 0;
+        for (int i = 0; i < 200; i++) {
+            double yaw = BowMath.nextHorizontalYaw(170, prev, 70, random);
+            double offset = Math.abs(BowMath.wrapDegrees(yaw - 170));
+            double[] range = BowMath.offsetRange(70);
+            assertTrue(offset >= range[0] - 1e-9 && offset <= range[1] + 1e-9);
+            prev = yaw;
+        }
+    }
+
+    @Test
+    public void wrapsDegrees() {
+        assertEquals(-170, BowMath.wrapDegrees(190), 1e-9);
+        assertEquals(170, BowMath.wrapDegrees(-190), 1e-9);
+        assertEquals(0, BowMath.wrapDegrees(720), 1e-9);
+    }
 }
