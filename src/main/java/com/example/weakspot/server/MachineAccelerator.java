@@ -1,5 +1,6 @@
 package com.example.weakspot.server;
 
+import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MachineBoost;
 import com.example.weakspot.common.MachineComboBoost;
@@ -59,6 +60,10 @@ public final class MachineAccelerator {
                 it.remove();
             }
             if (!world.isBlockLoaded(pos)) {
+                continue;
+            }
+            if (RightClickTargets.isScheduledMachine(world.getBlockState(pos).getBlock())) {
+                ScheduledTicks.boost(world, pos, calls, entry.getValue().multiplier());
                 continue;
             }
             TileEntity te = world.getTileEntity(pos);

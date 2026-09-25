@@ -17,6 +17,11 @@ public final class MachineBoost {
         this.remainingTicks = Math.max(remainingTicks, durationTicks);
     }
 
+    /** 今の倍率（重なったヒットのうち大きいほう）。 */
+    public double multiplier() {
+        return multiplier;
+    }
+
     public boolean isActive() {
         return remainingTicks > 0;
     }

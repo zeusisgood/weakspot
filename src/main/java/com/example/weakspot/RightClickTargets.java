@@ -13,6 +13,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDispenser;
+import net.minecraft.block.BlockObserver;
+import net.minecraft.block.BlockRedstoneDiode;
 import net.minecraft.block.BlockReed;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.properties.IProperty;
@@ -124,10 +127,20 @@ public final class RightClickTargets {
         return pos.up(blocksAbove(world, pos, block));
     }
 
-    /** ITickable のタイルエンティティを持ち、対象外リストにないもの。 */
+    /**
+     * ITickable のタイルエンティティを持つか、予約された tick で動くレッドストーンの部品（1.4.4）で、対象外リストにないもの。
+     */
     public static boolean isMachine(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
-        return world.getTileEntity(pos) instanceof ITickable
+        return (world.getTileEntity(pos) instanceof ITickable || isScheduledMachine(state.getBlock()))
                 && !settings.excludedBlocks.contains(String.valueOf(state.getBlock().getRegistryName()));
+    }
+
+    /**
+     * 予約された tick（スケジュール tick）で動く、機械の加速の対象のレッドストーンの部品（1.4.4）。
+     * リピーター・コンパレーター、オブザーバー、ディスペンサー・ドロッパー（と、それを継承したブロック）。
+     */
+    public static boolean isScheduledMachine(Block block) {
+        return block instanceof BlockRedstoneDiode || block instanceof BlockObserver || block instanceof BlockDispenser;
     }
 
     /** この側で今使う設定値（クライアントは接続中ならサーバーの値）。 */

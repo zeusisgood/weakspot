@@ -31,9 +31,14 @@ public final class Reflect {
 
     /** 引数なしのメソッド。 */
     public static Method method(Class<?> owner, String what, String... names) {
+        return method(owner, what, new Class<?>[0], names);
+    }
+
+    /** 引数の型を指定したメソッド。 */
+    public static Method method(Class<?> owner, String what, Class<?>[] parameterTypes, String... names) {
         for (String name : names) {
             try {
-                Method method = owner.getDeclaredMethod(name);
+                Method method = owner.getDeclaredMethod(name, parameterTypes);
                 method.setAccessible(true);
                 return method;
             } catch (NoSuchMethodException | RuntimeException e) {
