@@ -3,7 +3,7 @@
 Fortnite の資材集めにある「弱点（クリティカル）を叩くと速く壊せる」仕組みを Minecraft に持ち込む Mod です。
 
 - 対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**
-- 最新版: **1.7.0**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
+- 最新版: **1.7.1**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
 
 ## 遊び方
 
@@ -326,6 +326,19 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 - サーバーの設定で無効な種類は、灰色で「サーバーで無効」と出ます。
 - 色と形は、自分の弱点だけに効きます（他のプレイヤーのマークは `otherMarkerColor` / `otherMarkerShape`）。
 
+## 更新のお知らせ（1.7.1）
+
+- 新しい版に入れ替えてから**初めてワールドに入ったとき**に 1 回だけ、チャットに変更点の要約と **[変更点を見る]**（GitHub の Release ページ）、`/weakspot bug` の案内が出ます。ソロでもマルチでも同じです。
+- 初めてこの Mod を入れたときは出ません（ガイドの本を読んでください）。
+- 各自の設定 `showUpdateNotes` で止められます。
+
+## 不具合の報告（`/weakspot bug`。1.7.1）
+
+- チャットで `/weakspot bug` と打つと、報告の方法が出ます。誰でも、ソロでチートがオフでも使えます（自分のクライアントのコマンドです）。
+- **[GitHub の issue を開く]** をクリックすると、GitHub の報告の画面が、「何をしたか / 何が起きたか / どうなるはずだったか」の見出しと、**環境（Mod・Minecraft・Forge・Java・OS の版、言語、入れている Mod の一覧）を書き込んだ状態**で開きます。見出しの下を書いて送ってください（GitHub のアカウントが要ります）。送る前に、本文は自由に消したり書き足したりできます。
+- 同じ環境の文章が**クリップボードにもコピー**されます（Discord などに貼るとき用）。Mod がとても多いと、リンクには Mod の一覧が入らないので、クリップボードから貼り付けてください。
+- ログ（`logs/latest.log`）やクラッシュレポート（`crash-reports` フォルダー）は、自動では送られません。あると助かるので、添付してください。
+
 ## インストール
 
 ### どこに入れるか
@@ -524,6 +537,8 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 | `machineParticlesVisible` | true | 加速中の機械のまわりの色の粒子を、自分の画面に出すか（1.6.0。自分の機械の粒子も、ほかの人の機械の粒子も消える） |
 | `machineBarEnabled` | true | かまど・醸造台・スポナーを叩いている間、上に進み具合（黄）と燃料（橙）のバーを表示するか（1.6.0） |
 | `othersComboDisplay` | true | 近くのほかのプレイヤーのコンボ（10 以上）を、頭の上に「n HIT」と表示するか（1.6.0） |
+| `showUpdateNotes` | true | 版が変わって初めてワールドに入ったときに、チャットに更新のお知らせを出すか（1.7.1） |
+| `lastSeenVersion` | （空） | 最後に更新のお知らせを見た版（1.7.1）。Mod が書き換えるので、書き換えないでください |
 | `ladderBoostBarEnabled` | true | はしごを加速している間、照準の上に残り時間のゲージ（茶色）を表示するか（1.7.0） |
 | `throwChargeBarEnabled` | true | 投げる物の溜めのゲージ（青緑）を、照準の下に表示するか（1.7.0） |
 | `sprintBoostBarEnabled` | true | 走りを加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0） |
@@ -549,6 +564,7 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 | `/weakspot stats <プレイヤー>` | そのプレイヤーの統計（今回と累計）をチャットに表示する |
 | `/weakspot reset <プレイヤー>` | そのプレイヤーの統計の累計を消す（統計画面の「累計をリセット」と同じ。節目も、もう一度受け取れるようになる） |
 | `/weakspot reload` | `config/weakspot.cfg` を読み直し、接続中の全員に設定を送り直す（再起動せずに設定を反映する） |
+| `/weakspot bug` | 不具合の報告の方法を出す（1.7.1。**誰でも使える**。自分のクライアントのコマンドで、サーバーには送らない） |
 
 ### ブーストの目安
 
@@ -576,7 +592,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 | `server/` | 管理コマンド、破壊速度ブースト、成長・機械・動物・釣り・弓・近接のヒット、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
 | `config/` | 設定 |
 
-仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）、[doc/SPEC_v1.4.2.md](doc/SPEC_v1.4.2.md)（1.4.2 での機械の加速の強化とコンボの演出）、[doc/SPEC_v1.4.3.md](doc/SPEC_v1.4.3.md)（1.4.3 での育たないときの知らせ）、[doc/SPEC_v1.4.4.md](doc/SPEC_v1.4.4.md)（1.4.4 でのレッドストーンの部品の加速）、[doc/SPEC_v1.5.md](doc/SPEC_v1.5.md)（1.5.0 での近接の弱点の大きさ）、[doc/SPEC_v1.5.1.md](doc/SPEC_v1.5.1.md)（1.5.1 での版の違いの知らせ）、[doc/SPEC_v1.5.2.md](doc/SPEC_v1.5.2.md)（1.5.2 でのディスペンサーの連射の見せ方）、[doc/SPEC_v1.5.3.md](doc/SPEC_v1.5.3.md)（1.5.3 での加速中の機械の粒子）、[doc/SPEC_v1.5.4.md](doc/SPEC_v1.5.4.md)（1.5.4 での弓の弱点の距離）、[doc/SPEC_v1.5.5.md](doc/SPEC_v1.5.5.md)（1.5.5 での近接の弱点の見える距離）、[doc/SPEC_v1.6.md](doc/SPEC_v1.6.md)（1.6.0 での機械の速さの表示・進み具合のバー・頭の上のコンボ・乗り物・食事・睡眠の弱点）、[doc/SPEC_v1.6.1.md](doc/SPEC_v1.6.1.md)（1.6.1 での節目の受け取り直し）、[doc/SPEC_v1.6.2.md](doc/SPEC_v1.6.2.md)（1.6.2 での寝ている間のマーカーの範囲）、[doc/SPEC_v1.6.3.md](doc/SPEC_v1.6.3.md)（1.6.3 での頭の上のコンボ数の修正）、[doc/SPEC_v1.6.4.md](doc/SPEC_v1.6.4.md)（1.6.4 での乗り物のゲージの位置）、[doc/SPEC_v1.7.md](doc/SPEC_v1.7.md)（1.7.0 でのはしご・エリトラ・エンチャント・収穫・投げる物・走りの弱点、節目の拡張、「弱点」タブ）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
+仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）、[doc/SPEC_v1.4.2.md](doc/SPEC_v1.4.2.md)（1.4.2 での機械の加速の強化とコンボの演出）、[doc/SPEC_v1.4.3.md](doc/SPEC_v1.4.3.md)（1.4.3 での育たないときの知らせ）、[doc/SPEC_v1.4.4.md](doc/SPEC_v1.4.4.md)（1.4.4 でのレッドストーンの部品の加速）、[doc/SPEC_v1.5.md](doc/SPEC_v1.5.md)（1.5.0 での近接の弱点の大きさ）、[doc/SPEC_v1.5.1.md](doc/SPEC_v1.5.1.md)（1.5.1 での版の違いの知らせ）、[doc/SPEC_v1.5.2.md](doc/SPEC_v1.5.2.md)（1.5.2 でのディスペンサーの連射の見せ方）、[doc/SPEC_v1.5.3.md](doc/SPEC_v1.5.3.md)（1.5.3 での加速中の機械の粒子）、[doc/SPEC_v1.5.4.md](doc/SPEC_v1.5.4.md)（1.5.4 での弓の弱点の距離）、[doc/SPEC_v1.5.5.md](doc/SPEC_v1.5.5.md)（1.5.5 での近接の弱点の見える距離）、[doc/SPEC_v1.6.md](doc/SPEC_v1.6.md)（1.6.0 での機械の速さの表示・進み具合のバー・頭の上のコンボ・乗り物・食事・睡眠の弱点）、[doc/SPEC_v1.6.1.md](doc/SPEC_v1.6.1.md)（1.6.1 での節目の受け取り直し）、[doc/SPEC_v1.6.2.md](doc/SPEC_v1.6.2.md)（1.6.2 での寝ている間のマーカーの範囲）、[doc/SPEC_v1.6.3.md](doc/SPEC_v1.6.3.md)（1.6.3 での頭の上のコンボ数の修正）、[doc/SPEC_v1.6.4.md](doc/SPEC_v1.6.4.md)（1.6.4 での乗り物のゲージの位置）、[doc/SPEC_v1.7.md](doc/SPEC_v1.7.md)（1.7.0 でのはしご・エリトラ・エンチャント・収穫・投げる物・走りの弱点、節目の拡張、「弱点」タブ）、[doc/SPEC_v1.7.1.md](doc/SPEC_v1.7.1.md)（1.7.1 でのマーカーの塗りの修正、更新のお知らせ、`/weakspot bug`）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
 
 ## バージョンの方針
 
@@ -585,6 +601,13 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - 迷ったときは、マイナーを上げます。
 
 ## 更新履歴
+
+### 1.7.1
+
+- 照準まわりの弱点（弓・釣り・乗り物・食事・はしご・エリトラ・投げる物・走り）と、睡眠・エンチャントのマーカーが、中空の丸（輪郭だけ）に見えていたのを直した。採掘の弱点と同じ塗りつぶしの丸になる（「弱点」タブで選んだ形も、塗られて見える）
+- 新しい版に入れ替えて初めてワールドに入ったときに、チャットに更新のお知らせを出すようにした（各自の設定 `showUpdateNotes`）
+- `/weakspot bug` を足した。報告の方法を出し、GitHub の報告の画面を、環境を書き込んだ状態で開ける（クリップボードにもコピーする）
+- クライアントだけの変更。通信内容は変わっていない。1.7.x 同士は、そのまま接続できる
 
 ### 1.7.0
 
