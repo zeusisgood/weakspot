@@ -4,14 +4,19 @@ import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MachineBoost;
 import com.example.weakspot.common.MachineComboBoost;
+import com.example.weakspot.common.MachineParticles;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -28,6 +33,8 @@ public final class MachineAccelerator {
 
     /** ディメンションごとの、加速中の機械。 */
     private static final Map<Integer, Map<BlockPos, MachineBoost>> BOOSTS = new HashMap<>();
+    /** 粒子を面から外側へ出す距離（ブロック）。 */
+    private static final double PARTICLE_OUTSET = 0.05;
 
     private MachineAccelerator() {
     }
@@ -55,12 +62,16 @@ public final class MachineAccelerator {
         for (Iterator<Map.Entry<BlockPos, MachineBoost>> it = boosts.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<BlockPos, MachineBoost> entry = it.next();
             BlockPos pos = entry.getKey();
+            int particles = entry.getValue().nextParticles();
             int calls = entry.getValue().nextTickCalls();
             if (!entry.getValue().isActive()) {
                 it.remove();
             }
             if (!world.isBlockLoaded(pos)) {
                 continue;
+            }
+            if (WeakSpotConfig.machineBoostParticles && particles > 0) {
+                spawnParticles(world, pos, particles, entry.getValue().multiplier());
             }
             if (RightClickTargets.isScheduledMachine(world.getBlockState(pos).getBlock())) {
                 ScheduledTicks.boost(world, pos, calls, entry.getValue().multiplier());
@@ -70,6 +81,47 @@ public final class MachineAccelerator {
             for (int i = 0; i < calls && te instanceof ITickable && !te.isInvalid() && world.getTileEntity(pos) == te; i++) {
                 ((ITickable) te).update();
             }
+        }
+    }
+
+    /**
+     * 加速中の機械のまわりに、速さに合わせた色の粉の粒子を出す（1.5.3）。数を 0 にすると、オフセットが色として届く
+     * （バニラの粉の粒子。近くのプレイヤー全員に見える）。場所は、当たり判定の箱の底面以外の面のランダムな位置の少し外側。
+     */
+    private static void spawnParticles(World world, BlockPos pos, int count, double multiplier) {
+        if (!(world instanceof WorldServer)) {
+            return;
+        }
+        int rgb = MachineParticles.colorFor(
+                MachineParticles.comboFactor(multiplier, WeakSpotConfig.machineBoostMultiplier));
+        double r = (rgb >> 16 & 0xFF) / 255.0;
+        double g = (rgb >> 8 & 0xFF) / 255.0;
+        double b = (rgb & 0xFF) / 255.0;
+        AxisAlignedBB box = world.getBlockState(pos).getBoundingBox(world, pos).offset(pos);
+        Random rand = world.rand;
+        for (int i = 0; i < count; i++) {
+            double x = box.minX + rand.nextDouble() * (box.maxX - box.minX);
+            double y = box.minY + rand.nextDouble() * (box.maxY - box.minY);
+            double z = box.minZ + rand.nextDouble() * (box.maxZ - box.minZ);
+            // 底面以外の 5 つの面のどれかに寄せて、少し外側に出す
+            switch (rand.nextInt(5)) {
+                case 0:
+                    y = box.maxY + PARTICLE_OUTSET;
+                    break;
+                case 1:
+                    x = box.minX - PARTICLE_OUTSET;
+                    break;
+                case 2:
+                    x = box.maxX + PARTICLE_OUTSET;
+                    break;
+                case 3:
+                    z = box.minZ - PARTICLE_OUTSET;
+                    break;
+                default:
+                    z = box.maxZ + PARTICLE_OUTSET;
+                    break;
+            }
+            ((WorldServer) world).spawnParticle(EnumParticleTypes.REDSTONE, x, y, z, 0, r, g, b, 1.0);
         }
     }
 

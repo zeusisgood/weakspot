@@ -10,6 +10,7 @@ public final class MachineBoost {
     private double multiplier = 1;
     private int remainingTicks;
     private double carry;
+    private double particleCarry;
 
     /** ヒットを受け付けたときに呼ぶ。 */
     public void hit(double multiplier, int durationTicks) {
@@ -20,6 +21,17 @@ public final class MachineBoost {
     /** 今の倍率（重なったヒットのうち大きいほう）。 */
     public double multiplier() {
         return multiplier;
+    }
+
+    /** この tick に出す粒子の数（1.5.3。倍率 ÷ MachineParticles.PARTICLES_DIVISOR、端数は持ち越す）。残り時間は減らさない。 */
+    public int nextParticles() {
+        if (!isActive()) {
+            return 0;
+        }
+        double count = multiplier / MachineParticles.PARTICLES_DIVISOR + particleCarry;
+        int whole = (int) Math.floor(count);
+        particleCarry = count - whole;
+        return whole;
     }
 
     public boolean isActive() {

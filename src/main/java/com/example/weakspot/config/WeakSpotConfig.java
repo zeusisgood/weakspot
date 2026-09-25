@@ -149,6 +149,10 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double machineBoostMaxMultiplier = 16.0;
 
+    @Config.Comment({"[サーバー] 加速中の機械のまわりに、速さに合わせた色の粒子を出すか（近くのプレイヤー全員に見える）",
+            "サーバーだけが使う（クライアントには送らない）"})
+    public static boolean machineBoostParticles = true;
+
     @Config.Comment("[サーバー] 機械の加速が続く時間（tick）。machineMinHitIntervalTicks 以上なら、最短の間隔で当て続けると途切れない")
     @Config.RangeInt(min = 0, max = 200)
     public static int machineBoostDurationTicks = 6;
