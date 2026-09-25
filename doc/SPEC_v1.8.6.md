@@ -91,6 +91,14 @@
 - **次のマイナー（1.9.0）に向けたメモ**（今回はやらない）:
   - B2: 採掘・成長・機械・動物にも、サーバーの設定 `…WeakSpotEnabled` を足す（新しい種類にはあるのに、この 4 つにはなく、サーバーの管理者が全体で止められない）。`SyncedSettings` に項目が増えるので、マイナーで行う
   - A7: `StatsScreen`（タブごと）と `ClientWeakSpotHandler`（採掘・成長・機械・動物・収穫）を分ける（遊び方も通信も変わらないので、パッチでもよい）
+  - 互換のためだけに残しているものの整理（ユーザーの判断）:
+    1. 保存のキー `critHits` を `meleeHits` に改名する。読むときは `meleeHits` がなければ `critHits` を読み、書くのは `meleeHits` だけ（古いワールドの数字は引き継ぐ。1.9.0 のワールドを 1.8.x に戻すと近接の数は 0 に見える）
+    2. 保存データに残った古いキー `rewardHits`（1.6.1 でやめた）を、読み込んだときに消す
+    3. 送る順番の都合をやめる: `StatsMessage` は種類の順のループに、`SyncedSettings` も素直な並びに直す（通信は変わる版なので）
+    4. `weakspot.cfg` に残った、今の設定にない項目（1.7.x の `meleeWeakSpotScale` など）を、設定ファイルの移行（`configVersion` 6）で消す（Forge が消さないことは、実装のときに確かめる）
+    5. 設定ファイルの移行 1〜5（1.2.x〜1.6.x の古い初期値の直し）を消す。`configVersion` の仕組みと 6 は残す。1.6.x 以前から直接上げた人は古い初期値のままになるので、更新履歴で案内する
+    6. 古いガイドの本の差し替え（1.8.5、`GuideBook.isOutdated`・`GuideBookGiver` の差し替え・`client/GuideBookOpener`）を消す。更新履歴に「1.8.4 以前の本はキーのまま出るので、捨てて K キーの『ガイド』で読んでください」と書く
+  - 残すもの（ユーザーの判断）: `ServerLang`（パッチ同士の新しい翻訳キーのため）、設定キーの名前（`boostMultiplier`・`critsPerRepair` など。改名しない）、`HitKind` の番号、`ServerFeatures`
 
 ## 6. ユーザーに確認してもらうこと
 
