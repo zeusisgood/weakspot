@@ -7,6 +7,7 @@ import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.network.MarkerMessage.MarkerData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.client.ClientCommandHandler;
 
 public class ClientProxy extends CommonProxy {
 
@@ -14,6 +15,7 @@ public class ClientProxy extends CommonProxy {
     public void init() {
         StatsKeyHandler.register();
         ToggleKeyHandler.register();
+        ClientCommandHandler.instance.registerCommand(new BugCommand());
     }
 
     @Override

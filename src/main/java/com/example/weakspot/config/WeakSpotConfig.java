@@ -558,6 +558,12 @@ public final class WeakSpotConfig {
             "形は circle, ring, diamond, square。書いていない種類は円。統計画面の「弱点」タブで変えられる"})
     public static String[] myMarkerShapes = {};
 
+    @Config.Comment("[クライアント] 版が変わって初めてワールドに入ったときに、チャットに更新のお知らせを出すか（1.7.1）")
+    public static boolean showUpdateNotes = true;
+
+    @Config.Comment("[クライアント] 最後に更新のお知らせを見た版（1.7.1）。Mod が書き換えます。書き換えないでください")
+    public static String lastSeenVersion = "";
+
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
     public static int configVersion = 0;
 

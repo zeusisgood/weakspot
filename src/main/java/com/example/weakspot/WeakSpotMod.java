@@ -21,6 +21,8 @@ import com.example.weakspot.server.MachineAccelerator;
 import com.example.weakspot.server.MachineStates;
 import com.example.weakspot.server.VehicleHits;
 import com.example.weakspot.server.WeakSpotCommand;
+import java.io.File;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -47,6 +49,16 @@ public class WeakSpotMod {
     public static final String ACCEPTED_VERSIONS = "[1.7,1.8)";
 
     public static SimpleNetworkWrapper network;
+
+    /**
+     * 起動した時点で config/weakspot.cfg がもうあったか（1.7.1。更新のお知らせで、初めて入れた人を見分ける）。
+     * Forge が設定ファイルを作るより前（Mod のクラスを作るとき）に確かめる。
+     */
+    public static boolean configExistedAtStart;
+
+    public WeakSpotMod() {
+        configExistedAtStart = new File(Loader.instance().getConfigDir(), MODID + ".cfg").exists();
+    }
 
     @SidedProxy(clientSide = "com.example.weakspot.client.ClientProxy", serverSide = "com.example.weakspot.CommonProxy")
     public static CommonProxy proxy;

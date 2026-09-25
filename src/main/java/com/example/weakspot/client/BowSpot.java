@@ -218,6 +218,8 @@ final class BowSpot {
                 GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
                 GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.disableDepth();
+        // HUD の図形は時計回りに頂点を並べるので、カリングを切らないと塗りが消える（1.7.1）
+        GlStateManager.disableCull();
         GlStateManager.glLineWidth(2.0F);
 
         if (spot) {
@@ -228,6 +230,7 @@ final class BowSpot {
         }
 
         GlStateManager.glLineWidth(1.0F);
+        GlStateManager.enableCull();
         GlStateManager.enableDepth();
         GlStateManager.disableBlend();
         GlStateManager.enableTexture2D();
