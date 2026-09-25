@@ -46,6 +46,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
+    public void onOtherCombo(int entityId, int count) {
+        Minecraft.getMinecraft().addScheduledTask(() -> OtherCombos.receive(entityId, count));
+    }
+
+    @Override
     public void onMachineState(BlockPos pos, float progress, float fuel) {
         Minecraft.getMinecraft().addScheduledTask(
                 () -> MachineBars.receive(pos, progress, fuel, ClientWeakSpotHandler.clientTick));

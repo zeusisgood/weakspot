@@ -10,6 +10,7 @@ import com.example.weakspot.network.MachineQueryMessage;
 import com.example.weakspot.network.MachineStateMessage;
 import com.example.weakspot.network.MarkerMessage;
 import com.example.weakspot.network.MilestoneMessage;
+import com.example.weakspot.network.OtherComboMessage;
 import com.example.weakspot.network.OtherHitMessage;
 import com.example.weakspot.network.OtherMarkerMessage;
 import com.example.weakspot.network.SettingsMessage;
@@ -67,6 +68,7 @@ public class WeakSpotMod {
         network.registerMessage(FishingStateMessage.Handler.class, FishingStateMessage.class, 12, Side.CLIENT);
         network.registerMessage(MachineQueryMessage.Handler.class, MachineQueryMessage.class, 13, Side.SERVER);
         network.registerMessage(MachineStateMessage.Handler.class, MachineStateMessage.class, 14, Side.CLIENT);
+        network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 15, Side.CLIENT);
     }
 
     @Mod.EventHandler

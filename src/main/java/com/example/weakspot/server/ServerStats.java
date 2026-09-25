@@ -66,6 +66,11 @@ public final class ServerStats {
         return count;
     }
 
+    /** そのプレイヤーの連続ヒット（まだ一度もヒットしていなければ null）。頭の上のコンボ（ComboRelay）が読む。 */
+    static HitStreak streak(EntityPlayer player) {
+        return STREAKS.get(player.getUniqueID());
+    }
+
     public static MiningStats session(EntityPlayer player) {
         return SESSIONS.computeIfAbsent(player.getUniqueID(), id -> new MiningStats());
     }

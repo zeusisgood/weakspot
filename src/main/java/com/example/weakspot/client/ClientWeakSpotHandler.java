@@ -526,6 +526,7 @@ public final class ClientWeakSpotHandler {
         boostHitTick = Long.MIN_VALUE / 2;
         AnimalStates.clear();
         MachineBars.clear();
+        OtherCombos.clear();
         FishingSpot.clear();
         BowSpot.clear();
         lastPlayer = null;

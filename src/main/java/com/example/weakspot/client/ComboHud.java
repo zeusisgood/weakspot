@@ -380,7 +380,8 @@ final class ComboHud {
         return bottom;
     }
 
-    private static int colorOf(int value) {
+    /** コンボの数の色（段階の色。100 以上は虹色）。頭の上のコンボ（OtherCombos）も使う。 */
+    static int colorOf(int value) {
         ComboTier tier = ComboTier.of(value);
         if (tier != ComboTier.RAINBOW) {
             return tier.rgb;

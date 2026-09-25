@@ -36,6 +36,10 @@ public class CommonProxy {
     public void onAnimalState(int entityId, int mask, float[] progress) {
     }
 
+    /** 近くのほかのプレイヤーのコンボが届いた（1.6.0。サーバー → クライアントのパケットから呼ばれる）。 */
+    public void onOtherCombo(int entityId, int count) {
+    }
+
     /** 機械の進み具合が届いた（1.6.0。サーバー → クライアントのパケットから呼ばれる）。fuel が負なら燃料なし。 */
     public void onMachineState(BlockPos pos, float progress, float fuel) {
     }
