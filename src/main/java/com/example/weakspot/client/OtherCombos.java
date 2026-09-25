@@ -19,7 +19,7 @@ import net.minecraftforge.fml.relauncher.Side;
 /**
  * 近くのほかのプレイヤーのコンボを、頭の上（名前の少し上）に「25 HIT」と出す（1.6.0）。数はサーバーから届く
  * （OtherComboMessage）。MIN_SHOWN 以上のときだけ出し、STALE_TICKS 更新がなければ消す。色はコンボの表示と同じ段階の色。
- * 名前と同じく、しゃがんでいる人の分は出さない。壁の向こうは見えない（深度テストあり）。
+ * 機械はしゃがんで叩くので、名前と違って、しゃがんでいる人の分も出す（1.6.3）。壁の向こうは見えない（深度テストあり）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class OtherCombos {
@@ -53,7 +53,7 @@ final class OtherCombos {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = event.getEntityPlayer();
         if (!WeakSpotConfig.othersComboDisplay || mc.gameSettings.hideGUI || player == mc.player
-                || player.isSneaking() || player.isInvisible()) {
+                || player.isInvisible()) {
             return;
         }
         int[] entry = COMBOS.get(player.getEntityId());
