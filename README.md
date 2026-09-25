@@ -3,7 +3,7 @@
 Fortnite の資材集めにある「弱点（クリティカル）を叩くと速く壊せる」仕組みを Minecraft に持ち込む Mod です。
 
 - 対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**
-- 最新版: **1.4.4**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
+- 最新版: **1.5.0**（[Releases](https://github.com/zeusisgood/weakspot/releases)、変更点は[更新履歴](#更新履歴)）
 
 ## 遊び方
 
@@ -144,13 +144,14 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 
 - 弱点は遠くからでも見えますが、**当てられるのは攻撃が届く距離だけ**です。遠くで位置を確かめてから踏み込むと、クリーパーなども狙いやすくなります。
 - 何を持っていても出ます（素手を含む）。当てると、弱点は同じ面の別の位置へ動きます。
+- 近接の弱点は、ほかの弱点より**大きめ**です（1.5.0。初期値で約 1.5 倍。設定 `meleeWeakSpotScale`）。
 - 弱点は、狙いやすいように**頭・首・胴体のあたり**（当たり判定の箱の、上の 6 割）にだけ出ます。見下ろしたときは頭のてっぺんにも出ます。見上げたとき（箱の底面）には出ません。
 - **攻撃のゲージ**（照準の下の、剣のマーク）が溜まっていない間は、弱点が**薄く**表示されます。その間に弱点を殴っても、普通の攻撃です（ジャンプ攻撃のクリティカルと同じ条件）。
 - 弱点から外れた攻撃は、今までどおりの普通の攻撃です。ジャンプ攻撃と重ねても、1.5 倍のままです。
 - 動物・村人・プレイヤーには出ません。右クリックを押しているとき（弓を引いている、動物の弱点など）と、ブロックを掘っているときも出ません。
 - クリティカル **5 回ごと**に、手に持っている物（剣・斧など、耐久がある物）の耐久が **1** 回復します（端数はログアウトまで持ち越し）。
 - 近接の弱点は、他のプレイヤーには見えません。ヒット音とコンボには数えますが、節目には数えません。
-- 設定 `meleeWeakSpotEnabled` / `meleeMinHitIntervalTicks` / `critsPerRepair` / `critRepairPerStep`（サーバーの値）。
+- 設定 `meleeWeakSpotEnabled` / `meleeMinHitIntervalTicks` / `meleeWeakSpotScale` / `critsPerRepair` / `critRepairPerStep`（サーバーの値）。
 
 ### 耐久回復と節目
 
@@ -348,6 +349,7 @@ modid:block[property=条件,property=条件]   状態が条件を満たすとき
 | `bowMinHitIntervalTicks` | 4 | 弓のヒットを受け付ける最小間隔（tick） |
 | `meleeWeakSpotEnabled` | true | 近接の弱点（敵を殴ってクリティカル）のオン・オフ |
 | `meleeMinHitIntervalTicks` | 4 | 近接のヒットを受け付ける最小間隔（tick）。攻撃のゲージの条件もある |
+| `meleeWeakSpotScale` | 1.5 | 近接の弱点の大きさの倍率（1.0〜3.0）。`weakSpotRadiusRatio` と `weakSpotMinRadius` に掛ける（上限 `weakSpotMaxRadiusRatio` には掛けない）。ほかの弱点は変わらない（1.5.0） |
 | `critsPerRepair` | 5 | 近接の弱点のクリティカル何回ごとに、手に持っている物の耐久を回復するか（余りはログアウトまで持ち越す）。0 で回復しない。**サーバーだけが使う**（クライアントには送らない） |
 | `critRepairPerStep` | 1 | `critsPerRepair` ごとに回復する耐久。**サーバーだけが使う**（クライアントには送らない） |
 | `giveGuideBook` | true | 初めてログインしたプレイヤーに、遊び方のガイドの本を渡すか（1人1回）。**サーバーだけが使う**（クライアントには送らない） |
@@ -424,7 +426,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 | `server/` | 管理コマンド、破壊速度ブースト、成長・機械・動物・釣り・弓・近接のヒット、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
 | `config/` | 設定 |
 
-仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）、[doc/SPEC_v1.4.2.md](doc/SPEC_v1.4.2.md)（1.4.2 での機械の加速の強化とコンボの演出）、[doc/SPEC_v1.4.3.md](doc/SPEC_v1.4.3.md)（1.4.3 での育たないときの知らせ）、[doc/SPEC_v1.4.4.md](doc/SPEC_v1.4.4.md)（1.4.4 でのレッドストーンの部品の加速）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
+仕様は [doc/SPEC_v1.0.md](doc/SPEC_v1.0.md)（MVP）、[doc/SPEC_v1.1.md](doc/SPEC_v1.1.md)（1.1.0 での追加・変更）、[doc/SPEC_v1.1.1.md](doc/SPEC_v1.1.1.md)（1.1.1 での修正）、[doc/SPEC_v1.1.2.md](doc/SPEC_v1.1.2.md)（1.1.2 での成長の対象の拡張）、[doc/SPEC_v1.1.3.md](doc/SPEC_v1.1.3.md)（1.1.3 でのコンボの表示）、[doc/SPEC_v1.1.4.md](doc/SPEC_v1.1.4.md)（1.1.4 での弱点の移動の演出）、[doc/SPEC_v1.1.5.md](doc/SPEC_v1.1.5.md)（1.1.5 での耐久バー）、[doc/SPEC_v1.1.6.md](doc/SPEC_v1.1.6.md)（1.1.6 での成長バー・マークの形・一時オフ・管理コマンド）、[doc/SPEC_v1.2.md](doc/SPEC_v1.2.md)（1.2.0 での小さいブロックの弱点、設定の追加、動物・釣りの弱点、一時オフのサーバーへの通知）、1.2.x のパッチ（[1.2.1](doc/SPEC_v1.2.1.md)、[1.2.2](doc/SPEC_v1.2.2.md)、[1.2.3](doc/SPEC_v1.2.3.md)、[1.2.4](doc/SPEC_v1.2.4.md)）、[doc/SPEC_v1.3.md](doc/SPEC_v1.3.md)（1.3.0 での弓・近接の弱点）、[doc/SPEC_v1.3.1.md](doc/SPEC_v1.3.1.md)（1.3.1 での近接の弱点の範囲）、[doc/SPEC_v1.3.2.md](doc/SPEC_v1.3.2.md)（1.3.2 での他のプレイヤーのヒット音）、[doc/SPEC_v1.3.3.md](doc/SPEC_v1.3.3.md)（1.3.3 での他のプレイヤーのヒット音の残りの種類）、[doc/SPEC_v1.3.4.md](doc/SPEC_v1.3.4.md)（1.3.4 での近接の耐久回復・弓の過剰チャージ・一時オフのキー）、[doc/SPEC_v1.3.5.md](doc/SPEC_v1.3.5.md)（1.3.5 での近接の弱点の見える距離）、[doc/SPEC_v1.3.6.md](doc/SPEC_v1.3.6.md)（1.3.6 での機械・成長のマークの共有）、[doc/SPEC_v1.3.7.md](doc/SPEC_v1.3.7.md)（1.3.7 での IC2 のゴムの木）、[doc/SPEC_v1.4.md](doc/SPEC_v1.4.md)（1.4.0 での成長の追加リストの汎用化）、[doc/SPEC_v1.4.1.md](doc/SPEC_v1.4.1.md)（1.4.1 でのガイドの本）、[doc/SPEC_v1.4.2.md](doc/SPEC_v1.4.2.md)（1.4.2 での機械の加速の強化とコンボの演出）、[doc/SPEC_v1.4.3.md](doc/SPEC_v1.4.3.md)（1.4.3 での育たないときの知らせ）、[doc/SPEC_v1.4.4.md](doc/SPEC_v1.4.4.md)（1.4.4 でのレッドストーンの部品の加速）、[doc/SPEC_v1.5.md](doc/SPEC_v1.5.md)（1.5.0 での近接の弱点の大きさ）にあります。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](CLAUDE.md) を参照してください。
 
 ## バージョンの方針
 
@@ -433,6 +435,11 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - 迷ったときは、マイナーを上げます。
 
 ## 更新履歴
+
+### 1.5.0
+
+- 近接の弱点のマーカーを大きくした（初期値で約 1.5 倍）。大きさは新しい設定 `meleeWeakSpotScale`（サーバーの値）で変えられる。採掘・成長・機械・動物の弱点の大きさは変わらない
+- 通信内容が変わったため、1.4.x とは接続できない。サーバーとクライアントを、1.5.0 に同時に更新すること
 
 ### 1.4.4
 
