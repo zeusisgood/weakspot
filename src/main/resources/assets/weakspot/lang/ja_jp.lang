@@ -81,7 +81,7 @@ weakspot.general.othermarkershape.tooltip=[クライアント] 他のプレイ�
 weakspot.general.weakspotsenabled.tooltip=[クライアント] 自分の弱点のオン・オフ（弱点のオン・オフのキーで切り替わる）\nオフの間は、自分の弱点が出ず、通常の遊び方になる。他のプレイヤーのマークは見える
 weakspot.general.animalspotseethrough.tooltip=[クライアント] 自分の動物・敵の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか\nニワトリやゾンビの腕など、体が当たり判定より大きいときに見やすくなる。他のプレイヤーのマークは透かさない
 weakspot.general.bowdrawbarenabled.tooltip=[クライアント] 弓を引いている間、照準の下に引き具合のゲージを表示するか\n弓の弱点や、弱点の一時オフ（HOME キー）に関係なく出る
-weakspot.general.vehicleboostbarenabled.tooltip=[クライアント] 乗り物を加速している間、照準の下に残り時間のゲージ（水色）を表示するか
+weakspot.general.vehicleboostbarenabled.tooltip=[クライアント] 乗り物を加速している間、照準の上に残り時間のゲージ（水色）を表示するか
 
 weakspot.command.usage=/weakspot stats <プレイヤー> | /weakspot reset <プレイヤー>（オンラインのプレイヤーだけ） | /weakspot reload
 weakspot.command.usage.stats=/weakspot stats <プレイヤー>

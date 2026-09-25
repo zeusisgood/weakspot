@@ -81,7 +81,7 @@ weakspot.general.othermarkershape.tooltip=[Client] Shape of other players' weak 
 weakspot.general.weakspotsenabled.tooltip=[Client] Turn your own weak spots on or off (the Toggle Weak Spots key switches it).\nWhile off, your weak spots do not appear and the game plays as usual. Other players' markers are still shown.
 weakspot.general.animalspotseethrough.tooltip=[Client] When your weak spot on an animal or enemy is hidden by its body, show the hidden part faintly through it.\nHelps when the body is bigger than the hitbox, such as chickens or zombie arms. Other players' markers are not shown through.
 weakspot.general.bowdrawbarenabled.tooltip=[Client] While drawing a bow, show how far it is drawn as a gauge below the crosshair.\nShown regardless of the bow weak spot and of turning weak spots off (HOME key).
-weakspot.general.vehicleboostbarenabled.tooltip=[Client] Show the remaining boost time (light blue) under the crosshair while your vehicle is boosted.
+weakspot.general.vehicleboostbarenabled.tooltip=[Client] Show the remaining boost time (light blue) above the crosshair while your vehicle is boosted.
 
 weakspot.command.usage=/weakspot stats <player> | /weakspot reset <player> (online players only) | /weakspot reload
 weakspot.command.usage.stats=/weakspot stats <player>

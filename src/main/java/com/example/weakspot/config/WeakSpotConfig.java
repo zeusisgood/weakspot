@@ -415,7 +415,7 @@ public final class WeakSpotConfig {
             "弓の弱点や、弱点の一時オフ（HOME キー）に関係なく出る"})
     public static boolean bowDrawBarEnabled = true;
 
-    @Config.Comment({"[クライアント] 乗り物を加速している間、照準の下に残り時間のゲージ（水色）を表示するか（1.6.0）"})
+    @Config.Comment({"[クライアント] 乗り物を加速している間、照準の上に残り時間のゲージ（水色）を表示するか（1.6.0）"})
     public static boolean vehicleBoostBarEnabled = true;
 
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")

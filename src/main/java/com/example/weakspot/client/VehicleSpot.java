@@ -21,7 +21,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 乗り物の弱点（自分だけ。1.6.0）と、加速の残り時間のゲージ。馬・豚・トロッコ・ボートに乗って動いている間、
+ * 乗り物の弱点（自分だけ。1.6.0）と、加速の残り時間のゲージ（照準の上）。馬・豚・トロッコ・ボートに乗って動いている間、
  * 照準の近く（馬・豚は真上か真下だけ）に水色の弱点を出し、照準を合わせるだけでヒットにする。弓を引いている・
  * 何かを使っている（食べているなど）間は出さない（そちらの弱点を出す）。
  *
@@ -38,8 +38,11 @@ final class VehicleSpot {
 
     private static final int BAR_WIDTH = 40;
     private static final int BAR_HEIGHT = 3;
-    /** 照準の中心から、ゲージの中心までの下向きの距離（GUI ピクセル。弓の引きゲージの下）。 */
-    private static final int BAR_OFFSET = 22;
+    /**
+     * 照準の中心から、ゲージの中心までの上向きの距離（GUI ピクセル）。照準の下はコンボの表示と重なるので、上に出す
+     * （1.6.4。弓の引きゲージ（下に 12）と上下対称）。
+     */
+    private static final int BAR_OFFSET = 12;
     /** 水色 #55CCFF と、背景 #1E1E1E 半透明。 */
     private static final int RGB = 0x55CCFF;
     private static final float[] BAR_FILL = {0x55 / 255F, 0xCC / 255F, 0xFF / 255F, 1.0F};
@@ -160,7 +163,7 @@ final class VehicleSpot {
         if (bar) {
             ScaledResolution res = new ScaledResolution(mc);
             double x0 = res.getScaledWidth() / 2.0 - BAR_WIDTH / 2.0;
-            double y0 = res.getScaledHeight() / 2.0 + BAR_OFFSET - BAR_HEIGHT / 2.0;
+            double y0 = res.getScaledHeight() / 2.0 - BAR_OFFSET - BAR_HEIGHT / 2.0;
             ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
             ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * Math.min(1, remaining), y0 + BAR_HEIGHT, BAR_FILL);
         }
