@@ -104,6 +104,14 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 1000)
     public static int growthTicksPerHit = 5;
 
+    @Config.Comment({"[サーバー] 作物・苗木の弱点に当てても育たないときに、そのプレイヤーのチャットで知らせるか",
+            "暗い（作物・茎・苗木で明るさ 9 未満）ときは最初のヒットで、原因が分からないときは growthStuckHits 回続けて変わらなかったときに知らせる"})
+    public static boolean growthWarnings = true;
+
+    @Config.Comment("[サーバー] 何回続けて当てても状態が変わらなかったら「何らかの外部要因で育たない」と知らせるか")
+    @Config.RangeInt(min = 5, max = 1000)
+    public static int growthStuckHits = 30;
+
     @Config.Comment("[サーバー] 作物・苗木のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
     public static int growthMinHitIntervalTicks = 6;

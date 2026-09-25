@@ -60,6 +60,8 @@ weakspot.general.comboposition.tooltip=[クライアント] コンボの表示�
 weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100、250、500、1000（以降 1000 ごと）に達したときの演出（強調音と光）\n上の段階ほど派手になる（500 から花火、1000 からタイトル）
 weakspot.combo.machine=機械 ×%s
 weakspot.combo.title=%s COMBO!
+weakspot.growth.dark=暗くて育ちません（明るさ %s、9 以上が必要）。たいまつなどで明るくしてください（夜の屋外も暗くなります）
+weakspot.growth.stuck=%s 回当てても育ちません。何らかの外部要因で育たないようです。まわりの環境を確認してください
 weakspot.general.blockhealthbarenabled.tooltip=[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか\n自分が左クリックの長押しで掘っている、弱点が出るブロックだけに出る
 weakspot.general.weakspottrailenabled.tooltip=[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）\n見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く
 

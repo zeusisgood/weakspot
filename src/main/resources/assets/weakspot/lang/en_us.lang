@@ -60,6 +60,8 @@ weakspot.general.comboposition.tooltip=[Client] Where to show the combo.\nBELOW_
 weakspot.general.combomilestoneeffects.tooltip=[Client] Accent sound and glow when the combo reaches 10, 25, 50, 100, 250, 500 and 1000 (then every 1000).\nThe higher the step, the bigger the show (fireworks from 500, a title from 1000).
 weakspot.combo.machine=Machine ×%s
 weakspot.combo.title=%s COMBO!
+weakspot.growth.dark=Too dark to grow (light %s, needs 9 or more). Light it up with torches (outdoors gets dark at night, too).
+weakspot.growth.stuck=No growth after %s hits. Something around it seems to be stopping it. Check its surroundings.
 weakspot.general.blockhealthbarenabled.tooltip=[Client] Show the remaining health of the block you are mining as a green bar along the bottom margin of its face.\nOnly for blocks you mine by holding left click that can have a weak spot.
 weakspot.general.weakspottrailenabled.tooltip=[Client] Animate weak spots as they move: the marker quickly slides to its new place, leaving a short trail.\nVisual only: hits count at the new place immediately. Off switches in place. Also applies to other players' markers.
 

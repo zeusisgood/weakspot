@@ -81,7 +81,13 @@ public final class RightClickHits {
         // 機械の倍率はこのヒットを数えたあとのコンボで決めるので、先に数える
         int combo = ServerStats.countStreak(player);
         if (kind == HitKind.GROWTH) {
+            IBlockState before = world.getBlockState(pos);
+            BlockPos target = RightClickTargets.growthTarget(world, pos, before);
+            IBlockState targetBefore = world.getBlockState(target);
             grow(world, pos, settings);
+            // 柱が伸びると一番上の節が変わるので、前の一番上の節と、叩いたブロックの両方を比べる
+            boolean changed = world.getBlockState(pos) != before || world.getBlockState(target) != targetBefore;
+            GrowthWarnings.onGrowthHit(player, world, pos, changed);
             ServerStats.record(player, stats -> stats.recordGrowthHit());
         } else if (kind == HitKind.MACHINE) {
             MachineAccelerator.hit(world, pos, combo);
