@@ -9,16 +9,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 - **[weakspot-1.8.6.jar をダウンロード](https://github.com/zeusisgood/weakspot/releases/download/v1.8.6/weakspot-1.8.6.jar)**（最新版 1.8.6。クリックするとすぐ落とせます）
 - [ほかの版・リリースノート（Releases のページ）](https://github.com/zeusisgood/weakspot/releases/latest)
 
-対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**
-
-## はじめかた（3 ステップ）
-
-1. [Minecraft Forge 1.12.2 - 14.23.5.2860](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.12.2.html) を入れる
-2. ダウンロードした jar を、`.minecraft` の中の **`mods` フォルダ**に入れる（なければ作る）
-3. Forge のプロファイルで起動する。初めてワールドに入ると、遊び方の**ガイドの本**がもらえる
-
-- **マルチプレイ**では、サーバーと、入る人全員に同じ版の jar が要ります。
-- 詳しいインストール（専用サーバー・更新のしかた）は [doc/install.md](doc/install.md)。
+対応: **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**（マルチプレイでは、サーバーと全員に同じ版が要ります。詳しくは [doc/install.md](doc/install.md)）
 
 ## 操作
 
