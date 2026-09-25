@@ -37,7 +37,7 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_OTHERS_PREVIEW = 32;
 
     /** 13 行（見出し + 統計 13 項目）が、一番小さい画面でも下のボタンに重ならない高さ。 */
-    private static final int ROW_HEIGHT = 11;
+    private static final int ROW_HEIGHT = 10;
     /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
 
@@ -78,7 +78,7 @@ final class StatsScreen extends GuiScreen {
         WeakSpotMod.network.sendToServer(new StatsRequestMessage(false));
 
         buttonList.clear();
-        top = Math.max(10, height / 2 - 116);
+        top = Math.max(6, height / 2 - 124);
         int center = width / 2;
 
         tabStats = add(new GuiButton(BUTTON_TAB_STATS, center - 102, top + 14, 100, 20,
@@ -105,7 +105,7 @@ final class StatsScreen extends GuiScreen {
         }));
         add(new GuiButton(BUTTON_OTHERS_PREVIEW, center + 94, y, 60, 20, I18n.format("weakspot.sound.preview")));
 
-        int bottom = Math.min(height - 28, top + 200);
+        int bottom = Math.min(height - 28, top + 226);
         resetButton = add(new GuiButton(BUTTON_RESET, center - 154, bottom, 100, 20, ""));
         add(new GuiButton(BUTTON_CONFIG, center - 50, bottom, 100, 20, I18n.format("weakspot.stats.openConfig")));
         add(new GuiButton(BUTTON_DONE, center + 54, bottom, 100, 20, I18n.format("gui.done")));
@@ -251,6 +251,9 @@ final class StatsScreen extends GuiScreen {
         y = row("weakspot.stats.fishingHits", s -> Long.toString(s.fishingHits), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.bowHits", s -> Long.toString(s.bowHits), labelX, sessionRight, totalRight, y);
         y = row("weakspot.stats.critHits", s -> Long.toString(s.critHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.vehicleHits", s -> Long.toString(s.vehicleHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.eatHits", s -> Long.toString(s.eatHits), labelX, sessionRight, totalRight, y);
+        y = row("weakspot.stats.sleepHits", s -> Long.toString(s.sleepHits), labelX, sessionRight, totalRight, y);
         row("weakspot.stats.maxStreak", s -> Long.toString(s.maxStreak), labelX, sessionRight, totalRight, y);
     }
 

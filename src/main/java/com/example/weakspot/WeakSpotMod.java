@@ -19,6 +19,7 @@ import com.example.weakspot.network.StatsRequestMessage;
 import com.example.weakspot.network.SwitchMessage;
 import com.example.weakspot.server.MachineAccelerator;
 import com.example.weakspot.server.MachineStates;
+import com.example.weakspot.server.VehicleHits;
 import com.example.weakspot.server.WeakSpotCommand;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -81,6 +82,7 @@ public class WeakSpotMod {
     public void serverStopped(FMLServerStoppedEvent event) {
         MachineAccelerator.clear();
         MachineStates.clear();
+        VehicleHits.clear();
     }
 
     @Mod.EventHandler

@@ -124,6 +124,9 @@ public final class ServerStats {
         stats.fishingHits = tag.getLong("fishingHits");
         stats.bowHits = tag.getLong("bowHits");
         stats.critHits = tag.getLong("critHits");
+        stats.vehicleHits = tag.getLong("vehicleHits");
+        stats.eatHits = tag.getLong("eatHits");
+        stats.sleepHits = tag.getLong("sleepHits");
         return stats;
     }
 
@@ -141,6 +144,9 @@ public final class ServerStats {
         tag.setLong("fishingHits", stats.fishingHits);
         tag.setLong("bowHits", stats.bowHits);
         tag.setLong("critHits", stats.critHits);
+        tag.setLong("vehicleHits", stats.vehicleHits);
+        tag.setLong("eatHits", stats.eatHits);
+        tag.setLong("sleepHits", stats.sleepHits);
         return tag;
     }
 }

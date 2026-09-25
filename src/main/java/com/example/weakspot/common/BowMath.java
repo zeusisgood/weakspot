@@ -104,6 +104,35 @@ public final class BowMath {
         return best;
     }
 
+    /**
+     * 照準の真上か真下だけに出す弱点の次の pitch（度。1.6.0。馬・豚に乗っているとき）。yaw は使う側が視線に合わせる。
+     * 視線から offsetRange の角度だけ上か下（ランダム）にずらし、±90 度を越えるなら反対側にする。
+     * 前の pitch から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
+     */
+    public static double nextVerticalPitch(double lookPitch, double prevPitch, double fovDegrees, Random random) {
+        double[] range = offsetRange(fovDegrees);
+        double best = lookPitch;
+        double bestMove = -1;
+        for (int i = 0; i < 40; i++) {
+            double offset = range[0] + random.nextDouble() * (range[1] - range[0]);
+            double sign = random.nextBoolean() ? 1 : -1;
+            double pitch = lookPitch + sign * offset;
+            if (Math.abs(pitch) > 90) {
+                pitch = lookPitch - sign * offset;
+            }
+            pitch = Math.max(-90, Math.min(90, pitch));
+            double move = Math.abs(pitch - prevPitch);
+            if (move >= MIN_MOVE_DEGREES) {
+                return pitch;
+            }
+            if (move > bestMove) {
+                bestMove = move;
+                best = pitch;
+            }
+        }
+        return best;
+    }
+
     /** 1ヒットで実際に進める tick 数。引いた時間 used に足して、引き切り（FULL_DRAW_TICKS）を超えない。 */
     public static int addedTicks(int used, int hitTicks) {
         return Math.max(0, Math.min(hitTicks, FULL_DRAW_TICKS - used));

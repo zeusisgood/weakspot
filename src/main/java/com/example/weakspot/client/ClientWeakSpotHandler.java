@@ -216,6 +216,7 @@ public final class ClientWeakSpotHandler {
         WeakSpotRenderer.clearFlashes();
         FishingSpot.clear();
         BowSpot.clear();
+        VehicleSpot.clear();
     }
 
     private static void updateAim(Minecraft mc) {
@@ -527,6 +528,7 @@ public final class ClientWeakSpotHandler {
         AnimalStates.clear();
         MachineBars.clear();
         OtherCombos.clear();
+        VehicleSpot.clear();
         FishingSpot.clear();
         BowSpot.clear();
         lastPlayer = null;

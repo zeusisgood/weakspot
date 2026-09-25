@@ -66,6 +66,12 @@ public final class SyncedSettings {
     /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
     public double machineBoostMultiplier;
     public double machineBoostMaxMultiplier;
+    /** 乗り物の弱点（1.6.0）。 */
+    public boolean vehicleWeakSpotEnabled;
+    public double vehicleBoostMultiplier;
+    public double vehicleBoostMaxMultiplier;
+    public int vehicleBoostDurationTicks;
+    public int vehicleMinHitIntervalTicks;
     /** 値を送ったサーバーの Mod の版（1.6.0。ServerFeatures）。自分の設定の値なら、自分の版。 */
     public String serverVersion;
     public double markerShareRange;
@@ -128,6 +134,11 @@ public final class SyncedSettings {
         s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
         s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
         s.serverVersion = WeakSpotMod.VERSION;
+        s.vehicleWeakSpotEnabled = WeakSpotConfig.vehicleWeakSpotEnabled;
+        s.vehicleBoostMultiplier = WeakSpotConfig.vehicleBoostMultiplier;
+        s.vehicleBoostMaxMultiplier = WeakSpotConfig.vehicleBoostMaxMultiplier;
+        s.vehicleBoostDurationTicks = WeakSpotConfig.vehicleBoostDurationTicks;
+        s.vehicleMinHitIntervalTicks = WeakSpotConfig.vehicleMinHitIntervalTicks;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -175,6 +186,11 @@ public final class SyncedSettings {
         buf.writeDouble(machineBoostMultiplier);
         buf.writeDouble(machineBoostMaxMultiplier);
         ByteBufUtils.writeUTF8String(buf, serverVersion);
+        buf.writeBoolean(vehicleWeakSpotEnabled);
+        buf.writeDouble(vehicleBoostMultiplier);
+        buf.writeDouble(vehicleBoostMaxMultiplier);
+        buf.writeInt(vehicleBoostDurationTicks);
+        buf.writeInt(vehicleMinHitIntervalTicks);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -222,6 +238,11 @@ public final class SyncedSettings {
         s.machineBoostMultiplier = buf.readDouble();
         s.machineBoostMaxMultiplier = buf.readDouble();
         s.serverVersion = ByteBufUtils.readUTF8String(buf);
+        s.vehicleWeakSpotEnabled = buf.readBoolean();
+        s.vehicleBoostMultiplier = buf.readDouble();
+        s.vehicleBoostMaxMultiplier = buf.readDouble();
+        s.vehicleBoostDurationTicks = buf.readInt();
+        s.vehicleMinHitIntervalTicks = buf.readInt();
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;

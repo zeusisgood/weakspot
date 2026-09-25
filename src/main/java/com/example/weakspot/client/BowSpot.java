@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.BowDraw;
+import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BowMath;
 import com.example.weakspot.common.FishingMath;
@@ -104,13 +105,25 @@ final class BowSpot {
             hasSpot = false;
         } else if (!hasSpot) {
             // 引き始めた。今の視線の近くに出す
-            double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, player.rotationYaw,
-                    player.rotationPitch, SCREEN.fovDegrees(), RANDOM);
+            double[] next = next(player, player.rotationYaw, player.rotationPitch);
             yaw = next[0];
             pitch = next[1];
             MOTION.jumpTo(yaw, pitch);
             hasSpot = true;
         }
+    }
+
+    /**
+     * 次の弱点の向き。馬・豚に乗っているときは、照準の真上か真下だけ（1.6.0。狙うたびに進む向きがぶれないように）。
+     * 真上・真下の弱点の yaw は、出した時点の視線の yaw（弓を引いている短い間なので、向きを追いかけない）。
+     */
+    private static double[] next(EntityPlayerSP player, double prevYaw, double prevPitch) {
+        if (VehicleTargets.isSteeredByLook(player)) {
+            return new double[] {player.rotationYaw,
+                    BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, SCREEN.fovDegrees(), RANDOM)};
+        }
+        return BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch, SCREEN.fovDegrees(),
+                RANDOM);
     }
 
     /** 弱点を出すか。引き切る前と、引き切ったあとの過剰チャージが上限に届くまで。 */
@@ -160,6 +173,8 @@ final class BowSpot {
 
     private static void onHit(EntityPlayerSP player) {
         int streak = ClientWeakSpotHandler.registerHit(HitKind.BOW);
+        // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）
+        VehicleSpot.onRiderHit(streak);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.BOW, streak));
         // サーバーの返事を待たずに、自分の側でも引きを進める（弓の見た目とゲージのため）。引き切ったあとは過剰チャージ
         if (BowMath.isFull(BowDraw.usedTicks(player))) {
@@ -171,8 +186,7 @@ final class BowSpot {
             hasSpot = false;
             return;
         }
-        double[] next = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, yaw, pitch, SCREEN.fovDegrees(),
-                RANDOM);
+        double[] next = next(player, yaw, pitch);
         yaw = next[0];
         pitch = next[1];
         if (WeakSpotConfig.weakSpotTrailEnabled) {

@@ -112,4 +112,21 @@ public class BowMathTest {
             assertTrue("offset " + offset, offset >= 5.25 - 1e-6);
         }
     }
+
+    @Test
+    public void verticalPitchStaysAboveOrBelowAndInRange() {
+        java.util.Random random = new java.util.Random(3);
+        double prev = 0;
+        for (int i = 0; i < 200; i++) {
+            double pitch = BowMath.nextVerticalPitch(0, prev, 70, random);
+            double offset = Math.abs(pitch);
+            assertTrue("offset " + offset, offset >= 10 - 1e-6 && offset <= 20 + 1e-6);
+            prev = pitch;
+        }
+        // 見下ろしの限界の近くでは、上側に出す
+        for (int i = 0; i < 50; i++) {
+            double pitch = BowMath.nextVerticalPitch(85, 85, 70, random);
+            assertTrue("pitch " + pitch, pitch <= 90 && pitch < 85);
+        }
+    }
 }

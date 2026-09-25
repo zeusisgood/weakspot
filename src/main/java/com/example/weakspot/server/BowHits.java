@@ -54,7 +54,9 @@ public final class BowHits {
             BowDraw.add(player, WeakSpotConfig.bowHitTicks);
         }
         ServerStats.record(player, stats -> stats.recordBowHit());
-        ServerStats.countStreak(player);
+        int combo = ServerStats.countStreak(player);
+        // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）
+        VehicleHits.boostFromRider(player, combo);
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 

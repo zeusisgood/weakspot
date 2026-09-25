@@ -56,6 +56,27 @@ public final class MiningStats {
         critHits++;
     }
 
+    /** 乗り物の弱点に当てた回数（1.6.0）。 */
+    public long vehicleHits;
+
+    public void recordVehicleHit() {
+        vehicleHits++;
+    }
+
+    /** 食事・飲み物の弱点に当てた回数（1.6.0）。 */
+    public long eatHits;
+
+    public void recordEatHit() {
+        eatHits++;
+    }
+
+    /** 寝ている間の弱点に当てた回数（1.6.0）。 */
+    public long sleepHits;
+
+    public void recordSleepHit() {
+        sleepHits++;
+    }
+
     public void recordHit(double extraTicks) {
         hits++;
         savedTicks += Math.max(0, extraTicks);
@@ -99,5 +120,8 @@ public final class MiningStats {
         fishingHits = 0;
         bowHits = 0;
         critHits = 0;
+        vehicleHits = 0;
+        eatHits = 0;
+        sleepHits = 0;
     }
 }

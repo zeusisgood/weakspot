@@ -250,6 +250,27 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int bowMinHitIntervalTicks = 4;
 
+    @Config.Comment({"[サーバー] 乗り物の弱点のオン・オフ（1.6.0）",
+            "馬・豚・トロッコ・ボートに乗って動いている間、照準の近くに弱点が出る。当てると、その乗り物が少しの間速くなる"})
+    public static boolean vehicleWeakSpotEnabled = true;
+
+    @Config.Comment("[サーバー] 乗り物の弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+    @Config.RangeDouble(min = 1.0, max = 100.0)
+    public static double vehicleBoostMultiplier = 1.5;
+
+    @Config.Comment({"[サーバー] 乗り物の速さの倍率の上限。0 なら上限なし（初期値。コンボ 1000 で 6 倍になる）",
+            "速すぎて困るときに、3.0 などを書く"})
+    @Config.RangeDouble(min = 0.0, max = 100.0)
+    public static double vehicleBoostMaxMultiplier = 0.0;
+
+    @Config.Comment("[サーバー] 乗り物の加速が続く時間（tick）。ヒットのたびに、この長さに戻す")
+    @Config.RangeInt(min = 1, max = 1200)
+    public static int vehicleBoostDurationTicks = 40;
+
+    @Config.Comment("[サーバー] 乗り物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int vehicleMinHitIntervalTicks = 6;
+
     @Config.Comment({"[サーバー] 近接の弱点のオン・オフ",
             "敵に出た弱点を、攻撃のゲージが溜まった状態で殴ると、クリティカルヒット（ジャンプ攻撃と同じ 1.5 倍）になる"})
     public static boolean meleeWeakSpotEnabled = true;
@@ -368,6 +389,9 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] 弓を引いている間、照準の下に引き具合のゲージを表示するか",
             "弓の弱点や、弱点の一時オフ（HOME キー）に関係なく出る"})
     public static boolean bowDrawBarEnabled = true;
+
+    @Config.Comment({"[クライアント] 乗り物を加速している間、照準の下に残り時間のゲージ（水色）を表示するか（1.6.0）"})
+    public static boolean vehicleBoostBarEnabled = true;
 
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
     public static int configVersion = 0;

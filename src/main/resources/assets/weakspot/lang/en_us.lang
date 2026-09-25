@@ -15,6 +15,9 @@ weakspot.stats.animalHits=Animal hits
 weakspot.stats.fishingHits=Fishing hits
 weakspot.stats.bowHits=Bow hits
 weakspot.stats.critHits=Critical hits
+weakspot.stats.vehicleHits=Vehicle hits
+weakspot.stats.eatHits=Eating hits
+weakspot.stats.sleepHits=Sleep hits
 weakspot.stats.critHits.tooltip=Times you turned a hit into a critical hit by striking an enemy's weak spot
 weakspot.stats.maxStreak=Longest combo
 weakspot.stats.maxStreak.tooltip=The longest streak of hits of any kind (unlike "Weak spot hits", which counts mining only)
@@ -78,6 +81,7 @@ weakspot.general.othermarkershape.tooltip=[Client] Shape of other players' weak 
 weakspot.general.weakspotsenabled.tooltip=[Client] Turn your own weak spots on or off (the Toggle Weak Spots key switches it).\nWhile off, your weak spots do not appear and the game plays as usual. Other players' markers are still shown.
 weakspot.general.animalspotseethrough.tooltip=[Client] When your weak spot on an animal or enemy is hidden by its body, show the hidden part faintly through it.\nHelps when the body is bigger than the hitbox, such as chickens or zombie arms. Other players' markers are not shown through.
 weakspot.general.bowdrawbarenabled.tooltip=[Client] While drawing a bow, show how far it is drawn as a gauge below the crosshair.\nShown regardless of the bow weak spot and of turning weak spots off (HOME key).
+weakspot.general.vehicleboostbarenabled.tooltip=[Client] Show the remaining boost time (light blue) under the crosshair while your vehicle is boosted.
 
 weakspot.command.usage=/weakspot stats <player> | /weakspot reset <player> (online players only) | /weakspot reload
 weakspot.command.usage.stats=/weakspot stats <player>
@@ -87,8 +91,8 @@ weakspot.command.reload=[Weak Spot] Reloaded the config (weakspot.cfg)
 weakspot.command.reload.failed=Could not reload the config. Please restart the server (see the server log)
 weakspot.command.offline=Only online players can be specified
 weakspot.command.stats.header=[Weak Spot] Stats of %s
-weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, critical hits %s
-weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, critical hits %s
+weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, critical hits %s, vehicle hits %s, eating hits %s, sleep hits %s
+weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, critical hits %s, vehicle hits %s, eating hits %s, sleep hits %s
 weakspot.command.reset=[Weak Spot] Reset the all-time stats of %s
 
 # The guide book (1.4.1). Update it along with the README's how-to-play. Keep each page short enough to fit.
