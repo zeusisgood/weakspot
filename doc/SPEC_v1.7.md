@@ -14,7 +14,7 @@
 ## 0. バージョンと互換性
 
 - バージョンは 1.6.4（またはその後のパッチ）→ **1.7.0**（`build.gradle` の `version` と `WeakSpotMod.VERSION` の2か所を、そろえて変える）
-- **通信内容が変わる**（`HitKind` に `LADDER`・`ELYTRA`・`ENCHANT`・`HARVEST` を足す、`SyncedSettings` にはしご・エリトラ・エンチャント・収穫の設定を足す、`StatsMessage` に `ladderHits`・`elytraHits`・`enchantHits`・`harvestHits` を足す、`MilestoneMessage` に節目の種類を足す）。そのため 1.6.x とは接続できない
+- **通信内容が変わる**（`HitKind` に `LADDER`・`ELYTRA`・`ENCHANT`・`HARVEST`・`THROW`・`SPRINT` を足す、`SyncedSettings` にはしご・エリトラ・エンチャント・収穫・投げる物・走りの設定を足す、`StatsMessage` に `ladderHits`・`elytraHits`・`enchantHits`・`harvestHits`・`throwHits`・`sprintHits` を足す、`MilestoneMessage` に節目の種類を足す、`SwitchMessage` にオフの種類を足す）。そのため 1.6.x とは接続できない
   - `WeakSpotMod.ACCEPTED_VERSIONS` を `[1.7,1.8)` にする
   - README の更新履歴に、1.6.x とは接続できないこと（サーバーとクライアントを同時に更新すること）を書く
 - 1.6.x と接続できないので、この仕様書の機能は `ServerFeatures.since` で囲まなくてよい（1.7.x のサーバーはすべて持つ）
@@ -178,7 +178,7 @@
 | 節目 | 数えるもの | 数字 | ごほうび |
 |---|---|---|---|
 | **採掘**（今まであるもの） | 累計の採掘ヒット数（`hits`） | `milestones`（初期値を §4.2 に変える） | 経験値（`milestoneXp`）とツールの耐久回復（`milestoneRepair`）。今までどおり |
-| **種類ごと**（新しい） | それぞれの累計のヒット数: 成長 `growthHits`・機械 `machineHits`・動物 `animalHits`・釣り `fishingHits`・弓 `bowHits`・近接 `critHits`・乗り物 `vehicleHits`・食事 `eatHits`・睡眠 `sleepHits`・はしご `ladderHits`・エリトラ `elytraHits`・エンチャント `enchantHits`・収穫 `harvestHits` | **採掘と同じ** `milestones` | **経験値だけ**（`milestoneXp`） |
+| **種類ごと**（新しい） | それぞれの累計のヒット数: 成長 `growthHits`・機械 `machineHits`・動物 `animalHits`・釣り `fishingHits`・弓 `bowHits`・近接 `critHits`・乗り物 `vehicleHits`・食事 `eatHits`・睡眠 `sleepHits`・はしご `ladderHits`・エリトラ `elytraHits`・エンチャント `enchantHits`・収穫 `harvestHits`・投げる物 `throwHits`・走り `sprintHits` | **採掘と同じ** `milestones` | **経験値だけ**（`milestoneXp`） |
 | **合計**（新しい） | すべての種類の累計のヒット数の合計 | `totalMilestones`（§4.2） | 経験値（`totalMilestoneXp`） |
 
 - 1 回のヒットで、種類ごとの節目と合計の節目に同時に達したら、両方のごほうびをもらう。演出は合計のほうを出し、チャットは両方
@@ -264,29 +264,164 @@
 - Quark など、右クリックで収穫する Mod と一緒に入れたとき、二重に収穫しないか（どちらが先に動くか）
 - Mod の作物（`BlockCrops` を継承したもの）で、ピックした物が種になっているか。なっていない作物は、種を取り除かずに植え直す（上の「種がなかったとき」と同じ）
 
-## 6. README とガイドの本
+## 6. 投げる物の弱点（新しい種類 `HitKind.THROW`）
 
-- README に「はしご」「エリトラ」「エンチャント」「収穫」の節を足す（乗り物・睡眠の節にならう）。節目の節を §4 に合わせて書き直す
-- 設定表の `[サーバー]` に、はしご 5 つ・エリトラ 3 つ・エンチャント 2 つ・収穫 3 つ・節目の `kindMilestonesEnabled` / `totalMilestonesEnabled` / `milestoneRepeatInterval` / `totalMilestones` / `totalMilestoneXp` / `totalMilestoneRepeatInterval` を足し、`milestones` / `milestoneXp` / `milestoneRepair` の初期値を直す。`[クライアント]` に `ladderBoostBarEnabled`
-- 統計の一覧に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」「収穫ヒット数」
-- ガイドの本に 4 ページ足す（`GuideBook.PAGES` を 19 に）。案:
+### 6.1 対象と出し方（クライアント、`client/ThrowSpot`）
+
+- 対象: メインハンドに**投げる物**を持っている間。エンダーパール・雪玉・卵・スプラッシュポーション・残留ポーション・エンチャントの瓶（`ItemEnderPearl` / `ItemSnowball` / `ItemEgg` / `ItemSplashPotion` / `ItemLingeringPotion` / `ItemExpBottle` を継承したもの）
+- 弓と同じく、**HUD に画面上で一定の大きさの円**で出し（`client/HudSpot`）、**照準を合わせるだけでヒット**。向きは照準から 10〜20 度（`BowMath.offsetRange`）。馬・豚に乗っているときは上下だけ（騎射と同じ）
+- 色は**ティール `#2ED3B7`**
+- 次のときは出さない: 何かを使っている（弓を引く・食べる）、クリエイティブ・スペクテイター、弱点の一時オフ、この種類のオフ（§8）、`throwWeakSpotEnabled` が false
+- ヒットの間隔は `throwMinHitIntervalTicks`（**[サーバー]**、`SyncedSettings`。初期値 4）
+
+### 6.2 溜め（ユーザーの提案: 弓のようにゲージを溜め、持ち替えるまで保つ）
+
+- 1 ヒットごとに、**次の 1 投の溜め**が増える。1 ヒットで足す量 = `throwChargePerHit`（初期値 0.5）× コンボの掛け数（`MachineComboBoost.factor`。当てたときのコンボ）
+- 投げる速さの倍率 = 1 + 溜め。**上限はない**（4 ヒットで ×3 くらい。そこから先も溜まる）
+- **溜めは、持ち替えるまで残る**: 選んでいるスロットが変わる、またはメインハンドの物の種類が変わったら 0 に戻す（投げて数が減るのは、持ち替えではない）。死亡・ディメンション移動・ワールドを出たときも 0
+- **投げたら使い切る**（次の 1 投で全部使い、0 に戻る。当てる → 溜める → 投げる、のリズム）
+- 両側で溜めを覚える（`ThrowCharge`。弓の `BowDraw` と同じく、クライアントはサーバーの返事を待たずにゲージを進める。サーバーは受け付けたヒットで溜める）
+
+### 6.3 ゲージ（クライアント）
+
+- 照準の下に、弓の引きゲージと同じ位置・大きさで出す（弓と同時には出ない）。溜めが 0 なら出さない
+- ゲージの 1 本分 = 溜め 2.0（×3）。色はティール `#2ED3B7`、背景は半透明の黒 `#1E1E1E`
+- 1 本を越えた分は、弓の過剰チャージと同じく、ゲージの下に赤 `#FF4D4D` の目盛りを 1 本分ごとに 1 つ足す。目盛りが 5 つを越えたら「×n」の数字で出す（上限がないため）
+- ゲージの右に今の倍率「×3.0」を小さく出す
+- 設定 `throwChargeBarEnabled`（**[クライアント]**、初期値 true）。設定画面の説明を `en_us.lang` と `ja_jp.lang` に足す
+
+### 6.4 効果（サーバー、`server/ThrowHits`）
+
+- 投げた物が出たとき（`EntityJoinWorldEvent` で、`EntityThrowable`（パール・雪玉・卵・ポーション・瓶）の投げた人がそのプレイヤーで、同じ tick に出たもの）、**速さ（`motionX/Y/Z`）に倍率を掛ける**。遠くまで、速く飛ぶ。重力は変えない
+- 掛けたら溜めを 0 にする。クライアントにも投げたことは分かるので、自分でも 0 にする
+- ポーションの効く範囲、雪玉・卵の当たったときの効果は変えない（エンダーパールは遠くへ飛ぶので、遠くへワープできる）
+- サーバーは、ヒットを受け付けるとき、メインハンドが投げる物であること・間隔・オン/オフを確かめる。受け付けたら `ServerStats.countStreak`、統計の `throwHits`、`ServerBoostTracker.notifyNearbyPlayers`（鳴らす位置はプレイヤー）
+- 乗り物に乗っているときは、騎射と同じく乗り物の加速も続ける（`VehicleHits.boostFromRider`）
+
+### 6.5 設定
+
+| キー | 種類 | 初期値 | 説明 |
+|---|---|---|---|
+| `throwWeakSpotEnabled` | [サーバー]（同期） | true | 投げる物の弱点を出すか |
+| `throwChargePerHit` | [サーバー]（同期） | 0.5 | 1 ヒットで溜まる量（倍率に足す。コンボで上乗せ）。0.1〜10.0 |
+| `throwMinHitIntervalTicks` | [サーバー]（同期） | 4 | ヒットの最小間隔（tick） |
+| `throwChargeBarEnabled` | [クライアント] | true | 溜めのゲージを出すか |
+
+### 6.6 実装時の確認事項
+
+- 速いエンダーパールが、読み込まれていないチャンクに入ったときにどうなるか（消える・止まる）。上限は付けない。困る動きなら README の既知の問題に書き、ユーザーに報告する
+- 同じ tick に出た投げる物を、そのプレイヤーのものと見分けられるか（`getThrower`）
+
+## 7. 走りの弱点（新しい種類 `HitKind.SPRINT`）
+
+### 7.1 対象と出し方（クライアント、`client/SprintSpot`）
+
+- 対象: **地面の上を走っている（ダッシュ中の）**間（`isSprinting`、乗り物・エリトラ・水中を除く。1 tick の水平の移動が 0.05 ブロック以上）
+- HUD に円で出し、照準を合わせるだけでヒット。向きは**照準の真上か真下だけ**（`HudSpot` の「上下だけ」。左右を向くと進む向きがぶれるため。馬と同じ）
+- 色は**赤 `#FF5A5F`**
+- 次のときは出さない: 何かを使っている、クリエイティブ・スペクテイター、弱点の一時オフ、この種類のオフ（§8）、`sprintWeakSpotEnabled` が false
+- ヒットの間隔は `sprintMinHitIntervalTicks`（**[サーバー]**、`SyncedSettings`。初期値 6）
+
+### 7.2 効果（加速）
+
+- 1 ヒットで、**2 秒（`sprintBoostDurationTicks`、初期値 40 tick）の間、速さ ×1.5**（`sprintBoostMultiplier`、初期値 1.5）。ヒットのたびに残り時間を戻す
+- コンボの上乗せあり（`VehicleBoostMath.multiplier`。1000 で 6 倍）。上限は初期値ではなし（`sprintBoostMaxMultiplier`、0 = なし）
+- かけ方: **サーバーで**プレイヤーの移動速度（`MOVEMENT_SPEED`）に一時的な修正（決まった UUID、合計に掛ける、`setSaved(false)`）をかけ、時間が来たら外す（馬と同じ）。プレイヤー自身の値はクライアントにも届き、動きの計算に効く。壁の当たり判定はバニラのまま
+- 走るのをやめても、残り時間の間は歩く速さにも効く（修正は走りの修正と別なので）
+- **視野の広がりは、走りのときの 1.3 倍まで**に抑える（`FOVUpdateEvent`。速さには上限を付けず、見た目だけ抑える。画面が広がりすぎて酔うのを防ぐ）
+- 空腹の減りは**バニラのまま**（走った距離で減るので、速いほど早く減る。ユーザーの判断）
+- 照準の上に残り時間のゲージ（赤 `#FF5A5F`、乗り物・はしごと同じ位置。同時には起きない）。設定 `sprintBoostBarEnabled`（**[クライアント]**、初期値 true）
+
+### 7.3 通信・検証（サーバー、`server/SprintHits`）
+
+- ヒットは `HitMessage`（種類に `SPRINT`、対象なし）
+- サーバーは、オン/オフ、`sprintWeakSpotEnabled`、**直前 10 tick のどこかで走っていた**（`PlayerTickEvent` で覚える）、乗り物に乗っていない、間隔を確かめて受け付ける
+- 受け付けたら `ServerStats.countStreak`、統計の `sprintHits`、`ServerBoostTracker.notifyNearbyPlayers`（鳴らす位置はプレイヤー）
+- ログアウト・死亡・サーバー停止で修正を外す（保存しないので、残らない）
+
+### 7.4 設定
+
+| キー | 種類 | 初期値 | 説明 |
+|---|---|---|---|
+| `sprintWeakSpotEnabled` | [サーバー]（同期） | true | 走りの弱点を出すか |
+| `sprintBoostMultiplier` | [サーバー]（同期） | 1.5 | 1 ヒットの倍率（コンボで上乗せ） |
+| `sprintBoostMaxMultiplier` | [サーバー]（同期） | 0 | 倍率の上限。0 = 上限なし |
+| `sprintBoostDurationTicks` | [サーバー]（同期） | 40 | 加速が続く tick 数 |
+| `sprintMinHitIntervalTicks` | [サーバー]（同期） | 6 | ヒットの最小間隔（tick） |
+| `sprintBoostBarEnabled` | [クライアント] | true | 残り時間のゲージを出すか |
+
+### 7.5 実装時の確認事項
+
+- 速い移動で、マルチのサーバーに引き戻されないか（`moved too quickly`。バニラは歩き・走りで 1 tick に約 10 ブロックを越えると引き戻す）。コンボ 1000（6 倍、約 1.7 ブロック/tick）なら届かない見込み。届くようなら、上限は付けずにユーザーに報告する
+
+## 8. 「弱点」タブ: 種類ごとのオン・オフと見た目（ユーザーの提案）
+
+### 8.1 画面（クライアント、`StatsScreen` に「弱点」タブを足す）
+
+- 統計画面（K キー）の「統計」「サウンド」の隣に「**弱点**」タブを足す
+- 弱点の種類ごとに 1 行（全 16 種類。多いのでスクロールする）: 種類の名前 / オン・オフのボタン / 色 / 形
+
+```
+ 種類       オン/オフ   色                          形
+ 採掘       [ON ]      [■] [#FF5926   ] [▶]       [● 丸 ▶]
+ 収穫       [OFF]      [■] [#FF3DCB   ] [▶]       [● 丸 ▶]
+ 弓         [ON ]      [■] [初期値    ] [▶]       [◇ ひし形 ▶]
+ 乗り物     サーバーで無効
+```
+
+- サーバーの設定（`xxxWeakSpotEnabled`）で無効な種類は、灰色で「サーバーで無効」と出し、ボタンを押せなくする
+- 変えたらすぐに `WeakSpotConfig.save()` で `weakspot.cfg` に保存する（「サウンド」タブと同じ）
+- HOME キーの一時オフ（全部まとめて）は今のまま残す。一時オフの間は、タブの上に「一時オフ中」と出す
+
+### 8.2 オン・オフ
+
+- オフにした種類は、その人の画面に弱点が出ず、**バニラの動きに戻る**（例: 収穫をオフ → 実った作物の右クリックは何もしない。動物をオフ → 村人の取引画面が開く。機械をオフ → しゃがんでも機械の画面が開く）
+- サーバーもバニラの動きを止めないように、オフの種類の一覧（`HitKind` の番号のビット）を `SwitchMessage` に足して送る（ログイン時と、変わったとき。今の `weakSpotsEnabled` と同じく毎 tick 比べる）。サーバーは `ServerSwitches` で、その種類について、右クリックの抑止・ヒットの受け付け・効果（ブースト）を止める
+- **統計と節目は、オフにしても今までの数を残す**（ユーザーの判断）。オンに戻すと続きから数える
+- 設定 `disabledKinds`（**[クライアント]**、初期値は空）。種類の名前を小文字で 1 行ずつ（例: `harvest`）
+
+### 8.3 見た目（色と形）
+
+- **自分の弱点**の色と形を、種類ごとに選べる（他のプレイヤーのマークは今の `otherMarkerColor` / `otherMarkerShape` のまま）
+- 色（ユーザーの判断: 選ぶのと打ち込むのの両方）:
+  - ▶ を押すたびに、「初期値」→ 12 色 → 「初期値」と順に切り替える: `#FF5926` 橙赤 / `#FF3DCB` マゼンタ / `#FF8C42` オレンジ / `#FFE14D` 黄 / `#7CFC00` 黄緑 / `#2ED3B7` ティール / `#55CCFF` 水色 / `#7FB2FF` 空色 / `#B070FF` 紫 / `#C8A060` 木の茶 / `#F0F0F0` 白 / `#FF5A5F` 赤
+  - 入力欄にカラーコード（`#RRGGBB`）を打ち込んでも選べる。読めない値は受け付けない（前の値のまま、枠を赤くする）
+  - 左の [■] は今の色の見本
+- 形: ▶ を押すたびに、丸・輪・ひし形・四角を順に切り替える（`common/MarkerShape`。初期値は丸）
+- 色から、輪と中心の色は今と同じく白に寄せて作る（`MarkerColor.towardWhite`）
+- 「初期値」の色は、今の色のまま（ブロック・生き物の弱点は今の橙赤と黄の組み合わせ、HUD の弱点は種類ごとの色）
+- 画面上の弱点（弓・乗り物・食事・はしご・エリトラ・投げる物・走り）と、画面のマーカー（睡眠・エンチャント）も、選んだ形で描く（`ScreenProjection` に形の描き方を足す）
+- 設定 `myMarkerColors`（**[クライアント]**、1 行 `種類=#RRGGBB`）と `myMarkerShapes`（**[クライアント]**、1 行 `種類=circle|ring|diamond|square`）。書いていない種類は初期値
+- 翻訳キー: 種類の名前 `weakspot.kind.<種類>`（節目のタイトルと共通）、タブ `weakspot.stats.tab.kinds`、ボタン・注記 `weakspot.kinds.*`
+
+## 9. README とガイドの本
+
+- README に「はしご」「エリトラ」「エンチャント」「収穫」「投げる物」「走り」の節を足す（乗り物・睡眠の節にならう）。統計画面の説明に「弱点」タブ（種類ごとのオン・オフ、色、形）を足す。節目の節を §4 に合わせて書き直す
+- 設定表の `[サーバー]` に、はしご 5 つ・エリトラ 3 つ・エンチャント 2 つ・収穫 3 つ・投げる物 3 つ・走り 5 つ・節目の `kindMilestonesEnabled` / `totalMilestonesEnabled` / `milestoneRepeatInterval` / `totalMilestones` / `totalMilestoneXp` / `totalMilestoneRepeatInterval` を足し、`milestones` / `milestoneXp` / `milestoneRepair` の初期値を直す。`[クライアント]` に `ladderBoostBarEnabled`・`throwChargeBarEnabled`・`sprintBoostBarEnabled`・`disabledKinds`・`myMarkerColors`・`myMarkerShapes`（設定画面の説明も両方の lang に）
+- 統計の一覧に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」「収穫ヒット数」「投げる物ヒット数」「走りヒット数」
+- ガイドの本に 6 ページ足す（`GuideBook.PAGES` を 21 に）。案:
   - 16「はしご」: 「はしごやツタを登り降りしている間、照準の真上か真下に茶色の弱点が出ます。照準を合わせると登り降りが速くなり、コンボが続くほど速くなります。」 / "While climbing up or down a ladder or vine, a brown weak spot appears straight above or below your crosshair. Aim at it to climb faster; the longer your combo, the faster you go."
   - 17「エリトラ」: 「エリトラで飛んでいる間、照準の近くに青い弱点が出ます。照準を合わせると、見ている向きへ一気に飛び出します。コンボが続くほど勢いが増します。壁にぶつからないように。」 / "While gliding with an elytra, a blue weak spot appears near your crosshair. Aim at it to dash toward where you look; the longer your combo, the harder you dash. Mind the walls."
   - 18「エンチャント」: 「エンチャント台に物を置くと、画面のまわりに紫のマーカーが出ます。クリックで当てるたびに、3つの候補が引き直されます。ラピスラズリも経験値も減りません。」 / "Put an item in an enchanting table and a purple marker appears around the screen. Click it to reroll the three offers. It costs no lapis and no experience."
   - 19「収穫」: 「実った作物を素手で右クリックしたままにすると、ピンクの弱点が出ます。当てると収穫して植え直し、すぐに育てる弱点に変わります。コンボが続くほど収穫が増えます。」 / "Hold right-click on a ripe crop with an empty hand and a pink weak spot appears. Hit it to harvest and replant; it turns right back into a growth weak spot. The longer your combo, the bigger the harvest."
+  - 20「投げる物」: 「エンダーパールや雪玉などを持つと、照準の近くに青緑の弱点が出ます。当てるたびにゲージが溜まり、次に投げた物が速く遠くへ飛びます。持ち替えると溜めは消えます。」 / "Hold an ender pearl, snowball or other throwable and a teal weak spot appears near your crosshair. Each hit charges the gauge, and your next throw flies faster and farther. Switching items clears the charge."
+  - 21「走り」: 「走っている間、照準の真上か真下に赤い弱点が出ます。照準を合わせると走る速さが上がり、コンボが続くほど速くなります。」 / "While sprinting, a red weak spot appears straight above or below your crosshair. Aim at it to run faster; the longer your combo, the faster you go."
+  - 11「キー」の統計の画面の説明に「弱点の種類ごとのオン・オフと色も、ここで変えられます」を足す
   - 3「耐久回復と節目」を §4.4 のとおり直す
 - 「最新版」の行と「更新履歴」（1.6.x とは接続できないこと）、「開発」の節の仕様書へのリンク
 
-## 7. `CLAUDE.md` に書くこと
+## 10. `CLAUDE.md` に書くこと
 
 - 「仕様の正本」の一覧の、この仕様書の「下書き」の注記を外す。現行のバージョンを 1.7.0、範囲を `[1.7,1.8)` に
 - 「両方に Mod が必要」の説明に、1.7.0 で通信内容が変わったので 1.6.x と接続できないことを足す
 - `HitKind` の一覧に `LADDER`・`ELYTRA`・`ENCHANT`・`HARVEST` を足す。収穫（`server/HarvestHits`・`common/HarvestBonus`。成長と同じ操作・検証、実った作物で種類を切り替える、植え直し、コンボのおまけ）の説明を成長の弱点の説明のそばに足す。はしご（`client/LadderSpot`・`server/LadderHits`）・エリトラ（`client/ElytraSpot`・`server/ElytraHits`）・エンチャント（`client/EnchantSpot`・`server/EnchantHits`）の説明を、乗り物・睡眠の弱点の説明にならって足す（はしご・エリトラは速さをクライアントで足し、サーバーは検証だけ。エンチャントは `xpSeed` を引き直す）
-- 統計の一覧に `ladderHits`・`elytraHits`・`enchantHits`・`harvestHits`（1.7.0）を足す
+- 統計の一覧に `ladderHits`・`elytraHits`・`enchantHits`・`harvestHits`・`throwHits`・`sprintHits`（1.7.0）を足す
+- 投げる物（`client/ThrowSpot`・`server/ThrowHits`・両側の `ThrowCharge`。溜めは持ち替えるまで残り、投げたら使い切る。`EntityJoinWorldEvent` で速さに掛ける）、走り（`client/SprintSpot`・`server/SprintHits`。移動速度の一時的な修正、視野の広がりは 1.3 倍まで）の説明を足す
+- 「弱点」タブ（種類ごとのオン・オフ `disabledKinds` と `SwitchMessage` のビット、自分の弱点の色 `myMarkerColors` と形 `myMarkerShapes`）を、弱点の一時オフの説明のそばに足す。オフの種類で止める処理の一覧も書く
 - 節目の説明（`ServerStats`・`MiningRewards`・`MilestoneEffects`）に、種類ごと・合計の節目と、繰り返しの節目、7 並びの虹色を足す。設定の移行に `configVersion` 5（節目の初期値）を足す
 - 「次の作業」の節を片付ける
 
-## 8. 入れないこと
+## 11. 入れないこと
 
 - 弓・食事の弱点のヒットで、はしごの加速を続ける（乗り物の騎射にあたるもの）: はしごの上で弓を引く・食べることは少ないので入れない
 - 他のプレイヤーにはしご・エリトラ・エンチャントの弱点のマークを見せる: 乗り物・食事と同じく見せない（収穫は、成長と同じく見せる）
@@ -295,8 +430,11 @@
 - エンチャントの必要なレベルを下げる: ユーザーの判断で、引き直しだけにする
 - 引き直しにラピスラズリを使う・回数を限る: ユーザーの判断で、何もいらない・回数の制限なし
 - サーバーのランキング（`/weakspot top`）: 1.7.0 には入れない
+- 投げる物の溜めを時間で消す: ユーザーの提案で、持ち替えるまで残す
+- 走りの空腹の減りを抑える: ユーザーの判断で、バニラのまま
+- 種類ごとのキー: 種類が多く、キーが足りないので、統計画面のタブにした
 
-## 9. ユーザーに確認してもらうこと
+## 12. ユーザーに確認してもらうこと
 
 - はしご・ツタを登り降りすると、照準の真上か真下に茶色の弱点が出て、照準を合わせると速くなること。止まると弱点が消えること。照準の上に茶色のゲージが出ること
 - はしごでコンボが上がるとさらに速くなること（`ladderBoostMaxMultiplier` に 3 などを書くと、その倍率で止まること）。速く降りても落下のダメージを受けないこと
@@ -306,5 +444,9 @@
 - 古い `weakspot.cfg`（節目が 100 / 777 / 1000 / 10000 のまま）が、新しい初期値に置き換わること。自分で書き換えた値は、そのまま残ること
 - 実った小麦などを素手で右クリックしたままにすると、ピンクの弱点が出て、当てると収穫・植え直しされ、すぐに成長の弱点に変わること。押しっぱなしのまま、育てる・収穫するを続けられること
 - コンボが上がると、収穫物（小麦・ニンジンなど）が増えること。種は増えないこと。保護された土地では収穫できないこと
-- 統計画面と `/weakspot stats` に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」「収穫ヒット数」が出ること
+- エンダーパールなどを持つと、照準の近くにティールの弱点が出て、当てるたびに照準の下のゲージが溜まること。1 本を越えると赤い目盛りが増えること。投げると速く遠くへ飛び、ゲージが空になること。持ち替えるとゲージが消えること
+- 走ると照準の真上か真下に赤い弱点が出て、当てると速くなり、照準の上に赤いゲージが出ること。速くなっても画面が広がりすぎないこと
+- K キーの統計画面の「弱点」タブで、種類ごとにオフにすると弱点が出なくなり、バニラの動き（村人の取引画面など）に戻ること。オンに戻すと統計が続きから数えられること
+- 「弱点」タブで色を ▶ で切り替える・`#00FF00` のように打ち込むと、自分の弱点の色が変わること。形を切り替えると、ブロック・画面上の弱点の形が変わること。ゲームを入れ直しても残ること
+- 統計画面と `/weakspot stats` に「はしごヒット数」「エリトラヒット数」「エンチャントヒット数」「収穫ヒット数」「投げる物ヒット数」「走りヒット数」が出ること
 - 1.6.x のサーバー・クライアントとは接続できないこと
