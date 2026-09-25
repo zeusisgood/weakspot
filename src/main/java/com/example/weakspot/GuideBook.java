@@ -18,7 +18,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 public final class GuideBook {
 
     /** ページ数。weakspot.guide.1〜PAGES の title と text が lang にある。 */
-    public static final int PAGES = 12;
+    public static final int PAGES = 15;
     private static final String TITLE = "Weak Spot Mining";
     /** キーの名前を出すページと、そのキー（文章の %s の順）。 */
     private static final int KEYS_PAGE = 11;
