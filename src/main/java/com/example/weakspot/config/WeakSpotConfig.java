@@ -143,7 +143,7 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double machineBoostMultiplier = 4.0;
 
-    @Config.Comment({"[サーバー] 機械の倍率の上限。コンボが続くと machineBoostMultiplier に掛け数を掛ける",
+    @Config.Comment({"[サーバー] 機械の倍率の上限。クライアントにも送る（HUD の「機械 n倍速」）。コンボが続くと machineBoostMultiplier に掛け数を掛ける",
             "（25 で ×1.25、50 で ×1.5、100 で ×2、250 で ×2.5、500 で ×3、1000 で ×4）。その結果をこの値で抑える",
             "機械 Mod の不具合やサーバーの負荷が気になるときに下げる。machineBoostMultiplier より小さいときも、こちらを優先する"})
     @Config.RangeDouble(min = 1.0, max = 100.0)

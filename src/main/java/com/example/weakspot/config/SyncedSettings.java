@@ -62,6 +62,9 @@ public final class SyncedSettings {
     public int meleeMinHitIntervalTicks;
     /** 近接の弱点の大きさの倍率（1.5.0）。 */
     public double meleeWeakSpotScale;
+    /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
+    public double machineBoostMultiplier;
+    public double machineBoostMaxMultiplier;
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -119,6 +122,8 @@ public final class SyncedSettings {
         s.meleeWeakSpotEnabled = WeakSpotConfig.meleeWeakSpotEnabled;
         s.meleeMinHitIntervalTicks = WeakSpotConfig.meleeMinHitIntervalTicks;
         s.meleeWeakSpotScale = WeakSpotConfig.meleeWeakSpotScale;
+        s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
+        s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
         s.markerShareRange = WeakSpotConfig.markerShareRange;
         s.markerSendMinIntervalTicks = WeakSpotConfig.markerSendMinIntervalTicks;
         return s;
@@ -163,6 +168,8 @@ public final class SyncedSettings {
         buf.writeBoolean(meleeWeakSpotEnabled);
         buf.writeInt(meleeMinHitIntervalTicks);
         buf.writeDouble(meleeWeakSpotScale);
+        buf.writeDouble(machineBoostMultiplier);
+        buf.writeDouble(machineBoostMaxMultiplier);
         buf.writeDouble(markerShareRange);
         buf.writeInt(markerSendMinIntervalTicks);
     }
@@ -207,6 +214,8 @@ public final class SyncedSettings {
         s.meleeWeakSpotEnabled = buf.readBoolean();
         s.meleeMinHitIntervalTicks = buf.readInt();
         s.meleeWeakSpotScale = buf.readDouble();
+        s.machineBoostMultiplier = buf.readDouble();
+        s.machineBoostMaxMultiplier = buf.readDouble();
         s.markerShareRange = buf.readDouble();
         s.markerSendMinIntervalTicks = buf.readInt();
         return s;

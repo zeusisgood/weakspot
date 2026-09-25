@@ -8,6 +8,7 @@ import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.common.MachineComboBoost;
 import com.example.weakspot.common.ScheduledBoost;
+import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.awt.Color;
 import net.minecraft.client.Minecraft;
@@ -70,7 +71,7 @@ final class ComboHud {
     private static double stepTime = Double.NEGATIVE_INFINITY;
     /** 最後に達した段階の数（光の色と弾みの大きさを決める）。 */
     private static int stepCombo;
-    /** 「機械 ×n」の掛け数が上がった瞬間（光らせる）と、その段階の数。 */
+    /** 「機械 n倍速」の速さが上がった瞬間（光らせる）と、その段階の数。 */
     private static double factorStepTime = Double.NEGATIVE_INFINITY;
     private static int factorStepCombo;
     /** 「発射 ×n」の回数が上がった瞬間（光らせる）と、その段階の数。 */
@@ -93,14 +94,14 @@ final class ComboHud {
         lastHitTime = time;
         // 新しいコンボが始まったら、残していた数は消す
         brokenCombo = 0;
-        if (MachineComboBoost.factor(newCombo) > MachineComboBoost.factor(newCombo - 1)) {
+        // 速さ・発射の回数が上がった瞬間は光らせる（上限で止まっていれば光らない）
+        if (machineSpeed(newCombo) > machineSpeed(newCombo - 1) + 1e-9) {
             factorStepTime = time;
             factorStepCombo = newCombo;
-            if (ScheduledBoost.dispenseCountForFactor(MachineComboBoost.factor(newCombo))
-                    > ScheduledBoost.dispenseCountForFactor(MachineComboBoost.factor(newCombo - 1))) {
-                shotsStepTime = time;
-                shotsStepCombo = newCombo;
-            }
+        }
+        if (dispenseCount(newCombo) > dispenseCount(newCombo - 1)) {
+            shotsStepTime = time;
+            shotsStepCombo = newCombo;
         }
         if (MILESTONES.reached(newCombo) && WeakSpotConfig.comboDisplayEnabled
                 && WeakSpotConfig.comboMilestoneEffects) {
@@ -203,16 +204,14 @@ final class ComboHud {
             float bottom = draw(mc, event.getResolution(), I18n.format("weakspot.combo.hit", combo), colorOf(combo), 1,
                     bounce, HitStreak.remainingFraction(now - lastHitTime),
                     ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= 250, now);
-            double factor = MachineComboBoost.factor(combo);
-            if (ClientWeakSpotHandler.dispenserSpotActive()) {
-                // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2）
-                drawMachineLabel(mc, bottom, I18n.format("weakspot.combo.shots",
-                        ScheduledBoost.dispenseCountForFactor(factor)),
-                        ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
-            } else if (factor > 1 && ClientWeakSpotHandler.machineSpotActive()) {
-                drawMachineLabel(mc, bottom, I18n.format("weakspot.combo.machine", MachineComboBoost.label(factor)),
-                        ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
-            }
+            drawMachineLabel(mc, bottom, now);
+        } else if (combo == 1 && ClientWeakSpotHandler.machineSpotActive()) {
+            // 1 ヒット目はコンボの数字が出ないので、数字の位置に機械の表示だけを出す（1.6.0）
+            FontRenderer font = mc.fontRenderer;
+            float scale = (float) WeakSpotConfig.comboScale;
+            float[] center = center(event.getResolution(), 0, font.FONT_HEIGHT * scale);
+            lastCx = center[0];
+            drawMachineLabel(mc, center[1] - font.FONT_HEIGHT * scale / 2, now);
         } else if (brokenCombo > 0) {
             double alpha = ComboDisplay.fadeAlpha(brokenCombo, now - brokenTime);
             if (alpha <= 0) {
@@ -232,7 +231,33 @@ final class ComboHud {
         return rgb >= 0 ? rgb : colorOf(step);
     }
 
-    /** 「機械 ×2.5」。top はコンボの表示の下端、cx はその中心。 */
+    /** 機械の弱点に照準が合っていれば、その下に「機械 4倍速」（ディスペンサー・ドロッパーは「発射 ×2」）を出す。 */
+    private static void drawMachineLabel(Minecraft mc, float top, double now) {
+        if (ClientWeakSpotHandler.dispenserSpotActive()) {
+            // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2。1.6.0 から上限の設定も考える）
+            drawMachineLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)),
+                    ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
+        } else if (ClientWeakSpotHandler.machineSpotActive()) {
+            // その機械の今の速さ（サーバーと同じ計算。1.6.0）
+            drawMachineLabel(mc, top, I18n.format("weakspot.combo.machine",
+                    MachineComboBoost.speedLabel(machineSpeed(combo))),
+                    ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
+        }
+    }
+
+    /** コンボ combo での機械の速さ（サーバーから届いた倍率と上限で、サーバーと同じ計算）。 */
+    private static double machineSpeed(int combo) {
+        SyncedSettings settings = ClientSettings.get();
+        return MachineComboBoost.multiplier(settings.machineBoostMultiplier, settings.machineBoostMaxMultiplier,
+                Math.max(1, combo));
+    }
+
+    /** コンボ combo でのディスペンサー・ドロッパーの 1 回の信号での発射の回数。 */
+    private static int dispenseCount(int combo) {
+        return ScheduledBoost.dispenseCount(machineSpeed(combo), ClientSettings.get().machineBoostMultiplier);
+    }
+
+    /** 「機械 4倍速」。top はコンボの表示の下端、cx はその中心。 */
     private static void drawMachineLabel(Minecraft mc, float top, String text, double glow, int glowRgb) {
         FontRenderer font = mc.fontRenderer;
         float scale = (float) WeakSpotConfig.comboScale * MACHINE_LABEL_SCALE;
@@ -251,6 +276,19 @@ final class ComboHud {
         font.drawStringWithShadow(text, -font.getStringWidth(text) / 2F, -font.FONT_HEIGHT / 2F + 1, 0xFF000000 | rgb);
         GlStateManager.popMatrix();
         GlStateManager.color(1, 1, 1, 1);
+    }
+
+    /** コンボの数字の中心 {x, y}（設定 comboPosition による）。 */
+    private static float[] center(ScaledResolution res, float textWidth, float textHeight) {
+        switch (WeakSpotConfig.comboPosition) {
+            case RIGHT_OF_CROSSHAIR:
+                return new float[] {res.getScaledWidth() / 2F + CROSSHAIR_GAP + textWidth / 2, res.getScaledHeight() / 2F};
+            case TOP_CENTER:
+                return new float[] {res.getScaledWidth() / 2F, Math.max(4, bossBottom + 4) + textHeight / 2};
+            case BELOW_CROSSHAIR:
+            default:
+                return new float[] {res.getScaledWidth() / 2F, res.getScaledHeight() / 2F + CROSSHAIR_GAP + textHeight / 2};
+        }
     }
 
     /** 1000（以降 1000 ごと）のタイトル。画面の中央の少し上に、金色で大きく出す。 */
@@ -298,23 +336,9 @@ final class ComboHud {
         float barGap = 2 * scale;
 
         // 数字の中心
-        float cx;
-        float cy;
-        switch (WeakSpotConfig.comboPosition) {
-            case RIGHT_OF_CROSSHAIR:
-                cx = res.getScaledWidth() / 2F + CROSSHAIR_GAP + textWidth / 2;
-                cy = res.getScaledHeight() / 2F;
-                break;
-            case TOP_CENTER:
-                cx = res.getScaledWidth() / 2F;
-                cy = Math.max(4, bossBottom + 4) + textHeight / 2;
-                break;
-            case BELOW_CROSSHAIR:
-            default:
-                cx = res.getScaledWidth() / 2F;
-                cy = res.getScaledHeight() / 2F + CROSSHAIR_GAP + textHeight / 2;
-                break;
-        }
+        float[] center = center(res, textWidth, textHeight);
+        float cx = center[0];
+        float cy = center[1];
         lastCx = cx;
         float bottom = cy + textHeight / 2;
 

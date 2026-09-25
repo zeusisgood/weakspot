@@ -32,4 +32,13 @@ public final class MachineComboBoost {
     public static String label(double factor) {
         return String.valueOf(factor);
     }
+
+    /** 表示用の速さ（1.6.0。整数なら整数で「4」、そうでなければ小数 1 桁で「7.5」）。 */
+    public static String speedLabel(double speed) {
+        long rounded = Math.round(speed);
+        if (Math.abs(speed - rounded) < 1e-9) {
+            return Long.toString(rounded);
+        }
+        return String.format(java.util.Locale.ROOT, "%.1f", speed);
+    }
 }
