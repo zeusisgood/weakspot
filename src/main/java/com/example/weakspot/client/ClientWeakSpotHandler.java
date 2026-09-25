@@ -214,15 +214,7 @@ public final class ClientWeakSpotHandler {
         boostHitTick = Long.MIN_VALUE / 2;
         WeakSpotRenderer.clearFlashes();
         FishingSpot.clear();
-        BowSpot.clear();
-        VehicleSpot.clear();
-        EatSpot.clear();
-        LadderSpot.clear();
-        SprintSpot.clear();
-        ElytraSpot.clear();
-        ThrowSpot.clear();
-        MeleeSpot.clear();
-        PortalSpot.clear();
+        AimSpots.clearAll();
     }
 
     private static void updateAim(Minecraft mc) {
@@ -468,16 +460,8 @@ public final class ClientWeakSpotHandler {
         AnimalStates.clear();
         MachineBars.clear();
         OtherCombos.clear();
-        VehicleSpot.clear();
-        EatSpot.clear();
+        AimSpots.clearAll();
         FishingSpot.clear();
-        BowSpot.clear();
-        LadderSpot.clear();
-        SprintSpot.clear();
-        ElytraSpot.clear();
-        ThrowSpot.clear();
-        MeleeSpot.clear();
-        PortalSpot.clear();
         lastPlayer = null;
         resetStreak();
         WeakSpotRenderer.clearFlashes();

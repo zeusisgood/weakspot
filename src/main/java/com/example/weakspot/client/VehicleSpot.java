@@ -1,8 +1,6 @@
 package com.example.weakspot.client;
 
-import com.example.weakspot.PlayerRules;
 import com.example.weakspot.VehicleTargets;
-import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.VehicleBoostMath;
 import com.example.weakspot.config.SyncedSettings;
@@ -14,12 +12,6 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityBoat;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 乗り物の弱点（自分だけ。1.6.0）と、加速の残り時間のゲージ（照準の上）。馬・豚・トロッコ・ボートに乗って動いている間、
@@ -27,10 +19,9 @@ import net.minecraftforge.fml.relauncher.Side;
  * 何かを使っている（食べているなど）間は出さない（そちらの弱点を出す）。
  *
  * 加速はサーバーがかける（馬・豚・トロッコ）。ボートは動きをクライアントが決めるので、ここで速さを足す。
- * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。
+ * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。1.8.6 から AimSpotKind（AimSpots が回す）。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
-final class VehicleSpot {
+final class VehicleSpot extends AimSpotKind {
 
     /** 乗り物が動いているとみなす、1 tick の水平の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
@@ -49,73 +40,75 @@ final class VehicleSpot {
     private static final float[] BAR_FILL = {0x55 / 255F, 0xCC / 255F, 0xFF / 255F, 1.0F};
     private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
 
-    private static final HudSpot SPOT = new HudSpot(HitKind.VEHICLE, RGB);
-
-    /** 自分の側で覚えている加速（ボートの速さと、ゲージのため）。 */
+    /** 自分の側で覚えている加速（ボートの速さと、ゲージのため。弓・食事・投げる物からも onRiderHit で続ける）。 */
     private static double multiplier = 1;
     private static long boostUntil = Long.MIN_VALUE / 2;
     private static int boostDuration = 1;
 
-    private VehicleSpot() {
+    /** 前の tick のボートと、その yaw（1.8.2。曲がった分だけ弱点を回す）。 */
+    private Entity lastBoat;
+    private float lastBoatYaw;
+
+    VehicleSpot() {
+        super(HitKind.VEHICLE, new HudSpot(HitKind.VEHICLE, RGB));
     }
 
-    static void clear() {
-        SPOT.clear();
+    @Override
+    void clear() {
+        super.clear();
         boostUntil = Long.MIN_VALUE / 2;
     }
 
-    /** 乗り物の弱点を出すか。 */
-    private static boolean eligible(Minecraft mc) {
-        EntityPlayerSP player = mc.player;
-        if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.VEHICLE)
-                || !PlayerRules.canUse(player) || player.isHandActive()) {
-            return false;
-        }
-        if (!ClientSettings.get().vehicleWeakSpotEnabled || VehicleTargets.kind(player) == null) {
+    /** 乗り物の弱点を出すか（乗り物が動いているとき）。 */
+    @Override
+    boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
+        if (!settings.vehicleWeakSpotEnabled || VehicleTargets.kind(player) == null) {
             return false;
         }
         Entity vehicle = player.getRidingEntity();
         return Math.hypot(vehicle.posX - vehicle.prevPosX, vehicle.posZ - vehicle.prevPosZ) >= MOVING_SPEED;
     }
 
-    /** 前の tick のボートと、その yaw（1.8.2。曲がった分だけ弱点を回す）。 */
-    private static Entity lastBoat;
-    private static float lastBoatYaw;
+    @Override
+    int placement(EntityPlayerSP player) {
+        return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
+    }
+
+    @Override
+    int minHitInterval(SyncedSettings settings) {
+        return settings.vehicleMinHitIntervalTicks;
+    }
+
+    @Override
+    HitMessage message(EntityPlayerSP player, int streak) {
+        return HitMessage.entity(HitKind.VEHICLE, player.getRidingEntity().getEntityId(), streak);
+    }
+
+    @Override
+    void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
+        onRiderHit(streak);
+    }
 
     /** 自分が操っているボートが曲がった分だけ、弱点を回す（ボートは乗っている人の視線も回すため）。 */
-    private static void followBoat(EntityPlayerSP player) {
+    @Override
+    void beforeTick(Minecraft mc) {
+        EntityPlayerSP player = mc.player;
         Entity vehicle = player.getRidingEntity();
         if (!(vehicle instanceof EntityBoat) || vehicle.getControllingPassenger() != player) {
             lastBoat = null;
             return;
         }
         if (vehicle == lastBoat) {
-            SPOT.rotateYaw(vehicle.rotationYaw - lastBoatYaw);
+            spot.rotateYaw(vehicle.rotationYaw - lastBoatYaw);
         }
         lastBoat = vehicle;
         lastBoatYaw = vehicle.rotationYaw;
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.isGamePaused() || mc.player == null) {
-            return;
-        }
-        if (event.phase == TickEvent.Phase.START) {
-            followBoat(mc.player);
-            if (!eligible(mc)) {
-                SPOT.clear();
-            } else {
-                SPOT.ensure(mc.player, VehicleTargets.isSteeredByLook(mc.player));
-            }
-        } else {
-            pushBoat(mc.player);
-        }
-    }
-
     /** ボートの動きはクライアントが決めるので、加速中は、その tick の移動に (倍率 − 1) 倍を足す。 */
-    private static void pushBoat(EntityPlayerSP player) {
+    @Override
+    void tickEnd(Minecraft mc) {
+        EntityPlayerSP player = mc.player;
         Entity vehicle = player.getRidingEntity();
         if (!(vehicle instanceof EntityBoat) || vehicle.getControllingPassenger() != player
                 || ClientWeakSpotHandler.clientTick >= boostUntil) {
@@ -134,24 +127,7 @@ final class VehicleSpot {
         }
     }
 
-    @SubscribeEvent
-    public static void onRenderWorldLast(RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (!SPOT.aimed(mc, event.getPartialTicks()) || !eligible(mc)) {
-            return;
-        }
-        SyncedSettings settings = ClientSettings.get();
-        if (!ClientWeakSpotHandler.canHitNow(HitKind.VEHICLE, settings.vehicleMinHitIntervalTicks)) {
-            return;
-        }
-        int streak = ClientWeakSpotHandler.registerHit(HitKind.VEHICLE);
-        WeakSpotMod.network.sendToServer(HitMessage.entity(HitKind.VEHICLE, mc.player.getRidingEntity().getEntityId(),
-                streak));
-        onRiderHit(streak);
-        SPOT.relocate(mc.player);
-    }
-
-    /** 乗り物・弓・食事の弱点に当てた（乗っていれば、加速を続ける）。combo はヒット後の連続ヒット数。 */
+    /** 乗り物・弓・食事・投げる物の弱点に当てた（乗っていれば、加速を続ける）。combo はヒット後の連続ヒット数。 */
     static void onRiderHit(int combo) {
         Minecraft mc = Minecraft.getMinecraft();
         SyncedSettings settings = ClientSettings.get();
@@ -164,29 +140,22 @@ final class VehicleSpot {
         boostUntil = ClientWeakSpotHandler.clientTick + boostDuration;
     }
 
-    @SubscribeEvent
-    public static void onOverlayPost(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.player == null || mc.gameSettings.hideGUI) {
-            return;
-        }
-        double remaining = (boostUntil - ClientWeakSpotHandler.clientTick - event.getPartialTicks()) / boostDuration;
-        boolean bar = WeakSpotConfig.vehicleBoostBarEnabled && remaining > 0 && mc.player.isRiding();
-        if (!SPOT.has() && !bar) {
-            return;
-        }
-        HudSpot.beginOverlay();
-        SPOT.draw(mc);
-        if (bar) {
-            ScaledResolution res = new ScaledResolution(mc);
-            double x0 = res.getScaledWidth() / 2.0 - BAR_WIDTH / 2.0;
-            double y0 = res.getScaledHeight() / 2.0 - BAR_OFFSET - BAR_HEIGHT / 2.0;
-            ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
-            ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * Math.min(1, remaining), y0 + BAR_HEIGHT, BAR_FILL);
-        }
-        HudSpot.endOverlay();
+    private static double remaining(float partialTicks) {
+        return (boostUntil - ClientWeakSpotHandler.clientTick - partialTicks) / boostDuration;
+    }
+
+    @Override
+    boolean hasGauge(Minecraft mc, float partialTicks) {
+        return WeakSpotConfig.vehicleBoostBarEnabled && remaining(partialTicks) > 0 && mc.player.isRiding();
+    }
+
+    @Override
+    void drawGauge(Minecraft mc, float partialTicks) {
+        ScaledResolution res = new ScaledResolution(mc);
+        double x0 = res.getScaledWidth() / 2.0 - BAR_WIDTH / 2.0;
+        double y0 = res.getScaledHeight() / 2.0 - BAR_OFFSET - BAR_HEIGHT / 2.0;
+        ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
+        ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * Math.min(1, remaining(partialTicks)), y0 + BAR_HEIGHT,
+                BAR_FILL);
     }
 }

@@ -14,8 +14,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
- * 画面上に一定の大きさで出す、向き（yaw / pitch）で持つ弱点（1.6.0。乗り物・食事の弱点）。弓の弱点（BowSpot）と
- * 同じ描き方と当たり判定（ScreenProjection、FishingMath.allowedAngle）で、照準を合わせるだけで当たる。
+ * 画面上に一定の大きさで出す、向き（yaw / pitch）で持つ弱点（1.6.0。照準のまわりの弱点。1.8.6 から弓も。
+ * 種類ごとの処理は AimSpotKind）。描き方と当たり判定は ScreenProjection、FishingMath.allowedAngle で、照準を合わせるだけで当たる。
  * 「上下だけ」（馬・豚に乗っているとき）のときは pitch だけを持ち、yaw はいつも今の視線に合わせる（進む向きがぶれない）。
  */
 final class HudSpot {
@@ -29,10 +29,15 @@ final class HudSpot {
     private final MarkerMotion motion = new MarkerMotion(0, 0);
     private final Random random = new Random();
 
-    /** 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0）。 */
-    private static final int FREE = 0;
-    private static final int VERTICAL = 1;
-    private static final int HORIZONTAL = 2;
+    /**
+     * 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0）、
+     * 上下だけで yaw は出した時点のまま（弓を馬・豚の上で引いたとき。弓を引く短い間なので、向きを追いかけない。1.8.6 で
+     * BowSpot から移した）。
+     */
+    static final int FREE = 0;
+    static final int VERTICAL = 1;
+    static final int HORIZONTAL = 2;
+    static final int VERTICAL_FIXED = 3;
 
     private boolean has;
     private int mode;
@@ -58,6 +63,14 @@ final class HudSpot {
         this.defaultRgb = defaultRgb;
     }
 
+    /** 円・輪・中心の初期値の色を別に持つ（弓の橙。1.8.6 で BowSpot から移した）。色を書き換えたら、その色から作る。 */
+    private float[][] palette;
+
+    HudSpot withPalette(float[] disk, float[] ring, float[] center) {
+        palette = new float[][] {disk, ring, center};
+        return this;
+    }
+
     /** 上下も左右も交互だけにする（水平に戻す決まりを使わない。1.8.1。エリトラ）。 */
     HudSpot alternateOnly() {
         keepNearHorizon = false;
@@ -73,17 +86,8 @@ final class HudSpot {
         screen.invalidate();
     }
 
-    /** まだ出ていなければ、今の視線の近くに出す。verticalOnly なら照準の真上か真下だけ。 */
-    void ensure(EntityPlayer player, boolean verticalOnly) {
-        ensure(player, verticalOnly ? VERTICAL : FREE);
-    }
-
-    /** まだ出ていなければ、照準の左か右だけに出す（1.8.0。近接の弱点）。 */
-    void ensureHorizontal(EntityPlayer player) {
-        ensure(player, HORIZONTAL);
-    }
-
-    private void ensure(EntityPlayer player, int newMode) {
+    /** まだ出ていなければ（出し方が変わったときも）、今の視線の近くに newMode の出し方で出す。 */
+    void ensure(EntityPlayer player, int newMode) {
         if (has && mode == newMode) {
             // 照準から離れすぎた弱点は、今の照準の近くに出し直す（1.8.2。ヒットには数えない。その場で切り替える）
             if (BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL,
@@ -123,7 +127,7 @@ final class HudSpot {
 
     private void next(EntityPlayer player, double prevYaw, double prevPitch) {
         // 1.8.1: 交互に出し、照準が水平から離れすぎたら水平の側に出す（真上・真下まで行かないように）
-        if (mode == VERTICAL) {
+        if (mode == VERTICAL || mode == VERTICAL_FIXED) {
             pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
             yaw = player.rotationYaw;
             pitch = BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, pitchSide, screen.fovDegrees(),
@@ -190,13 +194,20 @@ final class HudSpot {
         double radius = FishingMath.SPOT_SCREEN_RADIUS;
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
         int rgb = MarkerLook.color(kind, defaultRgb);
+        float[][] look = palette == null ? null : MarkerLook.palette(kind, palette[0], palette[1], palette[2]);
         MarkerShape shape = MarkerLook.shape(kind);
         if (trail) {
             for (MarkerMotion.Afterimage image : motion.afterimages(nowMs)) {
                 double[] p = projectAt(image.u, image.v);
-                if (p != null) {
-                    ScreenProjection.afterimage(p[0] / scale, p[1] / scale, radius, shape, rgb,
-                            (float) image.alpha(nowMs));
+                if (p == null) {
+                    continue;
+                }
+                float a = (float) image.alpha(nowMs);
+                if (look == null) {
+                    ScreenProjection.afterimage(p[0] / scale, p[1] / scale, radius, shape, rgb, a);
+                } else {
+                    ScreenProjection.fillShape(p[0] / scale, p[1] / scale, radius, shape, look[0], 0.35F * a);
+                    ScreenProjection.outlineShape(p[0] / scale, p[1] / scale, radius, shape, look[1], 0.5F * a);
                 }
             }
         }
@@ -213,7 +224,15 @@ final class HudSpot {
         }
         double gx = p[0] / scale;
         double gy = p[1] / scale;
-        ScreenProjection.marker(gx, gy, radius, shape, rgb, 0.45F, 1);
+        if (look == null) {
+            ScreenProjection.marker(gx, gy, radius, shape, rgb, 0.45F, 1);
+        } else {
+            ScreenProjection.fillShape(gx, gy, radius, shape, look[0], 0.45F);
+            ScreenProjection.outlineShape(gx, gy, radius, shape, look[1], 0.9F);
+            if (shape.hasCenterDot()) {
+                ScreenProjection.fill(gx, gy, radius * 0.3, look[2], 0.9F);
+            }
+        }
         double head = trail ? motion.headHighlight(nowMs) : 0;
         if (head > 0) {
             ScreenProjection.fillShape(gx, gy, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));

@@ -1,105 +1,71 @@
 package com.example.weakspot.client;
 
-import com.example.weakspot.PlayerRules;
 import com.example.weakspot.ThrowCharge;
 import com.example.weakspot.VehicleTargets;
-import com.example.weakspot.WeakSpotMod;
-import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.ComboFactor;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
-import com.example.weakspot.network.HitMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 投げる物の弱点（自分だけ。1.7.0）。エンダーパール・雪玉などをメインハンドに持っている間、照準から 10〜20 度
  * （馬・豚に乗っているときは真上か真下だけ）に青緑の弱点を出し、照準を合わせるだけでヒットにする。当てるたびに
  * 次の 1 投の溜めが増え（ThrowCharge。クライアントもサーバーの返事を待たずに進める）、照準の下にゲージを出す。
+ * 1.8.6 から AimSpotKind（AimSpots が回す）。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
-final class ThrowSpot {
+final class ThrowSpot extends AimSpotKind {
 
-    /** ティール #2ED3B7。 */
+    /** 青緑 #2ED3B7。 */
     private static final int RGB = 0x2ED3B7;
     /** ゲージ 1 本分の溜め（倍率 ×3）。越えた分は、1 本分ごとに赤い目盛りを 1 つ足す。 */
     private static final double CHARGE_PER_BAR = 2.0;
 
-    private static final HudSpot SPOT = new HudSpot(HitKind.THROW, RGB);
+    /** このフレームのゲージの、本数を越えた分の文字（drawGauge から drawAfterOverlay へ渡す）。 */
+    private String extra;
 
-    private ThrowSpot() {
+    ThrowSpot() {
+        super(HitKind.THROW, new HudSpot(HitKind.THROW, RGB));
     }
 
-    static void clear() {
-        SPOT.clear();
+    @Override
+    boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
+        return settings.throwWeakSpotEnabled && ThrowCharge.isHoldingThrowable(player);
     }
 
-    private static boolean eligible(Minecraft mc) {
-        EntityPlayerSP player = mc.player;
-        if (player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.THROW)
-                || !PlayerRules.canUse(player) || player.isHandActive()) {
-            return false;
-        }
-        return ClientSettings.get().throwWeakSpotEnabled && ThrowCharge.isHoldingThrowable(player);
+    @Override
+    int placement(EntityPlayerSP player) {
+        return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (event.phase != TickEvent.Phase.START || mc.isGamePaused() || mc.player == null) {
-            return;
-        }
-        if (!eligible(mc)) {
-            SPOT.clear();
-        } else {
-            SPOT.ensure(mc.player, VehicleTargets.isSteeredByLook(mc.player));
-        }
+    @Override
+    int minHitInterval(SyncedSettings settings) {
+        return settings.throwMinHitIntervalTicks;
     }
 
-    @SubscribeEvent
-    public static void onRenderWorldLast(RenderWorldLastEvent event) {
-        Minecraft mc = Minecraft.getMinecraft();
-        if (!SPOT.aimed(mc, event.getPartialTicks()) || !eligible(mc)) {
-            return;
-        }
-        SyncedSettings settings = ClientSettings.get();
-        if (!ClientWeakSpotHandler.canHitNow(HitKind.THROW, settings.throwMinHitIntervalTicks)) {
-            return;
-        }
-        int streak = ClientWeakSpotHandler.registerHit(HitKind.THROW);
-        WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.THROW, streak));
-        ThrowCharge.add(mc.player, settings.throwChargePerHit * ComboFactor.factor(streak));
+    @Override
+    void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
+        ThrowCharge.add(player, settings.throwChargePerHit * ComboFactor.factor(streak));
         VehicleSpot.onRiderHit(streak);
-        SPOT.relocate(mc.player);
     }
 
-    @SubscribeEvent
-    public static void onOverlayPost(RenderGameOverlayEvent.Post event) {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) {
-            return;
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.player == null || mc.gameSettings.hideGUI) {
-            return;
-        }
-        double charge = ThrowCharge.isHoldingThrowable(mc.player) ? ThrowCharge.amount(mc.player) : 0;
-        boolean bar = WeakSpotConfig.throwChargeBarEnabled && charge > 0;
-        if (!SPOT.has() && !bar) {
-            return;
-        }
-        HudSpot.beginOverlay();
-        SPOT.draw(mc);
-        int rgb = MarkerLook.color(HitKind.THROW, RGB);
-        String extra = bar ? ChargeGauge.drawBars(mc, charge, CHARGE_PER_BAR, rgb) : null;
-        HudSpot.endOverlay();
-        if (bar) {
-            ChargeGauge.drawLabels(mc, charge, rgb, extra);
-        }
+    private static double charge(Minecraft mc) {
+        return ThrowCharge.isHoldingThrowable(mc.player) ? ThrowCharge.amount(mc.player) : 0;
+    }
+
+    @Override
+    boolean hasGauge(Minecraft mc, float partialTicks) {
+        return WeakSpotConfig.throwChargeBarEnabled && charge(mc) > 0;
+    }
+
+    @Override
+    void drawGauge(Minecraft mc, float partialTicks) {
+        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.THROW, RGB));
+    }
+
+    @Override
+    void drawAfterOverlay(Minecraft mc, float partialTicks) {
+        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.THROW, RGB), extra);
     }
 }
