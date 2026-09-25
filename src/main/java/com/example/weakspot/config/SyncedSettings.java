@@ -66,6 +66,9 @@ public final class SyncedSettings {
     /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
     public double machineBoostMultiplier;
     public double machineBoostMaxMultiplier;
+    /** 寝ている間の弱点（1.6.0）。進める時刻はサーバーだけが使うので送らない。 */
+    public boolean sleepWeakSpotEnabled;
+    public int sleepMinHitIntervalTicks;
     /** 食事・飲み物の弱点（1.6.0）。 */
     public boolean eatWeakSpotEnabled;
     public int eatHitTicks;
@@ -138,6 +141,8 @@ public final class SyncedSettings {
         s.machineBoostMultiplier = WeakSpotConfig.machineBoostMultiplier;
         s.machineBoostMaxMultiplier = WeakSpotConfig.machineBoostMaxMultiplier;
         s.serverVersion = WeakSpotMod.VERSION;
+        s.sleepWeakSpotEnabled = WeakSpotConfig.sleepWeakSpotEnabled;
+        s.sleepMinHitIntervalTicks = WeakSpotConfig.sleepMinHitIntervalTicks;
         s.eatWeakSpotEnabled = WeakSpotConfig.eatWeakSpotEnabled;
         s.eatHitTicks = WeakSpotConfig.eatHitTicks;
         s.eatMinHitIntervalTicks = WeakSpotConfig.eatMinHitIntervalTicks;
@@ -193,6 +198,8 @@ public final class SyncedSettings {
         buf.writeDouble(machineBoostMultiplier);
         buf.writeDouble(machineBoostMaxMultiplier);
         ByteBufUtils.writeUTF8String(buf, serverVersion);
+        buf.writeBoolean(sleepWeakSpotEnabled);
+        buf.writeInt(sleepMinHitIntervalTicks);
         buf.writeBoolean(eatWeakSpotEnabled);
         buf.writeInt(eatHitTicks);
         buf.writeInt(eatMinHitIntervalTicks);
@@ -248,6 +255,8 @@ public final class SyncedSettings {
         s.machineBoostMultiplier = buf.readDouble();
         s.machineBoostMaxMultiplier = buf.readDouble();
         s.serverVersion = ByteBufUtils.readUTF8String(buf);
+        s.sleepWeakSpotEnabled = buf.readBoolean();
+        s.sleepMinHitIntervalTicks = buf.readInt();
         s.eatWeakSpotEnabled = buf.readBoolean();
         s.eatHitTicks = buf.readInt();
         s.eatMinHitIntervalTicks = buf.readInt();

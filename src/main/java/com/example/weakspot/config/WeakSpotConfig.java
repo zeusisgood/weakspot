@@ -250,6 +250,19 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int bowMinHitIntervalTicks = 4;
 
+    @Config.Comment({"[サーバー] 寝ている間の弱点のオン・オフ（1.6.0）",
+            "夜にベッドで寝ている間、寝ている画面にマーカーが出る。クリックで当てると、ワールドの時刻が進む（全員に共通）"})
+    public static boolean sleepWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] 寝ている間の弱点に1回当てるごとに進めるワールドの時刻（tick）。次の朝は越えない",
+            "サーバーだけが使う（クライアントには送らない）"})
+    @Config.RangeInt(min = 0, max = 12000)
+    public static int sleepHitTicks = 200;
+
+    @Config.Comment("[サーバー] 寝ている間のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int sleepMinHitIntervalTicks = 6;
+
     @Config.Comment({"[サーバー] 食事・飲み物の弱点のオン・オフ（1.6.0）",
             "食べている・飲んでいる間、照準の近くに弱点が出る。当てると、食べ終わるまでの時間が縮む"})
     public static boolean eatWeakSpotEnabled = true;

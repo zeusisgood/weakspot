@@ -8,6 +8,7 @@ import com.example.weakspot.server.FishingHits;
 import com.example.weakspot.server.MeleeHits;
 import com.example.weakspot.server.RightClickHits;
 import com.example.weakspot.server.ServerBoostTracker;
+import com.example.weakspot.server.SleepHits;
 import com.example.weakspot.server.VehicleHits;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -88,6 +89,8 @@ public class HitMessage implements IMessage {
                     BowHits.onHit(player, streak);
                 } else if (kind == HitKind.MELEE) {
                     MeleeHits.onHit(player, entityId, streak);
+                } else if (kind == HitKind.SLEEP) {
+                    SleepHits.onHit(player, streak);
                 } else if (kind == HitKind.EAT) {
                     EatHits.onHit(player, streak);
                 } else if (kind == HitKind.VEHICLE) {
