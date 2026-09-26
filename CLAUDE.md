@@ -79,11 +79,14 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-ライセンスの相談（`LICENSE` がまだない。MIT / LGPL-3.0 / All Rights Reserved などから、ユーザーが決める）。GitHub の issue の雛形は、不具合報告 `bug_report.md` と要望 `feature_request.md`（1.9.1 のあと）。
+配布サイトへの自動公開（下の TODO）。ユーザーがアカウント・プロジェクト・トークンを用意してから、ワークフローを足す。
+
+- ライセンスは **MIT**（1.9.1 のあと。`LICENSE`、`Copyright (c) 2026 zeusisgood`。ユーザーの判断: Modpack 歓迎。再配布は止めず、README で Releases へのリンクをお願いするだけ）。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
+- GitHub の issue の雛形は、不具合報告 `bug_report.md` と要望 `feature_request.md`（1.9.1 のあと）。
 
 ### TODO（ユーザーの判断: いつかやる。やるときに相談する）
 
-- **Modrinth / CurseForge への自動公開**: Release を作るとき（`.github/workflows/ci.yml` の `release`）に、jar を配布サイトにも上げる。配布サイトのアカウントと、トークンをリポジトリの Secrets に登録してもらう必要がある。公開するかどうか、どちらのサイトにするかを先に決める。
+- **Modrinth / CurseForge への自動公開**（ユーザーの判断: 両方に上げる）: Release を作るとき（`.github/workflows/ci.yml` の `release`）に、`mc-publish` で jar を両方のサイトにも上げる。サイトに載せる更新内容は、英語のお知らせ `weakspot.news.<版>`（`en_us.lang`）の 1 行と、GitHub の Release へのリンク。1.9.1 は手動で 1 回流せるようにする（`workflow_dispatch`）。ユーザーに、アカウントとプロジェクト（初回は手作業で作って審査を通す。説明文は `README.en.md` をもとに Claude が用意する）と、Secrets の `MODRINTH_TOKEN`・`CURSEFORGE_TOKEN` を用意してもらう。
 
 ### 1.10.0 に向けたメモ（ユーザーの判断: 1.8.8 のあとの相談で、いったん見送り。入れる目星だけ付けた）
 

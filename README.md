@@ -80,3 +80,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 | [CHANGELOG.md](CHANGELOG.md) | 更新履歴 |
 
 **不具合報告**: ゲーム内のチャットで `/weakspot bug` と入力すると、報告方法と環境情報が表示されます（[issue](https://github.com/zeusisgood/weakspot/issues) に送信できます）。
+
+## ライセンス
+
+[MIT License](LICENSE)。**Modpack への同梱は自由**（連絡不要）。jar を配布する場合は、なるべくこのリポジトリの [Releases](https://github.com/zeusisgood/weakspot/releases) へのリンクで案内してください。

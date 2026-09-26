@@ -62,6 +62,10 @@ processResources {
 }
 
 jar {
+    // MIT の条件（配布物に著作権表示を付ける）のため、jar にも LICENSE を入れる
+    from('LICENSE') {
+        rename { 'LICENSE_weakspot' }
+    }
     manifest {
         attributes([
             "Specification-Title": "weakspot",

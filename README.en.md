@@ -53,3 +53,7 @@ Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. T
 - Settings: the Mods menu or `config/weakspot.cfg` (every setting has an English description).
 - Bugs: type `/weakspot bug` in chat to get a link to a prefilled [issue](https://github.com/zeusisgood/weakspot/issues) with your environment.
 - Other documents (changelog, detailed guide, settings list) are in Japanese: [CHANGELOG.md](CHANGELOG.md), [doc/](doc/README.md).
+
+## License
+
+[MIT License](LICENSE). **Modpacks are welcome** — no need to ask. If you share the mod, please link to the [Releases](https://github.com/zeusisgood/weakspot/releases) page rather than re-uploading the jar.
