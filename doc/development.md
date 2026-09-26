@@ -22,7 +22,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 | `server/` | 管理コマンド、破壊速度ブースト、各種類のヒットの検証と効果、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
 | `config/` | 設定 |
 
-仕様書（バージョンごとの差分）の一覧は [spec/README.md](spec/README.md)。設計上の注意点（サーバー側のブーストの仕組みなど）は [CLAUDE.md](../CLAUDE.md) を参照してください。
+仕様書（バージョンごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
 
 ## バージョンの方針
 

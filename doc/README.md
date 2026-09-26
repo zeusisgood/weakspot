@@ -8,5 +8,6 @@
 | 導入（導入先・更新時の注意） | [install.md](install.md) |
 | 設定一覧（`config/weakspot.cfg`）・管理コマンド | [config.md](config.md) |
 | 開発（ビルド・テスト・バージョン方針） | [development.md](development.md) |
+| 仕組み（開発者向け。コードの構成と各機能の中身） | [architecture.md](architecture.md) |
 | 仕様書（バージョンごとの差分。この Mod の仕様の正本） | [spec/README.md](spec/README.md) |
 | 更新履歴 | [../CHANGELOG.md](../CHANGELOG.md) |
