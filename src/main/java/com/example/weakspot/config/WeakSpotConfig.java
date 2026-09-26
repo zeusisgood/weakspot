@@ -604,6 +604,13 @@ public final class WeakSpotConfig {
     @Config.Comment("[クライアント] 最後に更新のお知らせを見た版（1.7.1）。Mod が書き換えます。書き換えないでください")
     public static String lastSeenVersion = "";
 
+    @Config.Comment("[クライアント] 新しい版が公開されていたら、ワールドに入ったときにチャットで知らせるか（1.9.2）。"
+            + "Forge の versionCheck が false のときは出ない")
+    public static boolean checkForUpdates = true;
+
+    @Config.Comment("[クライアント] 「この版は通知しない」を押した版（1.9.2）。この版の通知は出さない。空にすると、また出る")
+    public static String skippedUpdateVersion = "";
+
     @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
     public static int configVersion = 0;
 

@@ -1,0 +1,10 @@
+{
+  "homepage": "https://github.com/zeusisgood/weakspot/releases",
+  "promos": {
+    "1.12.2-latest": "1.9.2",
+    "1.12.2-recommended": "1.9.2"
+  },
+  "1.12.2": {
+    "1.9.2": "Chat notice when a new version is out"
+  }
+}
