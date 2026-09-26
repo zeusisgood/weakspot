@@ -102,7 +102,7 @@ public final class GuideBook {
             new Page("enchant", Chapter.SCREEN, s("when"), s("hit"), s("tip")),
             new Page("multi", Chapter.MORE, s("others"), s("together")),
             new Page("markers", Chapter.MORE, s("onoff", STATS_KEY), s("look")),
-            new Page("help", Chapter.MORE, s("busy", TOGGLE_KEY), s("bug")),
+            new Page("help", Chapter.MORE, s("busy", TOGGLE_KEY), s("bug"), s("update")),
     };
 
     /** 目次の各ページに載せる章（本の 1 ページに 14 行まで）。 */

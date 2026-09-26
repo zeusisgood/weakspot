@@ -29,7 +29,8 @@ import net.minecraftforge.fml.common.ModContainer;
  * クライアントのコマンド /weakspot（1.7.1）。/weakspot bug だけを自分のクライアントで受け取り、不具合の報告の方法を出す
  * （サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。古いサーバーにも無い）。
  * 環境を自動で集め、GitHub の issue の画面に最初から書き込むリンクと、クリップボードへのコピーの両方で渡す。
- * bug 以外（/weakspot、stats、reset、reload）は、打った文字をそのままサーバーへ送る（サーバーのコマンドが動く）。
+ * skipupdate <版>（1.9.2）は、新しい版の通知の [この版は通知しない] から動く。
+ * bug・skipupdate 以外（/weakspot、stats、reset、reload）は、打った文字をそのままサーバーへ送る（サーバーのコマンドが動く）。
  */
 final class BugCommand extends CommandBase {
 
@@ -65,6 +66,13 @@ final class BugCommand extends CommandBase {
         }
         if (args.length >= 1 && "bug".equalsIgnoreCase(args[0])) {
             showGuide(mc);
+            return;
+        }
+        // 新しい版の通知の [この版は通知しない]（1.9.2）。クリックで動くもので、補完には出さない
+        if (args.length >= 1 && "skipupdate".equalsIgnoreCase(args[0])) {
+            if (args.length >= 2) {
+                UpdateCheckNotice.skip(mc, args[1]);
+            }
             return;
         }
         // bug 以外は、サーバーのコマンドとして送る（チャットのパケットは、クライアントのコマンドを通らない）

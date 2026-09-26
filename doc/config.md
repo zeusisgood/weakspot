@@ -156,6 +156,8 @@
 | `othersComboDisplay` | true | 近くの他プレイヤーのコンボ（10 以上）を、頭上に「n HIT」と表示するか |
 | `showUpdateNotes` | true | バージョン更新後、初めてワールドに入った時にチャットで更新のお知らせを表示するか |
 | `lastSeenVersion` | （空） | 最後に更新のお知らせを見たバージョン。Mod が書き換えるため、編集しないでください |
+| `checkForUpdates` | true | 新しいバージョンが公開されていたら、ワールドに入った時にチャットで通知するか（Forge の `versionCheck` が false の時は通知なし） |
+| `skippedUpdateVersion` | （空） | チャットの [この版は通知しない] を押したバージョン。このバージョンの通知は表示しない。空にすると再び通知 |
 | `disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal`）。統計画面の「弱点マーカー」タブで変更可能 |
 | `myMarkerColors` | （空） | 自分の弱点の色（1 行に `種類=#RRGGBB`）。未記入の種類は初期値。「弱点マーカー」タブで変更可能 |
 | `myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`）。未記入の種類は円。「弱点マーカー」タブで変更可能 |
