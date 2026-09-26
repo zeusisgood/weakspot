@@ -22,7 +22,7 @@ import net.minecraft.util.text.event.ClickEvent;
  */
 public final class GuideBook {
 
-    /** 本の形の版。NBT の TAG_FORMAT。これより古い本は、新しい本に差し替える（1.8.5）。 */
+    /** 本の形の版（NBT の TAG_FORMAT。1.8.5 で 2。1.8.x までは、これより古い本を差し替えていた。1.9.0 でやめた）。 */
     public static final int FORMAT = 2;
     public static final String TAG_FORMAT = "weakspotGuide";
     private static final String TITLE = "Weak Spot Mining";
@@ -137,23 +137,6 @@ public final class GuideBook {
         }
         tag.setTag("pages", pages);
         book.setTagCompound(tag);
-        return book;
-    }
-
-    /** この Mod が渡した、古い形のガイドの本か（1.8.5 より前の本は、番号の翻訳キーで、今の lang にはない）。 */
-    public static boolean isOutdated(ItemStack stack) {
-        if (stack.isEmpty() || stack.getItem() != Items.WRITTEN_BOOK || !stack.hasTagCompound()) {
-            return false;
-        }
-        NBTTagCompound tag = stack.getTagCompound();
-        return TITLE.equals(tag.getString("title")) && TITLE.equals(tag.getString("author"))
-                && tag.getInteger(TAG_FORMAT) < FORMAT;
-    }
-
-    /** 古い本の代わり（数はそのまま）。 */
-    public static ItemStack replacement(ItemStack old) {
-        ItemStack book = create();
-        book.setCount(old.getCount());
         return book;
     }
 
