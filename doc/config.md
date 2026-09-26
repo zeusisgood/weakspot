@@ -14,6 +14,8 @@
 
 | キー | 初期値 | 説明 |
 |---|---|---|
+| `miningWeakSpotEnabled` | true | 採掘の弱点のオン／オフ（オフで全員がバニラの採掘に戻る） |
+| `miningComboBonus` | true | 採掘のコンボ倍率のオン／オフ（オンで 1 回に進む量にコンボの掛け数を乗算） |
 | `boostMultiplier` | 4.0 | ヒット時の破壊速度の倍率（1 回で進む上乗せ分に、コンボの掛け数を掛ける） |
 | `boostDurationTicks` | 4 | 倍率を掛ける時間（tick） |
 | `minHitIntervalTicks` | 6 | 採掘ヒットの最小受付間隔（tick） |
@@ -36,6 +38,7 @@
 | `totalMilestones` | 1000, 5000, 7777, 10000, 25000, 50000, 77777, 100000, 250000, 500000, 777777, 1000000 | 合計の節目となる数。**サーバー専用** |
 | `totalMilestoneXp` | 100, 200, 777, 300, 500, 700, 7777, 1000, 1500, 2000, 7777, 5000 | 合計の節目ごとの経験値（`totalMilestones` の順に対応）。**サーバー専用** |
 | `totalMilestoneRepeatInterval` | 500000 | `totalMilestones` の最大値より先は、この数ごとに合計の節目とする。0 で繰り返しなし。**サーバー専用** |
+| `growthWeakSpotEnabled` | true | 作物・苗木の成長の弱点のオン／オフ |
 | `growthTicksPerHit` | 5 | 成長ヒット 1 回で追加実行する成長判定（randomTick）の回数 |
 | `growthWarnings` | true | 作物・苗木の弱点に当てても育たない時に、チャットで通知するか。**サーバー専用** |
 | `growthStuckHits` | 30 | 連続何回当てても変化がない場合に「外部要因で育たない」と通知するか（5〜1000）。**サーバー専用** |
@@ -44,12 +47,14 @@
 | `growthExcludedBlocks` | 草ブロック、草、背の高い草花 | 成長の弱点を出さないブロックの登録名（サトウキビ・サボテン・ネザーウォートにも有効） |
 | `mushroomGrowChance` | 0.2 | キノコへの成長ヒット 1 回で、巨大キノコへの成長を試みる確率（0〜1）。**サーバー専用** |
 | `growthExtraBlocks` | サトウキビ、サボテン、ネザーウォート、IC2 のゴムの木 | 成長の弱点の対象に追加するブロック（追加リスト）。1 行に「登録名」または「登録名[プロパティ=条件,...]」（書式は[成長の弱点](play.md#作物苗木の成長素手で右クリック長押し)を参照）。当てると randomTick を追加実行して成長を早める |
+| `machineWeakSpotEnabled` | true | 機械の弱点のオン／オフ（オフでしゃがんで素手の右クリックは GUI を開く） |
 | `machineBoostMultiplier` | 4.0 | 機械ヒット時に、機械の処理を毎 tick 何倍実行するか。コンボ継続でさらに掛け数（×1.25〜×4）を乗算。クライアントにも送信（HUD の「機械 n倍速」） |
 | `machineBoostParticles` | true | 加速中の機械の周囲に、速度に応じた色の粒子を出すか（近くのプレイヤーに表示。各自の `machineParticlesVisible` がオフの人には送信しない）。**サーバー専用** |
 | `machineBoostMaxMultiplier` | 16.0 | 機械の倍率（コンボの掛け数を乗算した後）の上限。機械 Mod の不具合やサーバー負荷が気になる時に下げる。クライアントにも送信 |
 | `machineBoostDurationTicks` | 6 | 機械の加速の持続時間（tick）。複数プレイヤーが同じ機械を加速しても効果は重複しない |
 | `machineMinHitIntervalTicks` | 6 | 機械ヒットの最小受付間隔（tick） |
 | `excludedBlocks` | 宝箱、トラップチェスト、エンダーチェスト、エンチャントテーブル、ビーコン、シュルカーボックス（16 色） | 機械の加速の対象外とするブロックの登録名 |
+| `animalWeakSpotEnabled` | true | 動物の弱点のオン／オフ |
 | `animalBabyEnabled` | true | 動物の弱点で、子供の成長を早めるか |
 | `animalBreedingEnabled` | true | 動物の弱点で、繁殖の待ち時間を短縮するか |
 | `sheepWoolEnabled` | true | 羊の弱点で、羊毛の再生を早めるか |
