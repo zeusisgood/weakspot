@@ -2,8 +2,10 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.ComboDisplay;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.common.ComboMilestones;
 import com.example.weakspot.common.ComboTier;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.common.MachineComboBoost;
@@ -11,6 +13,8 @@ import com.example.weakspot.common.ScheduledBoost;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.awt.Color;
+import java.util.EnumSet;
+import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
@@ -31,7 +35,8 @@ import org.lwjgl.opengl.GL11;
  * 2 以上で「12 HIT」と出し、ヒットのたびに弾ませる。下のバーは途切れるまでの残り時間。
  * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、100、250、500、1000（以降 1000 ごと）で
  * 強調音と光を出し、上の段階ほど派手にする（100 は和音、250 から駆け上がり、500 から花火、1000 からタイトル）。
- * 機械の弱点に照準が合っている間は、コンボの掛け数（MachineComboBoost）を「機械 ×2.5」と下に出す。
+ * 直前にヒットした種類の弱点が出ている間は、その下に種類の表示を出す（1.8.7）: コンボの掛け数を使う種類は「走り ×1.25」
+ * （掛け数が 1 より大きいとき）、機械は今の速さ「機械 4倍速」、ディスペンサー・ドロッパーは「発射 ×2」。色はその種類の弱点の色。
  * 時間は ClientWeakSpotHandler.clientTick（一時停止中は止まる）で数える。F1 で HUD を隠している間は描かない。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -49,9 +54,11 @@ final class ComboHud {
     private static final int[] CHORD = {1, 3, 5, HitPitch.SCALE_LENGTH};
     /** 250 の駆け上がりの音の数（ドからソまで）。 */
     private static final int SHORT_RUN = 5;
-    /** 「機械 ×n」の文字の大きさ（コンボの数字に対する割合）。 */
-    private static final float MACHINE_LABEL_SCALE = 0.75F;
-    private static final int MACHINE_LABEL_RGB = 0xFFFFFF;
+    /** 種類の表示（「走り ×1.25」「機械 4倍速」）の文字の大きさ（コンボの数字に対する割合）。 */
+    private static final float KIND_LABEL_SCALE = 0.75F;
+    /** コンボの掛け数（ComboFactor）で効果が強くなる種類（機械は実際の速さを出すので別）。 */
+    private static final Set<HitKind> FACTOR_KINDS = EnumSet.of(HitKind.MINING, HitKind.VEHICLE, HitKind.LADDER,
+            HitKind.SPRINT, HitKind.ELYTRA, HitKind.THROW, HitKind.MELEE, HitKind.PORTAL, HitKind.HARVEST);
     /** 1000 のタイトル（フェードイン、表示、フェードアウトの tick）。バニラのタイトルと同じ長さ。 */
     private static final int TITLE_IN = 5;
     private static final int TITLE_STAY = 50;
@@ -71,7 +78,9 @@ final class ComboHud {
     private static double stepTime = Double.NEGATIVE_INFINITY;
     /** 最後に達した段階の数（光の色と弾みの大きさを決める）。 */
     private static int stepCombo;
-    /** 「機械 n倍速」の速さが上がった瞬間（光らせる）と、その段階の数。 */
+    /** 直前にヒットした種類（種類の表示に使う）。 */
+    private static HitKind lastKind;
+    /** 種類の表示の値（掛け数・機械の速さ）が上がった瞬間（光らせる）と、その段階の数。 */
     private static double factorStepTime = Double.NEGATIVE_INFINITY;
     private static int factorStepCombo;
     /** 「発射 ×n」の回数が上がった瞬間（光らせる）と、その段階の数。 */
@@ -89,13 +98,17 @@ final class ComboHud {
     }
 
     /** 自分のヒット。time はヒットした瞬間（tick。フレームの途中の値を含む）。 */
-    static void onHit(int newCombo, double time) {
+    static void onHit(HitKind kind, int newCombo, double time) {
         combo = newCombo;
         lastHitTime = time;
         // 新しいコンボが始まったら、残していた数は消す
         brokenCombo = 0;
-        // 速さ・発射の回数が上がった瞬間は光らせる（上限で止まっていれば光らない）
-        if (machineSpeed(newCombo) > machineSpeed(newCombo - 1) + 1e-9) {
+        if (kind != lastKind) {
+            lastKind = kind;
+            factorStepTime = Double.NEGATIVE_INFINITY;
+        }
+        // 掛け数・速さ・発射の回数が上がった瞬間は光らせる（上限で止まっていれば光らない）
+        if (labelValue(kind, newCombo) > labelValue(kind, newCombo - 1) + 1e-9) {
             factorStepTime = time;
             factorStepCombo = newCombo;
         }
@@ -168,6 +181,7 @@ final class ComboHud {
         stepTime = Double.NEGATIVE_INFINITY;
         stepCombo = 0;
         factorStepTime = Double.NEGATIVE_INFINITY;
+        lastKind = null;
         shotsStepTime = Double.NEGATIVE_INFINITY;
         titleCombo = 0;
         MILESTONES.reset();
@@ -204,14 +218,14 @@ final class ComboHud {
             float bottom = draw(mc, event.getResolution(), I18n.format("weakspot.combo.hit", combo), colorOf(combo), 1,
                     bounce, HitStreak.remainingFraction(now - lastHitTime),
                     ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= 250, now);
-            drawMachineLabel(mc, bottom, now);
-        } else if (combo == 1 && ClientWeakSpotHandler.machineSpotActive()) {
+            drawKindLabel(mc, bottom, now);
+        } else if (combo == 1 && lastKind == HitKind.MACHINE && ClientWeakSpotHandler.machineSpotActive()) {
             // 1 ヒット目はコンボの数字が出ないので、数字の位置に機械の表示だけを出す（1.6.0）
             FontRenderer font = mc.fontRenderer;
             float scale = (float) WeakSpotConfig.comboScale;
             float[] center = center(event.getResolution(), 0, font.FONT_HEIGHT * scale);
             lastCx = center[0];
-            drawMachineLabel(mc, center[1] - font.FONT_HEIGHT * scale / 2, now);
+            drawKindLabel(mc, center[1] - font.FONT_HEIGHT * scale / 2, now);
         } else if (brokenCombo > 0) {
             double alpha = ComboDisplay.fadeAlpha(brokenCombo, now - brokenTime);
             if (alpha <= 0) {
@@ -231,18 +245,60 @@ final class ComboHud {
         return rgb >= 0 ? rgb : colorOf(step);
     }
 
-    /** 機械の弱点に照準が合っていれば、その下に「機械 4倍速」（ディスペンサー・ドロッパーは「発射 ×2」）を出す。 */
-    private static void drawMachineLabel(Minecraft mc, float top, double now) {
-        if (ClientWeakSpotHandler.dispenserSpotActive()) {
-            // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2。1.6.0 から上限の設定も考える）
-            drawMachineLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)),
-                    ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
-        } else if (ClientWeakSpotHandler.machineSpotActive()) {
-            // その機械の今の速さ（サーバーと同じ計算。1.6.0）
-            drawMachineLabel(mc, top, I18n.format("weakspot.combo.machine",
-                    MachineComboBoost.speedLabel(machineSpeed(combo))),
-                    ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
+    /**
+     * 直前にヒットした種類の弱点が今出ていれば、その下に種類の表示を出す（1.8.7。1.8.6 までは機械だけ）。
+     * ディスペンサー・ドロッパーは「発射 ×2」、機械は「機械 4倍速」、コンボの掛け数を使う種類は、掛け数が 1 より大きいとき
+     * 「走り ×1.25」。色はその種類の自分の弱点の色（段階が上がった瞬間は、その段階の色で光る）。
+     */
+    private static void drawKindLabel(Minecraft mc, float top, double now) {
+        HitKind kind = lastKind;
+        if (kind == null || !spotShown(kind)) {
+            return;
         }
+        int rgb = MarkerLook.color(kind, MarkerLook.defaultColor(kind));
+        if (kind == HitKind.MACHINE && ClientWeakSpotHandler.dispenserSpotActive()) {
+            // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2。1.6.0 から上限の設定も考える）
+            drawKindLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)), rgb,
+                    ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
+        } else if (kind == HitKind.MACHINE) {
+            // その機械の今の速さ（サーバーと同じ計算。1.6.0）
+            drawKindLabel(mc, top, I18n.format("weakspot.combo.machine",
+                    MachineComboBoost.speedLabel(machineSpeed(combo))), rgb,
+                    ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
+        } else if (FACTOR_KINDS.contains(kind)) {
+            double factor = labelValue(kind, combo);
+            if (factor > 1) {
+                drawKindLabel(mc, top, I18n.format("weakspot.combo.kind", I18n.format("weakspot.kind." + kind.key()),
+                        MachineComboBoost.label(factor)), rgb,
+                        ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
+            }
+        }
+    }
+
+    /** その種類の自分の弱点が、今出ているか（採掘・機械・収穫はこのフレームで照準が合っている）。 */
+    private static boolean spotShown(HitKind kind) {
+        switch (kind) {
+            case MINING:
+            case MACHINE:
+                return ClientWeakSpotHandler.blockSpotActive(kind);
+            case HARVEST:
+                // 収穫すると植え直して、同じ所がすぐ成長の弱点に変わるので、それも含める
+                return ClientWeakSpotHandler.blockSpotActive(HitKind.HARVEST)
+                        || ClientWeakSpotHandler.blockSpotActive(HitKind.GROWTH);
+            default:
+                return AimSpots.isShown(kind);
+        }
+    }
+
+    /** 種類の表示の値: 機械は速さ、ほかはコンボの掛け数（採掘は、サーバーが 1.8.7 より前なら 1）。 */
+    private static double labelValue(HitKind kind, int combo) {
+        if (kind == HitKind.MACHINE) {
+            return machineSpeed(combo);
+        }
+        if (kind == HitKind.MINING) {
+            return ClientWeakSpotHandler.miningComboFactor(Math.max(0, combo));
+        }
+        return FACTOR_KINDS.contains(kind) ? ComboFactor.factor(Math.max(0, combo)) : 1;
     }
 
     /** コンボ combo での機械の速さ（サーバーから届いた倍率と上限で、サーバーと同じ計算）。 */
@@ -257,10 +313,10 @@ final class ComboHud {
         return ScheduledBoost.dispenseCount(machineSpeed(combo), ClientSettings.get().machineBoostMultiplier);
     }
 
-    /** 「機械 4倍速」。top はコンボの表示の下端、cx はその中心。 */
-    private static void drawMachineLabel(Minecraft mc, float top, String text, double glow, int glowRgb) {
+    /** 「機械 4倍速」「走り ×1.25」。top はコンボの表示の下端、cx はその中心。 */
+    private static void drawKindLabel(Minecraft mc, float top, String text, int baseRgb, double glow, int glowRgb) {
         FontRenderer font = mc.fontRenderer;
-        float scale = (float) WeakSpotConfig.comboScale * MACHINE_LABEL_SCALE;
+        float scale = (float) WeakSpotConfig.comboScale * KIND_LABEL_SCALE;
         float width = font.getStringWidth(text) * scale;
         float height = font.FONT_HEIGHT * scale;
         float cy = top + 2 * scale + height / 2;
@@ -272,7 +328,7 @@ final class ComboHud {
         GlStateManager.pushMatrix();
         GlStateManager.translate(lastCx, cy, 0);
         GlStateManager.scale(scale, scale, 1);
-        int rgb = glow > 0.5 ? glowRgb : MACHINE_LABEL_RGB;
+        int rgb = glow > 0.5 ? glowRgb : baseRgb;
         font.drawStringWithShadow(text, -font.getStringWidth(text) / 2F, -font.FONT_HEIGHT / 2F + 1, 0xFF000000 | rgb);
         GlStateManager.popMatrix();
         GlStateManager.color(1, 1, 1, 1);

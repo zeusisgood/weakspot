@@ -390,7 +390,12 @@ public final class ClientWeakSpotHandler {
     /** 前のヒットから minInterval tick あいているか（釣り・弓の弱点からも使う）。 */
     /** 機械の弱点が出ていて、このフレームで照準が合っているか（コンボの「機械 ×n」の表示）。 */
     static boolean machineSpotActive() {
-        return spot != null && spot.kind == HitKind.MACHINE && spot.lastActiveTick == clientTick;
+        return blockSpotActive(HitKind.MACHINE);
+    }
+
+    /** その種類（採掘・機械・収穫など）の弱点が出ていて、このフレームで照準が合っているか（コンボの種類の表示。1.8.7）。 */
+    static boolean blockSpotActive(HitKind kind) {
+        return spot != null && spot.kind == kind && spot.lastActiveTick == clientTick;
     }
 
     /** 機械の弱点がディスペンサー・ドロッパーに出ていて、このフレームで照準が合っているか（「発射 ×n」の表示）。 */
@@ -409,7 +414,7 @@ public final class ClientWeakSpotHandler {
     static int registerHit(HitKind kind) {
         int hitStreak = STREAK.hit(clientTick);
         HitSounds.playOwn(hitStreak);
-        ComboHud.onHit(hitStreak, clientTick + framePartialTicks);
+        ComboHud.onHit(kind, hitStreak, clientTick + framePartialTicks);
         LAST_HIT_TICK[kind.ordinal()] = clientTick;
         return hitStreak;
     }

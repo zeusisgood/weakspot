@@ -62,6 +62,7 @@ weakspot.general.comboscale.tooltip=[クライアント] コンボの数字の�
 weakspot.general.comboposition.tooltip=[クライアント] コンボの表示の位置\nBELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央。ボスバーがあればその下）
 weakspot.general.combomilestoneeffects.tooltip=[クライアント] コンボが 10、25、50、100、250、500、1000（以降 1000 ごと）に達したときの演出（強調音と光）\n上の段階ほど派手になる（500 から花火、1000 からタイトル）
 weakspot.combo.machine=機械 %s倍速
+weakspot.combo.kind=%s ×%s
 weakspot.combo.shots=発射 ×%s
 weakspot.combo.title=%s COMBO!
 weakspot.growth.dark=暗くて育ちません（明るさ %s、9 以上が必要）。たいまつなどで明るくしてください（夜の屋外も暗くなります）

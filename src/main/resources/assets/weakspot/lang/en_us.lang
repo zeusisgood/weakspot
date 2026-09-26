@@ -62,6 +62,7 @@ weakspot.general.comboscale.tooltip=[Client] Size multiplier of the combo number
 weakspot.general.comboposition.tooltip=[Client] Where to show the combo.\nBELOW_CROSSHAIR, RIGHT_OF_CROSSHAIR, TOP_CENTER (below boss bars)
 weakspot.general.combomilestoneeffects.tooltip=[Client] Accent sound and glow when the combo reaches 10, 25, 50, 100, 250, 500 and 1000 (then every 1000).\nThe higher the step, the bigger the show (fireworks from 500, a title from 1000).
 weakspot.combo.machine=Machine %sx speed
+weakspot.combo.kind=%s ×%s
 weakspot.combo.shots=Shots ×%s
 weakspot.combo.title=%s COMBO!
 weakspot.growth.dark=Too dark to grow (light %s, needs 9 or more). Light it up with torches (outdoors gets dark at night, too).

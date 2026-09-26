@@ -1,6 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.SyncedSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -33,6 +34,16 @@ final class AimSpots {
     };
 
     private AimSpots() {
+    }
+
+    /** その種類の照準のまわりの弱点が、今出ているか（コンボの種類の表示。1.8.7）。 */
+    static boolean isShown(HitKind kind) {
+        for (AimSpotKind k : KINDS) {
+            if (k.kind == kind) {
+                return k.spot.has();
+            }
+        }
+        return false;
     }
 
     /** 弱点の一時オフ、ワールドを出たとき。 */
