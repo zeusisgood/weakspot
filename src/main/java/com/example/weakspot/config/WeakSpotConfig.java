@@ -293,15 +293,15 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int sleepMinHitIntervalTicks = 6;
 
-    @Config.Comment({"[サーバー] 食事・飲み物の弱点のオン・オフ（1.6.0）",
+    @Config.Comment({"[サーバー] 飲食の弱点のオン・オフ（1.6.0）",
             "食べている・飲んでいる間、照準の近くに弱点が出る。当てると、食べ終わるまでの時間が縮む"})
     public static boolean eatWeakSpotEnabled = true;
 
-    @Config.Comment("[サーバー] 食事・飲み物の弱点に1回当てるごとに縮める時間（tick）。バニラの食事は 32 tick なので、16 なら 2 ヒットで食べ終わる")
+    @Config.Comment("[サーバー] 飲食の弱点に1回当てるごとに縮める時間（tick）。バニラの食事は 32 tick なので、16 なら 2 ヒットで食べ終わる")
     @Config.RangeInt(min = 0, max = 64)
     public static int eatHitTicks = 16;
 
-    @Config.Comment("[サーバー] 食事・飲み物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.Comment("[サーバー] 飲食のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
     public static int eatMinHitIntervalTicks = 4;
 
@@ -380,37 +380,37 @@ public final class WeakSpotConfig {
             "サーバーだけが使う（クライアントには送らない）"})
     public static boolean harvestComboBonus = true;
 
-    @Config.Comment({"[サーバー] 投げる物の弱点のオン・オフ（1.7.0）",
+    @Config.Comment({"[サーバー] 投擲物の弱点のオン・オフ（1.7.0）",
             "エンダーパール・雪玉・卵・ポーション・エンチャントの瓶を持っている間、照準の近くに弱点が出る。",
             "当てるたびに溜まり、次に投げた物が速く遠くへ飛ぶ（持ち替えるまで残り、投げたら使い切る）"})
     public static boolean throwWeakSpotEnabled = true;
 
-    @Config.Comment({"[サーバー] 投げる物の弱点に1回当てるごとに溜まる量（投げる速さの倍率に足す）。コンボの掛け数を上乗せする",
+    @Config.Comment({"[サーバー] 投擲物の弱点に1回当てるごとに溜まる量（投げる速さの倍率に足す）。コンボの掛け数を上乗せする",
             "溜めの上限はない"})
     @Config.RangeDouble(min = 0.1, max = 10.0)
     public static double throwChargePerHit = 0.5;
 
-    @Config.Comment("[サーバー] 投げる物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.Comment("[サーバー] 投擲物のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
     public static int throwMinHitIntervalTicks = 4;
 
-    @Config.Comment({"[サーバー] 走りの弱点のオン・オフ（1.7.0）",
+    @Config.Comment({"[サーバー] ダッシュの弱点のオン・オフ（1.7.0）",
             "地面を走っている間、照準の真上か真下に弱点が出る。当てると、少しの間速く走れる"})
     public static boolean sprintWeakSpotEnabled = true;
 
-    @Config.Comment("[サーバー] 走りの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+    @Config.Comment("[サーバー] ダッシュの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double sprintBoostMultiplier = 1.5;
 
-    @Config.Comment({"[サーバー] 走りの速さの倍率の上限。0 なら上限なし（初期値）", "速すぎて困るときに、3.0 などを書く"})
+    @Config.Comment({"[サーバー] ダッシュの速さの倍率の上限。0 なら上限なし（初期値）", "速すぎて困るときに、3.0 などを書く"})
     @Config.RangeDouble(min = 0.0, max = 100.0)
     public static double sprintBoostMaxMultiplier = 0.0;
 
-    @Config.Comment("[サーバー] 走りの加速が続く時間（tick）。ヒットのたびに、この長さに戻す")
+    @Config.Comment("[サーバー] ダッシュの加速が続く時間（tick）。ヒットのたびに、この長さに戻す")
     @Config.RangeInt(min = 1, max = 1200)
     public static int sprintBoostDurationTicks = 40;
 
-    @Config.Comment("[サーバー] 走りのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+    @Config.Comment("[サーバー] ダッシュのヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
     @Config.RangeInt(min = 0, max = 200)
     public static int sprintMinHitIntervalTicks = 6;
 
@@ -556,13 +556,13 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] はしごを加速している間、照準の上に残り時間のゲージ（茶色）を表示するか（1.7.0）"})
     public static boolean ladderBoostBarEnabled = true;
 
-    @Config.Comment({"[クライアント] 投げる物の溜めのゲージ（青緑）を、照準の下に表示するか（1.7.0）"})
+    @Config.Comment({"[クライアント] 投擲物の溜めのゲージ（青緑）を、照準の下に表示するか（1.7.0）"})
     public static boolean throwChargeBarEnabled = true;
 
     @Config.Comment({"[クライアント] 近接の溜めのゲージ（銀）を、照準の下に表示するか（1.8.0）"})
     public static boolean meleeChargeBarEnabled = true;
 
-    @Config.Comment({"[クライアント] 走りを加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0）"})
+    @Config.Comment({"[クライアント] ダッシュが加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0）"})
     public static boolean sprintBoostBarEnabled = true;
 
     @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（1.7.0。統計画面の「弱点マーカー」タブで変えられる）",
