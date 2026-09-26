@@ -83,10 +83,15 @@ final class BugCommand extends CommandBase {
         List<String> environment = environment(mc);
         List<String> mods = mods();
         String modsSummary = I18n.format("weakspot.bug.template.mods", mods.size());
-        List<String> headings = Arrays.asList(I18n.format("weakspot.bug.template.did"),
-                I18n.format("weakspot.bug.template.happened"), I18n.format("weakspot.bug.template.expected"),
-                I18n.format("weakspot.bug.template.environment"));
-        String url = BugReport.issueUrlFitting(NEW_ISSUE_URL, "[" + WeakSpotMod.VERSION + "] ", headings, environment,
+        // 一般的な不具合報告のテンプレートと同じ見出し（1.9.1）
+        BugReport.Template template = new BugReport.Template(Arrays.asList(
+                new BugReport.Section(I18n.format("weakspot.bug.template.summary")),
+                new BugReport.Section(I18n.format("weakspot.bug.template.steps"), "1. "),
+                new BugReport.Section(I18n.format("weakspot.bug.template.actual")),
+                new BugReport.Section(I18n.format("weakspot.bug.template.expected"))),
+                I18n.format("weakspot.bug.template.environment"),
+                Collections.singletonList(new BugReport.Section(I18n.format("weakspot.bug.template.additional"))));
+        String url = BugReport.issueUrlFitting(NEW_ISSUE_URL, "[" + WeakSpotMod.VERSION + "] ", template, environment,
                 modsSummary, mods, I18n.format("weakspot.bug.template.paste"));
         GuiScreen.setClipboardString(BugReport.plain(environment, modsSummary, mods));
 
@@ -108,9 +113,13 @@ final class BugCommand extends CommandBase {
         List<String> lines = new ArrayList<>();
         lines.add(I18n.format("weakspot.bug.env.mod", WeakSpotMod.VERSION, serverVersion(), playMode(mc)));
         lines.add("Minecraft " + Loader.MC_VERSION + " / Forge " + ForgeVersion.getVersion());
-        lines.add("Java " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ") / "
-                + System.getProperty("os.name") + " " + System.getProperty("os.version") + " ("
-                + System.getProperty("os.arch") + ")");
+        String javaVersion = System.getProperty("java.version");
+        String osName = System.getProperty("os.name");
+        // 古い Java は Windows 10・11 を 8.1 と答えるので、そのときは注記を付ける（1.9.1）
+        String osNote = BugReport.osNameMayBeWrong(osName, javaVersion) ? I18n.format("weakspot.bug.env.osNote") : "";
+        lines.add("Java " + javaVersion + " (" + System.getProperty("java.vendor") + ") / "
+                + osName + " " + System.getProperty("os.version") + " ("
+                + System.getProperty("os.arch") + ")" + osNote);
         lines.add(I18n.format("weakspot.bug.env.language", mc.gameSettings.language));
         return lines;
     }
