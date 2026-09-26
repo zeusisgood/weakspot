@@ -67,6 +67,11 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **速さの上限は基本的に付けない（ユーザーの方針）**。サーバーに引き戻されるなど上限が要りそうなときは、黙って付けずにユーザーに聞く。
 - ユーザーは vi に慣れていない。conf などを直してもらうときは、vi の使い方を簡単に添える（`/キー名` で検索 → `n` で次へ、`cw` で単語を書き換え → `Esc`、`:wq` で保存して終わる、`:q!` で保存せずに終わる）。
 - クラウドでのビルド: JDK 8 がなければ `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす（Maven Central が 429 を返したら、少し待って再実行する）。
+- **ブランチの約束**（1.9.0 のあとに決めた）:
+  - 長く残すブランチは `main` だけ。セッションごとの作業は `claude/…` のブランチで行い、ユーザーが手元で `main` に fast-forward で取り込む。
+  - 消してよいのは、中身がすべて `main` に入っているブランチだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチは、消さずにユーザーに聞く。
+  - 作業中のセッションのブランチは、そのセッションが終わるまで残す。
+  - 消すのはユーザー（GitHub の Branches 画面か `git push origin --delete <ブランチ>`）。Claude は候補の一覧と削除のコマンドを渡す。一覧を出すのは、頼まれたときと、新しいセッションの最初に気付いたとき。タグはブランチと別なので、ブランチを消しても残る。
 - リリースしたら、jar を `build/release/` にコピーしてユーザーに添付する。手元で打つコマンド（`git fetch origin <ブランチ>` → `git checkout main` → `git merge --ff-only origin/<ブランチ>` → `git tag -a vX.Y.Z -m "X.Y.Z: 〜"` → `git push origin main vX.Y.Z`）と、「試してほしいこと」の箇条書きを渡す。
 
 ## 次の作業
