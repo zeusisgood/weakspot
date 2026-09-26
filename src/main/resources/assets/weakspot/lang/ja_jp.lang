@@ -305,6 +305,7 @@ weakspot.news.1.8.5=ガイドの本を章と目次で整理し、見出しを付
 weakspot.news.1.8.6=クリエイティブでもすべての弱点が出るようにし、内部を整理した
 weakspot.news.1.8.7=採掘にもコンボ倍率。コンボ表示の下に種類ごとの倍率を表示
 weakspot.news.1.8.8=内部の整理（遊び方に変更なし）
+weakspot.news.1.8.9=種類の呼び名を統一（飲食・投擲物・ダッシュ）し、内部を整理した
 weakspot.breed.line=繁殖: %s
 weakspot.breed.separator=・
 weakspot.breed.ready=繁殖の条件はそろっています（少し待つと始まる）
