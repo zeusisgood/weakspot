@@ -14,7 +14,7 @@
 
 | キー | 初期値 | 説明 |
 |---|---|---|
-| `boostMultiplier` | 4.0 | ヒット時の破壊速度の倍率 |
+| `boostMultiplier` | 4.0 | ヒット時の破壊速度の倍率（1 回で進む上乗せ分に、コンボの掛け数を掛ける） |
 | `boostDurationTicks` | 4 | 倍率を掛ける時間（tick） |
 | `minHitIntervalTicks` | 6 | 採掘ヒットの最小受付間隔（tick） |
 | `weakSpotRadiusRatio` | 0.14 | 弱点の半径（面の短辺に対する比率） |
