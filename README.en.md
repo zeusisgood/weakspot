@@ -56,4 +56,7 @@ Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. T
 
 ## License
 
-[MIT License](LICENSE). **Modpacks are welcome** — no need to ask. If you share the mod, please link to the [Releases](https://github.com/zeusisgood/weakspot/releases) page rather than re-uploading the jar.
+[MIT License](LICENSE).
+
+- **Modpacks are welcome.** No permission needed. If you add it to a pack, I'd love to hear about it through an [issue](https://github.com/zeusisgood/weakspot/issues/new/choose) ("Modpack notice"), but it's entirely optional.
+- When sharing the mod, please link to this page or the [Releases](https://github.com/zeusisgood/weakspot/releases) page instead of re-uploading the jar.
