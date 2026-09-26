@@ -49,4 +49,32 @@ public final class Reflect {
                 owner.getSimpleName(), String.join("/", names), what);
         return null;
     }
+
+    /** 初めて使うときに 1 回だけ探すフィールド（1.8.9。ゲート・エンチャント。起動時に探さず、使わなければ警告も出さない）。 */
+    public static LazyField lazyField(Class<?> owner, String what, String... names) {
+        return new LazyField(owner, what, names);
+    }
+
+    public static final class LazyField {
+        private final Class<?> owner;
+        private final String what;
+        private final String[] names;
+        private Field field;
+        private boolean resolved;
+
+        private LazyField(Class<?> owner, String what, String[] names) {
+            this.owner = owner;
+            this.what = what;
+            this.names = names;
+        }
+
+        /** 見つからなければ null（警告は最初の 1 回だけ）。 */
+        public synchronized Field get() {
+            if (!resolved) {
+                resolved = true;
+                field = field(owner, what, names);
+            }
+            return field;
+        }
+    }
 }

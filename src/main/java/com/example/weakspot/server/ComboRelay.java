@@ -13,7 +13,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
@@ -71,8 +70,8 @@ public final class ComboRelay {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        SENT.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    static void forgetOnLogout(EntityPlayer player) {
+        SENT.remove(player.getUniqueID());
     }
 }

@@ -18,13 +18,11 @@ final class LadderSpot extends AimSpotKind {
 
     /** 登り降りしているとみなす、1 tick の縦の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
-    /** 木の茶色 #C8A060。 */
-    private static final int RGB = 0xC8A060;
 
     private final TimedBoost boost = new TimedBoost();
 
     LadderSpot() {
-        super(HitKind.LADDER, new HudSpot(HitKind.LADDER, RGB));
+        super(HitKind.LADDER, new HudSpot(HitKind.LADDER));
     }
 
     @Override
@@ -85,6 +83,6 @@ final class LadderSpot extends AimSpotKind {
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
         HudSpot.gauge(mc, boost.remaining(ClientWeakSpotHandler.clientTick, partialTicks),
-                MarkerLook.color(HitKind.LADDER, RGB), true);
+                MarkerLook.color(HitKind.LADDER), true);
     }
 }

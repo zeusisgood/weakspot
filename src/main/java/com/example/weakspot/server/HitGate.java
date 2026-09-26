@@ -73,21 +73,58 @@ public final class HitGate {
         return now - last >= Math.max(0, SyncedSettings.server().minHitInterval(kind) - INTERVAL_JITTER_TICKS);
     }
 
-    /** ログアウトの後片付け。プレイヤーごとの記憶を持つ *Hits は、ここに足す（付け忘れを防ぐため 1 か所にまとめる）。 */
+    /** 後片付けの理由（1.8.9）。消すものは理由ごとに違うので、各 *Hits の forget が分ける。 */
+    enum Leave {
+        /** ログアウト（プレイヤーごとの記憶をすべて消す）。 */
+        LOGOUT,
+        /** 死亡から戻った。 */
+        RESPAWN,
+        /** ディメンションを移動した。 */
+        DIMENSION
+    }
+
     @SubscribeEvent
     public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        EntityPlayer player = event.player;
-        for (Map<UUID, Long> last : LAST_HIT.values()) {
-            last.remove(player.getUniqueID());
+        forgetAll(event.player, Leave.LOGOUT);
+    }
+
+    @SubscribeEvent
+    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        forgetAll(event.player, Leave.RESPAWN);
+    }
+
+    @SubscribeEvent
+    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        forgetAll(event.player, Leave.DIMENSION);
+    }
+
+    /**
+     * プレイヤーごとの記憶の後片付けは、ここの 1 か所（1.8.6 でログアウト、1.8.9 から死亡・ディメンション移動も）。
+     * プレイヤーごとの記憶を持つクラスを足したら、ここに足す（付け忘れを防ぐため）。
+     */
+    private static void forgetAll(EntityPlayer player, Leave leave) {
+        if (leave == Leave.LOGOUT) {
+            for (Map<UUID, Long> last : LAST_HIT.values()) {
+                last.remove(player.getUniqueID());
+            }
         }
-        ServerBoostTracker.forget(player);
-        RightClickHits.forget(player);
-        FishingHits.forget(player);
-        MoveHits.forget(player);
-        MeleeHits.forget(player);
-        ThrowHits.forget(player);
-        if (player instanceof EntityPlayerMP) {
-            VillagerBreedHints.onLogout((EntityPlayerMP) player);
+        ServerStats.forget(player, leave);
+        ServerBoostTracker.forget(player, leave);
+        RightClickHits.forget(player, leave);
+        GrowthWarnings.forget(player, leave);
+        FishingHits.forget(player, leave);
+        MoveHits.forget(player, leave);
+        MeleeHits.forget(player, leave);
+        ThrowHits.forget(player, leave);
+        MarkerRelay.forget(player, leave);
+        if (leave == Leave.LOGOUT) {
+            ServerSwitches.forgetOnLogout(player);
+            MiningRewards.forgetOnLogout(player);
+            ComboRelay.forgetOnLogout(player);
+            VersionCheck.forgetOnLogout(player);
+            if (player instanceof EntityPlayerMP) {
+                VillagerBreedHints.onLogout((EntityPlayerMP) player);
+            }
         }
     }
 }

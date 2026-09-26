@@ -182,26 +182,36 @@ final class ScreenProjection {
         tessellator.draw();
     }
 
+    /** rgb から、円・輪・中心の色 {disk, ring, center}（中心ほど白に寄せる）。 */
+    static float[][] lookOf(int rgb) {
+        return new float[][] {MarkerColor.towardWhite(rgb, 0), MarkerColor.towardWhite(rgb, 0.5F),
+                MarkerColor.towardWhite(rgb, 0.8F)};
+    }
+
     /**
-     * 画面上のマーカーを 1 つ描く（1.7.0。HUD の弱点と、寝ている間・エンチャントの画面のマーカーで共通）。
-     * 形と色は種類ごとの設定（MarkerLook）。alphaScale は全体の濃さ。
+     * 画面上の弱点のマーカー（塗り・輪郭・形によっては中心の点。1.8.9 で照準のまわり・釣り・画面のマーカーの描き方を
+     * ここにまとめた）。look は {disk, ring, center}。
      */
-    static void marker(double x, double y, double radius, MarkerShape shape, int rgb, float diskAlpha,
-                       float alphaScale) {
-        float[] disk = MarkerColor.towardWhite(rgb, 0);
-        float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
-        float[] center = MarkerColor.towardWhite(rgb, 0.8F);
-        fillShape(x, y, radius, shape, disk, diskAlpha * alphaScale);
-        outlineShape(x, y, radius, shape, ring, 0.9F * alphaScale);
+    static void drawMarker(double x, double y, double radius, MarkerShape shape, float[][] look, float diskAlpha,
+                           float outlineAlpha) {
+        fillShape(x, y, radius, shape, look[0], diskAlpha);
+        outlineShape(x, y, radius, shape, look[1], outlineAlpha);
         if (shape.hasCenterDot()) {
-            fill(x, y, radius * 0.3, center, 0.9F * alphaScale);
+            fill(x, y, radius * 0.3, look[2], outlineAlpha);
         }
     }
 
-    /** 残像（薄い形と輪郭）。 */
-    static void afterimage(double x, double y, double radius, MarkerShape shape, int rgb, float a) {
-        fillShape(x, y, radius, shape, MarkerColor.towardWhite(rgb, 0), 0.35F * a);
-        outlineShape(x, y, radius, shape, MarkerColor.towardWhite(rgb, 0.5F), 0.5F * a);
+    /** 残像（薄い形と輪郭）。a は残像の濃さ（0〜1）。 */
+    static void drawAfterimage(double x, double y, double radius, MarkerShape shape, float[][] look, float a) {
+        fillShape(x, y, radius, shape, look[0], 0.35F * a);
+        outlineShape(x, y, radius, shape, look[1], 0.5F * a);
+    }
+
+    /** 動いた直後に先頭を白く光らせる（head は 0〜1）。 */
+    static void drawHeadHighlight(double x, double y, double radius, MarkerShape shape, double head) {
+        if (head > 0) {
+            fillShape(x, y, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));
+        }
     }
 
     static void rect(double x0, double y0, double x1, double y1, float[] rgba) {

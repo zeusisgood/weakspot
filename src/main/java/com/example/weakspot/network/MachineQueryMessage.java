@@ -2,7 +2,6 @@ package com.example.weakspot.network;
 
 import com.example.weakspot.server.MachineStates;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -37,10 +36,8 @@ public class MachineQueryMessage implements IMessage {
 
         @Override
         public IMessage onMessage(MachineQueryMessage message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
             BlockPos pos = message.pos;
-            player.getServerWorld().addScheduledTask(() -> MachineStates.onQuery(player, pos));
-            return null;
+            return ServerThread.run(ctx, player -> MachineStates.onQuery(player, pos));
         }
     }
 }

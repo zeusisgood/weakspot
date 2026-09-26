@@ -3,7 +3,6 @@ package com.example.weakspot.network;
 import com.example.weakspot.server.MarkerRelay;
 import com.example.weakspot.server.ServerSwitches;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -40,13 +39,10 @@ public class MarkerMessage implements IMessage {
 
         @Override
         public IMessage onMessage(MarkerMessage message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
             MarkerData marker = message.marker;
-            player.getServerWorld().addScheduledTask(() -> {
-                // オフのプレイヤーのマークは転送しない（オフにする直前に送られたものが遅れて届いても消す）
-                MarkerRelay.onMarker(player, ServerSwitches.isEnabled(player) ? marker : null);
-            });
-            return null;
+            // オフのプレイヤーのマークは転送しない（オフにする直前に送られたものが遅れて届いても消す）
+            return ServerThread.run(ctx,
+                    player -> MarkerRelay.onMarker(player, ServerSwitches.isEnabled(player) ? marker : null));
         }
     }
 

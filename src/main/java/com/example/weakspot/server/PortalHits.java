@@ -5,7 +5,6 @@ import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.WeakSpotConfig;
-import java.lang.reflect.Field;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -20,19 +19,15 @@ import net.minecraftforge.fml.common.Mod;
 public final class PortalHits {
 
     /** Entity の非公開の portalCounter（SRG field_82153_h）。読めなければ、ゲートの弱点を出さない。 */
-    private static Field portalCounter;
-    private static boolean resolved;
+    private static final Reflect.LazyField PORTAL_COUNTER =
+            Reflect.lazyField(Entity.class, "the portal weak spot", "portalCounter", "field_82153_h");
 
     private PortalHits() {
     }
 
     /** 待ち時間を読み書きできるか（できなければ SyncedSettings で portalWeakSpotEnabled を false にして送る）。 */
-    public static synchronized boolean isAvailable() {
-        if (!resolved) {
-            resolved = true;
-            portalCounter = Reflect.field(Entity.class, "the portal weak spot", "portalCounter", "field_82153_h");
-        }
-        return portalCounter != null;
+    public static boolean isAvailable() {
+        return PORTAL_COUNTER.get() != null;
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
@@ -42,7 +37,7 @@ public final class PortalHits {
         }
         int counter;
         try {
-            counter = portalCounter.getInt(player);
+            counter = PORTAL_COUNTER.get().getInt(player);
         } catch (IllegalAccessException | RuntimeException e) {
             return;
         }
@@ -55,7 +50,7 @@ public final class PortalHits {
         int combo = HitGate.accept(player, HitKind.PORTAL, new BlockPos(player), streak);
         int added = (int) Math.round(WeakSpotConfig.portalHitTicks * ComboFactor.factor(combo));
         try {
-            portalCounter.setInt(player, Math.min(player.getMaxInPortalTime(), counter + added));
+            PORTAL_COUNTER.get().setInt(player, Math.min(player.getMaxInPortalTime(), counter + added));
         } catch (IllegalAccessException | RuntimeException e) {
             // 読めたのに書けないことは、まずない。ヒットには数えたまま
         }

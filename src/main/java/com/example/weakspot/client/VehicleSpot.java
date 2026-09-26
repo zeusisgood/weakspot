@@ -35,8 +35,6 @@ final class VehicleSpot extends AimSpotKind {
      * （1.6.4。弓の引きゲージ（下に 12）と上下対称）。
      */
     private static final int BAR_OFFSET = 12;
-    /** 水色 #55CCFF と、背景 #1E1E1E 半透明。 */
-    private static final int RGB = 0x55CCFF;
     private static final float[] BAR_FILL = {0x55 / 255F, 0xCC / 255F, 0xFF / 255F, 1.0F};
     private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
 
@@ -50,7 +48,7 @@ final class VehicleSpot extends AimSpotKind {
     private float lastBoatYaw;
 
     VehicleSpot() {
-        super(HitKind.VEHICLE, new HudSpot(HitKind.VEHICLE, RGB));
+        super(HitKind.VEHICLE, new HudSpot(HitKind.VEHICLE));
     }
 
     @Override

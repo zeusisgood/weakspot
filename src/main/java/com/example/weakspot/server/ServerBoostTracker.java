@@ -163,12 +163,10 @@ public final class ServerBoostTracker {
     }
 
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
-    static void forget(EntityPlayer player) {
-        MINING.remove(player.getUniqueID());
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave != HitGate.Leave.RESPAWN) {
+            MINING.remove(player.getUniqueID());
+        }
     }
 
-    @SubscribeEvent
-    public static void onChangeDimension(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerChangedDimensionEvent event) {
-        MINING.remove(event.player.getUniqueID());
-    }
 }

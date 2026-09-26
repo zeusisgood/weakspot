@@ -18,8 +18,6 @@ import net.minecraft.client.entity.EntityPlayerSP;
  */
 final class MeleeSpot extends AimSpotKind {
 
-    /** 銀 #D0D8E0。 */
-    private static final int RGB = 0xD0D8E0;
     /** 敵を探す距離（ブロック）。 */
     private static final double ENEMY_RANGE = 16;
     /** ゲージ 1 本分の溜め（倍率 ×2）。 */
@@ -30,7 +28,7 @@ final class MeleeSpot extends AimSpotKind {
     private String extra;
 
     MeleeSpot() {
-        super(HitKind.MELEE, new HudSpot(HitKind.MELEE, RGB));
+        super(HitKind.MELEE, new HudSpot(HitKind.MELEE));
     }
 
     @Override
@@ -72,11 +70,11 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.MELEE, RGB));
+        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.MELEE));
     }
 
     @Override
     void drawAfterOverlay(Minecraft mc, float partialTicks) {
-        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.MELEE, RGB), extra);
+        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.MELEE), extra);
     }
 }

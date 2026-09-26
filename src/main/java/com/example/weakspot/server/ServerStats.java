@@ -37,21 +37,13 @@ public final class ServerStats {
         SESSIONS.put(event.player.getUniqueID(), new MiningStats());
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        SESSIONS.remove(event.player.getUniqueID());
-        STREAKS.remove(event.player.getUniqueID());
-    }
-
     /** クライアントのコンボと同じく、死亡（リスポーン）とディメンション移動で連続ヒットを最初に戻す。 */
-    @SubscribeEvent
-    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        STREAKS.remove(event.player.getUniqueID());
-    }
-
-    @SubscribeEvent
-    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        STREAKS.remove(event.player.getUniqueID());
+    /** ログアウトで今回の統計と連続ヒットを、死亡・ディメンション移動で連続ヒットを消す（クライアントのコンボと同じ）。 */
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave == HitGate.Leave.LOGOUT) {
+            SESSIONS.remove(player.getUniqueID());
+        }
+        STREAKS.remove(player.getUniqueID());
     }
 
     /**

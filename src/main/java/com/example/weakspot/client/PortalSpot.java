@@ -14,13 +14,11 @@ import net.minecraft.client.entity.EntityPlayerSP;
  */
 final class PortalSpot extends AimSpotKind {
 
-    /** 金 #FFD23F（ゲートの紫の上で目立つ）。 */
-    private static final int RGB = 0xFFD23F;
     /** バニラの紫のゆらぎが 1 tick に進む量。 */
     private static final float NAUSEA_PER_TICK = 0.0125F;
 
     PortalSpot() {
-        super(HitKind.PORTAL, new HudSpot(HitKind.PORTAL, RGB));
+        super(HitKind.PORTAL, new HudSpot(HitKind.PORTAL));
     }
 
     /** ゲートの中にいるか（紫のゆらぎが進んでいるか、1.0 で止まっているか）。 */

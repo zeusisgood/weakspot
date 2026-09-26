@@ -15,8 +15,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * 近接の弱点（論理サーバー。1.8.0 で溜めの形に置き換えた）。剣か斧を持ち、近くに敵がいる間に、照準の左右の弱点に
@@ -64,14 +62,13 @@ public final class MeleeHits {
     }
 
 
-    @SubscribeEvent
-    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        MeleeCharge.clear(event.player);
-    }
-
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
-    static void forget(EntityPlayer player) {
-        REPAIR_CARRY.remove(player.getUniqueID());
-        MeleeCharge.clear(player);
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave == HitGate.Leave.LOGOUT) {
+            REPAIR_CARRY.remove(player.getUniqueID());
+            MeleeCharge.clear(player);
+        } else if (leave == HitGate.Leave.DIMENSION) {
+            MeleeCharge.clear(player);
+        }
     }
 }

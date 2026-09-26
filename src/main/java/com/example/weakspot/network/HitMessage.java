@@ -3,7 +3,6 @@ package com.example.weakspot.network;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.server.HitHandlers;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -62,7 +61,6 @@ public class HitMessage implements IMessage {
 
         @Override
         public IMessage onMessage(HitMessage message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
             HitKind kind = message.kind;
             BlockPos pos = message.pos;
             int streak = message.streak;
@@ -70,8 +68,7 @@ public class HitMessage implements IMessage {
             if (kind == null) {
                 return null;
             }
-            player.getServerWorld().addScheduledTask(() -> HitHandlers.onHit(player, kind, pos, entityId, streak));
-            return null;
+            return ServerThread.run(ctx, player -> HitHandlers.onHit(player, kind, pos, entityId, streak));
         }
     }
 }

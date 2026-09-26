@@ -17,8 +17,6 @@ import net.minecraft.client.entity.EntityPlayerSP;
  */
 final class ThrowSpot extends AimSpotKind {
 
-    /** 青緑 #2ED3B7。 */
-    private static final int RGB = 0x2ED3B7;
     /** ゲージ 1 本分の溜め（倍率 ×3）。越えた分は、1 本分ごとに赤い目盛りを 1 つ足す。 */
     private static final double CHARGE_PER_BAR = 2.0;
 
@@ -26,7 +24,7 @@ final class ThrowSpot extends AimSpotKind {
     private String extra;
 
     ThrowSpot() {
-        super(HitKind.THROW, new HudSpot(HitKind.THROW, RGB));
+        super(HitKind.THROW, new HudSpot(HitKind.THROW));
     }
 
     @Override
@@ -57,11 +55,11 @@ final class ThrowSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.THROW, RGB));
+        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.THROW));
     }
 
     @Override
     void drawAfterOverlay(Minecraft mc, float partialTicks) {
-        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.THROW, RGB), extra);
+        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.THROW), extra);
     }
 }

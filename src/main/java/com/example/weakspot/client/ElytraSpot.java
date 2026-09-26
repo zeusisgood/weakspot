@@ -20,8 +20,6 @@ import net.minecraftforge.client.event.FOVUpdateEvent;
  */
 final class ElytraSpot extends AimSpotKind {
 
-    /** 空の青 #7FB2FF。 */
-    private static final int RGB = 0x7FB2FF;
     /** 演出の長さ（tick）。視野はこの間に元に戻り、雲の尾もこの間だけ出す。 */
     private static final int DASH_TICKS = 10;
     /** 当てた瞬間の視野の倍率。 */
@@ -32,7 +30,7 @@ final class ElytraSpot extends AimSpotKind {
     private long dashTick = Long.MIN_VALUE / 2;
 
     ElytraSpot() {
-        super(HitKind.ELYTRA, new HudSpot(HitKind.ELYTRA, RGB).alternateOnly());
+        super(HitKind.ELYTRA, new HudSpot(HitKind.ELYTRA).alternateOnly());
     }
 
     @Override

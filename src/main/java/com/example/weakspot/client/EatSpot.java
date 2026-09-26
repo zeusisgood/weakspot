@@ -15,11 +15,9 @@ import net.minecraft.client.entity.EntityPlayerSP;
  */
 final class EatSpot extends AimSpotKind {
 
-    /** 緑 #7CFC00。 */
-    private static final int RGB = 0x7CFC00;
 
     EatSpot() {
-        super(HitKind.EAT, new HudSpot(HitKind.EAT, RGB));
+        super(HitKind.EAT, new HudSpot(HitKind.EAT));
     }
 
     @Override

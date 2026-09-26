@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
@@ -41,9 +42,9 @@ public final class VersionCheck {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        PENDING.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    static void forgetOnLogout(EntityPlayer player) {
+        PENDING.remove(player.getUniqueID());
     }
 
     @SubscribeEvent

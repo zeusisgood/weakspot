@@ -58,6 +58,11 @@ final class HudSpot {
      * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。1.7.0 から、色と形は種類ごとの設定
      * （MarkerLook。統計画面の「弱点マーカー」タブ）で変えられる。
      */
+    /** 色の初期値は、その種類の色（HitKind.defaultColor）。 */
+    HudSpot(HitKind kind) {
+        this(kind, kind.defaultColor());
+    }
+
     HudSpot(HitKind kind, int defaultRgb) {
         this.kind = kind;
         this.defaultRgb = defaultRgb;
@@ -194,7 +199,8 @@ final class HudSpot {
         double radius = FishingMath.SPOT_SCREEN_RADIUS;
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
         int rgb = MarkerLook.color(kind, defaultRgb);
-        float[][] look = palette == null ? null : MarkerLook.palette(kind, palette[0], palette[1], palette[2]);
+        float[][] look = palette == null ? ScreenProjection.lookOf(rgb)
+                : MarkerLook.palette(kind, palette[0], palette[1], palette[2]);
         MarkerShape shape = MarkerLook.shape(kind);
         if (trail) {
             for (MarkerMotion.Afterimage image : motion.afterimages(nowMs)) {
@@ -202,13 +208,8 @@ final class HudSpot {
                 if (p == null) {
                     continue;
                 }
-                float a = (float) image.alpha(nowMs);
-                if (look == null) {
-                    ScreenProjection.afterimage(p[0] / scale, p[1] / scale, radius, shape, rgb, a);
-                } else {
-                    ScreenProjection.fillShape(p[0] / scale, p[1] / scale, radius, shape, look[0], 0.35F * a);
-                    ScreenProjection.outlineShape(p[0] / scale, p[1] / scale, radius, shape, look[1], 0.5F * a);
-                }
+                ScreenProjection.drawAfterimage(p[0] / scale, p[1] / scale, radius, shape, look,
+                        (float) image.alpha(nowMs));
             }
         }
         double u = yaw;
@@ -224,19 +225,8 @@ final class HudSpot {
         }
         double gx = p[0] / scale;
         double gy = p[1] / scale;
-        if (look == null) {
-            ScreenProjection.marker(gx, gy, radius, shape, rgb, 0.45F, 1);
-        } else {
-            ScreenProjection.fillShape(gx, gy, radius, shape, look[0], 0.45F);
-            ScreenProjection.outlineShape(gx, gy, radius, shape, look[1], 0.9F);
-            if (shape.hasCenterDot()) {
-                ScreenProjection.fill(gx, gy, radius * 0.3, look[2], 0.9F);
-            }
-        }
-        double head = trail ? motion.headHighlight(nowMs) : 0;
-        if (head > 0) {
-            ScreenProjection.fillShape(gx, gy, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));
-        }
+        ScreenProjection.drawMarker(gx, gy, radius, shape, look, 0.45F, 0.9F);
+        ScreenProjection.drawHeadHighlight(gx, gy, radius, shape, trail ? motion.headHighlight(nowMs) : 0);
     }
 
     /**

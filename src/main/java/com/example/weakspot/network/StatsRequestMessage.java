@@ -3,7 +3,6 @@ package com.example.weakspot.network;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.server.ServerStats;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -34,15 +33,14 @@ public class StatsRequestMessage implements IMessage {
 
         @Override
         public IMessage onMessage(StatsRequestMessage message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
-            player.getServerWorld().addScheduledTask(() -> {
-                if (message.reset) {
+            boolean reset = message.reset;
+            return ServerThread.run(ctx, player -> {
+                if (reset) {
                     ServerStats.resetTotal(player);
                 }
                 WeakSpotMod.network.sendTo(
                         new StatsMessage(ServerStats.session(player), ServerStats.total(player)), player);
             });
-            return null;
         }
     }
 }

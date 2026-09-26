@@ -12,7 +12,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
@@ -116,17 +115,17 @@ public final class MoveHits {
     }
 
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
-    static void forget(EntityPlayer player) {
-        STATES.remove(player.getUniqueID());
-        SPRINT_SPEED.clear(player);
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave == HitGate.Leave.LOGOUT) {
+            STATES.remove(player.getUniqueID());
+            SPRINT_SPEED.clear(player);
+        } else if (leave == HitGate.Leave.RESPAWN) {
+            State state = STATES.get(player.getUniqueID());
+            if (state != null) {
+                state.sprintRemaining = 0;
+            }
+            SPRINT_SPEED.clear(player);
+        }
     }
 
-    @SubscribeEvent
-    public static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        State state = STATES.get(event.player.getUniqueID());
-        if (state != null) {
-            state.sprintRemaining = 0;
-        }
-        SPRINT_SPEED.clear(event.player);
-    }
 }

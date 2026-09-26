@@ -2,7 +2,6 @@ package com.example.weakspot.network;
 
 import com.example.weakspot.server.ServerSwitches;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -44,16 +43,14 @@ public class SwitchMessage implements IMessage {
 
         @Override
         public IMessage onMessage(SwitchMessage message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
             boolean enabled = message.enabled;
             boolean particlesVisible = message.particlesVisible;
             int disabledKinds = message.disabledKinds;
-            player.getServerWorld().addScheduledTask(() -> {
+            return ServerThread.run(ctx, player -> {
                 ServerSwitches.set(player, enabled);
                 ServerSwitches.setParticlesVisible(player, particlesVisible);
                 ServerSwitches.setDisabledKinds(player, disabledKinds);
             });
-            return null;
         }
     }
 }

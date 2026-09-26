@@ -204,7 +204,9 @@ public final class FishingHits {
     }
 
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
-    static void forget(EntityPlayer player) {
-        TRACKS.remove(player.getUniqueID());
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave == HitGate.Leave.LOGOUT) {
+            TRACKS.remove(player.getUniqueID());
+        }
     }
 }

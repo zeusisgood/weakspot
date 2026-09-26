@@ -6,6 +6,7 @@ import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockSapling;
@@ -16,8 +17,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * 成長の弱点に当てても育たないときに、チャットで知らせる（1.4.3）。
@@ -64,13 +63,9 @@ public final class GrowthWarnings {
         return block instanceof BlockCrops || block instanceof BlockStem || block instanceof BlockSapling;
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        STUCK.remove(event.player.getUniqueID());
-    }
-
-    @SubscribeEvent
-    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        STUCK.remove(event.player.getUniqueID());
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave != HitGate.Leave.RESPAWN) {
+            STUCK.remove(player.getUniqueID());
+        }
     }
 }

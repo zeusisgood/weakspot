@@ -22,15 +22,13 @@ final class SprintSpot extends AimSpotKind {
 
     /** 走っているとみなす、1 tick の水平の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
-    /** 赤 #FF5A5F。 */
-    private static final int RGB = 0xFF5A5F;
     /** 走りの加速中の、視野の倍率の上限（見た目だけ。速さには上限を付けない）。 */
     private static final float MAX_FOV = 1.3F;
 
     private final TimedBoost boost = new TimedBoost();
 
     SprintSpot() {
-        super(HitKind.SPRINT, new HudSpot(HitKind.SPRINT, RGB));
+        super(HitKind.SPRINT, new HudSpot(HitKind.SPRINT));
     }
 
     @Override
@@ -89,6 +87,6 @@ final class SprintSpot extends AimSpotKind {
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
         HudSpot.gauge(mc, boost.remaining(ClientWeakSpotHandler.clientTick, partialTicks),
-                MarkerLook.color(HitKind.SPRINT, RGB), true);
+                MarkerLook.color(HitKind.SPRINT), true);
     }
 }

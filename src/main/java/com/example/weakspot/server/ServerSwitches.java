@@ -10,8 +10,6 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * プレイヤーごとの弱点のオン・オフ（クライアントの HOME キー）。ログインのたびにクライアントから届く。メモリだけ。
@@ -64,10 +62,10 @@ public final class ServerSwitches {
         }
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        SWITCHES.forget(event.player.getUniqueID());
-        PARTICLES.forget(event.player.getUniqueID());
-        DISABLED_KINDS.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    static void forgetOnLogout(EntityPlayer player) {
+        SWITCHES.forget(player.getUniqueID());
+        PARTICLES.forget(player.getUniqueID());
+        DISABLED_KINDS.remove(player.getUniqueID());
     }
 }

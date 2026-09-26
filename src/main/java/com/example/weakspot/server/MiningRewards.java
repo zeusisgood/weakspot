@@ -10,11 +10,10 @@ import com.example.weakspot.network.MilestoneMessage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /** 採掘ヒットの報酬（耐久回復と節目）と、1.7.0 からの種類ごと・合計の節目。耐久回復は採掘だけ。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -98,8 +97,8 @@ public final class MiningRewards {
         stack.setItemDamage(Milestones.repairedDamage(stack.getItemDamage(), amount));
     }
 
-    @SubscribeEvent
-    public static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        REPAIR_CARRY.remove(event.player.getUniqueID());
+    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    static void forgetOnLogout(EntityPlayer player) {
+        REPAIR_CARRY.remove(player.getUniqueID());
     }
 }

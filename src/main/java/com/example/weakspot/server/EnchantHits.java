@@ -4,7 +4,6 @@ import com.example.weakspot.Reflect;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.config.WeakSpotConfig;
-import java.lang.reflect.Field;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerEnchantment;
@@ -21,19 +20,15 @@ import net.minecraftforge.fml.common.Mod;
 public final class EnchantHits {
 
     /** EntityPlayer の非公開の xpSeed（SRG field_175152_f）。読めなければ、エンチャントの弱点を出さない。 */
-    private static Field xpSeed;
-    private static boolean resolved;
+    private static final Reflect.LazyField XP_SEED =
+            Reflect.lazyField(EntityPlayer.class, "the enchanting weak spot", "xpSeed", "field_175152_f");
 
     private EnchantHits() {
     }
 
     /** 種を読み書きできるか（できなければ SyncedSettings で enchantWeakSpotEnabled を false にして送る）。 */
-    public static synchronized boolean isAvailable() {
-        if (!resolved) {
-            resolved = true;
-            xpSeed = Reflect.field(EntityPlayer.class, "the enchanting weak spot", "xpSeed", "field_175152_f");
-        }
-        return xpSeed != null;
+    public static boolean isAvailable() {
+        return XP_SEED.get() != null;
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
@@ -58,7 +53,7 @@ public final class EnchantHits {
     private static boolean reroll(EntityPlayerMP player, ContainerEnchantment container) {
         int seed = player.getRNG().nextInt();
         try {
-            xpSeed.setInt(player, seed);
+            XP_SEED.get().setInt(player, seed);
         } catch (IllegalAccessException | RuntimeException e) {
             return false;
         }

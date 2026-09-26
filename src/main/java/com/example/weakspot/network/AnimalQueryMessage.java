@@ -2,7 +2,6 @@ package com.example.weakspot.network;
 
 import com.example.weakspot.server.AnimalHits;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -37,10 +36,8 @@ public class AnimalQueryMessage implements IMessage {
 
         @Override
         public IMessage onMessage(AnimalQueryMessage message, MessageContext ctx) {
-            EntityPlayerMP player = ctx.getServerHandler().player;
             int entityId = message.entityId;
-            player.getServerWorld().addScheduledTask(() -> AnimalHits.onQuery(player, entityId));
-            return null;
+            return ServerThread.run(ctx, player -> AnimalHits.onQuery(player, entityId));
         }
     }
 }

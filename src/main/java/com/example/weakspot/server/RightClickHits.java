@@ -16,8 +16,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /** 右クリックの弱点（作物・苗木、機械、1.7.0 から収穫）のヒット通知の検証と効果（論理サーバー）。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -130,12 +128,10 @@ public final class RightClickHits {
     }
 
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
-    static void forget(EntityPlayer player) {
-        CLICKING.remove(player.getUniqueID());
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave != HitGate.Leave.RESPAWN) {
+            CLICKING.remove(player.getUniqueID());
+        }
     }
 
-    @SubscribeEvent
-    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        CLICKING.remove(event.player.getUniqueID());
-    }
 }

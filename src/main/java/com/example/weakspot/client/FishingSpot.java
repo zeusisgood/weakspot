@@ -260,9 +260,8 @@ final class FishingSpot {
             for (MarkerMotion.Afterimage image : MOTION.afterimages(nowMs)) {
                 double[] p = SCREEN.project(hookX + image.u, hookY + LIFT, hookZ + image.v);
                 if (p != null) {
-                    float a = (float) image.alpha(nowMs);
-                    ScreenProjection.fillShape(p[0] / scale, p[1] / scale, radius, shape, look[0], 0.35F * a);
-                    ScreenProjection.outlineShape(p[0] / scale, p[1] / scale, radius, shape, look[1], 0.5F * a);
+                    ScreenProjection.drawAfterimage(p[0] / scale, p[1] / scale, radius, shape, look,
+                            (float) image.alpha(nowMs));
                 }
             }
         }
@@ -277,15 +276,8 @@ final class FishingSpot {
         if (p != null) {
             double gx = p[0] / scale;
             double gy = p[1] / scale;
-            ScreenProjection.fillShape(gx, gy, radius, shape, look[0], 0.45F);
-            ScreenProjection.outlineShape(gx, gy, radius, shape, look[1], 0.9F);
-            if (shape.hasCenterDot()) {
-                ScreenProjection.fill(gx, gy, radius * 0.3, look[2], 0.9F);
-            }
-            double head = trail ? MOTION.headHighlight(nowMs) : 0;
-            if (head > 0) {
-                ScreenProjection.fillShape(gx, gy, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));
-            }
+            ScreenProjection.drawMarker(gx, gy, radius, shape, look, 0.45F, 0.9F);
+            ScreenProjection.drawHeadHighlight(gx, gy, radius, shape, trail ? MOTION.headHighlight(nowMs) : 0);
         }
         // 浮きの下の、魚が寄ってくるまでの進み具合のバー
         double[] hook = SCREEN.project(hookX, hookY, hookZ);

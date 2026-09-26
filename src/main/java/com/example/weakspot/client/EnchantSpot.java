@@ -1,7 +1,6 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.MarkerColor;
 import com.example.weakspot.config.SyncedSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiEnchantment;
@@ -16,8 +15,6 @@ import net.minecraft.inventory.ContainerEnchantment;
  */
 final class EnchantSpot extends ScreenSpotKind {
 
-    /** 紫 #B070FF。 */
-    private static final int RGB = 0xB070FF;
     /** エンチャント台の画面の枠の大きさ（GuiEnchantment の xSize / ySize）。 */
     private static final int PANEL_WIDTH = 176;
     private static final int PANEL_HEIGHT = 166;
@@ -122,9 +119,7 @@ final class EnchantSpot extends ScreenSpotKind {
 
     @Override
     float[][] look() {
-        int rgb = MarkerLook.color(HitKind.ENCHANT, RGB);
-        return new float[][] {MarkerColor.towardWhite(rgb, 0), MarkerColor.towardWhite(rgb, 0.5F),
-                MarkerColor.towardWhite(rgb, 0.8F)};
+        return ScreenProjection.lookOf(MarkerLook.color(HitKind.ENCHANT));
     }
 
     @Override
@@ -145,6 +140,6 @@ final class EnchantSpot extends ScreenSpotKind {
         }
         int top = (gui.height - PANEL_HEIGHT) / 2;
         mc.fontRenderer.drawStringWithShadow(hint, (gui.width - mc.fontRenderer.getStringWidth(hint)) / 2.0F,
-                top - 11, MarkerLook.color(HitKind.ENCHANT, RGB));
+                top - 11, MarkerLook.color(HitKind.ENCHANT));
     }
 }

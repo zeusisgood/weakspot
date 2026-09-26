@@ -9,8 +9,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
  * 投げる物の弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。メインハンドに投げる物を持っている間に受け付け、
@@ -39,13 +37,10 @@ public final class ThrowHits {
     }
 
 
-    @SubscribeEvent
-    public static void onChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        ThrowCharge.clear(event.player);
-    }
-
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
-    static void forget(EntityPlayer player) {
-        ThrowCharge.clear(player);
+    static void forget(EntityPlayer player, HitGate.Leave leave) {
+        if (leave != HitGate.Leave.RESPAWN) {
+            ThrowCharge.clear(player);
+        }
     }
 }

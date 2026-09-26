@@ -67,18 +67,11 @@ final class ScreenSpots {
         HudSpot.beginOverlay();
         if (trail) {
             for (MarkerMotion.Afterimage image : k.motion.afterimages(nowMs)) {
-                float a = (float) image.alpha(nowMs);
-                ScreenProjection.fillShape(image.u, image.v, radius, shape, look[0], 0.35F * a);
-                ScreenProjection.outlineShape(image.u, image.v, radius, shape, look[1], 0.5F * a);
+                ScreenProjection.drawAfterimage(image.u, image.v, radius, shape, look, (float) image.alpha(nowMs));
             }
         }
         double[] p = trail ? k.motion.position(nowMs) : new double[] {k.x, k.y};
-        float alpha = k.outlineAlpha();
-        ScreenProjection.fillShape(p[0], p[1], radius, shape, look[0], 0.55F);
-        ScreenProjection.outlineShape(p[0], p[1], radius, shape, look[1], alpha);
-        if (shape.hasCenterDot()) {
-            ScreenProjection.fill(p[0], p[1], radius * 0.3, look[2], alpha);
-        }
+        ScreenProjection.drawMarker(p[0], p[1], radius, shape, look, 0.55F, k.outlineAlpha());
         HudSpot.endOverlay();
     }
 
