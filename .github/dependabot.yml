@@ -1,0 +1,11 @@
+# ワークフローで使う部品（actions/checkout など）の更新を、週に 1 回まとめて PR にする。
+# Mod 本体の依存（Forge・ForgeGradle）は、1.12.2 に固定しているので対象にしない。
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
