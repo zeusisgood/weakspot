@@ -60,18 +60,18 @@
 | `weakspot.updateCheck.skipped` | 今後 %s は通知しません（新しい版が出たら、また通知します） | You won't be reminded about %s again (newer versions will still be announced) |
 | `weakspot.updateCheck.minor` | サーバーと同じ版に揃えないと接続できません。更新するときは、サーバーの管理者にも伝えてください | Servers must use the same version to connect. Let the server admin know when you update |
 
+- `[ダウンロード]` は **GitHub の Release ページ**（`https://github.com/zeusisgood/weakspot/releases/tag/v<新しい版>`。`UpdateNotes.RELEASES_URL` を使う）を開く。配布サイトができたら差し替える
+- **マイナーが違う新版**（例: 今が 1.9.x で、新しい版が 1.10.0）のときは、2 行目に `weakspot.updateCheck.minor` を灰色で出す
+- 判定（通知するか・マイナーが違うか）は Minecraft に依存しない形で `common/UpdateCheck` に置き、単体テストを書く
+  - 通知する: 状態が新版あり、かつ新しい版 ≠ `skippedUpdateVersion`（`skippedUpdateVersion` が空でも出す）
+  - マイナーが違う: `1.9.1` と `1.10.0` → 違う、`1.9.1` と `1.9.2` → 同じ、`1.9.1` と `2.0.0` → 違う、数字でない形 → 違わない（添えない）
+
 ### 「この版は通知しない」
 
 - クリックすると、クライアントのコマンド **`/weakspot skipupdate <版>`** を実行する（`ClickEvent` の `RUN_COMMAND`）。`client/BugCommand` が `bug` と同じように自分のクライアントで受け取り、サーバーには送らない
   - `skippedUpdateVersion` に `<版>` を書いて保存し、`weakspot.updateCheck.skipped` を灰色で 1 行返す
   - 手で打つものではないので、Tab 補完には出さない。`<版>` がないときは何もしない
 - さらに新しい版（例: 1.9.3 を止めたあとに 1.9.4）が出たら、また出る
-
-- `[ダウンロード]` は **GitHub の Release ページ**（`https://github.com/zeusisgood/weakspot/releases/tag/v<新しい版>`。`UpdateNotes.RELEASES_URL` を使う）を開く。配布サイトができたら差し替える
-- **マイナーが違う新版**（例: 今が 1.9.x で、新しい版が 1.10.0）のときは、2 行目に `weakspot.updateCheck.minor` を灰色で出す
-- 判定（通知するか・マイナーが違うか）は Minecraft に依存しない形で `common/UpdateCheck` に置き、単体テストを書く
-  - 通知する: 状態が新版あり、かつ新しい版 ≠ `skippedUpdateVersion`（`skippedUpdateVersion` が空でも出す）
-  - マイナーが違う: `1.9.1` と `1.10.0` → 違う、`1.9.1` と `1.9.2` → 同じ、`1.9.1` と `2.0.0` → 違う、数字でない形 → 違わない（添えない）
 
 ## 4. 設定（`[クライアント]`。`general` に並べる）
 
