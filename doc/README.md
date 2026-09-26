@@ -10,4 +10,5 @@
 | 開発（ビルド・テスト・バージョン方針・開発に使う Forge の版） | [development.md](development.md) |
 | 仕組み（開発者向け。コードの構成と各機能の中身） | [architecture.md](architecture.md) |
 | 仕様書（バージョンごとの差分。この Mod の仕様の正本） | [spec/README.md](spec/README.md) |
+| 配布サイト（Modrinth・CurseForge）の説明文（英語。Modrinth には自動で反映） | [store/description.md](store/description.md) |
 | 更新履歴 | [../CHANGELOG.md](../CHANGELOG.md) |
