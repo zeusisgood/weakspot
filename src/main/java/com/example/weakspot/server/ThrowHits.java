@@ -26,11 +26,11 @@ public final class ThrowHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.THROW) || !WeakSpotConfig.throwWeakSpotEnabled
+        if (!HitGate.allowed(player, HitKind.THROW)
                 || !ThrowCharge.isHoldingThrowable(player) || player.isHandActive()) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.THROW, WeakSpotConfig.throwMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.THROW)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.THROW, new BlockPos(player), streak);

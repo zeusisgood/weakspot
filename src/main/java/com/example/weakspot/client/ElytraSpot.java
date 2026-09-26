@@ -43,7 +43,7 @@ final class ElytraSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.elytraWeakSpotEnabled && player.isElytraFlying();
+        return player.isElytraFlying();
     }
 
     @Override
@@ -51,10 +51,6 @@ final class ElytraSpot extends AimSpotKind {
         return HudSpot.FREE;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.elytraMinHitIntervalTicks;
-    }
 
     @Override
     void afterTick(Minecraft mc) {

@@ -27,28 +27,15 @@ public final class MarkerLook {
     private MarkerLook() {
     }
 
-    /** 種類ごとの初期値の色（「弱点マーカー」タブの見本。ブロック・生き物・弓・釣りの弱点は橙赤、ほかは種類ごとの色）。 */
-    static int defaultColor(HitKind kind) {
-        switch (kind) {
-            case HARVEST: return 0xFF3DCB;
-            case VEHICLE: return 0x55CCFF;
-            case EAT: return 0x7CFC00;
-            case SLEEP: return 0xFFF1A8;
-            case LADDER: return 0xC8A060;
-            case ELYTRA: return 0x7FB2FF;
-            case ENCHANT: return 0xB070FF;
-            case THROW: return 0x2ED3B7;
-            case SPRINT: return 0xFF5A5F;
-            case MELEE: return 0xD0D8E0;
-            case PORTAL: return 0xFFD23F;
-            default: return 0xFF5926;
-        }
-    }
-
     /** 書き換えた色（0xRRGGBB）。書いていなければ null。 */
     static Integer customColor(HitKind kind) {
         refresh();
         return COLORS.get(kind);
+    }
+
+    /** その種類の色。書いていなければ初期値の色（HitKind.defaultColor）。 */
+    static int color(HitKind kind) {
+        return color(kind, kind.defaultColor());
     }
 
     /** その種類の色。書いていなければ defaultRgb。 */
@@ -64,7 +51,7 @@ public final class MarkerLook {
         Integer custom = customColor(kind);
         if (custom == null && kind == HitKind.HARVEST) {
             // 収穫の弱点は、作物と重ならないマゼンタが初期値（ブロックの弱点で、ほかは橙赤）
-            custom = defaultColor(kind);
+            custom = kind.defaultColor();
         }
         if (custom == null) {
             return new float[][] {disk, ring, center};

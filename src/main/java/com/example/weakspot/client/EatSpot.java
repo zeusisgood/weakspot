@@ -29,7 +29,7 @@ final class EatSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.eatWeakSpotEnabled && settings.eatHitTicks > 0 && EatDraw.isEating(player);
+        return settings.eatHitTicks > 0 && EatDraw.isEating(player);
     }
 
     @Override
@@ -37,10 +37,6 @@ final class EatSpot extends AimSpotKind {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.eatMinHitIntervalTicks;
-    }
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {

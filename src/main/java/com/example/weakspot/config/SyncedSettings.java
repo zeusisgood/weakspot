@@ -2,12 +2,15 @@ package com.example.weakspot.config;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.GrowthFilters;
+import com.example.weakspot.common.HitKind;
 import com.example.weakspot.server.EnchantHits;
 import com.example.weakspot.server.PortalHits;
 import io.netty.buffer.ByteBuf;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
@@ -176,7 +179,68 @@ public final class SyncedSettings {
         }
     }
 
-    /** この側の weakspot.cfg の値。 */
+    /**
+     * 種類ごとのオン・オフと、ヒットの最小間隔の表（1.8.9）。フィールドの名前は、オン・オフが
+     * "<key>WeakSpotEnabled"（ない種類 = 採掘・成長・機械・動物は、いつでもオン）、間隔が "<key>MinHitIntervalTicks"
+     * （採掘だけ "minHitIntervalTicks"）。クライアントもサーバーも、この表から引く。
+     */
+    private static final Map<HitKind, Field> ENABLED = new EnumMap<>(HitKind.class);
+    private static final Map<HitKind, Field> INTERVAL = new EnumMap<>(HitKind.class);
+
+    static {
+        for (HitKind kind : HitKind.values()) {
+            try {
+                ENABLED.put(kind, SyncedSettings.class.getField(kind.key() + "WeakSpotEnabled"));
+            } catch (NoSuchFieldException e) {
+                // この種類には、サーバーの全体のオン・オフがない
+            }
+            String interval = kind == HitKind.MINING ? "minHitIntervalTicks" : kind.key() + "MinHitIntervalTicks";
+            try {
+                INTERVAL.put(kind, SyncedSettings.class.getField(interval));
+            } catch (NoSuchFieldException e) {
+                throw new IllegalStateException("no " + interval, e);
+            }
+        }
+    }
+
+    /** サーバーの設定で、その種類の弱点を出すか（読み書きできない種類は false。fromConfig の最後を見る）。 */
+    public boolean enabled(HitKind kind) {
+        Field field = ENABLED.get(kind);
+        try {
+            return field == null || field.getBoolean(this);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /** その種類のヒットの最小間隔（tick）。 */
+    public int minHitInterval(HitKind kind) {
+        try {
+            return INTERVAL.get(kind).getInt(this);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    /** サーバーが使う自分の値（1.8.9。作り直すのは invalidateServer のあと。ヒットのたびに作り直さないため）。 */
+    private static volatile SyncedSettings server;
+
+    /** この側の weakspot.cfg の値を、使い回す。読むだけにすること。 */
+    public static SyncedSettings server() {
+        SyncedSettings s = server;
+        if (s == null) {
+            s = fromConfig();
+            server = s;
+        }
+        return s;
+    }
+
+    /** 設定が変わった（起動・/weakspot reload・設定画面）。次の server() で作り直す。 */
+    public static void invalidateServer() {
+        server = null;
+    }
+
+    /** この側の weakspot.cfg の値（毎回作る）。 */
     public static SyncedSettings fromConfig() {
         SyncedSettings s = new SyncedSettings();
         try {

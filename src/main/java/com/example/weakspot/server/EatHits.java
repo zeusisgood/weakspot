@@ -19,12 +19,11 @@ public final class EatHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.EAT)
-                || !WeakSpotConfig.eatWeakSpotEnabled || WeakSpotConfig.eatHitTicks <= 0
+        if (!HitGate.allowed(player, HitKind.EAT) || WeakSpotConfig.eatHitTicks <= 0
                 || !EatDraw.isEating(player)) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.EAT, WeakSpotConfig.eatMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.EAT)) {
             return;
         }
         EatDraw.add(player, WeakSpotConfig.eatHitTicks);

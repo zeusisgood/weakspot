@@ -119,7 +119,7 @@ public final class ServerBoostTracker {
             return;
         }
         long now = player.world.getTotalWorldTime();
-        if (!HitGate.intervalOk(now, mining.lastHitTick, WeakSpotConfig.minHitIntervalTicks)) {
+        if (!HitGate.intervalOk(now, mining.lastHitTick, HitKind.MINING)) {
             return;
         }
         mining.lastHitTick = now;

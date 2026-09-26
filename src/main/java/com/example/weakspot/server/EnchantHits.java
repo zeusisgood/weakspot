@@ -37,8 +37,7 @@ public final class EnchantHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.ENCHANT)
-                || !WeakSpotConfig.enchantWeakSpotEnabled || !isAvailable()
+        if (!HitGate.allowed(player, HitKind.ENCHANT) || !isAvailable()
                 || !(player.openContainer instanceof ContainerEnchantment)) {
             return;
         }
@@ -46,7 +45,7 @@ public final class EnchantHits {
         if (container.tableInventory.getStackInSlot(0).isEmpty()) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.ENCHANT, WeakSpotConfig.enchantMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.ENCHANT)) {
             return;
         }
         if (!reroll(player, container)) {

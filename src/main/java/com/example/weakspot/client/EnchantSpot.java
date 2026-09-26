@@ -35,7 +35,7 @@ final class EnchantSpot extends ScreenSpotKind {
     @Override
     boolean eligible(Minecraft mc, GuiScreen gui) {
         return gui instanceof GuiEnchantment && KindSwitches.isEnabled(HitKind.ENCHANT)
-                && ClientSettings.get().enchantWeakSpotEnabled && mc.player != null && !mc.player.isSpectator();
+                && ClientSettings.get().enabled(HitKind.ENCHANT) && mc.player != null && !mc.player.isSpectator();
     }
 
     @Override
@@ -43,10 +43,6 @@ final class EnchantSpot extends ScreenSpotKind {
         return has && hasOffers((GuiEnchantment) gui);
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.enchantMinHitIntervalTicks;
-    }
 
     /** 台に物が置いてあり、候補が 1 つ以上出ているか。 */
     private static boolean hasOffers(GuiEnchantment gui) {

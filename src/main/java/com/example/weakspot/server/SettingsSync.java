@@ -20,7 +20,7 @@ public final class SettingsSync {
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.player instanceof EntityPlayerMP) {
-            WeakSpotMod.network.sendTo(new SettingsMessage(SyncedSettings.fromConfig()), (EntityPlayerMP) event.player);
+            WeakSpotMod.network.sendTo(new SettingsMessage(SyncedSettings.server()), (EntityPlayerMP) event.player);
         }
     }
 
@@ -29,10 +29,11 @@ public final class SettingsSync {
      * どのスレッドから呼んでもよい。この側でサーバーが動いていなければ何もしない。
      */
     public static void resendToAll() {
+        SyncedSettings.invalidateServer();
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
         if (server == null) {
             return;
         }
-        server.addScheduledTask(() -> WeakSpotMod.network.sendToAll(new SettingsMessage(SyncedSettings.fromConfig())));
+        server.addScheduledTask(() -> WeakSpotMod.network.sendToAll(new SettingsMessage(SyncedSettings.server())));
     }
 }

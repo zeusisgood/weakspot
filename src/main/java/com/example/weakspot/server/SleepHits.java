@@ -23,12 +23,12 @@ public final class SleepHits {
 
     public static void onHit(EntityPlayerMP player, int streak) {
         World world = player.world;
-        if (!HitGate.allowed(player, HitKind.SLEEP) || !WeakSpotConfig.sleepWeakSpotEnabled
+        if (!HitGate.allowed(player, HitKind.SLEEP)
                 || !player.isPlayerSleeping() || !world.getGameRules().getBoolean("doDaylightCycle")
                 || !SleepTime.isNight(world.getWorldTime())) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.SLEEP, WeakSpotConfig.sleepMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.SLEEP)) {
             return;
         }
         world.setWorldTime(SleepTime.advance(world.getWorldTime(), WeakSpotConfig.sleepHitTicks));

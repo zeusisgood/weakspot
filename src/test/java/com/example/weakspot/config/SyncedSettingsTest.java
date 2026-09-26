@@ -35,4 +35,26 @@ public class SyncedSettingsTest {
             }
         }
     }
+
+    @Test
+    public void everyKindHasAnIntervalAndServerSwitchesMatchTheFields() throws Exception {
+        java.lang.reflect.Constructor<SyncedSettings> c = SyncedSettings.class.getDeclaredConstructor();
+        c.setAccessible(true);
+        SyncedSettings s = c.newInstance();
+        s.minHitIntervalTicks = 6;
+        s.growthMinHitIntervalTicks = 7;
+        s.portalMinHitIntervalTicks = 9;
+        s.bowWeakSpotEnabled = false;
+        s.portalWeakSpotEnabled = true;
+        org.junit.Assert.assertEquals(6, s.minHitInterval(com.example.weakspot.common.HitKind.MINING));
+        org.junit.Assert.assertEquals(7, s.minHitInterval(com.example.weakspot.common.HitKind.GROWTH));
+        org.junit.Assert.assertEquals(9, s.minHitInterval(com.example.weakspot.common.HitKind.PORTAL));
+        org.junit.Assert.assertFalse(s.enabled(com.example.weakspot.common.HitKind.BOW));
+        org.junit.Assert.assertTrue(s.enabled(com.example.weakspot.common.HitKind.PORTAL));
+        // 全体のオン・オフの設定がない種類は、いつでもオン
+        org.junit.Assert.assertTrue(s.enabled(com.example.weakspot.common.HitKind.MINING));
+        for (com.example.weakspot.common.HitKind kind : com.example.weakspot.common.HitKind.values()) {
+            s.minHitInterval(kind);
+        }
+    }
 }

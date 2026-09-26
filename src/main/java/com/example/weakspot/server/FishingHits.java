@@ -137,7 +137,7 @@ public final class FishingHits {
     /** クライアントからの状態の問い合わせ（サーバースレッド）。待ち時間の段階か、と進み具合を返す。 */
     public static void onQuery(EntityPlayerMP player) {
         EntityFishHook hook = hookOf(player);
-        boolean waiting = hook != null && isWaiting(hook) && enabled(SyncedSettings.fromConfig());
+        boolean waiting = hook != null && isWaiting(hook) && enabled(SyncedSettings.server());
         float progress = 0;
         if (waiting) {
             Track track = TRACKS.get(player.getUniqueID());
@@ -149,7 +149,7 @@ public final class FishingHits {
     }
 
     private static boolean enabled(SyncedSettings settings) {
-        return settings.fishingWeakSpotEnabled && settings.fishingHits > 0 && available();
+        return settings.enabled(HitKind.FISHING) && settings.fishingHits > 0 && available();
     }
 
     /** クライアントからのヒット通知（サーバースレッド）。照準の角度は確かめない（クライアントを信用する）。 */
@@ -157,14 +157,14 @@ public final class FishingHits {
         if (!HitGate.allowed(player, HitKind.FISHING)) {
             return;
         }
-        SyncedSettings settings = SyncedSettings.fromConfig();
+        SyncedSettings settings = SyncedSettings.server();
         EntityFishHook hook = hookOf(player);
         if (hook == null || !enabled(settings) || !isWaiting(hook)) {
             return;
         }
         Track track = TRACKS.computeIfAbsent(player.getUniqueID(), id -> new Track());
         long now = player.world.getTotalWorldTime();
-        if (!HitGate.intervalOk(now, track.lastHitTick, WeakSpotConfig.fishingMinHitIntervalTicks)) {
+        if (!HitGate.intervalOk(now, track.lastHitTick, HitKind.FISHING)) {
             return;
         }
         track.lastHitTick = now;

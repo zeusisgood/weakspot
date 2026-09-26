@@ -1,7 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.VehicleBoostMath;
+import com.example.weakspot.common.TimedBoostMath;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.MoveHits;
@@ -41,7 +41,7 @@ final class SprintSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.sprintWeakSpotEnabled && player.isSprinting() && !player.isRiding()
+        return player.isSprinting() && !player.isRiding()
                 && !player.isElytraFlying() && !player.isInWater() && !player.isOnLadder()
                 && Math.hypot(player.posX - player.prevPosX, player.posZ - player.prevPosZ) >= MOVING_SPEED;
     }
@@ -51,14 +51,10 @@ final class SprintSpot extends AimSpotKind {
         return HudSpot.VERTICAL;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.sprintMinHitIntervalTicks;
-    }
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
-        boost.start(VehicleBoostMath.multiplier(settings.sprintBoostMultiplier, settings.sprintBoostMaxMultiplier,
+        boost.start(TimedBoostMath.multiplier(settings.sprintBoostMultiplier, settings.sprintBoostMaxMultiplier,
                 streak), settings.sprintBoostDurationTicks, ClientWeakSpotHandler.clientTick);
     }
 

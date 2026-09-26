@@ -13,8 +13,6 @@ import com.example.weakspot.common.ScheduledBoost;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.awt.Color;
-import java.util.EnumSet;
-import java.util.Set;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
@@ -56,9 +54,6 @@ final class ComboHud {
     private static final int SHORT_RUN = 5;
     /** 種類の表示（「走り ×1.25」「機械 4倍速」）の文字の大きさ（コンボの数字に対する割合）。 */
     private static final float KIND_LABEL_SCALE = 0.75F;
-    /** コンボの掛け数（ComboFactor）で効果が強くなる種類（機械は実際の速さを出すので別）。 */
-    private static final Set<HitKind> FACTOR_KINDS = EnumSet.of(HitKind.MINING, HitKind.VEHICLE, HitKind.LADDER,
-            HitKind.SPRINT, HitKind.ELYTRA, HitKind.THROW, HitKind.MELEE, HitKind.PORTAL, HitKind.HARVEST);
     /** 1000 のタイトル（フェードイン、表示、フェードアウトの tick）。バニラのタイトルと同じ長さ。 */
     private static final int TITLE_IN = 5;
     private static final int TITLE_STAY = 50;
@@ -255,7 +250,7 @@ final class ComboHud {
         if (kind == null || !spotShown(kind)) {
             return;
         }
-        int rgb = MarkerLook.color(kind, MarkerLook.defaultColor(kind));
+        int rgb = MarkerLook.color(kind);
         if (kind == HitKind.MACHINE && ClientWeakSpotHandler.dispenserSpotActive()) {
             // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2。1.6.0 から上限の設定も考える）
             drawKindLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)), rgb,
@@ -265,7 +260,7 @@ final class ComboHud {
             drawKindLabel(mc, top, I18n.format("weakspot.combo.machine",
                     MachineComboBoost.speedLabel(machineSpeed(combo))), rgb,
                     ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
-        } else if (FACTOR_KINDS.contains(kind)) {
+        } else if (kind.usesComboFactor()) {
             double factor = labelValue(kind, combo);
             if (factor > 1) {
                 drawKindLabel(mc, top, I18n.format("weakspot.combo.kind", I18n.format("weakspot.kind." + kind.key()),
@@ -298,7 +293,7 @@ final class ComboHud {
         if (kind == HitKind.MINING) {
             return ClientWeakSpotHandler.miningComboFactor(Math.max(0, combo));
         }
-        return FACTOR_KINDS.contains(kind) ? ComboFactor.factor(Math.max(0, combo)) : 1;
+        return kind.usesComboFactor() ? ComboFactor.factor(Math.max(0, combo)) : 1;
     }
 
     /** コンボ combo での機械の速さ（サーバーから届いた倍率と上限で、サーバーと同じ計算）。 */

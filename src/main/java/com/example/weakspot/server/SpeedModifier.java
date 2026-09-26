@@ -1,6 +1,6 @@
 package com.example.weakspot.server;
 
-import com.example.weakspot.common.VehicleBoostMath;
+import com.example.weakspot.common.TimedBoostMath;
 import java.util.UUID;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
@@ -32,7 +32,7 @@ final class SpeedModifier {
             return;
         }
         speed.removeModifier(id);
-        double extra = VehicleBoostMath.extra(multiplier);
+        double extra = TimedBoostMath.extra(multiplier);
         if (extra > 0) {
             speed.applyModifier(new AttributeModifier(id, name, extra, MULTIPLY_TOTAL).setSaved(false));
         }

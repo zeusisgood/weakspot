@@ -20,8 +20,7 @@ public final class BowHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.BOW)
-                || !WeakSpotConfig.bowWeakSpotEnabled || WeakSpotConfig.bowHitTicks <= 0) {
+        if (!HitGate.allowed(player, HitKind.BOW) || WeakSpotConfig.bowHitTicks <= 0) {
             return;
         }
         if (!BowDraw.isDrawing(player)) {
@@ -32,7 +31,7 @@ public final class BowHits {
         if (full && !BowMath.canOvercharge(BowDraw.overcharge(player))) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.BOW, WeakSpotConfig.bowMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.BOW)) {
             return;
         }
         if (full) {

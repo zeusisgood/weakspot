@@ -105,7 +105,7 @@ final class FishingSpot {
             return null;
         }
         SyncedSettings settings = ClientSettings.get();
-        if (!settings.fishingWeakSpotEnabled || settings.fishingHits <= 0) {
+        if (!settings.enabled(HitKind.FISHING) || settings.fishingHits <= 0) {
             return null;
         }
         EntityFishHook hook = mc.player.fishEntity;
@@ -208,7 +208,7 @@ final class FishingSpot {
             return;
         }
         event.setCanceled(true);
-        if (ClientWeakSpotHandler.canHitNow(HitKind.FISHING, ClientSettings.get().fishingMinHitIntervalTicks)) {
+        if (ClientWeakSpotHandler.canHitNow(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
             onHit();
         }
     }

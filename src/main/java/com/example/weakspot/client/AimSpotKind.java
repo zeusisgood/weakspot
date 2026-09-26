@@ -23,7 +23,7 @@ abstract class AimSpotKind {
         this.spot = spot;
     }
 
-    /** 共通の条件（ワールドにいる・種類がオン・PlayerRules・手を使っていない）のあとの、種類ごとの出す条件。 */
+    /** 共通の条件（ワールドにいる・種類がオン（自分とサーバーの設定）・PlayerRules・手を使っていない）のあとの、種類ごとの出す条件。 */
     abstract boolean wanted(EntityPlayerSP player, SyncedSettings settings);
 
     /** 手を使っている（弓を引く・食べる）間は出さないか。弓・食事は false。 */
@@ -34,7 +34,10 @@ abstract class AimSpotKind {
     /** 出し方（HudSpot.FREE / VERTICAL / HORIZONTAL / VERTICAL_FIXED）。 */
     abstract int placement(EntityPlayerSP player);
 
-    abstract int minHitInterval(SyncedSettings settings);
+    /** ヒットの最小間隔（設定の表から。1.8.9）。 */
+    final int minHitInterval(SyncedSettings settings) {
+        return settings.minHitInterval(kind);
+    }
 
     /** 当てたときのサーバーへの通知。 */
     HitMessage message(EntityPlayerSP player, int streak) {
@@ -89,6 +92,7 @@ abstract class AimSpotKind {
                 || (blockedByUsingHand() && player.isHandActive())) {
             return false;
         }
-        return wanted(player, ClientSettings.get());
+        SyncedSettings settings = ClientSettings.get();
+        return settings.enabled(kind) && wanted(player, settings);
     }
 }

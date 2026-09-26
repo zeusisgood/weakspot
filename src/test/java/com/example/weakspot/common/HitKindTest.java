@@ -38,4 +38,21 @@ public class HitKindTest {
         assertEquals(15, HitKind.SPRINT.ordinal());
         assertEquals(16, HitKind.PORTAL.ordinal());
     }
+
+    @Test
+    public void defaultColorsAndComboFactorKindsMatch188() {
+        org.junit.Assert.assertEquals(0xFF5926, HitKind.MINING.defaultColor());
+        org.junit.Assert.assertEquals(0xFF5926, HitKind.BOW.defaultColor());
+        org.junit.Assert.assertEquals(0xFF3DCB, HitKind.HARVEST.defaultColor());
+        org.junit.Assert.assertEquals(0x55CCFF, HitKind.VEHICLE.defaultColor());
+        org.junit.Assert.assertEquals(0xFFD23F, HitKind.PORTAL.defaultColor());
+        java.util.Set<HitKind> factor = java.util.EnumSet.noneOf(HitKind.class);
+        for (HitKind kind : HitKind.values()) {
+            if (kind.usesComboFactor()) {
+                factor.add(kind);
+            }
+        }
+        org.junit.Assert.assertEquals(java.util.EnumSet.of(HitKind.MINING, HitKind.VEHICLE, HitKind.LADDER,
+                HitKind.SPRINT, HitKind.ELYTRA, HitKind.THROW, HitKind.MELEE, HitKind.PORTAL, HitKind.HARVEST), factor);
+    }
 }

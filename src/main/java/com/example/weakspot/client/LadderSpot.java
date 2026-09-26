@@ -1,7 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.VehicleBoostMath;
+import com.example.weakspot.common.TimedBoostMath;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.Minecraft;
@@ -41,7 +41,7 @@ final class LadderSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.ladderWeakSpotEnabled && climbing(player);
+        return climbing(player);
     }
 
     @Override
@@ -49,14 +49,10 @@ final class LadderSpot extends AimSpotKind {
         return HudSpot.VERTICAL;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.ladderMinHitIntervalTicks;
-    }
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
-        boost.start(VehicleBoostMath.multiplier(settings.ladderBoostMultiplier, settings.ladderBoostMaxMultiplier,
+        boost.start(TimedBoostMath.multiplier(settings.ladderBoostMultiplier, settings.ladderBoostMaxMultiplier,
                 streak), settings.ladderBoostDurationTicks, ClientWeakSpotHandler.clientTick);
     }
 
@@ -71,7 +67,7 @@ final class LadderSpot extends AimSpotKind {
                 || !climbing(player)) {
             return;
         }
-        double dy = (player.posY - player.prevPosY) * VehicleBoostMath.extra(boost.multiplier());
+        double dy = (player.posY - player.prevPosY) * TimedBoostMath.extra(boost.multiplier());
         if (Math.abs(dy) > 1e-4) {
             player.move(MoverType.SELF, 0, dy, 0);
             if (player.isOnLadder()) {

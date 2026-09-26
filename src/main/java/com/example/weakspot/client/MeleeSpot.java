@@ -46,7 +46,7 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.meleeWeakSpotEnabled && MeleeCharge.isHoldingWeapon(player) && enemyNear
+        return MeleeCharge.isHoldingWeapon(player) && enemyNear
                 && !VehicleTargets.isSteeredByLook(player);
     }
 
@@ -55,10 +55,6 @@ final class MeleeSpot extends AimSpotKind {
         return HudSpot.HORIZONTAL;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.meleeMinHitIntervalTicks;
-    }
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {

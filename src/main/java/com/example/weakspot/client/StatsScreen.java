@@ -239,22 +239,7 @@ final class StatsScreen extends GuiScreen {
 
     /** サーバーの設定で、その種類の弱点が出るか（出ない種類は「サーバーで無効」と出して、押せなくする）。 */
     private static boolean isEnabledOnServer(HitKind kind, SyncedSettings settings) {
-        switch (kind) {
-            case FISHING: return settings.fishingWeakSpotEnabled;
-            case BOW: return settings.bowWeakSpotEnabled;
-            case MELEE: return settings.meleeWeakSpotEnabled;
-            case VEHICLE: return settings.vehicleWeakSpotEnabled;
-            case EAT: return settings.eatWeakSpotEnabled;
-            case SLEEP: return settings.sleepWeakSpotEnabled;
-            case LADDER: return settings.ladderWeakSpotEnabled;
-            case ELYTRA: return settings.elytraWeakSpotEnabled;
-            case ENCHANT: return settings.enchantWeakSpotEnabled;
-            case HARVEST: return settings.harvestWeakSpotEnabled;
-            case THROW: return settings.throwWeakSpotEnabled;
-            case SPRINT: return settings.sprintWeakSpotEnabled;
-            case PORTAL: return settings.portalWeakSpotEnabled;
-            default: return true;
-        }
+        return settings.enabled(kind);
     }
 
     /**
@@ -571,7 +556,7 @@ final class StatsScreen extends GuiScreen {
                 drawString(fontRenderer, I18n.format("weakspot.kinds.serverDisabled"), center - 26, y + 6, 0x808080);
                 continue;
             }
-            int rgb = MarkerLook.color(kind, MarkerLook.defaultColor(kind));
+            int rgb = MarkerLook.color(kind);
             // 見本（今の色）
             drawRect(center - 26, y + 5, center - 16, y + 15, 0xFF000000 | rgb);
             GuiTextField field = colorFields[kind.ordinal()];

@@ -33,14 +33,10 @@ final class SleepSpot extends ScreenSpotKind {
         }
         SyncedSettings settings = ClientSettings.get();
         WorldClient world = mc.world;
-        return settings.sleepWeakSpotEnabled && world != null
+        return settings.enabled(HitKind.SLEEP) && world != null
                 && world.getGameRules().getBoolean("doDaylightCycle") && SleepTime.isNight(world.getWorldTime());
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.sleepMinHitIntervalTicks;
-    }
 
     /**
      * 画面の中央の範囲（1.6.2。SleepSpotArea。画面全体だと、次のマーカーが遠すぎるため）のランダムな位置。

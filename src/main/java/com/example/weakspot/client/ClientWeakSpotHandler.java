@@ -267,7 +267,7 @@ public final class ClientWeakSpotHandler {
             return;
         }
         spot.lastActiveTick = clientTick;
-        if (spot.isHitBy(target.hitVec) && canHit(HitKind.MINING, settings.minHitIntervalTicks)) {
+        if (spot.isHitBy(target.hitVec) && canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
             onHit(mc);
         }
     }
@@ -298,7 +298,7 @@ public final class ClientWeakSpotHandler {
         }
         spot.lastActiveTick = clientTick;
         if (target.sideHit == spot.face && spot.isHitBy(target.hitVec)
-                && canHit(kind, minHitInterval(kind, settings))) {
+                && canHit(kind, settings.minHitInterval(kind))) {
             onHit(mc);
         }
     }
@@ -332,7 +332,7 @@ public final class ClientWeakSpotHandler {
         spot.follow(box);
         spot.lastActiveTick = clientTick;
         if (aimed == spot.face && spot.isHitBy(target.hitVec)
-                && canHit(HitKind.ANIMAL, settings.animalMinHitIntervalTicks)) {
+                && canHit(HitKind.ANIMAL, settings.minHitInterval(HitKind.ANIMAL))) {
             onHit(mc);
         }
     }
@@ -355,19 +355,6 @@ public final class ClientWeakSpotHandler {
         return Math.abs(box.minX - pos.getX()) < eps && Math.abs(box.minY - pos.getY()) < eps
                 && Math.abs(box.minZ - pos.getZ()) < eps && Math.abs(box.maxX - pos.getX() - 1) < eps
                 && Math.abs(box.maxY - pos.getY() - 1) < eps && Math.abs(box.maxZ - pos.getZ() - 1) < eps;
-    }
-
-    private static int minHitInterval(HitKind kind, SyncedSettings settings) {
-        switch (kind) {
-            case MACHINE:
-                return settings.machineMinHitIntervalTicks;
-            case ANIMAL:
-                return settings.animalMinHitIntervalTicks;
-            case HARVEST:
-                return settings.harvestMinHitIntervalTicks;
-            default:
-                return settings.growthMinHitIntervalTicks;
-        }
     }
 
     private static boolean canHit(HitKind kind, int minInterval) {

@@ -1,5 +1,6 @@
 package com.example.weakspot;
 
+import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.AnimalQueryMessage;
 import com.example.weakspot.network.AnimalStateMessage;
@@ -87,6 +88,7 @@ public class WeakSpotMod {
     @Mod.EventHandler
     public void serverStarting(FMLServerStartingEvent event) {
         WeakSpotConfig.migrate();
+        SyncedSettings.invalidateServer();
         event.registerServerCommand(new WeakSpotCommand());
     }
 

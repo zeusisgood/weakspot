@@ -36,7 +36,7 @@ public final class PortalHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.PORTAL) || player.isRiding() || !WeakSpotConfig.portalWeakSpotEnabled
+        if (!HitGate.allowed(player, HitKind.PORTAL) || player.isRiding()
                 || !isAvailable()) {
             return;
         }
@@ -49,7 +49,7 @@ public final class PortalHits {
         if (counter <= 0) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.PORTAL, WeakSpotConfig.portalMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.PORTAL)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.PORTAL, new BlockPos(player), streak);

@@ -73,7 +73,7 @@ public final class RightClickTargets {
      * ネザーウォートの age 3、カカオ豆の age 2。
      */
     public static boolean isHarvestable(IBlockState state, SyncedSettings settings) {
-        if (!settings.harvestWeakSpotEnabled) {
+        if (!settings.enabled(HitKind.HARVEST)) {
             return false;
         }
         Block block = state.getBlock();
@@ -172,7 +172,7 @@ public final class RightClickTargets {
 
     /** この側で今使う設定値（クライアントは接続中ならサーバーの値）。 */
     public static SyncedSettings settings(World world) {
-        return world.isRemote ? WeakSpotMod.proxy.clientSettings() : SyncedSettings.fromConfig();
+        return world.isRemote ? WeakSpotMod.proxy.clientSettings() : SyncedSettings.server();
     }
 
     /**

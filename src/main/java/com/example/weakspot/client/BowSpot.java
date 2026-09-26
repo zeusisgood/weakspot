@@ -49,7 +49,7 @@ final class BowSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.bowWeakSpotEnabled && settings.bowHitTicks > 0 && BowDraw.isDrawing(player)
+        return settings.bowHitTicks > 0 && BowDraw.isDrawing(player)
                 && spotWanted(player);
     }
 
@@ -64,10 +64,6 @@ final class BowSpot extends AimSpotKind {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL_FIXED : HudSpot.FREE;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.bowMinHitIntervalTicks;
-    }
 
     /** F1 で画面を隠している間は当てない（今までどおり）。 */
     @Override

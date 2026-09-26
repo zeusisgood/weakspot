@@ -66,11 +66,11 @@ public final class RightClickHits {
         if (!withinReach(player, pos)) {
             return;
         }
-        SyncedSettings settings = SyncedSettings.fromConfig();
+        SyncedSettings settings = SyncedSettings.server();
         if (RightClickTargets.classify(world, player, pos, settings) != kind) {
             return;
         }
-        if (!HitGate.intervalOk(now, clicking.lastHitTick[kind.ordinal()], minHitInterval(kind))) {
+        if (!HitGate.intervalOk(now, clicking.lastHitTick[kind.ordinal()], kind)) {
             return;
         }
         clicking.lastHitTick[kind.ordinal()] = now;
@@ -94,17 +94,6 @@ public final class RightClickHits {
             GrowthWarnings.onGrowthHit(player, world, pos, changed);
         } else if (kind == HitKind.MACHINE) {
             MachineAccelerator.hit(world, pos, combo);
-        }
-    }
-
-    private static int minHitInterval(HitKind kind) {
-        switch (kind) {
-            case MACHINE:
-                return WeakSpotConfig.machineMinHitIntervalTicks;
-            case HARVEST:
-                return WeakSpotConfig.harvestMinHitIntervalTicks;
-            default:
-                return WeakSpotConfig.growthMinHitIntervalTicks;
         }
     }
 

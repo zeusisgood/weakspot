@@ -104,7 +104,7 @@ public final class AnimalHits {
         Entity entity = player.world.getEntityByID(entityId);
         State state = new State(0);
         if (entity != null && AnimalTargets.isCandidate(entity) && player.getDistanceSq(entity) < REACH_SQ) {
-            SyncedSettings settings = SyncedSettings.fromConfig();
+            SyncedSettings settings = SyncedSettings.server();
             state = state(entity, settings);
             if (entity instanceof EntityVillager) {
                 VillagerBreedHints.onQuery(player, (EntityVillager) entity, settings);
@@ -122,11 +122,11 @@ public final class AnimalHits {
         if (entity == null || player.getDistanceSq(entity) >= REACH_SQ) {
             return;
         }
-        SyncedSettings settings = SyncedSettings.fromConfig();
+        SyncedSettings settings = SyncedSettings.server();
         if (!AnimalTargets.isTarget(player, entity, settings)) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.ANIMAL, WeakSpotConfig.animalMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.ANIMAL)) {
             return;
         }
         State state = state(entity, settings);

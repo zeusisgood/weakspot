@@ -3,6 +3,7 @@ package com.example.weakspot.server;
 import com.example.weakspot.PlayerRules;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
+import com.example.weakspot.config.SyncedSettings;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,16 +31,20 @@ public final class HitGate {
     private HitGate() {
     }
 
-    /** その種類をオンにしていて（一時オフ・種類ごとのオフ）、観戦モードでない。1.8.6 からクリエイティブも受け付ける。 */
+    /**
+     * サーバーの設定でその種類がオンで（1.8.9 から。SyncedSettings.enabled）、プレイヤーもオンにしていて（一時オフ・
+     * 種類ごとのオフ）、観戦モードでない。1.8.6 からクリエイティブも受け付ける。
+     */
     static boolean allowed(EntityPlayerMP player, HitKind kind) {
-        return ServerSwitches.isEnabled(player, kind) && PlayerRules.canUse(player);
+        return SyncedSettings.server().enabled(kind) && ServerSwitches.isEnabled(player, kind)
+                && PlayerRules.canUse(player);
     }
 
     /** 前に受け付けたヒットから、設定の間隔（− 2 tick）がたっているか（記録はしない。受け付けたら mark）。 */
-    static boolean ready(EntityPlayerMP player, HitKind kind, int minIntervalTicks) {
+    static boolean ready(EntityPlayerMP player, HitKind kind) {
         Map<UUID, Long> last = LAST_HIT.get(kind);
         Long previous = last == null ? null : last.get(player.getUniqueID());
-        return previous == null || intervalOk(player.world.getTotalWorldTime(), previous, minIntervalTicks);
+        return previous == null || intervalOk(player.world.getTotalWorldTime(), previous, kind);
     }
 
     /** このヒットを受け付けた（次の ready の起点）。 */
@@ -63,9 +68,9 @@ public final class HitGate {
         return combo;
     }
 
-    /** 自分で最後の tick を持つ種類（採掘・右クリック・釣り・移動）向けの判定。 */
-    static boolean intervalOk(long now, long last, int minIntervalTicks) {
-        return now - last >= Math.max(0, minIntervalTicks - INTERVAL_JITTER_TICKS);
+    /** 自分で最後の tick を持つ種類（採掘・右クリック・釣り・移動）向けの判定。間隔は設定の表から（1.8.9）。 */
+    static boolean intervalOk(long now, long last, HitKind kind) {
+        return now - last >= Math.max(0, SyncedSettings.server().minHitInterval(kind) - INTERVAL_JITTER_TICKS);
     }
 
     /** ログアウトの後片付け。プレイヤーごとの記憶を持つ *Hits は、ここに足す（付け忘れを防ぐため 1 か所にまとめる）。 */

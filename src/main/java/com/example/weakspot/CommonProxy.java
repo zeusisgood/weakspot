@@ -14,7 +14,7 @@ public class CommonProxy {
 
     /** クライアントが今使う [サーバー] の設定値。物理サーバーでは呼ばれないが、念のため自分の値を返す。 */
     public SyncedSettings clientSettings() {
-        return SyncedSettings.fromConfig();
+        return SyncedSettings.server();
     }
 
     /** 他のプレイヤーがヒットした（サーバー → クライアントのパケットから呼ばれる）。 */

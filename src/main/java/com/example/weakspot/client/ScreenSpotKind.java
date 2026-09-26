@@ -39,7 +39,10 @@ abstract class ScreenSpotKind {
         return has;
     }
 
-    abstract int minHitInterval(SyncedSettings settings);
+    /** ヒットの最小間隔（設定の表から。1.8.9）。 */
+    final int minHitInterval(SyncedSettings settings) {
+        return settings.minHitInterval(kind);
+    }
 
     /** 前の位置 (prevX, prevY) から離れたランダムな位置を x, y に入れる。置ける場所がなければ false。 */
     abstract boolean place(GuiScreen gui, double prevX, double prevY);

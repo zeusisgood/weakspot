@@ -3,7 +3,7 @@ package com.example.weakspot.server;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.WeakSpotMod;
-import com.example.weakspot.common.VehicleBoostMath;
+import com.example.weakspot.common.TimedBoostMath;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.Iterator;
 import java.util.Map;
@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 乗り物の弱点のヒット通知の検証と効果（論理サーバー。1.6.0）。倍率は VehicleBoostMath（コンボの上乗せあり、上限は
+ * 乗り物の弱点のヒット通知の検証と効果（論理サーバー。1.6.0）。倍率は TimedBoostMath（コンボの上乗せあり、上限は
  * 初期値で無し）、続く時間は vehicleBoostDurationTicks（ヒットのたびに戻す）。
  * 馬系・豚は移動速度に一時的な修正（保存しない）をかけ、乗っている人のクライアントにも届いて効く。
  * トロッコは、ワールドの tick の最後に onUpdate を余分に呼ぶ（レールに沿って進むので、カーブでも脱線しない）。
@@ -51,7 +51,7 @@ public final class VehicleHits {
         if (vehicle == null || vehicle.getEntityId() != entityId) {
             return;
         }
-        if (!HitGate.ready(player, HitKind.VEHICLE, WeakSpotConfig.vehicleMinHitIntervalTicks)) {
+        if (!HitGate.ready(player, HitKind.VEHICLE)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.VEHICLE, new BlockPos(vehicle), streak);
@@ -66,12 +66,11 @@ public final class VehicleHits {
     }
 
     private static boolean canBoost(EntityPlayerMP player) {
-        return HitGate.allowed(player, HitKind.VEHICLE)
-                && WeakSpotConfig.vehicleWeakSpotEnabled && VehicleTargets.kind(player) != null;
+        return HitGate.allowed(player, HitKind.VEHICLE) && VehicleTargets.kind(player) != null;
     }
 
     private static void boost(Entity vehicle, int combo) {
-        double multiplier = VehicleBoostMath.multiplier(WeakSpotConfig.vehicleBoostMultiplier,
+        double multiplier = TimedBoostMath.multiplier(WeakSpotConfig.vehicleBoostMultiplier,
                 WeakSpotConfig.vehicleBoostMaxMultiplier, combo);
         Boost boost = BOOSTS.computeIfAbsent(vehicle, v -> new Boost());
         boost.multiplier = multiplier;
@@ -102,7 +101,7 @@ public final class VehicleHits {
                 continue;
             }
             if (vehicle instanceof EntityMinecart && vehicle.isBeingRidden()) {
-                double extra = VehicleBoostMath.extra(boost.multiplier) + boost.carry;
+                double extra = TimedBoostMath.extra(boost.multiplier) + boost.carry;
                 int calls = (int) Math.floor(extra);
                 boost.carry = extra - calls;
                 for (int i = 0; i < calls && !vehicle.isDead; i++) {

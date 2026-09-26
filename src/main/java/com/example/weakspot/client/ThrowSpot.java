@@ -31,7 +31,7 @@ final class ThrowSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return settings.throwWeakSpotEnabled && ThrowCharge.isHoldingThrowable(player);
+        return ThrowCharge.isHoldingThrowable(player);
     }
 
     @Override
@@ -39,10 +39,6 @@ final class ThrowSpot extends AimSpotKind {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.throwMinHitIntervalTicks;
-    }
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {

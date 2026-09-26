@@ -30,7 +30,7 @@ final class PortalSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return !player.isRiding() && settings.portalWeakSpotEnabled && inPortal(player);
+        return !player.isRiding() && inPortal(player);
     }
 
     @Override
@@ -38,10 +38,6 @@ final class PortalSpot extends AimSpotKind {
         return HudSpot.FREE;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.portalMinHitIntervalTicks;
-    }
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {

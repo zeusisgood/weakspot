@@ -2,7 +2,7 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.VehicleTargets;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.VehicleBoostMath;
+import com.example.weakspot.common.TimedBoostMath;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.HitMessage;
@@ -62,7 +62,7 @@ final class VehicleSpot extends AimSpotKind {
     /** 乗り物の弱点を出すか（乗り物が動いているとき）。 */
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        if (!settings.vehicleWeakSpotEnabled || VehicleTargets.kind(player) == null) {
+        if (VehicleTargets.kind(player) == null) {
             return false;
         }
         Entity vehicle = player.getRidingEntity();
@@ -74,10 +74,6 @@ final class VehicleSpot extends AimSpotKind {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
 
-    @Override
-    int minHitInterval(SyncedSettings settings) {
-        return settings.vehicleMinHitIntervalTicks;
-    }
 
     @Override
     HitMessage message(EntityPlayerSP player, int streak) {
@@ -114,7 +110,7 @@ final class VehicleSpot extends AimSpotKind {
                 || ClientWeakSpotHandler.clientTick >= boostUntil) {
             return;
         }
-        double extra = VehicleBoostMath.extra(multiplier);
+        double extra = TimedBoostMath.extra(multiplier);
         double dx = vehicle.motionX * extra;
         double dz = vehicle.motionZ * extra;
         double step = Math.hypot(dx, dz);
@@ -131,10 +127,10 @@ final class VehicleSpot extends AimSpotKind {
     static void onRiderHit(int combo) {
         Minecraft mc = Minecraft.getMinecraft();
         SyncedSettings settings = ClientSettings.get();
-        if (mc.player == null || !settings.vehicleWeakSpotEnabled || VehicleTargets.kind(mc.player) == null) {
+        if (mc.player == null || !settings.enabled(HitKind.VEHICLE) || VehicleTargets.kind(mc.player) == null) {
             return;
         }
-        multiplier = VehicleBoostMath.multiplier(settings.vehicleBoostMultiplier, settings.vehicleBoostMaxMultiplier,
+        multiplier = TimedBoostMath.multiplier(settings.vehicleBoostMultiplier, settings.vehicleBoostMaxMultiplier,
                 combo);
         boostDuration = Math.max(1, settings.vehicleBoostDurationTicks);
         boostUntil = ClientWeakSpotHandler.clientTick + boostDuration;

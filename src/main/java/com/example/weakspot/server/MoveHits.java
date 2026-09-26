@@ -2,7 +2,7 @@ package com.example.weakspot.server;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.VehicleBoostMath;
+import com.example.weakspot.common.TimedBoostMath;
 import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +80,7 @@ public final class MoveHits {
 
     /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, int streak) {
-        if (!HitGate.allowed(player, kind)
-                || !isEnabledOnServer(kind)) {
+        if (!HitGate.allowed(player, kind)) {
             return;
         }
         State state = STATES.get(player.getUniqueID());
@@ -93,28 +92,15 @@ public final class MoveHits {
             return;
         }
         Long last = state.lastHit.get(kind);
-        if (last != null && !HitGate.intervalOk(now, last, minHitInterval(kind))) {
+        if (last != null && !HitGate.intervalOk(now, last, kind)) {
             return;
         }
         state.lastHit.put(kind, now);
         int combo = HitGate.accept(player, kind, new BlockPos(player), streak);
         if (kind == HitKind.SPRINT) {
-            SPRINT_SPEED.set(player, VehicleBoostMath.multiplier(WeakSpotConfig.sprintBoostMultiplier,
+            SPRINT_SPEED.set(player, TimedBoostMath.multiplier(WeakSpotConfig.sprintBoostMultiplier,
                     WeakSpotConfig.sprintBoostMaxMultiplier, combo));
             state.sprintRemaining = WeakSpotConfig.sprintBoostDurationTicks;
-        }
-    }
-
-    private static boolean isEnabledOnServer(HitKind kind) {
-        switch (kind) {
-            case LADDER:
-                return WeakSpotConfig.ladderWeakSpotEnabled;
-            case ELYTRA:
-                return WeakSpotConfig.elytraWeakSpotEnabled;
-            case SPRINT:
-                return WeakSpotConfig.sprintWeakSpotEnabled;
-            default:
-                return false;
         }
     }
 
@@ -126,17 +112,6 @@ public final class MoveHits {
                 return state.elytraTick;
             default:
                 return state.sprintTick;
-        }
-    }
-
-    private static int minHitInterval(HitKind kind) {
-        switch (kind) {
-            case LADDER:
-                return WeakSpotConfig.ladderMinHitIntervalTicks;
-            case ELYTRA:
-                return WeakSpotConfig.elytraMinHitIntervalTicks;
-            default:
-                return WeakSpotConfig.sprintMinHitIntervalTicks;
         }
     }
 
