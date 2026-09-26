@@ -73,12 +73,17 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - CI（`.github/workflows/ci.yml` の `build`。まっさらな環境で `./gradlew build`）が PR で走る。`main` のルールで CI の成功が必須なので、赤いままでは Merge できない。**自分が作った PR の CI が赤くなったら、原因を直して push する**（Claude のコンテナで通っても、まっさらな環境で落ちることがある）。
   - ユーザーが GitHub で「Create a merge commit」で取り込む。取り込んだブランチは自動で消える（設定「Automatically delete head branches」）。取り込まれたあとの作業は、同じ名前のブランチを `main` から作り直し、新しい PR にする（取り込み済みの PR は使い回さない）。
   - `main` への直接の push は、ルールで禁止（例外はユーザーだけ）。Claude は `main` に push しない。
+  - Dependabot（`.github/dependabot.yml`）が、ワークフローの部品の更新 PR を月に 1 回作る。CI が緑なら、ユーザーが Merge してよい。赤なら Claude が原因を調べる。
   - 自動で消えなかったブランチを消すとき: 消してよいのは、中身がすべて `main` に入っているブランチだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチは、消さずにユーザーに聞く。作業中のセッションのブランチは残す。消すのはユーザーで、Claude は候補の一覧と削除のコマンドを渡す。タグはブランチと別なので、ブランチを消しても残る。
 - リリースしたら、jar を `build/release/` にコピーしてユーザーに添付する（Merge の前に試せるように）。PR のリンクと、「試してほしいこと」の箇条書きを渡す。
 
 ## 次の作業
 
 なし（1.9.0 をリリースした。次の要望を待つ）。
+
+### TODO（ユーザーの判断: いつかやる。やるときに相談する）
+
+- **Modrinth / CurseForge への自動公開**: Release を作るとき（`.github/workflows/ci.yml` の `release`）に、jar を配布サイトにも上げる。配布サイトのアカウントと、トークンをリポジトリの Secrets に登録してもらう必要がある。公開するかどうか、どちらのサイトにするかを先に決める。
 
 ### 1.10.0 に向けたメモ（ユーザーの判断: 1.8.8 のあとの相談で、いったん見送り。入れる目星だけ付けた）
 
