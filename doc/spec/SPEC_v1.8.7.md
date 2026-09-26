@@ -45,12 +45,16 @@
 - `onBreakSpeed` の時間枠の中は、速さに 1 + (`boostMultiplier` − 1) × f を掛ける（f = 1 なら今までと同じ `boostMultiplier`）
 - コンボ数はクライアントとサーバーがそれぞれ数える（機械などと同じ）。サーバーがヒットを 1 回拒否した直後に段階の境目をまたぐと、一瞬だけ掛け数がずれる。ただし、サーバーは破壊の進み具合が 70% 以上なら壊れたことを認めるので、1 ヒット分のずれは吸収できる
 
-### 2.4 サーバーの掛け数の求め方の共通化
+### 2.4 サーバーのヒット受付の後半の共通化（ユーザーの判断: 1.8.7 に入れる）
 
-- 各 `server/*Hits` にある「`ServerStats.countStreak(player)` → `ComboFactor.factor(コンボ)`」を、`ServerStats.comboFactor(player)`（このヒットを数えて、掛け数を返す）にまとめる。採掘（2.2）・機械（`RightClickHits`）・乗り物・はしご・走り・エリトラ・投げる物・近接・ゲートが使う
-  - 機械は `MachineAccelerator.hit` にコンボ数を渡しているので、数が要る所は今の `countStreak` のまま（掛け数だけ要る所をまとめる）
-  - 収穫は収穫できたときだけ数える（`peekStreak`）ので今のまま
-- 遊び方は変えない（同じ値になる）
+- 各 `server/*Hits` の、ヒットを受け付けると決めたあとの 4 行（`HitGate.mark` → `ServerStats.recordKindHit` → `ServerStats.countStreak` → `ServerBoostTracker.notifyNearbyPlayers`。順番も所によって違う）を、`HitGate.accept(player, kind, 音の位置, streak)` の 1 つにまとめる
+  - 中身は mark → recordKindHit → countStreak → notifyNearbyPlayers の順（この順にそろえる。節目の判定とコンボの記録は互いに影響しないので、結果は変わらない。実装のときに確かめる）。戻り値はこのヒットを数えたあとのコンボ数
+  - `mark` は、自分で最後の tick を持つ種類（採掘・右クリック・釣り・移動）でも呼んでよい（使われない記録が残るだけで、ログアウトで消える）
+  - 採掘は `recordKindHit` が何もしない（採掘は `recordHit` で短縮した時間と一緒に数える）ので、`recordHit` はそのまま先に呼ぶ
+  - 収穫は、収穫できたかどうかを見る前に `peekStreak` でコンボを先読みする今の形のまま
+- 使う所: 採掘（`ServerBoostTracker`）・成長・機械・収穫（`RightClickHits`）・動物・釣り・弓・近接・乗り物・食事・睡眠・はしご・エリトラ・走り（`MoveHits`）・エンチャント・投げる物・ゲート
+- コンボの掛け数は `ComboFactor.factor(HitGate.accept(...))` で求める（別の `comboFactor` は作らない）
+- 遊び方は変えない（同じ値になる）。`HitHandlersTest`・`WireCompatTest` がそのまま通ること
 
 ## 3. 種類ごとの掛け数の表示（ユーザーの判断: すべておすすめ）
 
@@ -101,7 +105,7 @@
 
 - 現行を 1.8.7 に
 - `ComboFactor` を使う種類に採掘を足す。「重要: サーバー側のブーストは時間枠ではない」の節に、1 ヒットの追加進捗に f を掛けること（クライアントは時間枠の速さに 1 + (倍率 − 1) × f）を足す。ブーストの目安の式も f 込みに
-- コンボの表示の説明を、種類の表示（3 の表・いつ出すか・色）に書き換える。`ServerStats.comboFactor` を足す
+- コンボの表示の説明を、種類の表示（3 の表・いつ出すか・色）に書き換える。1.8.6 の共通の部品の `HitGate` の説明に `accept` を足す
 
 ## 6. ユーザーに確認してもらうこと
 
