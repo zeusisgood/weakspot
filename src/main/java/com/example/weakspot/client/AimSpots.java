@@ -82,11 +82,11 @@ final class AimSpots {
                 continue;
             }
             SyncedSettings settings = ClientSettings.get();
-            if (!ClientWeakSpotHandler.canHitNow(k.kind, k.minHitInterval(settings))) {
+            if (!OwnHits.canHit(k.kind, k.minHitInterval(settings))) {
                 continue;
             }
             EntityPlayerSP player = mc.player;
-            int streak = ClientWeakSpotHandler.registerHit(k.kind);
+            int streak = OwnHits.register(k.kind);
             WeakSpotMod.network.sendToServer(k.message(player, streak));
             k.onHit(mc, player, settings, streak);
             if (k.keepAfterHit(player)) {

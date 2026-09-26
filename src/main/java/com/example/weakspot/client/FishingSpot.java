@@ -208,13 +208,13 @@ final class FishingSpot {
             return;
         }
         event.setCanceled(true);
-        if (ClientWeakSpotHandler.canHitNow(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
+        if (OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
             onHit();
         }
     }
 
     private static void onHit() {
-        int streak = ClientWeakSpotHandler.registerHit(HitKind.FISHING);
+        int streak = OwnHits.register(HitKind.FISHING);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.FISHING, streak));
         double[] next = FishingMath.nextSpot(dx, dz, RANDOM);
         dx = next[0];

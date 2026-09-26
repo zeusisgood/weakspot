@@ -93,10 +93,10 @@ final class ScreenSpots {
             }
             // 当てたクリックは、ボタンやスロットに届かないようにする
             event.setCanceled(true);
-            if (!ClientWeakSpotHandler.canHitNow(k.kind, k.minHitInterval(ClientSettings.get()))) {
+            if (!OwnHits.canHit(k.kind, k.minHitInterval(ClientSettings.get()))) {
                 return;
             }
-            int streak = ClientWeakSpotHandler.registerHit(k.kind);
+            int streak = OwnHits.register(k.kind);
             WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(k.kind, streak));
             k.onHit();
             if (k.place(gui, k.x, k.y)) {

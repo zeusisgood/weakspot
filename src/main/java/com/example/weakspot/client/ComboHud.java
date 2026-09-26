@@ -6,7 +6,6 @@ import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.common.ComboMilestones;
 import com.example.weakspot.common.ComboTier;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.HitPitch;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.common.MachineComboBoost;
 import com.example.weakspot.common.ScheduledBoost;
@@ -29,10 +28,10 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 自分の連続ヒット（コンボ）の画面表示。数は ClientWeakSpotHandler.STREAK（ヒット音の音階と同じ数）。
+ * 自分の連続ヒット（コンボ）の画面表示。数は OwnHits.STREAK（ヒット音の音階と同じ数）。
  * 2 以上で「12 HIT」と出し、ヒットのたびに弾ませる。下のバーは途切れるまでの残り時間。
  * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、100、250、500、1000（以降 1000 ごと）で
- * 強調音と光を出し、上の段階ほど派手にする（100 は和音、250 から駆け上がり、500 から花火、1000 からタイトル）。
+ * 光を出す（音・花火・タイトルは ComboEffects。1.8.9 で分けた）。
  * 直前にヒットした種類の弱点が出ている間は、その下に種類の表示を出す（1.8.7）: コンボの掛け数を使う種類は「走り ×1.25」
  * （掛け数が 1 より大きいとき）、機械は今の速さ「機械 4倍速」、ディスペンサー・ドロッパーは「発射 ×2」。色はその種類の弱点の色。
  * 時間は ClientWeakSpotHandler.clientTick（一時停止中は止まる）で数える。F1 で HUD を隠している間は描かない。
@@ -46,21 +45,8 @@ final class ComboHud {
     /** 残りがこの割合を切ったら、バーを点滅させる。 */
     private static final double LOW_FRACTION = 0.25;
     private static final int LOW_RGB = 0xFF3333;
-    /** 段階の演出の強調音を、ヒット音から少し遅らせる（tick）。 */
-    private static final int ACCENT_DELAY_TICKS = 2;
-    /** 100 の和音（ド・ミ・ソ・上のド。連続ヒット数で表した音階の位置）。 */
-    private static final int[] CHORD = {1, 3, 5, HitPitch.SCALE_LENGTH};
-    /** 250 の駆け上がりの音の数（ドからソまで）。 */
-    private static final int SHORT_RUN = 5;
     /** 種類の表示（「走り ×1.25」「機械 4倍速」）の文字の大きさ（コンボの数字に対する割合）。 */
     private static final float KIND_LABEL_SCALE = 0.75F;
-    /** 1000 のタイトル（フェードイン、表示、フェードアウトの tick）。バニラのタイトルと同じ長さ。 */
-    private static final int TITLE_IN = 5;
-    private static final int TITLE_STAY = 50;
-    private static final int TITLE_OUT = 20;
-    /** 節目のタイトルがこの tick 以内に出ていたら、1000 のタイトルは出さない（節目を優先する）。 */
-    private static final int TITLE_GUARD_TICKS = TITLE_IN + TITLE_STAY + TITLE_OUT;
-    private static final float TITLE_SCALE = 3;
 
     private static final ComboMilestones MILESTONES = new ComboMilestones();
 
@@ -81,9 +67,6 @@ final class ComboHud {
     /** 「発射 ×n」の回数が上がった瞬間（光らせる）と、その段階の数。 */
     private static double shotsStepTime = Double.NEGATIVE_INFINITY;
     private static int shotsStepCombo;
-    /** 1000 のタイトルを出し始めた clientTick と、その数（0 なら出していない）。 */
-    private static long titleTick;
-    private static int titleCombo;
     /** 最後に描いたコンボの数字の中心の x（「機械 ×n」をその下にそろえる）。 */
     private static float lastCx;
     /** このフレームのボスバーの下端（TOP_CENTER のときに避ける）。 */
@@ -115,49 +98,8 @@ final class ComboHud {
                 && WeakSpotConfig.comboMilestoneEffects) {
             stepTime = time;
             stepCombo = newCombo;
-            playStep(newCombo);
+            ComboEffects.playStep(newCombo);
         }
-    }
-
-    /** 段階の演出。上の段階ほど足していく。 */
-    private static void playStep(int step) {
-        if (step >= ComboMilestones.GRAND_STEP) {
-            for (int i = 0; i < HitPitch.TWO_OCTAVE_LENGTH; i++) {
-                float pitch = HitPitch.twoOctave(i);
-                HitSounds.schedule(ACCENT_DELAY_TICKS + i, () -> HitSounds.playOwnPitch(pitch));
-            }
-            playChord(ACCENT_DELAY_TICKS + HitPitch.TWO_OCTAVE_LENGTH + 1);
-            HitSounds.schedule(ACCENT_DELAY_TICKS, () -> {
-                MilestoneEffects.comboFireworks(3, ComboMilestones.glowRgb(step));
-                long now = ClientWeakSpotHandler.clientTick;
-                // 累計の節目のタイトルが出ていたら、そちらを優先する
-                if (now - MilestoneEffects.lastShownTick > TITLE_GUARD_TICKS) {
-                    titleTick = now;
-                    titleCombo = step;
-                }
-            });
-        } else if (step >= 500) {
-            HitSounds.playScale(HitSounds::playOwn, 1, ACCENT_DELAY_TICKS);
-            HitSounds.schedule(ACCENT_DELAY_TICKS,
-                    () -> MilestoneEffects.comboFireworks(1, ComboMilestones.glowRgb(step)));
-        } else if (step >= 250) {
-            for (int i = 0; i < SHORT_RUN; i++) {
-                int note = i + 1;
-                HitSounds.schedule(ACCENT_DELAY_TICKS + i, () -> HitSounds.playOwn(note));
-            }
-        } else if (step >= 100) {
-            playChord(ACCENT_DELAY_TICKS);
-        } else {
-            HitSounds.schedule(ACCENT_DELAY_TICKS, () -> HitSounds.playOwn(HitPitch.SCALE_LENGTH));
-        }
-    }
-
-    private static void playChord(int delay) {
-        HitSounds.schedule(delay, () -> {
-            for (int note : CHORD) {
-                HitSounds.playOwn(note);
-            }
-        });
     }
 
     /** 40 tick ヒットがなく途切れた。 */
@@ -178,7 +120,7 @@ final class ComboHud {
         factorStepTime = Double.NEGATIVE_INFINITY;
         lastKind = null;
         shotsStepTime = Double.NEGATIVE_INFINITY;
-        titleCombo = 0;
+        ComboEffects.clear();
         MILESTONES.reset();
     }
 
@@ -205,7 +147,7 @@ final class ComboHud {
             return;
         }
         double now = ClientWeakSpotHandler.clientTick + event.getPartialTicks();
-        drawTitle(mc, event.getResolution(), now);
+        ComboEffects.drawTitle(mc, event.getResolution(), now);
         if (combo >= ComboDisplay.MIN_SHOWN) {
             boolean big = stepCombo >= 250 && lastHitTime == stepTime;
             double bounce = ComboDisplay.bounceScale(now - lastHitTime,
@@ -291,7 +233,7 @@ final class ComboHud {
             return machineSpeed(combo);
         }
         if (kind == HitKind.MINING) {
-            return ClientWeakSpotHandler.miningComboFactor(Math.max(0, combo));
+            return MiningBoost.comboFactor(Math.max(0, combo));
         }
         return kind.usesComboFactor() ? ComboFactor.factor(Math.max(0, combo)) : 1;
     }
@@ -340,34 +282,6 @@ final class ComboHud {
             default:
                 return new float[] {res.getScaledWidth() / 2F, res.getScaledHeight() / 2F + CROSSHAIR_GAP + textHeight / 2};
         }
-    }
-
-    /** 1000（以降 1000 ごと）のタイトル。画面の中央の少し上に、金色で大きく出す。 */
-    private static void drawTitle(Minecraft mc, ScaledResolution res, double now) {
-        if (titleCombo == 0) {
-            return;
-        }
-        double t = now - titleTick;
-        if (t < 0 || t >= TITLE_GUARD_TICKS || MilestoneEffects.lastShownTick >= titleTick) {
-            titleCombo = 0;
-            return;
-        }
-        double alpha = t < TITLE_IN ? t / TITLE_IN
-                : t < TITLE_IN + TITLE_STAY ? 1 : 1 - (t - TITLE_IN - TITLE_STAY) / TITLE_OUT;
-        int a = (int) Math.round(Math.max(0, Math.min(1, alpha)) * 255);
-        if (a < 8) {
-            return;
-        }
-        FontRenderer font = mc.fontRenderer;
-        String text = TextFormatting.BOLD + I18n.format("weakspot.combo.title", titleCombo);
-        GlStateManager.enableBlend();
-        GlStateManager.pushMatrix();
-        GlStateManager.translate(res.getScaledWidth() / 2F, res.getScaledHeight() / 2F - 40, 0);
-        GlStateManager.scale(TITLE_SCALE, TITLE_SCALE, 1);
-        font.drawStringWithShadow(text, -font.getStringWidth(text) / 2F, -font.FONT_HEIGHT / 2F,
-                a << 24 | ComboMilestones.glowRgb(ComboMilestones.GRAND_STEP));
-        GlStateManager.popMatrix();
-        GlStateManager.color(1, 1, 1, 1);
     }
 
     /**

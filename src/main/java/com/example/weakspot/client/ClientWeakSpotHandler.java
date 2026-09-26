@@ -4,16 +4,11 @@ import com.example.weakspot.PlayerRules;
 import com.example.weakspot.AnimalTargets;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
-import com.example.weakspot.common.BlockHealthBar;
-import com.example.weakspot.common.BoostMath;
-import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.common.HitKind;
-import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.server.MachineStates;
 import com.example.weakspot.network.HitMessage;
-import java.util.Arrays;
 import java.util.Random;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.state.IBlockState;
@@ -27,9 +22,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -41,7 +34,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * 弱点は一度に1つだけ。
  *
  * ヒット判定は毎フレーム行う（素早く照準を動かしたときに tick 単位だと取りこぼすため）。
- * 破壊速度のブーストは PlayerControllerMP の tick ごとの進捗に掛かるので、tick 単位で管理する。
+ * 1.8.9 で、採掘のブーストを MiningBoost、共通のヒット処理（連続ヒット・間隔）を OwnHits、足元・面のバーを OwnSpotBars に分けた。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ClientWeakSpotHandler {
@@ -52,24 +45,10 @@ public final class ClientWeakSpotHandler {
     static long clientTick;
     static WeakSpot spot;
     /** 今のフレームの partialTicks（ヒットした瞬間を、フレームの途中の値まで含めてコンボの表示に渡す）。 */
-    private static float framePartialTicks;
+    static float framePartialTicks;
 
-    /** 種類ごとの最後のヒット（ヒット間隔の制限に使う）。 */
-    private static final long[] LAST_HIT_TICK = new long[HitKind.values().length];
-    /** 連続ヒット数。ブロックや種類をまたいで続き、ヒット音のピッチとコンボの表示に使う。 */
-    static final HitStreak STREAK = new HitStreak();
     /** 死亡・ディメンション移動（どちらもプレイヤーが作り直される）を見分けるため。 */
     private static EntityPlayerSP lastPlayer;
-    private static BlockPos boostPos;
-    private static long boostHitTick = Long.MIN_VALUE / 2;
-    /** 最後の採掘ヒットのコンボの掛け数（1.8.7。サーバーが古ければ 1）。 */
-    private static double boostFactor = 1;
-    /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
-    private static boolean suppressBoost;
-
-    static {
-        Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
-    }
 
     private ClientWeakSpotHandler() {
     }
@@ -89,14 +68,14 @@ public final class ClientWeakSpotHandler {
         if (mc.player != lastPlayer || mc.player.getHealth() <= 0) {
             // 死亡したとき、リスポーンやディメンション移動でプレイヤーが作り直されたときは、連続ヒットを最初に戻す
             lastPlayer = mc.player;
-            resetStreak();
+            OwnHits.resetStreak();
         }
         if (mc.isGamePaused()) {
             return;
         }
         clientTick++;
         MiningProgress.sample(mc.playerController);
-        int broken = STREAK.expire(clientTick);
+        int broken = OwnHits.STREAK.expire(clientTick);
         if (broken > 0) {
             ComboHud.onBreak(broken, clientTick);
         }
@@ -144,12 +123,12 @@ public final class ClientWeakSpotHandler {
         if (WeakSpotConfig.weakSpotsEnabled) {
             updateAim(mc);
             if (WeakSpotConfig.blockHealthBarEnabled) {
-                health = healthBarRemaining(mc, event.getPartialTicks());
+                health = OwnSpotBars.healthRemaining(mc, event.getPartialTicks());
             }
             if (WeakSpotConfig.growthBarEnabled) {
-                growth = growthBarProgress(mc);
+                growth = OwnSpotBars.growthProgress(mc);
             }
-            animal = animalBarProgress();
+            animal = OwnSpotBars.animalProgress();
             if (spot != null && spot.entity != null) {
                 // 動物・敵の弱点は、描く時点の位置に合わせる（当たり判定は updateAim で、その tick の位置に合わせた）
                 spot.follow(WeakSpot.renderBox(spot.entity, event.getPartialTicks()));
@@ -158,54 +137,8 @@ public final class ClientWeakSpotHandler {
             // 一時オフ。J を押した直後のフレームでも、自分の弱点を出さない
             stopOwnWeakSpots();
         }
-        WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.weakSpotsEnabled && machineBar(mc),
+        WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.weakSpotsEnabled && OwnSpotBars.machineBar(mc),
                 clientTick, event.getPartialTicks());
-    }
-
-    /**
-     * 耐久バーに出す、掘っているブロックの残りの耐久（0〜1）。出さないときは -1。
-     * 採掘の弱点がこのフレームの照準の面に出ていて（弱点が出るブロックで、クリエイティブでない）、
-     * そのブロックを今掘っているときだけ出す。長押しをやめた・壊れたときは、掘っていない扱いになってすぐに消える。
-     */
-    private static double healthBarRemaining(Minecraft mc, float partialTicks) {
-        RayTraceResult target = mc.objectMouseOver;
-        if (spot == null || spot.lastActiveTick != clientTick || mc.player.capabilities.isCreativeMode
-                || target == null || target.typeOfHit != RayTraceResult.Type.BLOCK
-                || !spot.matches(HitKind.MINING, target.getBlockPos(), target.sideHit)) {
-            return -1;
-        }
-        double progress = MiningProgress.progress(mc.playerController, spot.pos, partialTicks);
-        return progress < 0 ? -1 : BlockHealthBar.remaining(progress);
-    }
-
-    /**
-     * 機械の進み具合のバーを出すか（1.6.0）。機械の弱点がかまど・醸造台・スポナーに出ていて、このフレームで照準が
-     * 合っているとき。出すときは、サーバーに値を問い合わせる（間隔があいていなければ送らない）。
-     */
-    private static boolean machineBar(Minecraft mc) {
-        if (!WeakSpotConfig.machineBarEnabled || !machineSpotActive()
-                || !MachineStates.hasBar(mc.world.getTileEntity(spot.pos))) {
-            return false;
-        }
-        MachineBars.query(spot.pos, clientTick, false);
-        return true;
-    }
-
-    /** 成長バーに出す作物の進み具合（0〜1）。成長の弱点が今出ているときだけ。出さないときは -1。 */
-    private static double growthBarProgress(Minecraft mc) {
-        if (spot == null || spot.kind != HitKind.GROWTH || spot.lastActiveTick != clientTick) {
-            return -1;
-        }
-        return GrowthBar.progress(mc.world, spot.pos);
-    }
-
-    /** 動物の足元のバーに出す進み具合（0〜1）。動物の弱点が今出ていて、サーバーの返事があるときだけ。出さないときは -1。 */
-    private static double animalBarProgress() {
-        if (spot == null || spot.kind != HitKind.ANIMAL || spot.lastActiveTick != clientTick) {
-            return -1;
-        }
-        AnimalStates.State state = AnimalStates.get(spot.entity.getEntityId(), clientTick);
-        return state == null ? -1 : state.barProgress();
     }
 
     /**
@@ -214,8 +147,7 @@ public final class ClientWeakSpotHandler {
      */
     static void stopOwnWeakSpots() {
         spot = null;
-        boostPos = null;
-        boostHitTick = Long.MIN_VALUE / 2;
+        MiningBoost.clear();
         WeakSpotRenderer.clearFlashes();
         FishingSpot.clear();
         AimSpots.clearAll();
@@ -256,7 +188,7 @@ public final class ClientWeakSpotHandler {
     private static void aimMining(Minecraft mc, RayTraceResult target) {
         BlockPos pos = target.getBlockPos();
         IBlockState state = mc.world.getBlockState(pos);
-        if (!isEligible(mc.world, mc.player, pos, state)) {
+        if (!MiningBoost.isEligible(mc.world, mc.player, pos, state)) {
             return;
         }
         SyncedSettings settings = ClientSettings.get();
@@ -267,7 +199,7 @@ public final class ClientWeakSpotHandler {
             return;
         }
         spot.lastActiveTick = clientTick;
-        if (spot.isHitBy(target.hitVec) && canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
+        if (spot.isHitBy(target.hitVec) && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
             onHit(mc);
         }
     }
@@ -298,7 +230,7 @@ public final class ClientWeakSpotHandler {
         }
         spot.lastActiveTick = clientTick;
         if (target.sideHit == spot.face && spot.isHitBy(target.hitVec)
-                && canHit(kind, settings.minHitInterval(kind))) {
+                && OwnHits.canHit(kind, settings.minHitInterval(kind))) {
             onHit(mc);
         }
     }
@@ -332,7 +264,7 @@ public final class ClientWeakSpotHandler {
         spot.follow(box);
         spot.lastActiveTick = clientTick;
         if (aimed == spot.face && spot.isHitBy(target.hitVec)
-                && canHit(HitKind.ANIMAL, settings.minHitInterval(HitKind.ANIMAL))) {
+                && OwnHits.canHit(HitKind.ANIMAL, settings.minHitInterval(HitKind.ANIMAL))) {
             onHit(mc);
         }
     }
@@ -357,24 +289,6 @@ public final class ClientWeakSpotHandler {
                 && Math.abs(box.maxY - pos.getY() - 1) < eps && Math.abs(box.maxZ - pos.getZ() - 1) < eps;
     }
 
-    private static boolean canHit(HitKind kind, int minInterval) {
-        return clientTick - LAST_HIT_TICK[kind.ordinal()] >= minInterval;
-    }
-
-    /** 壊せないブロック（硬度が負）と、今の破壊速度で1tick以内に壊れるブロックは対象外。 */
-    private static boolean isEligible(World world, EntityPlayerSP player, BlockPos pos, IBlockState state) {
-        if (state.getBlock().isAir(state, world, pos) || state.getBlockHardness(world, pos) < 0) {
-            return false;
-        }
-        suppressBoost = true;
-        try {
-            return state.getPlayerRelativeBlockHardness(player, world, pos) < 1.0F;
-        } finally {
-            suppressBoost = false;
-        }
-    }
-
-    /** 前のヒットから minInterval tick あいているか（釣り・弓の弱点からも使う）。 */
     /** 機械の弱点が出ていて、このフレームで照準が合っているか（コンボの「機械 ×n」の表示）。 */
     static boolean machineSpotActive() {
         return blockSpotActive(HitKind.MACHINE);
@@ -391,34 +305,17 @@ public final class ClientWeakSpotHandler {
                 && Minecraft.getMinecraft().world.getBlockState(spot.pos).getBlock() instanceof BlockDispenser;
     }
 
-    static boolean canHitNow(HitKind kind, int minInterval) {
-        return canHit(kind, minInterval);
-    }
-
-    /**
-     * どの種類のヒットにも共通の処理: 連続ヒット、ヒット音、コンボの表示、ヒット間隔の記録。ヒット後の連続ヒット数を返す。
-     */
-    static int registerHit(HitKind kind) {
-        int hitStreak = STREAK.hit(clientTick);
-        HitSounds.playOwn(hitStreak);
-        ComboHud.onHit(kind, hitStreak, clientTick + framePartialTicks);
-        LAST_HIT_TICK[kind.ordinal()] = clientTick;
-        return hitStreak;
-    }
-
     private static void onHit(Minecraft mc) {
         HitKind kind = spot.kind;
         WeakSpotRenderer.addFlash(spot, clientTick);
-        int hitStreak = registerHit(kind);
+        int hitStreak = OwnHits.register(kind);
         if (kind == HitKind.MACHINE && WeakSpotConfig.machineBarEnabled
                 && MachineStates.hasBar(mc.world.getTileEntity(spot.pos))) {
             // ヒットで進んだ分を、すぐに見に行く
             MachineBars.query(spot.pos, clientTick, true);
         }
         if (kind == HitKind.MINING) {
-            boostHitTick = clientTick;
-            boostPos = spot.pos;
-            boostFactor = miningComboFactor(hitStreak);
+            MiningBoost.onHit(spot.pos, hitStreak);
         }
         if (kind == HitKind.ANIMAL) {
             WeakSpotMod.network.sendToServer(HitMessage.entity(kind, spot.entity.getEntityId(), hitStreak));
@@ -432,51 +329,20 @@ public final class ClientWeakSpotHandler {
         spot.relocate(RANDOM, WeakSpotConfig.weakSpotTrailEnabled, Minecraft.getSystemTime());
     }
 
-    /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
-        if (!event.getEntityPlayer().world.isRemote || suppressBoost || !KindSwitches.isEnabled(HitKind.MINING)) {
-            return;
-        }
-        if (event.getEntityPlayer() != Minecraft.getMinecraft().player || !event.getPos().equals(boostPos)) {
-            return;
-        }
-        SyncedSettings settings = ClientSettings.get();
-        long sinceHit = clientTick - boostHitTick;
-        if (sinceHit > 0 && sinceHit <= settings.boostDurationTicks) {
-            event.setNewSpeed((float) (event.getNewSpeed()
-                    * BoostMath.clientMultiplier(settings.boostMultiplier, boostFactor)));
-        }
-    }
-
-    /**
-     * 採掘のコンボの掛け数（1.8.7）。1.8.6 以前のサーバーは掛けないので 1（掛けると、クライアントだけが先に掘り終えて、
-     * ブロックが一度戻って見える）。
-     */
-    static double miningComboFactor(int combo) {
-        return ServerFeatures.since("1.8.7") ? ComboFactor.factor(combo) : 1;
-    }
-
     private static void reset() {
         spot = null;
         MiningProgress.clear();
-        boostPos = null;
-        Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
-        boostHitTick = Long.MIN_VALUE / 2;
-        boostFactor = 1;
+        MiningBoost.clear();
+        OwnHits.clearIntervals();
         AnimalStates.clear();
         MachineBars.clear();
         OtherCombos.clear();
         AimSpots.clearAll();
         FishingSpot.clear();
         lastPlayer = null;
-        resetStreak();
+        OwnHits.resetStreak();
         WeakSpotRenderer.clearFlashes();
         HitSounds.clear();
     }
 
-    private static void resetStreak() {
-        STREAK.reset();
-        ComboHud.clear();
-    }
 }
