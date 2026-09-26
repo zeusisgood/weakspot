@@ -5,6 +5,8 @@ import com.example.weakspot.AnimalTargets;
 import com.example.weakspot.RightClickTargets;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BlockHealthBar;
+import com.example.weakspot.common.BoostMath;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.HitStreak;
 import com.example.weakspot.config.SyncedSettings;
@@ -60,6 +62,8 @@ public final class ClientWeakSpotHandler {
     private static EntityPlayerSP lastPlayer;
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
+    /** 最後の採掘ヒットのコンボの掛け数（1.8.7。サーバーが古ければ 1）。 */
+    private static double boostFactor = 1;
     /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
     private static boolean suppressBoost;
 
@@ -422,6 +426,7 @@ public final class ClientWeakSpotHandler {
         if (kind == HitKind.MINING) {
             boostHitTick = clientTick;
             boostPos = spot.pos;
+            boostFactor = miningComboFactor(hitStreak);
         }
         if (kind == HitKind.ANIMAL) {
             WeakSpotMod.network.sendToServer(HitMessage.entity(kind, spot.entity.getEntityId(), hitStreak));
@@ -447,8 +452,17 @@ public final class ClientWeakSpotHandler {
         SyncedSettings settings = ClientSettings.get();
         long sinceHit = clientTick - boostHitTick;
         if (sinceHit > 0 && sinceHit <= settings.boostDurationTicks) {
-            event.setNewSpeed((float) (event.getNewSpeed() * settings.boostMultiplier));
+            event.setNewSpeed((float) (event.getNewSpeed()
+                    * BoostMath.clientMultiplier(settings.boostMultiplier, boostFactor)));
         }
+    }
+
+    /**
+     * 採掘のコンボの掛け数（1.8.7）。1.8.6 以前のサーバーは掛けないので 1（掛けると、クライアントだけが先に掘り終えて、
+     * ブロックが一度戻って見える）。
+     */
+    static double miningComboFactor(int combo) {
+        return ServerFeatures.since("1.8.7") ? ComboFactor.factor(combo) : 1;
     }
 
     private static void reset() {
@@ -457,6 +471,7 @@ public final class ClientWeakSpotHandler {
         boostPos = null;
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
         boostHitTick = Long.MIN_VALUE / 2;
+        boostFactor = 1;
         AnimalStates.clear();
         MachineBars.clear();
         OtherCombos.clear();

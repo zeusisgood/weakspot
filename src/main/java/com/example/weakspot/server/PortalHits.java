@@ -49,20 +49,16 @@ public final class PortalHits {
         if (counter <= 0) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.PORTAL, WeakSpotConfig.portalMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.PORTAL);
-        int combo = ServerStats.countStreak(player);
+        int combo = HitGate.accept(player, HitKind.PORTAL, new BlockPos(player), streak);
         int added = (int) Math.round(WeakSpotConfig.portalHitTicks * ComboFactor.factor(combo));
         try {
             portalCounter.setInt(player, Math.min(player.getMaxInPortalTime(), counter + added));
         } catch (IllegalAccessException | RuntimeException e) {
-            return;
+            // 読めたのに書けないことは、まずない。ヒットには数えたまま
         }
-        ServerStats.recordKindHit(player, HitKind.PORTAL);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
 }

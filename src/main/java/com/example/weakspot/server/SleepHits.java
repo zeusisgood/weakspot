@@ -28,19 +28,15 @@ public final class SleepHits {
                 || !SleepTime.isNight(world.getWorldTime())) {
             return;
         }
-        long now = world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.SLEEP, WeakSpotConfig.sleepMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.SLEEP);
         world.setWorldTime(SleepTime.advance(world.getWorldTime(), WeakSpotConfig.sleepHitTicks));
         // 20 tick ごとの時刻の送信を待たずに、すぐに知らせる（空の明るさがすぐに変わるように）
         player.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketTimeUpdate(
                 world.getTotalWorldTime(), world.getWorldTime(), true), world.provider.getDimension());
-        ServerStats.recordKindHit(player, HitKind.SLEEP);
-        ServerStats.countStreak(player);
         BlockPos bed = player.bedLocation != null ? player.bedLocation : new BlockPos(player);
-        ServerBoostTracker.notifyNearbyPlayers(player, bed, streak);
+        HitGate.accept(player, HitKind.SLEEP, bed, streak);
     }
 
 }

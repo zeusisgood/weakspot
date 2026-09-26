@@ -30,16 +30,12 @@ public final class ThrowHits {
                 || !ThrowCharge.isHoldingThrowable(player) || player.isHandActive()) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.THROW, WeakSpotConfig.throwMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.THROW);
-        int combo = ServerStats.countStreak(player);
+        int combo = HitGate.accept(player, HitKind.THROW, new BlockPos(player), streak);
         ThrowCharge.add(player, WeakSpotConfig.throwChargePerHit * ComboFactor.factor(combo));
-        ServerStats.recordKindHit(player, HitKind.THROW);
         VehicleHits.boostFromRider(player, combo);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
 

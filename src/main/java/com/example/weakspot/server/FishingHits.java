@@ -175,9 +175,7 @@ public final class FishingHits {
         } catch (IllegalAccessException e) {
             return;
         }
-        ServerStats.recordKindHit(player, HitKind.FISHING);
-        ServerStats.countStreak(player);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(hook), streak);
+        HitGate.accept(player, HitKind.FISHING, new BlockPos(hook), streak);
     }
 
     /**

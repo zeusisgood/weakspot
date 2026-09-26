@@ -41,16 +41,12 @@ public final class MeleeHits {
                 || !MeleeCharge.isHoldingWeapon(player) || !MeleeTargets.hasEnemyNear(player, ENEMY_RANGE)) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.MELEE, WeakSpotConfig.meleeMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.MELEE);
-        int combo = ServerStats.countStreak(player);
+        int combo = HitGate.accept(player, HitKind.MELEE, new BlockPos(player), streak);
         MeleeCharge.add(player, WeakSpotConfig.meleeChargePerHit * ComboFactor.factor(combo),
                 WeakSpotConfig.meleeChargeMax);
-        ServerStats.recordKindHit(player, HitKind.MELEE);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
     /**

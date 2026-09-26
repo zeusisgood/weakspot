@@ -83,10 +83,8 @@ public final class RightClickHits {
                 return;
             }
         }
-        int combo = ServerStats.countStreak(player);
-        if (kind == HitKind.HARVEST) {
-            ServerStats.recordKindHit(player, HitKind.HARVEST);
-        } else if (kind == HitKind.GROWTH) {
+        int combo = HitGate.accept(player, kind, pos, streak);
+        if (kind == HitKind.GROWTH) {
             IBlockState before = world.getBlockState(pos);
             BlockPos target = RightClickTargets.growthTarget(world, pos, before);
             IBlockState targetBefore = world.getBlockState(target);
@@ -94,13 +92,9 @@ public final class RightClickHits {
             // 柱が伸びると一番上の節が変わるので、前の一番上の節と、叩いたブロックの両方を比べる
             boolean changed = world.getBlockState(pos) != before || world.getBlockState(target) != targetBefore;
             GrowthWarnings.onGrowthHit(player, world, pos, changed);
-            ServerStats.recordKindHit(player, HitKind.GROWTH);
         } else if (kind == HitKind.MACHINE) {
             MachineAccelerator.hit(world, pos, combo);
-            ServerStats.recordKindHit(player, HitKind.MACHINE);
         }
-        // 採掘と同じく、近くの他のプレイヤーにもヒット音を鳴らす
-        ServerBoostTracker.notifyNearbyPlayers(player, pos, streak);
     }
 
     private static int minHitInterval(HitKind kind) {

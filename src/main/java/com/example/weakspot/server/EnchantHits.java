@@ -46,17 +46,13 @@ public final class EnchantHits {
         if (container.tableInventory.getStackInSlot(0).isEmpty()) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.ENCHANT, WeakSpotConfig.enchantMinHitIntervalTicks)) {
             return;
         }
         if (!reroll(player, container)) {
             return;
         }
-        HitGate.mark(player, HitKind.ENCHANT);
-        ServerStats.countStreak(player);
-        ServerStats.recordKindHit(player, HitKind.ENCHANT);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
+        HitGate.accept(player, HitKind.ENCHANT, new BlockPos(player), streak);
     }
 
     /** 種を新しい乱数にして、候補を計算し直す。書けなければ false。 */

@@ -24,16 +24,12 @@ public final class EatHits {
                 || !EatDraw.isEating(player)) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.EAT, WeakSpotConfig.eatMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.EAT);
         EatDraw.add(player, WeakSpotConfig.eatHitTicks);
-        ServerStats.recordKindHit(player, HitKind.EAT);
-        int combo = ServerStats.countStreak(player);
+        int combo = HitGate.accept(player, HitKind.EAT, new BlockPos(player), streak);
         VehicleHits.boostFromRider(player, combo);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
 }

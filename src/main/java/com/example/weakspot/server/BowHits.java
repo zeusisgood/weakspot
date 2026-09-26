@@ -32,21 +32,17 @@ public final class BowHits {
         if (full && !BowMath.canOvercharge(BowDraw.overcharge(player))) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.BOW, WeakSpotConfig.bowMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.BOW);
         if (full) {
             BowDraw.addOvercharge(player);
         } else {
             BowDraw.add(player, WeakSpotConfig.bowHitTicks);
         }
-        ServerStats.recordKindHit(player, HitKind.BOW);
-        int combo = ServerStats.countStreak(player);
+        int combo = HitGate.accept(player, HitKind.BOW, new BlockPos(player), streak);
         // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）
         VehicleHits.boostFromRider(player, combo);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
 }

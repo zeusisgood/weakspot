@@ -55,15 +55,11 @@ public final class VehicleHits {
         if (vehicle == null || vehicle.getEntityId() != entityId) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.VEHICLE, WeakSpotConfig.vehicleMinHitIntervalTicks)) {
             return;
         }
-        HitGate.mark(player, HitKind.VEHICLE);
-        int combo = ServerStats.countStreak(player);
-        ServerStats.recordKindHit(player, HitKind.VEHICLE);
+        int combo = HitGate.accept(player, HitKind.VEHICLE, new BlockPos(vehicle), streak);
         boost(vehicle, combo);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(vehicle), streak);
     }
 
     /** 弓・食事の弱点のヒットを受け付けたときに呼ぶ。対象の乗り物に乗っていれば、加速を続ける（騎射）。 */

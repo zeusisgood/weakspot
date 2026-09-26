@@ -126,7 +126,6 @@ public final class AnimalHits {
         if (!AnimalTargets.isTarget(player, entity, settings)) {
             return;
         }
-        long now = player.world.getTotalWorldTime();
         if (!HitGate.ready(player, HitKind.ANIMAL, WeakSpotConfig.animalMinHitIntervalTicks)) {
             return;
         }
@@ -134,11 +133,8 @@ public final class AnimalHits {
         if (state.mask == 0) {
             return;
         }
-        HitGate.mark(player, HitKind.ANIMAL);
         apply(entity, state.mask, settings);
-        ServerStats.recordKindHit(player, HitKind.ANIMAL);
-        ServerStats.countStreak(player);
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(entity), streak);
+        HitGate.accept(player, HitKind.ANIMAL, new BlockPos(entity), streak);
     }
 
     /** 動いているタイマーを、すべて同時に進める。 */

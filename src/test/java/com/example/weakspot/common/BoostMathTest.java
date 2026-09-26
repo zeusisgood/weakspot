@@ -27,4 +27,22 @@ public class BoostMathTest {
     public void noExtraMeansNoChange() {
         assertEquals(1, BoostMath.serverSpeedFactor(0, 10), 1e-9);
     }
+
+    @Test
+    public void comboFactorScalesExtraTicks() {
+        assertEquals(12, BoostMath.extraTicksPerHit(4.0, 4, 1.0), 1e-9);
+        assertEquals(24, BoostMath.extraTicksPerHit(4.0, 4, 2.0), 1e-9);
+        assertEquals(15, BoostMath.extraTicksPerHit(4.0, 4, 1.25), 1e-9);
+    }
+
+    @Test
+    public void clientMultiplierMatchesServerExtra() {
+        // 時間枠 d tick の間 (1 + (m − 1)f) 倍なら、上乗せは (m − 1) f d tick で、サーバーの追加進捗と同じ
+        double m = 4.0;
+        int d = 4;
+        for (double f : new double[] {1.0, 1.25, 2.0, 4.0}) {
+            assertEquals(BoostMath.extraTicksPerHit(m, d, f), (BoostMath.clientMultiplier(m, f) - 1) * d, 1e-9);
+        }
+        assertEquals(4.0, BoostMath.clientMultiplier(4.0, 1.0), 1e-9);
+    }
 }

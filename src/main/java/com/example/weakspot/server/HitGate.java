@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -44,6 +45,22 @@ public final class HitGate {
     /** このヒットを受け付けた（次の ready の起点）。 */
     static void mark(EntityPlayerMP player, HitKind kind) {
         LAST_HIT.computeIfAbsent(kind, k -> new HashMap<>()).put(player.getUniqueID(), player.world.getTotalWorldTime());
+    }
+
+    /**
+     * ヒットを受け付けると決めたあとの共通の処理（1.8.7）: 間隔の起点（mark）→ 種類ごとの数と節目 → 連続ヒット →
+     * 近くの他のプレイヤーのヒット音（soundPos から）。このヒットを数えたあとのコンボ数を返す（コンボの掛け数は
+     * ComboFactor.factor(accept(...))）。採掘は、短縮した時間と一緒に ServerStats.record で数え、節目も
+     * MiningRewards.onMiningHit で見るので、種類ごとの数は数えない。
+     */
+    static int accept(EntityPlayerMP player, HitKind kind, BlockPos soundPos, int streak) {
+        mark(player, kind);
+        if (kind != HitKind.MINING) {
+            ServerStats.recordKindHit(player, kind);
+        }
+        int combo = ServerStats.countStreak(player);
+        ServerBoostTracker.notifyNearbyPlayers(player, soundPos, streak);
+        return combo;
     }
 
     /** 自分で最後の tick を持つ種類（採掘・右クリック・釣り・移動）向けの判定。 */

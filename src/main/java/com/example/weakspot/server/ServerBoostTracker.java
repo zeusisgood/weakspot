@@ -3,6 +3,7 @@ package com.example.weakspot.server;
 import com.example.weakspot.common.HitKind;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BoostMath;
+import com.example.weakspot.common.ComboFactor;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.OtherHitMessage;
 import java.util.HashMap;
@@ -122,13 +123,14 @@ public final class ServerBoostTracker {
             return;
         }
         mining.lastHitTick = now;
-        double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks);
+        // 1 回のヒットで進む量に、コンボの掛け数を掛ける（1.8.7）
+        int combo = HitGate.accept(player, HitKind.MINING, pos, streak);
+        double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks,
+                ComboFactor.factor(combo));
         mining.extraTicks += extra;
         mining.hits++;
         ServerStats.record(player, stats -> stats.recordHit(extra));
-        ServerStats.countStreak(player);
         MiningRewards.onMiningHit(player);
-        notifyNearbyPlayers(player, pos, streak);
     }
 
     /**

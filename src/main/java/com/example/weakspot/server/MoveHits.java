@@ -100,14 +100,12 @@ public final class MoveHits {
             return;
         }
         state.lastHit.put(kind, now);
-        int combo = ServerStats.countStreak(player);
-        ServerStats.recordKindHit(player, kind);
+        int combo = HitGate.accept(player, kind, new BlockPos(player), streak);
         if (kind == HitKind.SPRINT) {
             setSprintModifier(player, VehicleBoostMath.multiplier(WeakSpotConfig.sprintBoostMultiplier,
                     WeakSpotConfig.sprintBoostMaxMultiplier, combo));
             state.sprintRemaining = WeakSpotConfig.sprintBoostDurationTicks;
         }
-        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), streak);
     }
 
     private static boolean isEnabledOnServer(HitKind kind) {

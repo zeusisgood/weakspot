@@ -18,6 +18,16 @@ public final class BoostMath {
         return Math.max(0, multiplier - 1) * Math.max(0, durationTicks);
     }
 
+    /** コンボの掛け数つき（1.8.7）: (倍率 − 1) × 継続時間 × 掛け数。 */
+    public static double extraTicksPerHit(double multiplier, int durationTicks, double comboFactor) {
+        return extraTicksPerHit(multiplier, durationTicks) * Math.max(0, comboFactor);
+    }
+
+    /** クライアントで時間枠の中の破壊速度に掛ける倍率（1.8.7）: 1 + (倍率 − 1) × 掛け数。 */
+    public static double clientMultiplier(double multiplier, double comboFactor) {
+        return 1 + Math.max(0, multiplier - 1) * Math.max(0, comboFactor);
+    }
+
     /** サーバー側で破壊速度に掛ける係数。 */
     public static double serverSpeedFactor(double extraTicks, long elapsedTicks) {
         if (extraTicks <= 0) {
