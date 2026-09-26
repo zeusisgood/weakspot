@@ -79,7 +79,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-なし（1.9.1 をリリースした。`main` への PR の Merge 待ち）。
+ライセンスの相談（`LICENSE` がまだない。MIT / LGPL-3.0 / All Rights Reserved などから、ユーザーが決める）。GitHub の issue の雛形は、不具合報告 `bug_report.md` と要望 `feature_request.md`（1.9.1 のあと）。
 
 ### TODO（ユーザーの判断: いつかやる。やるときに相談する）
 
