@@ -6,7 +6,7 @@ import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.FishingMath;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
-import com.example.weakspot.network.FishingStateMessage;
+import com.example.weakspot.network.StateMessage;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -145,7 +145,7 @@ public final class FishingHits {
                 progress = (float) FishingMath.progress(track.initialWait, read(WAIT, hook));
             }
         }
-        WeakSpotMod.network.sendTo(new FishingStateMessage(waiting, progress), player);
+        WeakSpotMod.network.sendTo(StateMessage.fishing(waiting, progress), player);
     }
 
     private static boolean enabled(SyncedSettings settings) {

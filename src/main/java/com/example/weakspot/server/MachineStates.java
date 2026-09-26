@@ -4,7 +4,7 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.Reflect;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.MachineProgress;
-import com.example.weakspot.network.MachineStateMessage;
+import com.example.weakspot.network.StateMessage;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
@@ -70,7 +70,7 @@ public final class MachineStates {
         } else {
             return;
         }
-        WeakSpotMod.network.sendTo(new MachineStateMessage(pos, progress, fuel), player);
+        WeakSpotMod.network.sendTo(StateMessage.machine(pos, progress, fuel), player);
     }
 
     /** バニラが右クリックを受け付ける距離と同じ（RightClickHits と同じ）。 */

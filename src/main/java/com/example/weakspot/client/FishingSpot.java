@@ -8,7 +8,7 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.common.MarkerMotion;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
-import com.example.weakspot.network.FishingQueryMessage;
+import com.example.weakspot.network.QueryMessage;
 import com.example.weakspot.network.HitMessage;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * 画面上で一定の大きさ（半径 12 GUI ピクセル）の円として描く（浮きが遠くても近くても同じ大きさ）。
  * 当たり判定は、視線と「目から弱点への向き」の角度の差が、画面上の円の半径・視野角・画面の高さから求めた角度より小さいこと。
  * 変換に使う行列は、RenderWorldLastEvent の時点の OpenGL の行列（視野角は射影行列から求める。ScreenProjection）。
- * 待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、サーバーに状態を問い合わせる（FishingQueryMessage）。
+ * 待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、サーバーに状態を問い合わせる（QueryMessage）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class FishingSpot {
@@ -160,7 +160,7 @@ final class FishingSpot {
     /** 浮きの状態を問い合わせる。間隔があいていなければ送らない（force ならすぐに送る）。 */
     private static void query(long tick, boolean force) {
         if (QUERIES.due(Boolean.TRUE, tick, force)) {
-            WeakSpotMod.network.sendToServer(new FishingQueryMessage());
+            WeakSpotMod.network.sendToServer(QueryMessage.fishing());
         }
     }
 

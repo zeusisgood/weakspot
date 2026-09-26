@@ -1,7 +1,7 @@
 package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
-import com.example.weakspot.network.MachineQueryMessage;
+import com.example.weakspot.network.QueryMessage;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -42,7 +42,7 @@ final class MachineBars {
         if (!QUERIES.due(target, tick, force)) {
             return;
         }
-        WeakSpotMod.network.sendToServer(new MachineQueryMessage(target));
+        WeakSpotMod.network.sendToServer(QueryMessage.machine(target));
     }
 
     /** サーバーの返事が届いた（クライアントのスレッドで呼ぶ）。fuel が負なら燃料のない機械。 */

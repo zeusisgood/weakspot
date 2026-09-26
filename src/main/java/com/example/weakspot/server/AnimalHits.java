@@ -7,7 +7,7 @@ import com.example.weakspot.common.AnimalTimers;
 import com.example.weakspot.common.AnimalTimers.Timer;
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
-import com.example.weakspot.network.AnimalStateMessage;
+import com.example.weakspot.network.StateMessage;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.entity.Entity;
@@ -110,7 +110,7 @@ public final class AnimalHits {
                 VillagerBreedHints.onQuery(player, (EntityVillager) entity, settings);
             }
         }
-        WeakSpotMod.network.sendTo(new AnimalStateMessage(entityId, state), player);
+        WeakSpotMod.network.sendTo(StateMessage.animal(entityId, state.mask, state.progress), player);
     }
 
     /** クライアントからのヒット通知（サーバースレッドで実行される）。 */

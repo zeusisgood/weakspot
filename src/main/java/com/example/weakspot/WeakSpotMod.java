@@ -2,16 +2,12 @@ package com.example.weakspot;
 
 import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
-import com.example.weakspot.network.AnimalQueryMessage;
-import com.example.weakspot.network.AnimalStateMessage;
-import com.example.weakspot.network.FishingQueryMessage;
-import com.example.weakspot.network.FishingStateMessage;
 import com.example.weakspot.network.HitMessage;
-import com.example.weakspot.network.MachineQueryMessage;
-import com.example.weakspot.network.MachineStateMessage;
 import com.example.weakspot.network.MarkerMessage;
 import com.example.weakspot.network.MilestoneMessage;
 import com.example.weakspot.network.OtherComboMessage;
+import com.example.weakspot.network.QueryMessage;
+import com.example.weakspot.network.StateMessage;
 import com.example.weakspot.network.OtherHitMessage;
 import com.example.weakspot.network.OtherMarkerMessage;
 import com.example.weakspot.network.SettingsMessage;
@@ -76,13 +72,10 @@ public class WeakSpotMod {
         network.registerMessage(MarkerMessage.Handler.class, MarkerMessage.class, 6, Side.SERVER);
         network.registerMessage(OtherMarkerMessage.Handler.class, OtherMarkerMessage.class, 7, Side.CLIENT);
         network.registerMessage(SwitchMessage.Handler.class, SwitchMessage.class, 8, Side.SERVER);
-        network.registerMessage(AnimalQueryMessage.Handler.class, AnimalQueryMessage.class, 9, Side.SERVER);
-        network.registerMessage(AnimalStateMessage.Handler.class, AnimalStateMessage.class, 10, Side.CLIENT);
-        network.registerMessage(FishingQueryMessage.Handler.class, FishingQueryMessage.class, 11, Side.SERVER);
-        network.registerMessage(FishingStateMessage.Handler.class, FishingStateMessage.class, 12, Side.CLIENT);
-        network.registerMessage(MachineQueryMessage.Handler.class, MachineQueryMessage.class, 13, Side.SERVER);
-        network.registerMessage(MachineStateMessage.Handler.class, MachineStateMessage.class, 14, Side.CLIENT);
-        network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 15, Side.CLIENT);
+        // 1.9.0 で、動物・釣り・機械の問い合わせと返事（9〜14）を QueryMessage / StateMessage にまとめ、番号を振り直した
+        network.registerMessage(QueryMessage.Handler.class, QueryMessage.class, 9, Side.SERVER);
+        network.registerMessage(StateMessage.Handler.class, StateMessage.class, 10, Side.CLIENT);
+        network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 11, Side.CLIENT);
     }
 
     @Mod.EventHandler

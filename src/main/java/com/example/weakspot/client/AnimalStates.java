@@ -2,7 +2,7 @@ package com.example.weakspot.client;
 
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.AnimalTimers;
-import com.example.weakspot.network.AnimalQueryMessage;
+import com.example.weakspot.network.QueryMessage;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +47,7 @@ final class AnimalStates {
         if (!QUERIES.due(entityId, tick, force)) {
             return;
         }
-        WeakSpotMod.network.sendToServer(new AnimalQueryMessage(entityId));
+        WeakSpotMod.network.sendToServer(QueryMessage.animal(entityId));
     }
 
     /** サーバーの返事が届いた（クライアントのスレッドで呼ぶ）。 */
