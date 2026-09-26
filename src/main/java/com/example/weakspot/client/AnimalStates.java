@@ -19,7 +19,7 @@ final class AnimalStates {
     private static final int STALE_TICKS = 30;
 
     private static final Map<Integer, State> STATES = new HashMap<>();
-    private static final Map<Integer, Long> LAST_QUERY = new HashMap<>();
+    private static final QueryThrottle<Integer> QUERIES = new QueryThrottle<>(QUERY_INTERVAL_TICKS, true);
 
     private AnimalStates() {
     }
@@ -44,11 +44,9 @@ final class AnimalStates {
 
     /** 動物の状態を問い合わせる。前の問い合わせから間隔があいていなければ送らない（force ならすぐに送る）。 */
     static void query(int entityId, long tick, boolean force) {
-        Long last = LAST_QUERY.get(entityId);
-        if (!force && last != null && tick - last < QUERY_INTERVAL_TICKS) {
+        if (!QUERIES.due(entityId, tick, force)) {
             return;
         }
-        LAST_QUERY.put(entityId, tick);
         WeakSpotMod.network.sendToServer(new AnimalQueryMessage(entityId));
     }
 
@@ -71,6 +69,6 @@ final class AnimalStates {
 
     static void clear() {
         STATES.clear();
-        LAST_QUERY.clear();
+        QUERIES.reset();
     }
 }

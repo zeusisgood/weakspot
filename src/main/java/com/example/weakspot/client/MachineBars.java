@@ -32,17 +32,16 @@ final class MachineBars {
     private static double fuelFrom;
     private static double fuelTo;
     private static long receivedTick = Long.MIN_VALUE / 2;
-    private static long lastQuery = Long.MIN_VALUE / 2;
+    private static final QueryThrottle<BlockPos> QUERIES = new QueryThrottle<>(QUERY_INTERVAL_TICKS, false);
 
     private MachineBars() {
     }
 
     /** pos の機械の値を問い合わせる。間隔があいていなければ送らない（force ならすぐに送る）。 */
     static void query(BlockPos target, long tick, boolean force) {
-        if (!force && target.equals(pos) && tick - lastQuery < QUERY_INTERVAL_TICKS) {
+        if (!QUERIES.due(target, tick, force)) {
             return;
         }
-        lastQuery = tick;
         WeakSpotMod.network.sendToServer(new MachineQueryMessage(target));
     }
 
@@ -91,5 +90,6 @@ final class MachineBars {
     static void clear() {
         pos = null;
         receivedTick = Long.MIN_VALUE / 2;
+        QUERIES.reset();
     }
 }

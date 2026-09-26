@@ -60,7 +60,8 @@ final class FishingSpot {
     private static boolean waiting;
     private static float progress;
     private static long receivedTick = Long.MIN_VALUE / 2;
-    private static long lastQueryTick = Long.MIN_VALUE / 2;
+    /** 問い合わせの相手は自分の浮きだけなので、相手は区別しない。 */
+    private static final QueryThrottle<Boolean> QUERIES = new QueryThrottle<>(QUERY_INTERVAL_TICKS, false);
 
     // 弱点（浮きからの水平の差。当たり判定の位置と、表示の位置 motion）
     private static EntityFishHook spotHook;
@@ -94,7 +95,7 @@ final class FishingSpot {
         spotHook = null;
         SCREEN.invalidate();
         aimed = false;
-        lastQueryTick = Long.MIN_VALUE / 2;
+        QUERIES.reset();
     }
 
     /** 自分の、弱点を出せる浮き（釣り竿を持っていて、水に浮いている）。なければ null。 */
@@ -141,11 +142,9 @@ final class FishingSpot {
             spotHook = hook;
             hasSpot = false;
             waiting = false;
-            lastQueryTick = Long.MIN_VALUE / 2;
+            QUERIES.reset();
         }
-        if (tick - lastQueryTick >= QUERY_INTERVAL_TICKS) {
-            query(tick);
-        }
+        query(tick, false);
         if (waiting && fresh() && !hasSpot) {
             // 待ち時間の段階に入った。浮きから離れた水面の点に出す
             double[] p = FishingMath.nextSpot(0, 0, RANDOM);
@@ -158,9 +157,11 @@ final class FishingSpot {
         }
     }
 
-    private static void query(long tick) {
-        lastQueryTick = tick;
-        WeakSpotMod.network.sendToServer(new FishingQueryMessage());
+    /** 浮きの状態を問い合わせる。間隔があいていなければ送らない（force ならすぐに送る）。 */
+    private static void query(long tick, boolean force) {
+        if (QUERIES.due(Boolean.TRUE, tick, force)) {
+            WeakSpotMod.network.sendToServer(new FishingQueryMessage());
+        }
     }
 
     /** 弱点の点のワールド座標（浮きのまわり。水面の少し上）。 */
@@ -224,7 +225,7 @@ final class FishingSpot {
             MOTION.jumpTo(dx, dz);
         }
         // 待ち時間が縮んだ分の進み具合を、すぐに見に行く
-        query(ClientWeakSpotHandler.clientTick);
+        query(ClientWeakSpotHandler.clientTick, true);
         aimed = false;
     }
 
