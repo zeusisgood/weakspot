@@ -1,0 +1,33 @@
+# 配布サイトの説明文（doc/store/description.md）を、Modrinth のプロジェクトの説明に反映する。
+# main でこのファイルが変わったとき（と、Actions の画面から手動で）動く。CurseForge は API で説明を
+# 変えられないので、手で貼り替える。
+# 要るもの: Secrets の MODRINTH_TOKEN（スコープ「プロジェクトを書く」）と、Variables の MODRINTH_PROJECT_ID。
+name: Modrinth description
+
+on:
+  push:
+    branches: [main]
+    paths: [doc/store/description.md]
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Update the description
+        run: |
+          if [ -z "$MODRINTH_TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "::notice::MODRINTH_TOKEN or MODRINTH_PROJECT_ID is not set; skipped."
+            exit 0
+          fi
+          jq -Rs '{body: .}' doc/store/description.md > payload.json
+          curl --fail-with-body -sS -X PATCH "https://api.modrinth.com/v2/project/$PROJECT_ID" \
+            -H "Authorization: $MODRINTH_TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: zeusisgood/weakspot (GitHub Actions)" \
+            --data @payload.json
+          echo "Updated the Modrinth description."
