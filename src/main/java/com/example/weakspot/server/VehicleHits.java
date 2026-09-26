@@ -11,9 +11,6 @@ import java.util.UUID;
 import java.util.WeakHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -32,9 +29,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VehicleHits {
 
-    private static final UUID SPEED_MODIFIER = UUID.fromString("7a1c9c55-0f3b-4f5e-9d52-5a1f6c1e8b01");
-    /** 移動速度の修正の種類: 合計に (1 + 値) を掛ける。 */
-    private static final int MULTIPLY_TOTAL = 2;
+    private static final SpeedModifier SPEED = new SpeedModifier(
+            UUID.fromString("7a1c9c55-0f3b-4f5e-9d52-5a1f6c1e8b01"), "weakspot vehicle boost");
 
     private static final Map<Entity, Boost> BOOSTS = new WeakHashMap<>();
 
@@ -81,21 +77,7 @@ public final class VehicleHits {
         boost.multiplier = multiplier;
         boost.remaining = WeakSpotConfig.vehicleBoostDurationTicks;
         if (vehicle instanceof EntityLivingBase) {
-            setSpeedModifier((EntityLivingBase) vehicle, multiplier);
-        }
-    }
-
-    private static void setSpeedModifier(EntityLivingBase living, double multiplier) {
-        IAttributeInstance speed = living.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-        if (speed == null) {
-            return;
-        }
-        speed.removeModifier(SPEED_MODIFIER);
-        double extra = VehicleBoostMath.extra(multiplier);
-        if (extra > 0) {
-            // 保存しない（加速中にワールドを保存しても、速いまま残らないように）
-            speed.applyModifier(new AttributeModifier(SPEED_MODIFIER, "weakspot vehicle boost", extra, MULTIPLY_TOTAL)
-                    .setSaved(false));
+            SPEED.set((EntityLivingBase) vehicle, multiplier);
         }
     }
 
@@ -114,7 +96,7 @@ public final class VehicleHits {
             Boost boost = entry.getValue();
             if (vehicle.isDead || --boost.remaining < 0) {
                 if (vehicle instanceof EntityLivingBase) {
-                    setSpeedModifier((EntityLivingBase) vehicle, 1);
+                    SPEED.clear((EntityLivingBase) vehicle);
                 }
                 it.remove();
                 continue;

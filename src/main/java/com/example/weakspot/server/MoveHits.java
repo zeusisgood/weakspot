@@ -7,9 +7,6 @@ import com.example.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -32,7 +29,7 @@ public final class MoveHits {
     private static final int RECENT_TICKS = 10;
     /** 走りの加速の修正（固定の UUID。合計に (1 + 値) を掛ける）。クライアントの視野の抑えも、この UUID で見分ける。 */
     public static final UUID SPRINT_MODIFIER = UUID.fromString("5d3c2b1a-7e6f-4a8b-9c0d-1e2f3a4b5c6d");
-    private static final int MULTIPLY_TOTAL = 2;
+    private static final SpeedModifier SPRINT_SPEED = new SpeedModifier(SPRINT_MODIFIER, "weakspot sprint boost");
 
     /** プレイヤーごとの、最後にはしご・エリトラ・走りだった tick と、種類ごとの最後のヒット。 */
     private static final class State {
@@ -77,7 +74,7 @@ public final class MoveHits {
             state.sprintTick = now;
         }
         if (state.sprintRemaining > 0 && --state.sprintRemaining <= 0) {
-            setSprintModifier(player, 1);
+            SPRINT_SPEED.clear(player);
         }
     }
 
@@ -102,7 +99,7 @@ public final class MoveHits {
         state.lastHit.put(kind, now);
         int combo = HitGate.accept(player, kind, new BlockPos(player), streak);
         if (kind == HitKind.SPRINT) {
-            setSprintModifier(player, VehicleBoostMath.multiplier(WeakSpotConfig.sprintBoostMultiplier,
+            SPRINT_SPEED.set(player, VehicleBoostMath.multiplier(WeakSpotConfig.sprintBoostMultiplier,
                     WeakSpotConfig.sprintBoostMaxMultiplier, combo));
             state.sprintRemaining = WeakSpotConfig.sprintBoostDurationTicks;
         }
@@ -143,24 +140,10 @@ public final class MoveHits {
         }
     }
 
-    /** 走りの加速の修正をかけ直す。multiplier が 1 以下なら外す。保存しない（ログアウトしても速いまま残らない）。 */
-    private static void setSprintModifier(EntityPlayer player, double multiplier) {
-        IAttributeInstance speed = player.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
-        if (speed == null) {
-            return;
-        }
-        speed.removeModifier(SPRINT_MODIFIER);
-        double extra = VehicleBoostMath.extra(multiplier);
-        if (extra > 0) {
-            speed.applyModifier(new AttributeModifier(SPRINT_MODIFIER, "weakspot sprint boost", extra, MULTIPLY_TOTAL)
-                    .setSaved(false));
-        }
-    }
-
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player) {
         STATES.remove(player.getUniqueID());
-        setSprintModifier(player, 1);
+        SPRINT_SPEED.clear(player);
     }
 
     @SubscribeEvent
@@ -169,6 +152,6 @@ public final class MoveHits {
         if (state != null) {
             state.sprintRemaining = 0;
         }
-        setSprintModifier(event.player, 1);
+        SPRINT_SPEED.clear(event.player);
     }
 }
