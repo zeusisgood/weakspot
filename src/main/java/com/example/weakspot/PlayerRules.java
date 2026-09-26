@@ -9,17 +9,10 @@ public final class PlayerRules {
     }
 
     /**
-     * 観戦モードでなければ出す。1.8.6 からクリエイティブでも出す（それまでは、弱点の種類によって出なかった）。
-     * クライアントは、サーバーが 1.8.6 以降のときだけクリエイティブでも出す（古いサーバーは受け付けないので、
-     * 出ても何も起きない食い違いを防ぐ。CommonProxy#serverAcceptsCreative）。
+     * 観戦モードでなければ出す。1.8.6 からクリエイティブでも出す（それまでは、弱点の種類によって出なかった。1.8.x の間は、
+     * 古いサーバーにつないだクライアントでは出さなかった。1.9.0 は 1.8.x のサーバーにつながらないので、その判定はやめた）。
      */
     public static boolean canUse(EntityPlayer player) {
-        if (player.isSpectator()) {
-            return false;
-        }
-        if (!player.capabilities.isCreativeMode) {
-            return true;
-        }
-        return !player.world.isRemote || WeakSpotMod.proxy.serverAcceptsCreative();
+        return !player.isSpectator();
     }
 }

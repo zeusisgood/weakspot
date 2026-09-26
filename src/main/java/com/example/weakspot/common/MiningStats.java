@@ -26,7 +26,7 @@ public final class MiningStats {
 
     /**
      * 採掘以外の種類ごとの、弱点に当てた回数（HitKind の番号で引く。採掘の欄は使わず、hits を使う。1.8.6 で配列にした）。
-     * 近接は、1.8.0 から「近接の弱点に当てた回数」（1.7.x まではクリティカルにした回数。保存のキーは今も critHits）。
+     * 近接は、1.8.0 から「近接の弱点に当てた回数」（1.7.x まではクリティカルにした回数。保存のキーは 1.9.0 から meleeHits）。
      */
     private final long[] kindHits = new long[HitKind.values().length];
 
@@ -92,15 +92,14 @@ public final class MiningStats {
         java.util.Arrays.fill(kindHits, 0);
     }
 
-    /**
-     * その種類の保存のキー（PlayerPersisted の weakspot の中。1.8.6 までの名前のまま）。
-     * 近接は critHits（中身は 1.8.0 から近接の弱点に当てた回数）。
-     */
+    /** 保存のキー（採掘は hits、ほかは "<key>Hits"。近接は 1.9.0 から meleeHits で、1.8.x までは critHits）。 */
     public static String saveKey(HitKind kind) {
-        if (kind == HitKind.MINING) {
-            return "hits";
-        }
-        return kind == HitKind.MELEE ? "critHits" : kind.key() + "Hits";
+        return kind == HitKind.MINING ? "hits" : kind.key() + "Hits";
+    }
+
+    /** 1.8.x までの保存のキー（読み込みで、新しいキーがないときだけ読む）。なければ null。 */
+    public static String legacySaveKey(HitKind kind) {
+        return kind == HitKind.MELEE ? "critHits" : null;
     }
 
     /** 送るときの書き先（StatsMessage が ByteBuf につなぐ）。 */
@@ -117,23 +116,17 @@ public final class MiningStats {
         double readDouble();
     }
 
-    /**
-     * 送る並び。1.8.5 までの手書きの並び（maxStreak が機械のあとに入る）と同じにして、通信の中身を変えない。
-     * 種類を足すと通信が変わる（マイナー）。
-     */
+    /** 送る並び（1.9.0 から、全体の数のあとに種類の順）。種類を足すと通信が変わる（マイナー）。 */
     public void writeTo(Writer out) {
         out.writeLong(hits);
         out.writeLong(blocksBroken);
         out.writeLong(blocksBrokenWithHit);
         out.writeLong(maxHitsOnBlock);
         out.writeDouble(savedTicks);
+        out.writeLong(maxStreak);
         for (HitKind kind : HitKind.values()) {
-            if (kind == HitKind.MINING) {
-                continue;
-            }
-            out.writeLong(kindHits[kind.ordinal()]);
-            if (kind == HitKind.MACHINE) {
-                out.writeLong(maxStreak);
+            if (kind != HitKind.MINING) {
+                out.writeLong(kindHits[kind.ordinal()]);
             }
         }
     }
@@ -145,13 +138,10 @@ public final class MiningStats {
         stats.blocksBrokenWithHit = in.readLong();
         stats.maxHitsOnBlock = in.readLong();
         stats.savedTicks = in.readDouble();
+        stats.maxStreak = in.readLong();
         for (HitKind kind : HitKind.values()) {
-            if (kind == HitKind.MINING) {
-                continue;
-            }
-            stats.kindHits[kind.ordinal()] = in.readLong();
-            if (kind == HitKind.MACHINE) {
-                stats.maxStreak = in.readLong();
+            if (kind != HitKind.MINING) {
+                stats.kindHits[kind.ordinal()] = in.readLong();
             }
         }
         return stats;

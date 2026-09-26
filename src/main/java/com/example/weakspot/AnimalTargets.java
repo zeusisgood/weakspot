@@ -58,7 +58,7 @@ public final class AnimalTargets {
      * 素手（両手が空。餌を持った右クリックは「繁殖・餌やり」なので出さない）で、しゃがみが要る動物ではしゃがんでいること。
      */
     public static boolean isTarget(EntityPlayer player, Entity entity, SyncedSettings settings) {
-        if (!PlayerRules.canUse(player) || !isCandidate(entity)
+        if (!settings.enabled(HitKind.ANIMAL) || !PlayerRules.canUse(player) || !isCandidate(entity)
                 || settings.animalExcludedEntities.contains(id(entity))) {
             return false;
         }

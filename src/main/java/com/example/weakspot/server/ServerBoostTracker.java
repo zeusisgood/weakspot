@@ -4,6 +4,7 @@ import com.example.weakspot.common.HitKind;
 import com.example.weakspot.WeakSpotMod;
 import com.example.weakspot.common.BoostMath;
 import com.example.weakspot.common.ComboFactor;
+import com.example.weakspot.config.SyncedSettings;
 import com.example.weakspot.config.WeakSpotConfig;
 import com.example.weakspot.network.OtherHitMessage;
 import java.util.HashMap;
@@ -125,8 +126,9 @@ public final class ServerBoostTracker {
         mining.lastHitTick = now;
         // 1 回のヒットで進む量に、コンボの掛け数を掛ける（1.8.7）
         int combo = HitGate.accept(player, HitKind.MINING, pos, streak);
+        double factor = SyncedSettings.server().miningComboBonus ? ComboFactor.factor(combo) : 1;
         double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks,
-                ComboFactor.factor(combo));
+                factor);
         mining.extraTicks += extra;
         mining.hits++;
         ServerStats.record(player, stats -> stats.recordHit(extra));

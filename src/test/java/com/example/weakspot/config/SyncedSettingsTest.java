@@ -51,8 +51,10 @@ public class SyncedSettingsTest {
         org.junit.Assert.assertEquals(9, s.minHitInterval(com.example.weakspot.common.HitKind.PORTAL));
         org.junit.Assert.assertFalse(s.enabled(com.example.weakspot.common.HitKind.BOW));
         org.junit.Assert.assertTrue(s.enabled(com.example.weakspot.common.HitKind.PORTAL));
-        // 全体のオン・オフの設定がない種類は、いつでもオン
+        // 採掘・成長・機械・動物にも、1.9.0 から全体のオン・オフがある
+        s.miningWeakSpotEnabled = true;
         org.junit.Assert.assertTrue(s.enabled(com.example.weakspot.common.HitKind.MINING));
+        org.junit.Assert.assertFalse(s.enabled(com.example.weakspot.common.HitKind.ANIMAL));
         for (com.example.weakspot.common.HitKind kind : com.example.weakspot.common.HitKind.values()) {
             s.minHitInterval(kind);
         }

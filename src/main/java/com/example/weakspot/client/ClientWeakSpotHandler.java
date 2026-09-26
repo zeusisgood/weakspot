@@ -172,7 +172,7 @@ public final class ClientWeakSpotHandler {
             return;
         }
         if (mc.playerController.getIsHittingBlock()) {
-            if (KindSwitches.isEnabled(HitKind.MINING)) {
+            if (KindSwitches.isEnabled(HitKind.MINING) && ClientSettings.get().enabled(HitKind.MINING)) {
                 aimMining(mc, target);
             }
         } else if (isHoldingUse(mc)) {

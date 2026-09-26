@@ -23,9 +23,10 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
  */
 public final class SyncedSettings {
 
-    public double boostMultiplier;
-    public int boostDurationTicks;
-    public int minHitIntervalTicks;
+    /** 値を送ったサーバーの Mod の版（1.6.0。ServerFeatures）。自分の設定の値なら、自分の版。 */
+    public String serverVersion;
+
+    // 弱点の置き方（全種類で共通）
     public double weakSpotRadiusRatio;
     public double edgeMargin;
     public double minMoveDistance;
@@ -33,6 +34,16 @@ public final class SyncedSettings {
     public double weakSpotMaxRadiusRatio;
     public double minFaceSize;
     public int lingerTicks;
+
+    // 採掘（全体のオン・オフとコンボ倍率のオン・オフは 1.9.0）
+    public boolean miningWeakSpotEnabled;
+    public boolean miningComboBonus;
+    public double boostMultiplier;
+    public int boostDurationTicks;
+    public int minHitIntervalTicks;
+
+    // 成長
+    public boolean growthWeakSpotEnabled;
     public int growthMinHitIntervalTicks;
     public double growthMinRadius;
     /** 登録名（"minecraft:grass" など）。 */
@@ -41,9 +52,18 @@ public final class SyncedSettings {
     public Set<String> growthExtraBlocks;
     /** growthExtraBlocks を読んだもの。最初に使うときに作る（作った後は読むだけなので、使い回してよい）。送らない。 */
     private GrowthFilters growthFilters;
+
+    // 機械（倍率と上限は、HUD に実際の速さを出すため）
+    public boolean machineWeakSpotEnabled;
     public int machineMinHitIntervalTicks;
     /** 機械の加速の対象外。登録名。 */
     public Set<String> excludedBlocks;
+    public double machineBoostMultiplier;
+    public double machineBoostMaxMultiplier;
+
+    // 動物
+    public boolean animalWeakSpotEnabled;
+    public int animalMinHitIntervalTicks;
     public boolean animalBabyEnabled;
     public boolean animalBreedingEnabled;
     public boolean sheepWoolEnabled;
@@ -54,70 +74,81 @@ public final class SyncedSettings {
     public int sheepWoolHits;
     public int chickenEggHits;
     public int villagerTradeResetHits;
-    public int animalMinHitIntervalTicks;
     /** 動物の弱点の対象外。エンティティの ID。 */
     public Set<String> animalExcludedEntities;
     /** しゃがみを条件にする MOD の動物。エンティティの ID。 */
     public Set<String> animalSneakRequiredEntities;
+
+    // 釣り
     public boolean fishingWeakSpotEnabled;
-    public int fishingHits;
     public int fishingMinHitIntervalTicks;
+    public int fishingHits;
+
+    // 弓
     public boolean bowWeakSpotEnabled;
-    public int bowHitTicks;
     public int bowMinHitIntervalTicks;
+    public int bowHitTicks;
+
+    // 近接（溜め。1.8.0）
     public boolean meleeWeakSpotEnabled;
     public int meleeMinHitIntervalTicks;
-    /** 近接の溜め（1.8.0。1.7.x までの meleeWeakSpotScale はなくした）。 */
     public double meleeChargePerHit;
     public double meleeChargeMax;
-    /** ネザーゲートの弱点（1.8.0）。サーバーが待ち時間を読み書きできないときは false で送る。 */
-    public boolean portalWeakSpotEnabled;
-    public int portalHitTicks;
-    public int portalMinHitIntervalTicks;
-    /** 機械の倍率と上限（1.6.0。HUD に実際の速さを出すため）。 */
-    public double machineBoostMultiplier;
-    public double machineBoostMaxMultiplier;
-    /** 寝ている間の弱点（1.6.0）。進める時刻はサーバーだけが使うので送らない。 */
-    public boolean sleepWeakSpotEnabled;
-    public int sleepMinHitIntervalTicks;
-    /** 食事・飲み物の弱点（1.6.0）。 */
-    public boolean eatWeakSpotEnabled;
-    public int eatHitTicks;
-    public int eatMinHitIntervalTicks;
-    /** 乗り物の弱点（1.6.0）。 */
+
+    // 乗り物
     public boolean vehicleWeakSpotEnabled;
+    public int vehicleMinHitIntervalTicks;
     public double vehicleBoostMultiplier;
     public double vehicleBoostMaxMultiplier;
     public int vehicleBoostDurationTicks;
-    public int vehicleMinHitIntervalTicks;
-    /** はしごの弱点（1.7.0。速さはクライアントで足すので、倍率・上限・時間も送る）。 */
+
+    // 飲食
+    public boolean eatWeakSpotEnabled;
+    public int eatMinHitIntervalTicks;
+    public int eatHitTicks;
+
+    // 睡眠（進める時刻はサーバーだけが使うので送らない）
+    public boolean sleepWeakSpotEnabled;
+    public int sleepMinHitIntervalTicks;
+
+    // はしご（速さはクライアントで足すので、倍率・上限・時間も送る）
     public boolean ladderWeakSpotEnabled;
+    public int ladderMinHitIntervalTicks;
     public double ladderBoostMultiplier;
     public double ladderBoostMaxMultiplier;
     public int ladderBoostDurationTicks;
-    public int ladderMinHitIntervalTicks;
-    /** エリトラの弱点（1.7.0。速さはクライアントで足す）。 */
+
+    // エリトラ（速さはクライアントで足す）
     public boolean elytraWeakSpotEnabled;
-    public double elytraBoostPower;
     public int elytraMinHitIntervalTicks;
-    /** エンチャントの弱点（1.7.0）。サーバーが種を読み書きできないときは false で送る。 */
+    public double elytraBoostPower;
+
+    // エンチャント（サーバーが種を読み書きできないときは false で送る）
     public boolean enchantWeakSpotEnabled;
     public int enchantMinHitIntervalTicks;
-    /** 収穫の弱点（1.7.0）。おまけの有無はサーバーだけが使うので送らない。 */
+
+    // 収穫（おまけの有無はサーバーだけが使うので送らない）
     public boolean harvestWeakSpotEnabled;
     public int harvestMinHitIntervalTicks;
-    /** 投げる物の弱点（1.7.0。溜めのゲージをクライアントも進める）。 */
+
+    // 投擲物（溜めのゲージをクライアントも進める）
     public boolean throwWeakSpotEnabled;
-    public double throwChargePerHit;
     public int throwMinHitIntervalTicks;
-    /** 走りの弱点（1.7.0。残り時間のゲージのため、倍率・時間も送る）。 */
+    public double throwChargePerHit;
+
+    // ダッシュ（残り時間のゲージのため、倍率・時間も送る）
     public boolean sprintWeakSpotEnabled;
+    public int sprintMinHitIntervalTicks;
     public double sprintBoostMultiplier;
     public double sprintBoostMaxMultiplier;
     public int sprintBoostDurationTicks;
-    public int sprintMinHitIntervalTicks;
-    /** 値を送ったサーバーの Mod の版（1.6.0。ServerFeatures）。自分の設定の値なら、自分の版。 */
-    public String serverVersion;
+
+    // ネザーゲート（サーバーが待ち時間を読み書きできないときは false で送る）
+    public boolean portalWeakSpotEnabled;
+    public int portalMinHitIntervalTicks;
+    public int portalHitTicks;
+
+    // 他のプレイヤーの弱点マーク
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
@@ -135,37 +166,33 @@ public final class SyncedSettings {
     }
 
     /**
-     * 送る項目と並び（1.8.6 で一覧にした。並びは 1.8.5 までの手書きの write と同じで、通信の中身を変えない）。
+     * 送る項目と並び（1.8.6 で一覧にした。1.9.0 で、フィールドと同じ種類ごとの素直な並びにした）。
      * 項目を足すときは、フィールドとこの一覧の両方に足す（通信が変わるので、マイナー）。フィールドの名前が
      * WeakSpotConfig の同じ名前の項目から値を取る（serverVersion は自分の版）。
      */
     static final String[] WIRE = {
-            "boostMultiplier", "boostDurationTicks", "minHitIntervalTicks",
-            "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance",
-            "weakSpotMinRadius", "weakSpotMaxRadiusRatio", "minFaceSize",
-            "lingerTicks", "growthMinHitIntervalTicks", "growthMinRadius",
-            "growthExcludedBlocks", "growthExtraBlocks", "machineMinHitIntervalTicks",
-            "excludedBlocks", "animalBabyEnabled", "animalBreedingEnabled",
-            "sheepWoolEnabled", "chickenEggEnabled", "villagerTradeResetEnabled",
-            "animalBabyHits", "animalBreedingHits", "sheepWoolHits",
-            "chickenEggHits", "villagerTradeResetHits", "animalMinHitIntervalTicks",
+            "serverVersion", "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance", "weakSpotMinRadius",
+            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "miningWeakSpotEnabled", "miningComboBonus",
+            "boostMultiplier", "boostDurationTicks", "minHitIntervalTicks", "growthWeakSpotEnabled",
+            "growthMinHitIntervalTicks", "growthMinRadius", "growthExcludedBlocks", "growthExtraBlocks",
+            "machineWeakSpotEnabled", "machineMinHitIntervalTicks", "excludedBlocks", "machineBoostMultiplier",
+            "machineBoostMaxMultiplier", "animalWeakSpotEnabled", "animalMinHitIntervalTicks", "animalBabyEnabled",
+            "animalBreedingEnabled", "sheepWoolEnabled", "chickenEggEnabled", "villagerTradeResetEnabled",
+            "animalBabyHits", "animalBreedingHits", "sheepWoolHits", "chickenEggHits", "villagerTradeResetHits",
             "animalExcludedEntities", "animalSneakRequiredEntities", "fishingWeakSpotEnabled",
-            "fishingHits", "fishingMinHitIntervalTicks", "bowWeakSpotEnabled",
-            "bowHitTicks", "bowMinHitIntervalTicks", "meleeWeakSpotEnabled",
-            "meleeMinHitIntervalTicks", "meleeChargePerHit", "meleeChargeMax",
-            "portalWeakSpotEnabled", "portalHitTicks", "portalMinHitIntervalTicks",
-            "machineBoostMultiplier", "machineBoostMaxMultiplier", "serverVersion",
-            "sleepWeakSpotEnabled", "sleepMinHitIntervalTicks", "eatWeakSpotEnabled",
-            "eatHitTicks", "eatMinHitIntervalTicks", "vehicleWeakSpotEnabled",
-            "vehicleBoostMultiplier", "vehicleBoostMaxMultiplier", "vehicleBoostDurationTicks",
-            "vehicleMinHitIntervalTicks", "markerShareRange", "markerSendMinIntervalTicks",
-            "ladderWeakSpotEnabled", "ladderBoostMultiplier", "ladderBoostMaxMultiplier",
-            "ladderBoostDurationTicks", "ladderMinHitIntervalTicks", "elytraWeakSpotEnabled",
-            "elytraBoostPower", "elytraMinHitIntervalTicks", "enchantWeakSpotEnabled",
-            "enchantMinHitIntervalTicks", "harvestWeakSpotEnabled", "harvestMinHitIntervalTicks",
-            "throwWeakSpotEnabled", "throwChargePerHit", "throwMinHitIntervalTicks",
-            "sprintWeakSpotEnabled", "sprintBoostMultiplier", "sprintBoostMaxMultiplier",
-            "sprintBoostDurationTicks", "sprintMinHitIntervalTicks"
+            "fishingMinHitIntervalTicks", "fishingHits", "bowWeakSpotEnabled", "bowMinHitIntervalTicks",
+            "bowHitTicks", "meleeWeakSpotEnabled", "meleeMinHitIntervalTicks", "meleeChargePerHit",
+            "meleeChargeMax", "vehicleWeakSpotEnabled", "vehicleMinHitIntervalTicks", "vehicleBoostMultiplier",
+            "vehicleBoostMaxMultiplier", "vehicleBoostDurationTicks", "eatWeakSpotEnabled",
+            "eatMinHitIntervalTicks", "eatHitTicks", "sleepWeakSpotEnabled", "sleepMinHitIntervalTicks",
+            "ladderWeakSpotEnabled", "ladderMinHitIntervalTicks", "ladderBoostMultiplier",
+            "ladderBoostMaxMultiplier", "ladderBoostDurationTicks", "elytraWeakSpotEnabled",
+            "elytraMinHitIntervalTicks", "elytraBoostPower", "enchantWeakSpotEnabled", "enchantMinHitIntervalTicks",
+            "harvestWeakSpotEnabled", "harvestMinHitIntervalTicks", "throwWeakSpotEnabled",
+            "throwMinHitIntervalTicks", "throwChargePerHit", "sprintWeakSpotEnabled", "sprintMinHitIntervalTicks",
+            "sprintBoostMultiplier", "sprintBoostMaxMultiplier", "sprintBoostDurationTicks",
+            "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "markerShareRange",
+            "markerSendMinIntervalTicks"
     };
     private static final Field[] FIELDS = new Field[WIRE.length];
 

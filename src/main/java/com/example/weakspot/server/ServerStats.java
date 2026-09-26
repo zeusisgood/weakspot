@@ -107,11 +107,13 @@ public final class ServerStats {
         NBTTagCompound persisted = entityData.getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG);
         entityData.setTag(EntityPlayer.PERSISTED_NBT_TAG, persisted);
         NBTTagCompound mine = persisted.getCompoundTag(TAG);
+        // 1.6.1 でやめた節目の別の累計。1.9.0 から、読み込んだときに消す
+        mine.removeTag("rewardHits");
         persisted.setTag(TAG, mine);
         return mine;
     }
 
-    /** 保存のキーは MiningStats#saveKey（1.8.5 までと同じ名前）。 */
+    /** 保存のキーは MiningStats#saveKey。1.8.x で保存した近接の数（critHits）は、meleeHits がなければ読む（1.9.0）。 */
     private static MiningStats read(NBTTagCompound tag) {
         MiningStats stats = new MiningStats();
         stats.blocksBroken = tag.getLong("blocksBroken");
@@ -120,7 +122,12 @@ public final class ServerStats {
         stats.savedTicks = tag.getDouble("savedTicks");
         stats.maxStreak = tag.getLong("maxStreak");
         for (HitKind kind : HitKind.values()) {
-            stats.setCount(kind, tag.getLong(MiningStats.saveKey(kind)));
+            String key = MiningStats.saveKey(kind);
+            String legacy = MiningStats.legacySaveKey(kind);
+            if (!tag.hasKey(key) && legacy != null) {
+                key = legacy;
+            }
+            stats.setCount(kind, tag.getLong(key));
         }
         return stats;
     }

@@ -120,9 +120,12 @@ public class MiningStatsTest {
     }
 
     @Test
-    public void saveKeysKeepTheirOldNames() {
+    public void saveKeysFollowTheKindNames() {
         assertEquals("hits", MiningStats.saveKey(HitKind.MINING));
-        assertEquals("critHits", MiningStats.saveKey(HitKind.MELEE));
+        // 1.9.0 で critHits から改名。1.8.x のワールドは legacySaveKey で読む
+        assertEquals("meleeHits", MiningStats.saveKey(HitKind.MELEE));
+        assertEquals("critHits", MiningStats.legacySaveKey(HitKind.MELEE));
+        assertEquals(null, MiningStats.legacySaveKey(HitKind.BOW));
         assertEquals("portalHits", MiningStats.saveKey(HitKind.PORTAL));
     }
 

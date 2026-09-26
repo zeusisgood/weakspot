@@ -54,11 +54,6 @@ public class CommonProxy {
         return false;
     }
 
-    /** つないでいるサーバーが、クリエイティブの弱点を受け付けるか（1.8.6。PlayerRules）。物理サーバーでは呼ばれない。 */
-    public boolean serverAcceptsCreative() {
-        return true;
-    }
-
     /** 自分のその種類の弱点がオンか（1.7.0。一時オフと、種類ごとのオフ）。物理サーバーでは呼ばれない。 */
     public boolean isKindEnabled(HitKind kind) {
         return true;

@@ -30,6 +30,14 @@ import org.apache.logging.log4j.LogManager;
 @Config(modid = WeakSpotMod.MODID)
 public final class WeakSpotConfig {
 
+    @Config.Comment({"[サーバー] 採掘の弱点のオン・オフ（1.9.0）",
+            "オフにすると、全員の採掘の弱点が出ない（バニラの採掘に戻る）"})
+    public static boolean miningWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] 採掘のコンボ倍率のオン・オフ（1.9.0）",
+            "オンなら、1 回のヒットで進む量にコンボの掛け数（25 で ×1.25 … 1000 で ×4）を掛ける"})
+    public static boolean miningComboBonus = true;
+
     @Config.Comment("[サーバー] ヒット時の破壊速度の倍率")
     @Config.RangeDouble(min = 1.0, max = 100.0)
     public static double boostMultiplier = 4.0;
@@ -129,6 +137,10 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 100000000)
     public static int totalMilestoneRepeatInterval = 500000;
 
+    @Config.Comment({"[サーバー] 作物・苗木の成長の弱点のオン・オフ（1.9.0）",
+            "オフにすると、全員の成長の弱点が出ず、素手の右クリックは通常の動作になる"})
+    public static boolean growthWeakSpotEnabled = true;
+
     @Config.Comment({"[サーバー] 作物・苗木の弱点に1回当てるごとに、そのブロックに余分に呼ぶ randomTick の回数",
             "骨粉と違い、明るさや農地の水分などの成長条件は守ったまま速くなる"})
     @Config.RangeInt(min = 0, max = 1000)
@@ -168,6 +180,10 @@ public final class WeakSpotConfig {
     public static String[] growthExtraBlocks = {"minecraft:reeds", "minecraft:cactus", "minecraft:nether_wart",
             "ic2:rubber_wood"};
 
+    @Config.Comment({"[サーバー] 機械の弱点のオン・オフ（1.9.0）",
+            "オフにすると、全員の機械の弱点が出ず、しゃがんで素手の右クリックは通常の動作（GUI が開く）になる"})
+    public static boolean machineWeakSpotEnabled = true;
+
     @Config.Comment({"[サーバー] 機械の弱点に当てたとき、update() を毎tick何倍呼ぶか（4.0 なら毎tick 3回余分に呼ぶ）",
             "複数のプレイヤーが同じ機械を加速しても、足さずに大きいほうだけを使う"})
     @Config.RangeDouble(min = 1.0, max = 100.0)
@@ -202,6 +218,10 @@ public final class WeakSpotConfig {
             "minecraft:cyan_shulker_box", "minecraft:purple_shulker_box", "minecraft:blue_shulker_box",
             "minecraft:brown_shulker_box", "minecraft:green_shulker_box", "minecraft:red_shulker_box",
             "minecraft:black_shulker_box"};
+
+    @Config.Comment({"[サーバー] 動物の弱点のオン・オフ（1.9.0）",
+            "オフにすると、全員の動物の弱点が出ず、素手の右クリックは通常の動作になる"})
+    public static boolean animalWeakSpotEnabled = true;
 
     @Config.Comment("[サーバー] 動物の弱点で、子どもの成長を早めるか")
     public static boolean animalBabyEnabled = true;
@@ -598,62 +618,41 @@ public final class WeakSpotConfig {
     /**
      * 古い版で作った weakspot.cfg を1回だけ移行する（サーバーの起動時に呼ぶ。preInit の間の ConfigManager.sync は
      * ファイルの値でフィールドを上書きする「読み込み」になるので、そこでは保存できない）。
-     * 1: 1.2.2 でキノコを成長の対象にしたので、growthExcludedBlocks からキノコを取り除く（書き戻したら尊重する）。
-     * 2: 1.2.4 で mushroomGrowChance の初期値を 0.2 にしたので、古い初期値 0.1 のままなら 0.2 にする（ほかの値は残す）。
-     * 3: 1.3.7 で IC2 のゴムの木を成長の対象にしたので、growthExtraBlocks に ic2:rubber_wood を足す（書き戻したら尊重する）。
-     * 4: 1.4.2 で machineBoostDurationTicks の初期値を 6 にしたので、古い初期値 4 のままなら 6 にする（ほかの値は残す）。
-     * 5: 1.7.0 で節目の数字を細かくしたので、milestones / milestoneXp / milestoneRepair が古い初期値のままなら、
-     *    新しい初期値にする（どれかを書き換えてあれば、3 つとも残す）。
+     * 1.9.0 で、1〜5（1.2.x〜1.6.x の古い初期値の直し）は消した。
+     * 6: 今の設定にない項目（1.7.x の meleeWeakSpotScale など）を、ファイルから消す（Forge は自分では消さない）。
      */
     public static void migrate() {
-        if (configVersion >= 5) {
+        if (configVersion >= 6) {
             return;
         }
-        if (configVersion < 1) {
-            List<String> excluded = new ArrayList<>(Arrays.asList(growthExcludedBlocks));
-            if (excluded.removeAll(Arrays.asList("minecraft:brown_mushroom", "minecraft:red_mushroom"))) {
-                growthExcludedBlocks = excluded.toArray(new String[0]);
-                LogManager.getLogger(WeakSpotMod.MODID).info(
-                        "weakspot.cfg: removed mushrooms from growthExcludedBlocks (mushrooms can grow since 1.2.2)");
-            }
-        }
-        if (configVersion < 2 && mushroomGrowChance == 0.1) {
-            mushroomGrowChance = 0.2;
-            LogManager.getLogger(WeakSpotMod.MODID).info(
-                    "weakspot.cfg: changed mushroomGrowChance from the old default 0.1 to 0.2 (default since 1.2.4)");
-        }
-        if (configVersion < 3) {
-            List<String> extra = new ArrayList<>(Arrays.asList(growthExtraBlocks));
-            if (!extra.contains("ic2:rubber_wood")) {
-                extra.add("ic2:rubber_wood");
-                growthExtraBlocks = extra.toArray(new String[0]);
-                LogManager.getLogger(WeakSpotMod.MODID).info(
-                        "weakspot.cfg: added ic2:rubber_wood to growthExtraBlocks (IC2 rubber wood resin holes since 1.3.7)");
-            }
-        }
-        if (configVersion < 4 && machineBoostDurationTicks == 4) {
-            machineBoostDurationTicks = 6;
-            LogManager.getLogger(WeakSpotMod.MODID).info(
-                    "weakspot.cfg: changed machineBoostDurationTicks from the old default 4 to 6 (default since 1.4.2)");
-        }
-        if (configVersion < 5 && Arrays.equals(milestones, OLD_MILESTONES) && Arrays.equals(milestoneXp, OLD_MILESTONE_XP)
-                && Arrays.equals(milestoneRepair, OLD_MILESTONE_XP)) {
-            milestones = NEW_MILESTONES.clone();
-            milestoneXp = NEW_MILESTONE_XP.clone();
-            milestoneRepair = NEW_MILESTONE_XP.clone();
-            LogManager.getLogger(WeakSpotMod.MODID).info(
-                    "weakspot.cfg: replaced the old default milestones (100, 777, 1000, 10000) with the finer ones (since 1.7.0)");
-        }
-        configVersion = 5;
+        removeUnknownKeys();
+        configVersion = 6;
         save();
     }
 
-    /** 1.6.x までの節目の初期値（configVersion 5 の移行で使う）。milestoneRepair も milestoneXp と同じ値だった。 */
-    private static final int[] OLD_MILESTONES = {100, 777, 1000, 10000};
-    private static final int[] OLD_MILESTONE_XP = {10, 77, 30, 100};
-    /** 1.7.0 の節目の初期値（フィールドの初期値と同じ。移行で使う）。 */
-    private static final int[] NEW_MILESTONES = milestones.clone();
-    private static final int[] NEW_MILESTONE_XP = milestoneXp.clone();
+    /** weakspot.cfg の general の項目のうち、このクラスに同じ名前の設定がないものを消す（configVersion 6）。 */
+    private static void removeUnknownKeys() {
+        Configuration cfg = cachedConfiguration();
+        if (cfg == null) {
+            return;
+        }
+        ConfigCategory general = cfg.getCategory("general");
+        for (String key : new ArrayList<>(general.keySet())) {
+            if (!isSetting(key)) {
+                general.remove(key);
+                LogManager.getLogger(WeakSpotMod.MODID).info("weakspot.cfg: removed the unused setting {}", key);
+            }
+        }
+    }
+
+    private static boolean isSetting(String key) {
+        try {
+            Field field = WeakSpotConfig.class.getField(key);
+            return java.lang.reflect.Modifier.isStatic(field.getModifiers());
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+    }
 
     private static boolean reloadWarned;
 

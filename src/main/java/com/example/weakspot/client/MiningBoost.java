@@ -78,11 +78,8 @@ final class MiningBoost {
         }
     }
 
-    /**
-     * 採掘のコンボの掛け数（1.8.7）。1.8.6 以前のサーバーは掛けないので 1（掛けると、クライアントだけが先に掘り終えて、
-     * ブロックが一度戻って見える）。
-     */
+    /** 採掘のコンボの掛け数（1.8.7。1.9.0 からサーバーの設定 miningComboBonus でオフにできる）。 */
     static double comboFactor(int combo) {
-        return ServerFeatures.since("1.8.7") ? ComboFactor.factor(combo) : 1;
+        return ClientSettings.get().miningComboBonus ? ComboFactor.factor(combo) : 1;
     }
 }

@@ -56,10 +56,12 @@ public final class RightClickTargets {
             return null;
         }
         IBlockState state = world.getBlockState(pos);
-        if (player.isSneaking() && player.getHeldItemOffhand().isEmpty() && isMachine(world, pos, state, settings)) {
+        // サーバーの設定で止めた種類は、対象にしない（1.9.0。収穫は isHarvestable の中で見る）
+        if (settings.enabled(HitKind.MACHINE) && player.isSneaking() && player.getHeldItemOffhand().isEmpty()
+                && isMachine(world, pos, state, settings)) {
             return HitKind.MACHINE;
         }
-        if (isGrowable(world, pos, state, settings)) {
+        if (settings.enabled(HitKind.GROWTH) && isGrowable(world, pos, state, settings)) {
             return HitKind.GROWTH;
         }
         if (isHarvestable(state, settings)) {
