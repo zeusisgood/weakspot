@@ -27,7 +27,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-  - 現行は 1.8.7。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.8,1.9)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.8.8。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.8,1.9)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - クラウドのセッションはタグを push できない（403）。そのときは、ブランチだけ push し、タグを付けて `main` とタグを push するコマンドをユーザーに渡す（ユーザーが手元で実行する）。
 - **遊び方（プレイヤーから見える動き。`doc/play.md`）を変えたときは、ガイドの本の文章（`en_us.lang` と `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`。1.8.5）も合わせて直す**（ユーザーの指示）。技術的なこと（設定の名前・値、通信、バージョン）は書かない。本の 1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい）で、題・小見出し・「↩ 目次」を含めてはみ出さないこと。ページを足すときは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動で作る。目次の 1 ページも 14 行まで）。
 - リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」）**と「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）→ コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
@@ -102,7 +102,12 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - `client/AimSpotKind` / `client/AimSpots`: 照準のまわりの弱点（乗り物・食事・弓・はしご・走り・エリトラ・投げる物・近接・ゲート）の共通の土台。`AimSpots` が毎 tick 出す・消す（`beforeTick` / `afterTick` / `tickEnd`）、毎フレーム当たりを見て通知・`onHit`・`relocate`（`keepAfterHit` が false なら消す）、HUD に描く（`hasGauge` / `drawGauge` / `drawAfterOverlay`）、`FOVUpdateEvent` を回す。種類ごとのクラスは、出す条件 `wanted`・出し方 `placement`（`HudSpot.FREE` / `VERTICAL` / `HORIZONTAL` / `VERTICAL_FIXED`（弓を馬・豚の上で引いたとき。yaw は出した時点のまま））・間隔・効果・ゲージだけを書く。手を使っている間も出すのは弓・食事（`blockedByUsingHand` が false）。弓は `HudSpot.withPalette` で橙の 3 色を持つ。一時オフ・ワールドを出たときは `AimSpots.clearAll`。釣り（水面）と、画面のマーカー（睡眠・エンチャント）は別のまま。
   - `common/ComboFactor`: コンボの掛け数（25 / 50 / 100 / 250 / 500 / 1000 で 1.25〜4.0）。採掘（1.8.7）・機械・乗り物・はしご・走り・投げる物・近接・エリトラ・ゲート・収穫が使う（1.8.5 までは `MachineComboBoost.factor`）。
   - **`HitGate.accept(player, 種類, 音の位置, streak)`（1.8.7）**: ヒットを受け付けると決めたあとの共通の処理（`mark` → 種類ごとの数と節目 `recordKindHit`（採掘は除く。採掘は `recordHit` と `MiningRewards.onMiningHit`）→ `countStreak` → `notifyNearbyPlayers`）。戻り値はコンボ数で、掛け数は `ComboFactor.factor(accept(...))`。すべての *Hits が使う。効果が失敗したらヒットに数えない種類（エンチャントの `reroll`、収穫の `harvest`）は、効果のあとに呼ぶ。
-  - **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers`（と、その種類の `*Hits`。前置きは `HitGate`）、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、統計（`MiningStats` の配列は自動。保存のキーは `saveKey` の規則。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前）、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`doc/play.md`・`doc/config.md`、ガイドの本（`GuideBook.CONTENT`）。
+  - **1.8.8 で共通にした部品**（遊び方・通信は変えていない）:
+    - `UseTimeCut`（両側）: 使っている物の残り時間をヒットで縮める（縮める量をプレイヤーごとに覚え、次の `LivingEntityUseItemEvent.Tick` の `setDuration` で減らす。使い始めで捨てる）。`BowDraw`（引き切り 20 tick まで。過剰チャージ・同じ tick の矢の charge・矢の威力は `BowDraw` に残す）と `EatDraw`（残り 1 まで）が使う。
+    - `server/SpeedModifier`: 固定の UUID の `MOVEMENT_SPEED` の一時的な修正（合計に掛ける、保存しない）。走り（`MoveHits.SPRINT_MODIFIER`）と馬・豚（`VehicleHits`）。残り時間の数え方はそれぞれ。
+    - `client/ScreenSpotKind` / `client/ScreenSpots`: 画面の上のマーカー（睡眠・エンチャント）の土台。`ScreenSpots` が描く（色・形・残像）・左クリックで当てる（キャンセル、間隔、`registerHit`、`HitMessage`）・出し直す。種類ごとのクラスは、出す条件 `eligible`・当ててよいか `markerVisible`・置く範囲 `place`・色 `look` / `outlineAlpha`・`onShown` / `onHit` / `drawExtra`（エンチャントの注釈）だけを書く。
+    - `client/QueryThrottle`: サーバーへの問い合わせの間隔（動物 5 tick・相手ごと、機械 4 tick・最後の相手、釣り 5 tick）。ヒットのときは force。
+  - **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers`（と、その種類の `*Hits`。前置きは `HitGate`）、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上のマーカーなら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。保存のキーは `saveKey` の規則。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前）、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`doc/play.md`・`doc/config.md`、ガイドの本（`GuideBook.CONTENT`）。
 - `network/`（`WeakSpotMod.preInit` で登録。番号は登録順）: パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは、クライアントのクラスに `proxy.onXxx` 経由でアクセスする。
   - `HitMessage`（C→S）: ヒット通知（種類、BlockPos、連続ヒット数、動物・敵のエンティティ ID）。1.3.0 で種類に BOW・MELEE。
   - `OtherHitMessage`（S→C）: 受け付けたヒット（すべての種類。成長・機械は 1.3.2、動物・釣り・弓・近接は 1.3.3 から。各 `server/*Hits` が `ServerBoostTracker.notifyNearbyPlayers` を呼ぶ）を、鳴らす位置から 16 ブロック以内の他のプレイヤーに転送する（ヒット音用）。位置はブロックで、動物・近接は当てた生き物、釣りは浮き、弓は引いているプレイヤー。
@@ -156,7 +161,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-`doc/spec/SPEC_v1.8.8.md`（コードの整理だけ）。ユーザーの「実装」済み（1.8.7 をリリースしたあとに続けて行う）。
+なし（1.8.8 をリリースした。次の要望を待つ）。
 
 ### 次のマイナー（1.9.0）に向けたメモ（ユーザーの判断。1.8.6 の相談で決めた）
 

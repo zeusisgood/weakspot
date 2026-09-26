@@ -304,6 +304,7 @@ weakspot.news.1.8.4=Sneak-right-click a villager to see why it cannot breed
 weakspot.news.1.8.5=The guide book now has chapters, clickable contents and headings
 weakspot.news.1.8.6=Weak spots now appear in creative mode too, plus internal cleanup
 weakspot.news.1.8.7=Mining now scales with your combo, and each kind shows its combo bonus
+weakspot.news.1.8.8=Internal cleanup (no gameplay changes)
 weakspot.breed.line=Breeding: %s
 weakspot.breed.separator= / 
 weakspot.breed.ready=Ready to breed (it starts after a short wait)
