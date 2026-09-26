@@ -28,11 +28,11 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
   - 現行は 1.9.0。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
-- クラウドのセッションはタグを push できない（403）。そのときは、ブランチだけ push し、タグを付けて `main` とタグを push するコマンドをユーザーに渡す（ユーザーが手元で実行する）。
+- タグと GitHub Release は、`main` に取り込まれたあとに GitHub Actions（`.github/workflows/ci.yml` の `release`）が作る。Claude はタグを付けない（クラウドのセッションはタグを push できない）。
 - **遊び方（プレイヤーから見える動き。`doc/play.md`）を変えたときは、ガイドの本の文章（`en_us.lang` と `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`。1.8.5）も合わせて直す**（ユーザーの指示）。技術的なこと（設定の名前・値、通信、バージョン）は書かない。本の 1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい）で、題・小見出し・「↩ 目次」を含めてはみ出さないこと。ページを足すときは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動で作る。目次の 1 ページも 14 行まで）。
-- リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README と `README.en.md` の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」/「latest: X.Y.Z」）**、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し（種類・操作が変わったら `README.en.md` の表も）、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）→ コミット → 注釈付きタグ `vX.Y.Z` → `main` とタグを push。GitHub Release はユーザーが手動で作り、`build/libs/weakspot-X.Y.Z.jar` を添付する。
-  - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。タグのメッセージは「X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
-  - 仕様書（`doc/spec/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装からタグと push まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。GitHub Release の作成は、ユーザーが手動で行う。
+- リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README と `README.en.md` の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」/「latest: X.Y.Z」）**、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し（種類・操作が変わったら `README.en.md` の表も）、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）→ コミット → 作業用ブランチに push → `main` への PR を作る（下の「ブランチと PR の約束」）。ユーザーが Merge すると、Actions がタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を作る。
+  - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
+  - 仕様書（`doc/spec/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装から push と PR まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。Merge はユーザーが行う。
   - マイナーを上げるときは、仕様書に書かれた互換性の変更（通信内容、`SyncedSettings`・`StatsMessage` の項目の追加など）は、止まる条件の「互換性を破る変更が必要」に当たらない。`ACCEPTED_VERSIONS` を新しいマイナーに書き換える。仕様書に書かれていない互換性の変更（特に、古い版で作ったワールドの保存データが読めなくなる変更。項目の追加で古いデータを読める形なら、よい）は、当たる。
 
 ## アーキテクチャ
@@ -67,12 +67,14 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **速さの上限は基本的に付けない（ユーザーの方針）**。サーバーに引き戻されるなど上限が要りそうなときは、黙って付けずにユーザーに聞く。
 - ユーザーは vi に慣れていない。conf などを直してもらうときは、vi の使い方を簡単に添える（`/キー名` で検索 → `n` で次へ、`cw` で単語を書き換え → `Esc`、`:wq` で保存して終わる、`:q!` で保存せずに終わる）。
 - クラウドでのビルド: JDK 8 がなければ `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす（Maven Central が 429 を返したら、少し待って再実行する）。
-- **ブランチの約束**（1.9.0 のあとに決めた）:
-  - 長く残すブランチは `main` だけ。セッションごとの作業は `claude/…` のブランチで行い、ユーザーが手元で `main` に fast-forward で取り込む。
-  - 消してよいのは、中身がすべて `main` に入っているブランチだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチは、消さずにユーザーに聞く。
-  - 作業中のセッションのブランチは、そのセッションが終わるまで残す。
-  - 消すのはユーザー（GitHub の Branches 画面か `git push origin --delete <ブランチ>`）。Claude は候補の一覧と削除のコマンドを渡す。一覧を出すのは、頼まれたときと、新しいセッションの最初に気付いたとき。タグはブランチと別なので、ブランチを消しても残る。
-- リリースしたら、jar を `build/release/` にコピーしてユーザーに添付する。手元で打つコマンド（`git fetch origin <ブランチ>` → `git checkout main` → `git merge --ff-only origin/<ブランチ>` → `git tag -a vX.Y.Z -m "X.Y.Z: 〜"` → `git push origin main vX.Y.Z`）と、「試してほしいこと」の箇条書きを渡す。
+- **ブランチと PR の約束**（1.9.0 のあとに決めた）:
+  - 長く残すブランチは `main` だけ。セッションごとの作業は `claude/…` のブランチで行う。
+  - `main` に渡せる状態になったら（主にリリースのあと。文書だけの変更でも）、Claude が作業用ブランチから `main` への PR を作る（ユーザーの指示。頼まれるたびではなく、この約束で作ってよい）。本文は、変えたこと・試してほしいこと。
+  - CI（`.github/workflows/ci.yml` の `build`。まっさらな環境で `./gradlew build`）が PR で走る。`main` のルールで CI の成功が必須なので、赤いままでは Merge できない。**自分が作った PR の CI が赤くなったら、原因を直して push する**（Claude のコンテナで通っても、まっさらな環境で落ちることがある）。
+  - ユーザーが GitHub で「Create a merge commit」で取り込む。取り込んだブランチは自動で消える（設定「Automatically delete head branches」）。取り込まれたあとの作業は、同じ名前のブランチを `main` から作り直し、新しい PR にする（取り込み済みの PR は使い回さない）。
+  - `main` への直接の push は、ルールで禁止（例外はユーザーだけ）。Claude は `main` に push しない。
+  - 自動で消えなかったブランチを消すとき: 消してよいのは、中身がすべて `main` に入っているブランチだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチは、消さずにユーザーに聞く。作業中のセッションのブランチは残す。消すのはユーザーで、Claude は候補の一覧と削除のコマンドを渡す。タグはブランチと別なので、ブランチを消しても残る。
+- リリースしたら、jar を `build/release/` にコピーしてユーザーに添付する（Merge の前に試せるように）。PR のリンクと、「試してほしいこと」の箇条書きを渡す。
 
 ## 次の作業
 
