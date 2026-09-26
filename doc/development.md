@@ -26,6 +26,11 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 
 仕様書（バージョンごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
 
+## ブランチとリリース
+
+- 作業は `main` 以外のブランチで行い、`main` への PR を作ります。PR ごとに GitHub Actions（[`.github/workflows/ci.yml`](../.github/workflows/ci.yml)）がビルドと全テストを実行し、成功しないと Merge できません。
+- `main` に取り込まれた時、`build.gradle` の `version` がまだ Release のない版なら、同じワークフローがタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を自動で作成します。版を上げない変更（文書だけなど）では作成しません。
+
 ## バージョンの方針
 
 - **パッチ**（1.8.5 → 1.8.6）: 機能追加・不具合修正。通信内容や保存データの形式は変えないため、同じマイナー内であれば、サーバーとクライアントのパッチが違っても接続できます。
