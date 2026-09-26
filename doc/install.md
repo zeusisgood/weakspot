@@ -2,7 +2,7 @@
 
 [← README に戻る](../README.md)
 
-必要環境: Minecraft Java Edition **1.12.2** / Minecraft Forge **1.12.2 - 14.23.5.2860**。Mod の jar は [Releases](https://github.com/zeusisgood/weakspot/releases) から入手し、`mods` フォルダに入れてください。
+必要環境: Minecraft Java Edition **1.12.2** + Minecraft Forge（1.12.2 用。開発・動作確認は 14.23.5.2860。古い Forge では一部の機能が動かない可能性あり）。Mod の jar は [Releases](https://github.com/zeusisgood/weakspot/releases) から入手し、`mods` フォルダに入れてください。
 
 ## 導入先
 

@@ -2,6 +2,8 @@
 
 [← README に戻る](../README.md)
 
+開発・動作確認には Minecraft 1.12.2 / **Forge 14.23.5.2860**（公式 MDK、ForgeGradle 3 + Gradle 4.9）を使っています。Mod 側では Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。
+
 JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます。
 
 ```sh
