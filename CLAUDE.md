@@ -32,6 +32,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **遊び方（プレイヤーから見える動き。`doc/play.md`）を変えたときは、ガイドの本の文章（`en_us.lang` と `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`。1.8.5）も合わせて直す**（ユーザーの指示）。技術的なこと（設定の名前・値、通信、バージョン）は書かない。本の 1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい）で、題・小見出し・「↩ 目次」を含めてはみ出さないこと。ページを足すときは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動で作る。目次の 1 ページも 14 行まで）。
 - リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README と `README.en.md` の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」/「latest: X.Y.Z」）**、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し（種類・操作が変わったら `README.en.md` の表も）、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）。新しい版の通知（1.9.2）のため、直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md`（英語。版の番号は書かない）も直す（下の「配布サイトの説明文」）→ コミット → 作業用ブランチに push → `main` への PR を作る（下の「ブランチと PR の約束」）。ユーザーが Merge すると、Actions がタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を作る。
   - **配布サイトの説明文**（1.9.1 のあと）: 正本は `doc/store/description.md`（Markdown。リンクは `https://…` の完全な形）。**Modrinth** は、`main` でこのファイルが変わると `.github/workflows/modrinth-description.yml` が API（`PATCH /v2/project/<ID>`）で自動で反映する（Secrets の `MODRINTH_TOKEN` にスコープ「プロジェクトを書く」、Variables の `MODRINTH_PROJECT_ID` が要る。どちらかがなければ何もせず成功で終わる。Actions の画面から手動でも流せる）。**CurseForge** は API で説明を変えられないので手動（ユーザーの判断）: このファイルを直した PR では、PR の本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
+  - **画像**（1.9.3 のあと）: アイコンの正本は `doc/images/icon.png`（512×512。配布サイト・GitHub のソーシャルプレビュー・ゲーム内のロゴで共通。AI 生成なので、Modrinth の開示の「資産」に入れてある）。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
   - コミットの形: 仕様書を足す「Add the spec for X.Y.Z」→ 機能のコミット（1つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。リリースした jar は `build/release/` にも残す（ユーザーが試す版を取り出しやすくするため）。
   - 仕様書（`doc/spec/SPEC_*.md`）にもとづく作業は、ユーザーの承認を待たずに、実装から push と PR まで進める。ただし、止まる条件（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。Merge はユーザーが行う。
   - マイナーを上げるときは、仕様書に書かれた互換性の変更（通信内容、`SyncedSettings`・`StatsMessage` の項目の追加など）は、止まる条件の「互換性を破る変更が必要」に当たらない。`ACCEPTED_VERSIONS` を新しいマイナーに書き換える。仕様書に書かれていない互換性の変更（特に、古い版で作ったワールドの保存データが読めなくなる変更。項目の追加で古いデータを読める形なら、よい）は、当たる。
@@ -79,6 +80,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - リリースしたら、jar を `build/release/` にコピーしてユーザーに添付する（Merge の前に試せるように）。PR のリンクと、「試してほしいこと」の箇条書きを渡す。
 
 ## 次の作業
+
+`doc/spec/SPEC_v1.9.4.md`（統計の「平均ヒット数」の名前、Mods の一覧のロゴ）の下書き。ユーザーが「実装」と言うまで実装しない。計算の修正は `SPEC_v1.10.0.md` の 2b.1。
 
 配布サイトへの自動公開（下の TODO）。ユーザーがアカウント・プロジェクト・トークンを用意してから、ワークフローを足す。
 

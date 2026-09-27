@@ -1,3 +1,5 @@
+<img src="doc/images/icon.png" alt="" width="96" align="right">
+
 # Weak Spot Mining
 
 [![Latest](https://img.shields.io/github/v/release/zeusisgood/weakspot?label=latest)](https://github.com/zeusisgood/weakspot/releases/latest)
@@ -5,6 +7,8 @@
 [日本語](README.md) | English
 
 A Minecraft mod that brings Fortnite's "weak spot" harvesting to Minecraft. A glowing circle (a weak spot) appears while you mine, farm, ride, draw a bow and more. Aim at it to speed things up.
+
+![A weak spot and the combo counter while mining](doc/images/mining-combo.jpg)
 
 ## ⬇ Download
 

@@ -1,3 +1,5 @@
+<img src="doc/images/icon.png" alt="" width="96" align="right">
+
 # Weak Spot Mining（弱点破壊 Mod）
 
 [![最新版](https://img.shields.io/github/v/release/zeusisgood/weakspot?label=%E6%9C%80%E6%96%B0%E7%89%88)](https://github.com/zeusisgood/weakspot/releases/latest)
@@ -5,6 +7,8 @@
 日本語 | [English](README.en.md)
 
 Fortnite の資材集めにある「弱点（クリティカル）を叩くと速く壊せる」仕組みを、Minecraft に導入する Mod です。採掘・栽培・移動・弓など、様々な場面に光る円（弱点）が出現し、当てると各動作が加速します。
+
+![採掘中の弱点とコンボの表示](doc/images/mining-combo.jpg)
 
 ## ⬇ ダウンロード
 
