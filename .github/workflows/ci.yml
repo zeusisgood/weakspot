@@ -14,6 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Check the publishing scripts
+        # 配布サイトへ上げるスクリプトの書き間違いを見つける（shellcheck は ubuntu-latest に入っている）
+        run: shellcheck .github/scripts/*.sh
       - uses: actions/setup-java@v6
         with:
           distribution: temurin

@@ -43,7 +43,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - クライアントとサーバーの**両方に Mod が必要**（同じマイナー同士なら接続できる）。パッケージは `io.github.zeusisgood.weakspot`（1.9.3 で `com.example.weakspot` から改名。通信・保存データ・設定はクラス名を使っていないので、改名しても互換は変わらない。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ）。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。
-- `common/` は Minecraft に依存しない純粋な計算だけ（1.7.10 への移植を見込んで、MC クラスを持ち込まない）。単体テストはここ（と `compat/`・`config/` の golden テスト）にある。
+- `common/` は Minecraft に依存しない純粋な計算だけ（1.7.10 への移植を見込んで、MC クラスを持ち込まない）。単体テストはここ（と `compat/`・`config/` の golden テスト）にある。`resources/` のテスト（1.9.4 のあと）は、ファイルの揃い具合を確かめる: `LangFilesTest`（日英の翻訳のキーが一致、設定の全項目に説明、全種類に名前、コードに書いた翻訳キーが翻訳にある）と `ReleaseFilesTest`（版を上げたときに直すファイル: `build.gradle` と `WeakSpotMod.VERSION`・`ACCEPTED_VERSIONS`・README の日英のリンクと「最近の更新」・`CHANGELOG.md`・`doc/spec/README.md`・`weakspot.news.<版>`・`update.json`）。リリースの流れの直し忘れは、このテストで CI が赤くなる。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（専用サーバーではロードされない）。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
 - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲み、古いサーバーでは出さない**。
