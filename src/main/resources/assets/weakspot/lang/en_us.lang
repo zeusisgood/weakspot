@@ -32,7 +32,7 @@ weakspot.config.remoteNotice=Connected to a server: its settings are used, excep
 
 weakspot.milestone.title=Mining %s Hits!
 weakspot.milestone.subtitle=Weak spot milestone
-weakspot.milestone.chat=[Weak Spot] You reached %s mining weak spot hits!
+weakspot.milestone.chat=[WeakSpot] You reached %s mining weak spot hits!
 
 weakspot.stats.tab.stats=Stats
 weakspot.stats.tab.sound=Sound
@@ -90,13 +90,13 @@ weakspot.command.usage=/weakspot stats <player> | /weakspot reset <player> (onli
 weakspot.command.usage.stats=/weakspot stats <player>
 weakspot.command.usage.reset=/weakspot reset <player>
 weakspot.command.usage.reload=/weakspot reload
-weakspot.command.reload=[Weak Spot] Reloaded the config (weakspot.cfg)
+weakspot.command.reload=[WeakSpot] Reloaded the config (weakspot.cfg)
 weakspot.command.reload.failed=Could not reload the config. Please restart the server (see the server log)
 weakspot.command.offline=Only online players can be specified
-weakspot.command.stats.header=[Weak Spot] Stats of %s
+weakspot.command.stats.header=[WeakSpot] Stats of %s
 weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, hits/blocks %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
 weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, hits/blocks %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
-weakspot.command.reset=[Weak Spot] Reset the all-time stats of %s
+weakspot.command.reset=[WeakSpot] Reset the all-time stats of %s
 
 # The guide book (1.4.1, chapters since 1.8.5). Update it along with doc/play.md. Keep each page within 14 lines.
 weakspot.stats.guide=Guide
@@ -258,10 +258,10 @@ weakspot.kinds.shape.ring=○ Ring
 weakspot.kinds.shape.diamond=◆ Diamond
 weakspot.kinds.shape.square=■ Square
 weakspot.milestone.kindTitle=%s %s Hits!
-weakspot.milestone.kindChat=[Weak Spot] You reached %2$s %1$s weak spot hits!
+weakspot.milestone.kindChat=[WeakSpot] You reached %2$s %1$s weak spot hits!
 weakspot.milestone.totalTitle=%s Total Hits!
 weakspot.milestone.totalSubtitle=Total weak spot milestone
-weakspot.milestone.totalChat=[Weak Spot] You reached %s weak spot hits in total!
+weakspot.milestone.totalChat=[WeakSpot] You reached %s weak spot hits in total!
 weakspot.enchant.hint=Hit the marker to reroll the offers
 weakspot.enchant.hintCount=Hit the marker to reroll the offers (%s)
 weakspot.enchant.hintEmpty=Put an item in to reroll the offers with weak spots
@@ -271,17 +271,17 @@ weakspot.general.sprintboostbarenabled.tooltip=[Client] Show the remaining time 
 weakspot.general.disabledkinds.tooltip=[Client] Weak spot kinds you turned off (also on the Markers tab of the K menu).\nOne per line: mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra, enchant, harvest, throw, sprint, portal.
 weakspot.general.mymarkercolors.tooltip=[Client] Colors of your own weak spots. One "kind=#RRGGBB" per line (e.g. harvest=#FF3DCB).\nAlso on the Markers tab of the K menu.
 weakspot.general.mymarkershapes.tooltip=[Client] Shapes of your own weak spots. One "kind=shape" per line (e.g. bow=diamond).\nShapes: circle, ring, diamond, square. Also on the Markers tab of the K menu.
-weakspot.news.header=[Weak Spot] Updated to %s: %s
+weakspot.news.header=[WeakSpot] Updated to %s: %s
 weakspot.news.link=[See changes]
 weakspot.news.bugHint=Found a bug? %s shows how to report it
 weakspot.news.default=Updated to a new version
-weakspot.updateCheck.available=[Weak Spot] Version %s is available (you have %s)
+weakspot.updateCheck.available=[WeakSpot] Version %s is available (you have %s)
 weakspot.updateCheck.link=[Download]
 weakspot.updateCheck.skip=[Don't remind me for this version]
 weakspot.updateCheck.skipped=You won't be reminded about %s again (newer versions will still be announced)
 weakspot.updateCheck.minor=Servers must use the same version to connect. Let the server admin know when you update
 weakspot.news.1.7.1=Fixed hollow weak spot markers; added update notes and /weakspot bug
-weakspot.bug.title=[Weak Spot] Bug report
+weakspot.bug.title=[WeakSpot] Bug report
 weakspot.bug.step1= 1. Report here: %s (opens with your environment filled in)
 weakspot.bug.openIssue=[Create a GitHub issue]
 weakspot.bug.step2= 2. Please include: summary, steps to reproduce, actual and expected behavior
@@ -320,6 +320,7 @@ weakspot.news.1.8.6=Weak spots now appear in creative mode too, plus internal cl
 weakspot.news.1.8.7=Mining now scales with your combo, and each kind shows its combo bonus
 weakspot.news.1.8.8=Internal cleanup (no gameplay changes)
 weakspot.news.1.9.1=Tidied up the bug report text
+weakspot.news.1.9.6=Server messages now show in your language
 weakspot.news.1.9.5=Hit sounds stack into chords with combos; clearer combo step sounds
 weakspot.news.1.9.4=Clearer name for the stats average; logo in the Mods list
 weakspot.news.1.9.3=Internal cleanup (no gameplay changes)

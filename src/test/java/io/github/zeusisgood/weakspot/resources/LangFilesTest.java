@@ -104,6 +104,36 @@ public class LangFilesTest {
         assertTrue("keys used in the code but missing from the lang files: " + missing, missing.isEmpty());
     }
 
+    /** サーバーから翻訳キーで送る文（1.9.6。PlayerText）は、クライアントの翻訳で使える %s / %1$s の形だけを使う。 */
+    @Test
+    public void serverSentTextsUseOnlyPercentS() {
+        Pattern format = Pattern.compile("%(?!(\\d+\\$)?s)");
+        List<String> bad = new ArrayList<>();
+        for (Map<String, String> entries : java.util.Arrays.asList(EN, JA)) {
+            entries.forEach((key, value) -> {
+                if ((key.startsWith("weakspot.version.") || key.startsWith("weakspot.breed."))
+                        && format.matcher(value).find()) {
+                    bad.add(key + "=" + value);
+                }
+            });
+        }
+        assertTrue("server-sent texts with formats other than %s: " + bad, bad.isEmpty());
+    }
+
+    /** チャットの頭は、日英とも [WeakSpot]（1.9.6。コマンド /weakspot と同じ綴り）。 */
+    @Test
+    public void chatPrefixIsWeakSpot() {
+        List<String> old = new ArrayList<>();
+        for (Map<String, String> entries : java.util.Arrays.asList(EN, JA)) {
+            entries.forEach((key, value) -> {
+                if (value.contains("[弱点]") || value.contains("[Weak Spot]")) {
+                    old.add(key);
+                }
+            });
+        }
+        assertTrue("old chat prefixes: " + old, old.isEmpty());
+    }
+
     private static Set<String> duplicates(Map<String, String> entries) {
         Set<String> found = new TreeSet<>();
         for (String key : entries.keySet()) {

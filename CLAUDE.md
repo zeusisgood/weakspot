@@ -27,7 +27,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-  - 現行は 1.9.5。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.9.6。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに GitHub Actions（`.github/workflows/ci.yml` の `release`）が作る。Claude はタグを付けない（クラウドのセッションはタグを push できない）。
 - **遊び方（プレイヤーから見える動き。`doc/play.md`）を変えたときは、ガイドの本の文章（`en_us.lang` と `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`。1.8.5）も合わせて直す**（ユーザーの指示）。技術的なこと（設定の名前・値、通信、バージョン）は書かない。本の 1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい）で、題・小見出し・「↩ 目次」を含めてはみ出さないこと。ページを足すときは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動で作る。目次の 1 ページも 14 行まで）。
 - リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README と `README.en.md` の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」/「latest: X.Y.Z」）**、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し（種類・操作が変わったら `README.en.md` の表も）、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）。新しい版の通知（1.9.2）のため、直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md`（英語。版の番号は書かない）も直す（下の「配布サイトの説明文」）→ コミット → 作業用ブランチに push → `main` への PR を作る（下の「ブランチと PR の約束」）。ユーザーが Merge すると、Actions がタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を作り、続けてその jar を **Modrinth** にも上げる（`.github/scripts/publish-modrinth.sh`。更新内容は英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク。Modrinth にその版がもうあれば何もしない。失敗したら Actions の「Modrinth publish」を手動で流す）。**CurseForge** にも上げる（`publish-curseforge.sh`。更新内容は同じ `changelog.sh`。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る。どちらかがなければ何もせず成功で終わる）。
@@ -48,7 +48,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲み、古いサーバーでは出さない**。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと、塗りが消える）。
-- 画面の文字列は `assets/weakspot/lang/en_us.lang` と `ja_jp.lang` の両方に足す。
+- 画面の文字列は `assets/weakspot/lang/en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`（1.9.6。テストで確かめる）。
+- **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)` で送る**（1.9.6。翻訳キーで送り、クライアントの言語で表示する。`since` はその翻訳キーを足した版。キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品（`HitGate`・`HitGate.accept`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **サーバー側の採掘のブーストは時間枠ではない**（1.12.2 のサーバーは破壊完了の瞬間に「今の速さ × (経過 tick + 1) ≥ 0.7」で判定するため、追加進捗を貯めて速さに換算する。`BoostMath`）。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる。詳細は `doc/architecture.md`。
 - **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers`（と、その種類の `*Hits`。前置きは `HitGate`）、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上のマーカーなら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。保存のキーは `saveKey` の規則。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。オン・オフは `<key>WeakSpotEnabled`、間隔は `<key>MinHitIntervalTicks` にすると、種類の表 `SyncedSettings.enabled` / `minHitInterval` に自動で入る）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ と、その `HitKind` の初期の色・コンボの掛け数を使うか（`HitKind` の引数）、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`doc/play.md`・`doc/config.md`・`doc/architecture.md`、ガイドの本（`GuideBook.CONTENT`）。
@@ -80,6 +81,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - リリースしたら、jar を `build/release/` にコピーしてユーザーに添付する（Merge の前に試せるように）。PR のリンクと、「試してほしいこと」の箇条書きを渡す。
 
 ## 次の作業
+
+1.9.6（サーバーからの案内をプレイヤーの言語で・チャットの頭 `[WeakSpot]`）をリリースした。
 
 1.9.5（ヒット音の和音・段階の音・駆け上がり・コンボが切れた音）をリリースした。
 

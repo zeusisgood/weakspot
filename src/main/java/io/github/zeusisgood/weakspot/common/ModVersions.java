@@ -19,6 +19,14 @@ public final class ModVersions {
         return 0;
     }
 
+    /**
+     * 相手のクライアントの版 clientVersion が、翻訳キーを足した版 since 以上か（1.9.6）。以上なら、そのキーを持っているので
+     * 翻訳キーのまま送ってよい。版が分からない（null・空）ときは false（サーバーで文にして送る）。
+     */
+    public static boolean hasKeysSince(String clientVersion, String since) {
+        return clientVersion != null && !clientVersion.isEmpty() && compare(clientVersion, since) >= 0;
+    }
+
     private static int number(String[] parts, int index) {
         if (index >= parts.length) {
             return 0;

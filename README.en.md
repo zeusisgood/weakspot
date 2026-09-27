@@ -12,7 +12,7 @@ A Minecraft mod that brings Fortnite's "weak spot" harvesting to Minecraft. A gl
 
 ## ⬇ Download
 
-- **[Download weakspot-1.9.5.jar](https://github.com/zeusisgood/weakspot/releases/download/v1.9.5/weakspot-1.9.5.jar)** (latest: 1.9.5)
+- **[Download weakspot-1.9.6.jar](https://github.com/zeusisgood/weakspot/releases/download/v1.9.6/weakspot-1.9.6.jar)** (latest: 1.9.6)
 - [Other versions and release notes](https://github.com/zeusisgood/weakspot/releases/latest)
 
 Requires **Minecraft Java Edition 1.12.2 + Forge**. Developed and tested with Forge 14.23.5.2860; much older Forge builds may not run every feature.

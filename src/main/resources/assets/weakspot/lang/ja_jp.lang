@@ -1,4 +1,4 @@
-key.categories.weakspot=弱点破壊
+key.categories.weakspot=弱点破壊（Weak Spot Mining）
 key.weakspot.stats=弱点破壊のメニューを開く
 
 weakspot.stats.title=弱点破壊
@@ -32,7 +32,7 @@ weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定
 
 weakspot.milestone.title=採掘 %s ヒット！
 weakspot.milestone.subtitle=弱点ヒットの節目を達成
-weakspot.milestone.chat=[弱点] 採掘の弱点ヒットが %s 回に達しました！
+weakspot.milestone.chat=[WeakSpot] 採掘の弱点ヒットが %s 回に達しました！
 
 weakspot.stats.tab.stats=統計
 weakspot.stats.tab.sound=サウンド
@@ -90,13 +90,13 @@ weakspot.command.usage=/weakspot stats <プレイヤー> | /weakspot reset <プ�
 weakspot.command.usage.stats=/weakspot stats <プレイヤー>
 weakspot.command.usage.reset=/weakspot reset <プレイヤー>
 weakspot.command.usage.reload=/weakspot reload
-weakspot.command.reload=[弱点] 設定（weakspot.cfg）を読み直しました
+weakspot.command.reload=[WeakSpot] 設定（weakspot.cfg）を読み直しました
 weakspot.command.reload.failed=設定を読み直せませんでした。サーバーを再起動してください（詳しくはサーバーのログ）
 weakspot.command.offline=オンラインのプレイヤーだけ指定できます
-weakspot.command.stats.header=[弱点] %s の統計
+weakspot.command.stats.header=[WeakSpot] %s の統計
 weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒットして壊した数 %s、ヒット÷ブロック %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、合計ヒット %s
 weakspot.command.stats.total=  累計: ヒット %s、壊した数 %s、ヒットして壊した数 %s、ヒット÷ブロック %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、合計ヒット %s
-weakspot.command.reset=[弱点] %s の統計の累計を消しました
+weakspot.command.reset=[WeakSpot] %s の統計の累計を消しました
 
 # ガイドの本（1.4.1。1.8.5 から章立て）。遊び方（doc/play.md）を変えたら、ここも合わせて直す。1 ページは 14 行まで
 weakspot.stats.guide=ガイド
@@ -258,10 +258,10 @@ weakspot.kinds.shape.ring=○ 輪
 weakspot.kinds.shape.diamond=◆ ひし形
 weakspot.kinds.shape.square=■ 四角
 weakspot.milestone.kindTitle=%s %s ヒット！
-weakspot.milestone.kindChat=[弱点] %s の弱点ヒットが %s 回に達しました！
+weakspot.milestone.kindChat=[WeakSpot] %s の弱点ヒットが %s 回に達しました！
 weakspot.milestone.totalTitle=合計 %s ヒット！
 weakspot.milestone.totalSubtitle=すべての弱点ヒットの合計の節目を達成
-weakspot.milestone.totalChat=[弱点] すべての弱点ヒットの合計が %s 回に達しました！
+weakspot.milestone.totalChat=[WeakSpot] すべての弱点ヒットの合計が %s 回に達しました！
 weakspot.enchant.hint=マーカーに当てると、候補を引き直せます
 weakspot.enchant.hintCount=マーカーに当てると、候補を引き直せます（%s 回）
 weakspot.enchant.hintEmpty=物を置くと、弱点で候補を引き直せます
@@ -271,17 +271,17 @@ weakspot.general.sprintboostbarenabled.tooltip=[クライアント] ダッシュ
 weakspot.general.disabledkinds.tooltip=[クライアント] 自分でオフにした弱点の種類（統計画面の「弱点マーカー」タブで変えられる）\nmining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra, enchant, harvest, throw, sprint, portal のどれかを 1 行に 1 つ
 weakspot.general.mymarkercolors.tooltip=[クライアント] 自分の弱点の色。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）\n統計画面の「弱点マーカー」タブで変えられる
 weakspot.general.mymarkershapes.tooltip=[クライアント] 自分の弱点の形。1 行に「種類=形」（例: bow=diamond）\n形は circle, ring, diamond, square。統計画面の「弱点マーカー」タブで変えられる
-weakspot.news.header=[弱点] %s に更新: %s
+weakspot.news.header=[WeakSpot] %s に更新: %s
 weakspot.news.link=[変更点を見る]
 weakspot.news.bugHint=不具合は %s で報告の方法を案内します
 weakspot.news.default=新しい版に更新しました
-weakspot.updateCheck.available=[弱点] 新しい版 %s が公開されています（今は %s）
+weakspot.updateCheck.available=[WeakSpot] 新しい版 %s が公開されています（今は %s）
 weakspot.updateCheck.link=[ダウンロード]
 weakspot.updateCheck.skip=[この版は通知しない]
 weakspot.updateCheck.skipped=今後 %s は通知しません（新しい版が出たら、また通知します）
 weakspot.updateCheck.minor=サーバーと同じ版に揃えないと接続できません。更新するときは、サーバーの管理者にも伝えてください
 weakspot.news.1.7.1=マーカーの塗りが消えていたのを直し、更新のお知らせと /weakspot bug を足した
-weakspot.bug.title=[弱点] 不具合報告
+weakspot.bug.title=[WeakSpot] 不具合報告
 weakspot.bug.step1= 1. 報告先: %s（環境情報を記入済みの状態で開きます）
 weakspot.bug.openIssue=[GitHub で issue を作成]
 weakspot.bug.step2= 2. 記載事項: 概要・再現手順・実際の動作・期待される動作
@@ -320,6 +320,7 @@ weakspot.news.1.8.6=クリエイティブでもすべての弱点が出るよう
 weakspot.news.1.8.7=採掘にもコンボ倍率。コンボ表示の下に種類ごとの倍率を表示
 weakspot.news.1.8.8=内部の整理（遊び方に変更なし）
 weakspot.news.1.9.1=不具合報告の文章を整理した
+weakspot.news.1.9.6=サーバーからの案内がプレイヤーの言語で出るようにした
 weakspot.news.1.9.5=コンボで音が重なり、区切りの音を聞き取りやすくした
 weakspot.news.1.9.4=統計の平均ヒット数の名前を直し、Mod 一覧にロゴを付けた
 weakspot.news.1.9.3=内部の名前を整理した（遊び方に変更なし）
