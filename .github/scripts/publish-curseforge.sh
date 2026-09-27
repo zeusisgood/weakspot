@@ -17,20 +17,38 @@ api=${CURSEFORGE_API:-https://minecraft.curseforge.com/api}
 auth="X-Api-Token: $CURSEFORGE_TOKEN"
 work=$(mktemp -d)
 
-# ゲームの版の ID を引く: Minecraft 1.12.2・Forge・Java 8
-curl -fsS -H "$auth" "$api/game/version-types" > "$work/types.json"
-curl -fsS -H "$auth" "$api/game/versions" > "$work/versions.json"
-ids=$(jq -c --slurpfile types "$work/types.json" '
+# 失敗したら、CurseForge が返した理由（本文）も出す
+call() {
+  local what="$1"; shift
+  if ! curl --fail-with-body -sS -o "$work/response.txt" "$@"; then
+    echo "::error::CurseForge: $what failed."
+    cat "$work/response.txt"; echo
+    exit 1
+  fi
+}
+
+# ゲームの版の ID を引く: Minecraft 1.12.2・Forge・Java 8（あれば、環境の Client・Server も）
+call "reading version types" -H "$auth" "$api/game/version-types"
+mv "$work/response.txt" "$work/types.json"
+call "reading game versions" -H "$auth" "$api/game/versions"
+mv "$work/response.txt" "$work/versions.json"
+required=$(jq -c --slurpfile types "$work/types.json" '
   ($types[0] | map({(.slug): .id}) | add) as $t
   | [ .[] | select(
         (.gameVersionTypeID == $t["minecraft-1-12"] and .name == "1.12.2")
         or (.gameVersionTypeID == $t["modloader"] and .name == "Forge")
         or (.gameVersionTypeID == $t["java"] and .name == "Java 8")
       ) | .id ]' "$work/versions.json")
-if [ "$(jq length <<< "$ids")" != "3" ]; then
-  echo "::error::Could not find the CurseForge version IDs for 1.12.2 / Forge / Java 8 (got $ids)."
+if [ "$(jq length <<< "$required")" != "3" ]; then
+  echo "::error::Could not find the CurseForge version IDs for 1.12.2 / Forge / Java 8 (got $required)."
   exit 1
 fi
+environments=$(jq -c --slurpfile types "$work/types.json" '
+  ($types[0] | map(select(.slug == "environment") | .id)) as $env
+  | [ .[] | select((.gameVersionTypeID as $id | $env | index($id)) and (.name == "Client" or .name == "Server")) | .id ]
+  ' "$work/versions.json")
+ids=$(jq -c -n --argjson a "$required" --argjson b "$environments" '$a + $b')
+echo "Game version IDs: $ids"
 
 jar="weakspot-$version.jar"
 gh release download "v$version" --pattern "$jar" --dir "$work"
@@ -48,8 +66,8 @@ jq -n \
     releaseType: "release"
   }' > "$work/metadata.json"
 
-curl -fsS -X POST "$api/projects/$CURSEFORGE_PROJECT_ID/upload-file" \
+call "uploading the file" -X POST "$api/projects/$CURSEFORGE_PROJECT_ID/upload-file" \
   -H "$auth" \
   -F "metadata=<$work/metadata.json;type=application/json" \
-  -F "file=@$work/$jar;type=application/java-archive" > /dev/null
+  -F "file=@$work/$jar;type=application/java-archive"
 echo "Published $version to CurseForge."

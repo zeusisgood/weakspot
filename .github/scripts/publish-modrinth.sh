@@ -48,9 +48,11 @@ jq -n \
     primary_file: "file"
   }' > "$work/data.json"
 
-curl -fsS -X POST "$api/version" \
+# 失敗したら、Modrinth が返した理由（本文）も出す
+curl --fail-with-body -sS -X POST "$api/version" \
   -H "User-Agent: $ua" \
   -H "Authorization: $MODRINTH_TOKEN" \
   -F "data=<$work/data.json;type=application/json" \
-  -F "file=@$work/$jar;type=application/java-archive" > /dev/null
+  -F "file=@$work/$jar;type=application/java-archive" -o "$work/response.txt" ||
+  { echo "::error::Modrinth: uploading the version failed."; cat "$work/response.txt"; echo; exit 1; }
 echo "Published $version to Modrinth."
