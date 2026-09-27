@@ -85,9 +85,9 @@ final class MilestoneEffects {
             }
         }
 
-        HitSounds.playScale(HitSounds::playOwn, lucky || grand ? 1 : 2, 0);
+        HitSounds.accentScale(lucky || grand ? 1 : 2, 0);
         if (lucky || grand) {
-            HitSounds.playScale(HitSounds::playOwn, 1, HitPitch.SCALE_LENGTH + 2);
+            HitSounds.accentScale(1, HitPitch.SCALE_LENGTH + 2);
         }
     }
 

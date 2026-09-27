@@ -24,12 +24,30 @@ import net.minecraftforge.fml.relauncher.Side;
  * ヒット音。楽器と音量は各自の設定（myHitSound / myHitVolume、othersHitSound / othersHitVolume）。
  * どれも「プレイヤー」のカテゴリで鳴らすので、バニラの「プレイヤー」音量が掛かる。
  * 自分の音と試聴は距離なし、他のプレイヤーの音は叩かれたブロックの位置から距離で小さくなる。
+ * 1.9.5: 自分のヒット音はコンボで和音が厚くなる（HitPitch.forHit。hitChordEnabled）。コンボの段階と累計の節目の音は
+ * ベルで大きめに鳴らし（accent）、駆け上がりが鳴っている間は自分の通常のヒット音を小さくする（埋もれないように）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class HitSounds {
 
     /** 予約した音。delay が 0 になった tick に鳴らす。一時停止中も進める（統計画面の試聴のため）。 */
     private static final List<Scheduled> QUEUE = new ArrayList<>();
+    /** 重ねる音の音量（旋律に対する倍率）。 */
+    private static final float CHORD_VOLUME = 0.6F;
+    /** 段階・節目の音（ベル）の音量（自分のヒット音の音量に対する倍率。上限 1.0）。 */
+    private static final float ACCENT_VOLUME = 1.5F;
+    /** 駆け上がりの間の、自分の通常のヒット音の音量の倍率。 */
+    private static final float DUCKED_VOLUME = 0.3F;
+    /** 駆け上がりの最後の音のあと、ヒット音を小さくしたままにする tick。 */
+    private static final int DUCK_TAIL_TICKS = 2;
+    /** コンボが途切れた音の音量（自分のヒット音の音量に対する倍率）と、2 音の間の tick。 */
+    private static final float BREAK_VOLUME = 0.5F;
+    private static final int BREAK_GAP_TICKS = 2;
+
+    /** この音の時計（予約の音と同じく一時停止中も進む）。 */
+    private static long soundTick;
+    /** この tick まで、自分の通常のヒット音を小さくする（駆け上がりの間）。 */
+    private static long duckUntil;
 
     private HitSounds() {
     }
@@ -44,9 +62,55 @@ final class HitSounds {
         }
     }
 
-    /** 自分のヒット音。streak は連続ヒット数（1 始まり）。 */
+    /** 自分のヒット音。streak は連続ヒット数（1 始まり）。コンボで和音が厚くなり、駆け上がりの間は小さくなる。 */
+    static void playHit(int streak) {
+        double volume = WeakSpotConfig.myHitVolume * (soundTick <= duckUntil ? DUCKED_VOLUME : 1);
+        float[] pitches = HitPitch.forHit(streak, WeakSpotConfig.hitChordEnabled);
+        for (int i = 0; i < pitches.length; i++) {
+            playFlatPitch(WeakSpotConfig.myHitSound, i == 0 ? volume : volume * CHORD_VOLUME, pitches[i]);
+        }
+    }
+
+    /** 自分のヒット音の楽器で、旋律の 1 音だけを鳴らす（試聴と、統計画面の音の確かめ）。 */
     static void playOwn(int streak) {
         playFlat(WeakSpotConfig.myHitSound, WeakSpotConfig.myHitVolume, streak);
+    }
+
+    /** 段階・節目の音（ベル、大きめ）。 */
+    static void playAccent(float pitch) {
+        playFlatPitch(HitSound.BELL, Math.min(1.0, WeakSpotConfig.myHitVolume * ACCENT_VOLUME), pitch);
+    }
+
+    /**
+     * 段階・節目の音を、startDelay tick 後から ticksPerNote ごとに鳴らす（駆け上がり・分散和音）。
+     * 鳴っている間（最後の音の少しあとまで）は、自分の通常のヒット音を小さくする。
+     */
+    static void accentRun(float[] pitches, int ticksPerNote, int startDelay) {
+        for (int i = 0; i < pitches.length; i++) {
+            float pitch = pitches[i];
+            schedule(startDelay + i * ticksPerNote, () -> playAccent(pitch));
+        }
+        long end = soundTick + startDelay + (long) (pitches.length - 1) * ticksPerNote + DUCK_TAIL_TICKS;
+        duckUntil = Math.max(duckUntil, end);
+    }
+
+    /** 音階（下のドから上のドまで）を、段階・節目の音で鳴らす。 */
+    static void accentScale(int ticksPerNote, int startDelay) {
+        float[] pitches = new float[HitPitch.SCALE_LENGTH];
+        for (int i = 0; i < pitches.length; i++) {
+            pitches[i] = HitPitch.forStreak(i + 1);
+        }
+        accentRun(pitches, ticksPerNote, startDelay);
+    }
+
+    /** 自分のコンボが途切れた音（下がる 2 音。自分のヒット音の楽器で小さめ）。 */
+    static void playBreak() {
+        float[] notes = HitPitch.breakNotes();
+        double volume = WeakSpotConfig.myHitVolume * BREAK_VOLUME;
+        for (int i = 0; i < notes.length; i++) {
+            float pitch = notes[i];
+            schedule(i * BREAK_GAP_TICKS, () -> playFlatPitch(WeakSpotConfig.myHitSound, volume, pitch));
+        }
     }
 
     /** 他のプレイヤーのヒット音。叩かれたブロックの位置から鳴らす。 */
@@ -63,11 +127,6 @@ final class HitSounds {
     /** 他のプレイヤーのヒット音の試聴。実際は距離で小さくなるが、試聴は距離なしで鳴らす。 */
     static void playOtherFlat(int streak) {
         playFlat(WeakSpotConfig.othersHitSound, WeakSpotConfig.othersHitVolume, streak);
-    }
-
-    /** 自分のヒット音の楽器で、ピッチを直接決めて鳴らす（コンボの 1000 の駆け上がり）。 */
-    static void playOwnPitch(float pitch) {
-        playFlatPitch(WeakSpotConfig.myHitSound, WeakSpotConfig.myHitVolume, pitch);
     }
 
     private static void playFlat(HitSound sound, double volume, int streak) {
@@ -101,11 +160,16 @@ final class HitSounds {
 
     static void clear() {
         QUEUE.clear();
+        duckUntil = 0;
     }
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || QUEUE.isEmpty()) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        soundTick++;
+        if (QUEUE.isEmpty()) {
             return;
         }
         List<Runnable> due = new ArrayList<>();
