@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
- * リリースの流れ（CLAUDE.md）で、版を上げるときに直すファイルが揃っているか。
+ * リリースの手順（doc/development.md）で、版を上げるときに直すファイルが揃っているか。
  * 版の直し忘れ・お知らせの書き忘れを、PR の CI で見つける。
  */
 public class ReleaseFilesTest {
