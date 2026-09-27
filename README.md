@@ -1,4 +1,4 @@
-<img src="doc/images/icon.png" alt="" width="96" align="right">
+<img src="doc/images/icon-transparent.png" alt="" width="96" align="right">
 
 # Weak Spot Mining（弱点破壊 Mod）
 

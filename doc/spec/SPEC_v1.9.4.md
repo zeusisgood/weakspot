@@ -33,7 +33,7 @@
 ## 2b. ゲーム内の Mods の一覧（ユーザーの判断）
 
 - 配布サイトと同じアイコン（`doc/images/icon.png`。石のブロックと弱点の円）を、ゲーム内の Mods の一覧のロゴにする
-  - `src/main/resources/logo.png` に置き（256×256 に縮めて jar を軽くする）、`mcmod.info` の `logoFile` を `"logo.png"` にする
+  - 背景を透過した版（`doc/images/icon-transparent.png`。ユーザーが切り抜いた）を `src/main/resources/logo.png` に置き（256×256 に縮めて jar を軽くする）、`mcmod.info` の `logoFile` を `"logo.png"` にする
 - `mcmod.info` のほかの項目も埋める
   - `description`: 英語にする（Mods の一覧は言語で切り替わらないため）。例 `Fortnite-style weak spots for mining, farming, travel and more. Aim at the glowing circle to speed things up.`
   - `url`: `https://github.com/zeusisgood/weakspot`
