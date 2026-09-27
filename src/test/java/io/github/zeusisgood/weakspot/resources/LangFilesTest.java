@@ -127,7 +127,8 @@ public class LangFilesTest {
         List<String> bad = new ArrayList<>();
         for (Map<String, String> entries : java.util.Arrays.asList(EN, JA)) {
             entries.forEach((key, value) -> {
-                if ((key.startsWith("weakspot.version.") || key.startsWith("weakspot.breed."))
+                if ((key.startsWith("weakspot.version.") || key.startsWith("weakspot.breed.")
+                        || key.startsWith("weakspot.milestone.broadcast."))
                         && format.matcher(value).find()) {
                     bad.add(key + "=" + value);
                 }

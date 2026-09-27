@@ -35,6 +35,20 @@ public class MiningStatsTest {
         assertEquals(0, stats.savedTicks, 1e-9);
     }
 
+    /** 平均は、壊したブロックへのヒットだけで数える（壊しきらなかったブロックへのヒットは入れない。1.10.0）。 */
+    @Test
+    public void averageCountsOnlyHitsOnBrokenBlocks() {
+        MiningStats stats = new MiningStats();
+        for (int i = 0; i < 10; i++) {
+            stats.recordHit(0);
+        }
+        stats.recordBlockBroken(3);
+        stats.recordBlockBroken(5);
+        assertEquals(8, stats.hitsOnBrokenBlocks);
+        assertEquals(4.0, stats.averageHitsPerBlock(), 1e-9);
+        assertEquals(5, stats.maxHitsOnBlock);
+    }
+
     @Test
     public void averageIsNaNWithoutBlocks() {
         assertTrue(Double.isNaN(new MiningStats().averageHitsPerBlock()));

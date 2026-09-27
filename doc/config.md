@@ -266,6 +266,7 @@
 | `comboPosition` | BELOW_CROSSHAIR | コンボの表示位置。`BELOW_CROSSHAIR`（照準の下）、`RIGHT_OF_CROSSHAIR`（照準の右）、`TOP_CENTER`（画面上部中央。ボスバーがあればその下）から選択 |
 | `comboMilestoneEffects` | true | コンボが 10・25・50・100・250・500・1000（以降 1000 ごと）に達した時の演出（強調音・光・花火・タイトル）を出すか |
 | `othersComboDisplay` | true | 近くの他プレイヤーのコンボ（10 以上）を、頭上に「n HIT」と表示するか |
+| `showOthersMilestones` | true | ほかのプレイヤーが節目に届いたときの知らせ（チャット）を表示するか。自分の節目の演出とチャットは、オフでも出る |
 
 ### ゲージ・表示（`client.hud`）
 

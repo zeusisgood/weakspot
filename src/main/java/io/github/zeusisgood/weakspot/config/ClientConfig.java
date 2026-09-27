@@ -122,6 +122,10 @@ public final class ClientConfig {
         @Config.Comment({"[クライアント] 近くのほかのプレイヤーのコンボ（10 以上）を、頭の上に「n HIT」と表示するか"})
         public boolean othersComboDisplay = true;
 
+        @Config.Comment({"[クライアント] ほかのプレイヤーが節目に届いたときの知らせを、チャットに表示するか",
+                "オフにすると、ほかの人の節目の知らせが出ない（自分の節目の演出とチャットは出る）"})
+        public boolean showOthersMilestones = true;
+
         Combo() {
         }
     }

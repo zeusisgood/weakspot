@@ -13,6 +13,11 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod;
 
 /** 採掘ヒットの報酬（耐久回復と節目）と、1.7.0 からの種類ごと・合計の節目。耐久回復は採掘だけ。 */
@@ -38,6 +43,7 @@ public final class MiningRewards {
             giveXp(player, Milestones.amountAt(WeakSpotConfig.server.milestones.milestoneXp, index));
             repairHeldTool(player, Milestones.amountAt(WeakSpotConfig.server.milestones.milestoneRepair, index));
             WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.MINING, -1, reached[0]), player);
+            broadcast(player, "mining", null, reached[0]);
         }
         checkTotal(player, total);
     }
@@ -54,6 +60,7 @@ public final class MiningRewards {
                 giveXp(player, Milestones.amountAt(WeakSpotConfig.server.milestones.milestoneXp, (int) reached[1]));
                 WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.KIND, kind.ordinal(), reached[0]),
                         player);
+                broadcast(player, "kind", kind, reached[0]);
             }
         }
         checkTotal(player, total);
@@ -68,6 +75,40 @@ public final class MiningRewards {
                 WeakSpotConfig.server.milestones.totalMilestoneRepeatInterval, total.totalHits())) {
             giveXp(player, Milestones.amountAt(WeakSpotConfig.server.milestones.totalMilestoneXp, (int) reached[1]));
             WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.TOTAL, -1, reached[0]), player);
+            broadcast(player, "total", null, reached[0]);
+        }
+    }
+
+    /** 節目の知らせの翻訳キー weakspot.milestone.broadcast.* を足した版。 */
+    static final String BROADCAST_SINCE = "1.10.0";
+
+    /**
+     * 本人以外の全員のチャットに、節目に届いたことを知らせる（1.10.0）。type は mining / kind / total。
+     * 色は金、7 だけが並ぶ数はピンク。受け取った側は showOthersMilestones で消せる（OthersMilestoneFilter）。
+     */
+    private static void broadcast(EntityPlayerMP player, String type, HitKind kind, long milestone) {
+        MinecraftServer server = player.getServer();
+        if (server == null) {
+            return;
+        }
+        String key = "weakspot.milestone.broadcast." + type;
+        TextFormatting color = Milestones.isLucky(milestone) ? TextFormatting.LIGHT_PURPLE : TextFormatting.GOLD;
+        for (EntityPlayerMP other : server.getPlayerList().getPlayers()) {
+            if (other == player) {
+                continue;
+            }
+            ITextComponent text;
+            if (kind == null) {
+                text = PlayerText.of(other, BROADCAST_SINCE, key, player.getName(), milestone);
+            } else if (PlayerText.understands(other, BROADCAST_SINCE)) {
+                text = new TextComponentTranslation(key, player.getName(),
+                        new TextComponentTranslation("weakspot.kind." + kind.key()), milestone);
+            } else {
+                text = new TextComponentString(ServerLang.format(other, key, player.getName(),
+                        ServerLang.format(other, "weakspot.kind." + kind.key()), milestone));
+            }
+            text.getStyle().setColor(color);
+            other.sendMessage(text);
         }
     }
 
