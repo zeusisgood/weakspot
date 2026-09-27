@@ -35,6 +35,11 @@
 - 値の書き方: 翻訳の値は今どれも `%s` だけなので、`TextComponentTranslation` でそのまま使える。今後も、サーバーから送る文の翻訳には `%s`（と `%1$s` の形）だけを使う（`%d` などはクライアントの翻訳で使えない）
 - `ServerLang` は、`PlayerText` の「持っていないキー」のときだけ使う形で残す
 
+## 2b. 不具合報告の案内（ログの文字化け。ユーザーの判断）
+
+- 日本語の Windows の Java 8（ランチャーの Java）は、ログ（`logs/latest.log`）を Shift_JIS で書く。UTF-8 として開くと日本語が化ける（Mod の不具合ではない。Minecraft 本体の文も同じ）
+- `doc/play.md` の不具合報告の節と、issue の雛形（`.github/ISSUE_TEMPLATE/bug_report.md`）に、「ログの日本語が化けていたら Shift_JIS で開き直す（VS Code なら右下の文字コード →「エンコード付きで再度開く」→ Japanese (Shift JIS)）。そのまま添付しても大丈夫」と書く
+
 ## 3. テスト
 
 - `common/` に、版の比べ方（`ModVersions` を使い、`since` と相手の版から「翻訳キーで送るか」を決める部分）の単体テスト
