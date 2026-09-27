@@ -130,6 +130,7 @@
 |---|---|---|
 | `myHitSound` | PLING | 自分のヒット音の楽器。`XYLOPHONE` `CHIME` `BELL` `FLUTE` `GUITAR` `HARP` `BASS` `HAT` `SNARE` `BASEDRUM` `PLING` から選択 |
 | `myHitVolume` | 0.25 | 自分のヒット音の音量（0〜1）。0 で無音 |
+| `hitChordEnabled` | true | 自分のヒット音に、コンボで音を重ねるか（25 から 2 音、100 から 3 音）。オフで 1 音のまま |
 | `othersHitSound` | XYLOPHONE | 他プレイヤーのヒット音の楽器（選択肢は `myHitSound` と同じ） |
 | `othersHitVolume` | 0.4 | 他プレイヤーのヒット音の音量（0〜1）。0 で無音 |
 | `otherMarkerEnabled` | true | 他プレイヤーの弱点マークを表示するか |

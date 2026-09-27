@@ -108,7 +108,7 @@
 
 | カテゴリ | 項目 |
 |---|---|
-| `sound`（音） | `myHitSound` `myHitVolume` `othersHitSound` `othersHitVolume` |
+| `sound`（音） | `myHitSound` `myHitVolume` `hitChordEnabled` `othersHitSound` `othersHitVolume` |
 | `markers`（マーカー） | `weakSpotsEnabled` `disabledKinds` `myMarkerColors` `myMarkerShapes` `weakSpotTrailEnabled` `animalSpotSeeThrough` `otherMarkerEnabled` `otherMarkerColor` `otherMarkerAlpha` `otherMarkerShape` |
 | `combo`（コンボ） | `comboDisplayEnabled` `comboScale` `comboPosition` `comboMilestoneEffects` `othersComboDisplay` |
 | `hud`（ゲージ・表示） | `blockHealthBarEnabled` `machineBarEnabled` `growthBarEnabled` `machineParticlesVisible` `bowDrawBarEnabled` `vehicleBoostBarEnabled` `ladderBoostBarEnabled` `throwChargeBarEnabled` `meleeChargeBarEnabled` `sprintBoostBarEnabled` `swimBoostBarEnabled` |
