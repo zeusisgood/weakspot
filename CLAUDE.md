@@ -13,7 +13,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - devcontainer で **JDK 8** を使う。ビルドは公式 MDK ベースの **ForgeGradle 3 + Gradle 4.9**（仕様書の FG 2.3 ではない）。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
 - ビルド + テスト: `./gradlew build` → 成果物は `build/libs/weakspot-<version>.jar`（reobf 済み）
-- テストのみ: `./gradlew test`、1クラスだけ: `./gradlew test --tests com.example.weakspot.common.WeakSpotPlacerTest`
+- テストのみ: `./gradlew test`、1クラスだけ: `./gradlew test --tests io.github.zeusisgood.weakspot.common.WeakSpotPlacerTest`
 - 専用サーバー起動: `./gradlew runServer`（作業ディレクトリは `run/`、`nogui` 付き。`run/eula.txt` は同意済み）。止めるときはコンソールで `stop`。
   - パイプで `stop` を流しても Gradle 経由では届かない。Claude が起動を確かめるときは `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を確認する。
   - devcontainer が使えない環境（クラウドのセッションなど。`runServer` が FML の `NetworkRegistry.newChannel` の NPE で落ちる）では、`runServer` での確認はしなくてよい（ユーザーの指示）。ユーザーが jar をダウンロードして試す。止まる条件の「runServer が起動しない」にも当たらない。ビルドとテストは通すこと。
@@ -27,7 +27,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-  - 現行は 1.9.2。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.9.3。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに GitHub Actions（`.github/workflows/ci.yml` の `release`）が作る。Claude はタグを付けない（クラウドのセッションはタグを push できない）。
 - **遊び方（プレイヤーから見える動き。`doc/play.md`）を変えたときは、ガイドの本の文章（`en_us.lang` と `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`。1.8.5）も合わせて直す**（ユーザーの指示）。技術的なこと（設定の名前・値、通信、バージョン）は書かない。本の 1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい）で、題・小見出し・「↩ 目次」を含めてはみ出さないこと。ページを足すときは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動で作る。目次の 1 ページも 14 行まで）。
 - リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README と `README.en.md` の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」/「latest: X.Y.Z」）**、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し（種類・操作が変わったら `README.en.md` の表も）、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）。新しい版の通知（1.9.2）のため、直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md`（英語。版の番号は書かない）も直す（下の「配布サイトの説明文」）→ コミット → 作業用ブランチに push → `main` への PR を作る（下の「ブランチと PR の約束」）。ユーザーが Merge すると、Actions がタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を作る。
@@ -40,7 +40,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 **仕組みの詳細（各機能の中身・通信・サーバーの各クラス・設定の移行など）は `doc/architecture.md`**（1.8.8 のあとに `CLAUDE.md` から移した）。コードに触る前に、関係する所を読むこと。仕組みを変えたら、そちらを直す（この節は約束事だけ）。
 
-- クライアントとサーバーの**両方に Mod が必要**（同じマイナー同士なら接続できる）。パッケージは `com.example.weakspot`。
+- クライアントとサーバーの**両方に Mod が必要**（同じマイナー同士なら接続できる）。パッケージは `io.github.zeusisgood.weakspot`（1.9.3 で `com.example.weakspot` から改名。通信・保存データ・設定はクラス名を使っていないので、改名しても互換は変わらない。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ）。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。
 - `common/` は Minecraft に依存しない純粋な計算だけ（1.7.10 への移植を見込んで、MC クラスを持ち込まない）。単体テストはここ（と `compat/`・`config/` の golden テスト）にある。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（専用サーバーではロードされない）。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
@@ -90,7 +90,10 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **Modrinth / CurseForge への自動公開**（ユーザーの判断: 両方に上げる）: Release を作るとき（`.github/workflows/ci.yml` の `release`）に、`mc-publish` で jar を両方のサイトにも上げる。サイトに載せる更新内容は、英語のお知らせ `weakspot.news.<版>`（`en_us.lang`）の 1 行と、GitHub の Release へのリンク。1.9.1 は手動で 1 回流せるようにする（`workflow_dispatch`）。ユーザーに、アカウントとプロジェクト（初回は手作業で作って審査を通す。説明文は `README.en.md` をもとに Claude が用意する）と、Secrets の `MODRINTH_TOKEN`・`CURSEFORGE_TOKEN` を用意してもらう。
 
 
-### 1.10.0 に向けたメモ（ユーザーの判断: 1.8.8 のあとの相談で、いったん見送り。入れる目星だけ付けた）
+### 1.10.0 に向けたメモ（ユーザーの判断: 1.8.8 のあとの相談で、いったん見送り。1.9.2 のあとの相談で、次のように決めた）
 
-- **パッケージ名の改名**（`com.example.weakspot` → 例 `io.github.zeusisgood.weakspot`）: 通信・保存データはクラス名を使っていないので互換は保てるが、全ファイルに触る。ほかの整理と重ならない時期（1.9.0 が落ち着いたあと、または 1.7.10 への移植を始める前）に、単独の版で行う。
+- 1.10.0 は、ほかの内容もまとめる（ユーザーの判断）。下書きの仕様書は `doc/spec/SPEC_v1.10.0.md`（今は泳ぎの弱点）。**ユーザーが「実装」と明示するまで実装しない**。
+- パッケージ名の改名は、**1.9.3 で済んだ**（単独のパッチとして出した。`doc/spec/SPEC_v1.9.3.md`）。
+- 設定のカテゴリ分けは、**1.10.0 に入れる**（2 段: `server`／`client` → 種類・用途。項目の名前は変えない。仕様書の 2 の節）。
+- 以下は 1.8.8 のあとのメモ（経緯）。
 - **設定のカテゴリ分け**（138 項目が `general` に並んでいて、設定画面で探しにくい）: カテゴリを分けると設定キー（`general.xxx`）が変わるので、設定ファイルの移行（`configVersion` 7。古いキーの値を新しいカテゴリへ移して消す）と一緒に、マイナーで行う。「キー名を変えない」方針を、この版だけ移行つきで破ることになるので、行うときに改めて相談する。

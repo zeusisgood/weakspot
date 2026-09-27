@@ -14,7 +14,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 
 コンテナ内ではゲーム画面を表示できないため、クライアント側の動作は、ビルドした jar をホスト側の Minecraft の `mods` に入れて確認します。
 
-ソースは `com.example.weakspot` 以下にあります。
+ソースは `io.github.zeusisgood.weakspot` 以下にあります。
 
 | パッケージ | 内容 |
 |---|---|
