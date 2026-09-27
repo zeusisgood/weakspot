@@ -20,7 +20,7 @@ public final class BowHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.BOW) || WeakSpotConfig.bowHitTicks <= 0) {
+        if (!HitGate.allowed(player, HitKind.BOW) || WeakSpotConfig.server.bow.bowHitTicks <= 0) {
             return;
         }
         if (!BowDraw.isDrawing(player)) {
@@ -37,7 +37,7 @@ public final class BowHits {
         if (full) {
             BowDraw.addOvercharge(player);
         } else {
-            BowDraw.add(player, WeakSpotConfig.bowHitTicks);
+            BowDraw.add(player, WeakSpotConfig.server.bow.bowHitTicks);
         }
         int combo = HitGate.accept(player, HitKind.BOW, new BlockPos(player), streak);
         // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）

@@ -81,7 +81,7 @@ final class OtherMarkers {
         }
         Received previous = MARKERS.get(entityId);
         boolean sameSurface = previous != null && previous.spot.sameSurface(spot);
-        if (MarkerMotion.animates(WeakSpotConfig.weakSpotTrailEnabled, previous != null, sameSurface)) {
+        if (MarkerMotion.animates(WeakSpotConfig.client.markers.weakSpotTrailEnabled, previous != null, sameSurface)) {
             // 最後に知っている位置から、届いた位置へ動かす（間引かれて途中の移動がまとめて届いても同じ）。
             // 同じ位置の送り直しなら動かさない
             spot = previous.spot;

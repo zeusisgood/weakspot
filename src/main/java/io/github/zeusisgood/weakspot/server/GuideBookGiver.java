@@ -29,7 +29,7 @@ public final class GuideBookGiver {
         if (player.world.isRemote) {
             return;
         }
-        if (!WeakSpotConfig.giveGuideBook) {
+        if (!WeakSpotConfig.server.general.giveGuideBook) {
             return;
         }
         NBTTagCompound data = ServerStats.data(player);

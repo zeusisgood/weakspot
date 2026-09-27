@@ -83,7 +83,7 @@ public final class ClientWeakSpotHandler {
                 HitSounds.playBreak();
             }
         }
-        if (!WeakSpotConfig.weakSpotsEnabled) {
+        if (!WeakSpotConfig.client.markers.weakSpotsEnabled) {
             stopOwnWeakSpots();
         }
         if (spot != null && (isGone(mc.world, spot)
@@ -124,12 +124,12 @@ public final class ClientWeakSpotHandler {
         double health = -1;
         double growth = -1;
         double animal = -1;
-        if (WeakSpotConfig.weakSpotsEnabled) {
+        if (WeakSpotConfig.client.markers.weakSpotsEnabled) {
             updateAim(mc);
-            if (WeakSpotConfig.blockHealthBarEnabled) {
+            if (WeakSpotConfig.client.hud.blockHealthBarEnabled) {
                 health = OwnSpotBars.healthRemaining(mc, event.getPartialTicks());
             }
-            if (WeakSpotConfig.growthBarEnabled) {
+            if (WeakSpotConfig.client.hud.growthBarEnabled) {
                 growth = OwnSpotBars.growthProgress(mc);
             }
             animal = OwnSpotBars.animalProgress();
@@ -141,7 +141,7 @@ public final class ClientWeakSpotHandler {
             // 一時オフ。J を押した直後のフレームでも、自分の弱点を出さない
             stopOwnWeakSpots();
         }
-        WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.weakSpotsEnabled && OwnSpotBars.machineBar(mc),
+        WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.client.markers.weakSpotsEnabled && OwnSpotBars.machineBar(mc),
                 clientTick, event.getPartialTicks());
     }
 
@@ -313,7 +313,7 @@ public final class ClientWeakSpotHandler {
         HitKind kind = spot.kind;
         WeakSpotRenderer.addFlash(spot, clientTick);
         int hitStreak = OwnHits.register(kind);
-        if (kind == HitKind.MACHINE && WeakSpotConfig.machineBarEnabled
+        if (kind == HitKind.MACHINE && WeakSpotConfig.client.hud.machineBarEnabled
                 && MachineStates.hasBar(mc.world.getTileEntity(spot.pos))) {
             // ヒットで進んだ分を、すぐに見に行く
             MachineBars.query(spot.pos, clientTick, true);
@@ -330,7 +330,7 @@ public final class ClientWeakSpotHandler {
         }
 
         // 同じ面の中の移動なので、演出がオンならマーカーを動かす（当たり判定は移動先ですぐに行う）
-        spot.relocate(RANDOM, WeakSpotConfig.weakSpotTrailEnabled, Minecraft.getSystemTime());
+        spot.relocate(RANDOM, WeakSpotConfig.client.markers.weakSpotTrailEnabled, Minecraft.getSystemTime());
     }
 
     private static void reset() {

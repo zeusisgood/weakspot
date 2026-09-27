@@ -48,7 +48,7 @@ final class UpdateCheckNotice {
         if (++waitTicks < DELAY_TICKS) {
             return;
         }
-        if (!WeakSpotConfig.checkForUpdates) {
+        if (!WeakSpotConfig.client.updates.checkForUpdates) {
             done = true;
             return;
         }
@@ -69,7 +69,7 @@ final class UpdateCheckNotice {
         boolean newer = result.status == ForgeVersion.Status.OUTDATED
                 || result.status == ForgeVersion.Status.BETA_OUTDATED;
         String target = result.target == null ? null : result.target.toString();
-        if (UpdateCheck.shouldNotify(newer, target, WeakSpotConfig.skippedUpdateVersion)) {
+        if (UpdateCheck.shouldNotify(newer, target, WeakSpotConfig.client.updates.skippedUpdateVersion)) {
             show(mc, target);
         }
     }
@@ -102,7 +102,7 @@ final class UpdateCheckNotice {
         if (target.isEmpty()) {
             return;
         }
-        WeakSpotConfig.skippedUpdateVersion = target;
+        WeakSpotConfig.client.updates.skippedUpdateVersion = target;
         WeakSpotConfig.save();
         TextComponentTranslation reply = new TextComponentTranslation("weakspot.updateCheck.skipped", target);
         reply.getStyle().setColor(TextFormatting.GRAY);

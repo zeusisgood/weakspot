@@ -41,8 +41,8 @@ final class SoundTab extends StatsScreenTab {
         int center = screen.width / 2;
         int y = screen.top() + 56;
         mySound = add(new GuiButton(BUTTON_MY_SOUND, center - 154, y, 120, 20, ""));
-        add(new VolumeSlider(BUTTON_MY_VOLUME, center - 30, y, WeakSpotConfig.myHitVolume, v -> {
-            WeakSpotConfig.myHitVolume = v;
+        add(new VolumeSlider(BUTTON_MY_VOLUME, center - 30, y, WeakSpotConfig.client.sound.myHitVolume, v -> {
+            WeakSpotConfig.client.sound.myHitVolume = v;
             WeakSpotConfig.save();
             HitSounds.playOwn(1);
         }));
@@ -50,8 +50,8 @@ final class SoundTab extends StatsScreenTab {
 
         y += 48;
         othersSound = add(new GuiButton(BUTTON_OTHERS_SOUND, center - 154, y, 120, 20, ""));
-        add(new VolumeSlider(BUTTON_OTHERS_VOLUME, center - 30, y, WeakSpotConfig.othersHitVolume, v -> {
-            WeakSpotConfig.othersHitVolume = v;
+        add(new VolumeSlider(BUTTON_OTHERS_VOLUME, center - 30, y, WeakSpotConfig.client.sound.othersHitVolume, v -> {
+            WeakSpotConfig.client.sound.othersHitVolume = v;
             WeakSpotConfig.save();
             HitSounds.playOtherFlat(1);
         }));
@@ -77,19 +77,19 @@ final class SoundTab extends StatsScreenTab {
     boolean action(int id) {
         switch (id) {
             case BUTTON_MY_SOUND:
-                WeakSpotConfig.myHitSound = WeakSpotConfig.myHitSound.next();
+                WeakSpotConfig.client.sound.myHitSound = WeakSpotConfig.client.sound.myHitSound.next();
                 WeakSpotConfig.save();
                 updateLabels();
                 HitSounds.playOwn(1);
                 return true;
             case BUTTON_OTHERS_SOUND:
-                WeakSpotConfig.othersHitSound = WeakSpotConfig.othersHitSound.next();
+                WeakSpotConfig.client.sound.othersHitSound = WeakSpotConfig.client.sound.othersHitSound.next();
                 WeakSpotConfig.save();
                 updateLabels();
                 HitSounds.playOtherFlat(1);
                 return true;
             case BUTTON_CHORD:
-                WeakSpotConfig.hitChordEnabled = !WeakSpotConfig.hitChordEnabled;
+                WeakSpotConfig.client.sound.hitChordEnabled = !WeakSpotConfig.client.sound.hitChordEnabled;
                 WeakSpotConfig.save();
                 updateLabels();
                 return true;
@@ -107,10 +107,10 @@ final class SoundTab extends StatsScreenTab {
     }
 
     private void updateLabels() {
-        mySound.displayString = instrumentLabel(WeakSpotConfig.myHitSound);
-        othersSound.displayString = instrumentLabel(WeakSpotConfig.othersHitSound);
+        mySound.displayString = instrumentLabel(WeakSpotConfig.client.sound.myHitSound);
+        othersSound.displayString = instrumentLabel(WeakSpotConfig.client.sound.othersHitSound);
         chord.displayString = I18n.format("weakspot.sound.chord",
-                I18n.format(WeakSpotConfig.hitChordEnabled ? "options.on" : "options.off"));
+                I18n.format(WeakSpotConfig.client.sound.hitChordEnabled ? "options.on" : "options.off"));
     }
 
     private static String instrumentLabel(HitSound sound) {

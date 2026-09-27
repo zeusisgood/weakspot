@@ -140,7 +140,7 @@ final class VehicleSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.vehicleBoostBarEnabled && remaining(partialTicks) > 0 && mc.player.isRiding();
+        return WeakSpotConfig.client.hud.vehicleBoostBarEnabled && remaining(partialTicks) > 0 && mc.player.isRiding();
     }
 
     @Override

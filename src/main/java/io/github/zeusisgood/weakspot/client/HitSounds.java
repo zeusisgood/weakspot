@@ -64,21 +64,21 @@ final class HitSounds {
 
     /** 自分のヒット音。streak は連続ヒット数（1 始まり）。コンボで和音が厚くなり、駆け上がりの間は小さくなる。 */
     static void playHit(int streak) {
-        double volume = WeakSpotConfig.myHitVolume * (soundTick <= duckUntil ? DUCKED_VOLUME : 1);
-        float[] pitches = HitPitch.forHit(streak, WeakSpotConfig.hitChordEnabled);
+        double volume = WeakSpotConfig.client.sound.myHitVolume * (soundTick <= duckUntil ? DUCKED_VOLUME : 1);
+        float[] pitches = HitPitch.forHit(streak, WeakSpotConfig.client.sound.hitChordEnabled);
         for (int i = 0; i < pitches.length; i++) {
-            playFlatPitch(WeakSpotConfig.myHitSound, i == 0 ? volume : volume * CHORD_VOLUME, pitches[i]);
+            playFlatPitch(WeakSpotConfig.client.sound.myHitSound, i == 0 ? volume : volume * CHORD_VOLUME, pitches[i]);
         }
     }
 
     /** 自分のヒット音の楽器で、旋律の 1 音だけを鳴らす（試聴と、統計画面の音の確かめ）。 */
     static void playOwn(int streak) {
-        playFlat(WeakSpotConfig.myHitSound, WeakSpotConfig.myHitVolume, streak);
+        playFlat(WeakSpotConfig.client.sound.myHitSound, WeakSpotConfig.client.sound.myHitVolume, streak);
     }
 
     /** 段階・節目の音（ベル、大きめ）。 */
     static void playAccent(float pitch) {
-        playFlatPitch(HitSound.BELL, Math.min(1.0, WeakSpotConfig.myHitVolume * ACCENT_VOLUME), pitch);
+        playFlatPitch(HitSound.BELL, Math.min(1.0, WeakSpotConfig.client.sound.myHitVolume * ACCENT_VOLUME), pitch);
     }
 
     /**
@@ -106,27 +106,27 @@ final class HitSounds {
     /** 自分のコンボが途切れた音（下がる 2 音。自分のヒット音の楽器で小さめ）。 */
     static void playBreak() {
         float[] notes = HitPitch.breakNotes();
-        double volume = WeakSpotConfig.myHitVolume * BREAK_VOLUME;
+        double volume = WeakSpotConfig.client.sound.myHitVolume * BREAK_VOLUME;
         for (int i = 0; i < notes.length; i++) {
             float pitch = notes[i];
-            schedule(i * BREAK_GAP_TICKS, () -> playFlatPitch(WeakSpotConfig.myHitSound, volume, pitch));
+            schedule(i * BREAK_GAP_TICKS, () -> playFlatPitch(WeakSpotConfig.client.sound.myHitSound, volume, pitch));
         }
     }
 
     /** 他のプレイヤーのヒット音。叩かれたブロックの位置から鳴らす。 */
     static void playOther(BlockPos pos, int streak) {
-        float volume = (float) WeakSpotConfig.othersHitVolume;
+        float volume = (float) WeakSpotConfig.client.sound.othersHitVolume;
         if (volume <= 0 || Minecraft.getMinecraft().world == null) {
             return;
         }
         Minecraft.getMinecraft().getSoundHandler().playSound(new PositionedSoundRecord(
-                soundOf(WeakSpotConfig.othersHitSound), SoundCategory.PLAYERS, volume,
+                soundOf(WeakSpotConfig.client.sound.othersHitSound), SoundCategory.PLAYERS, volume,
                 HitPitch.forStreak(streak), pos));
     }
 
     /** 他のプレイヤーのヒット音の試聴。実際は距離で小さくなるが、試聴は距離なしで鳴らす。 */
     static void playOtherFlat(int streak) {
-        playFlat(WeakSpotConfig.othersHitSound, WeakSpotConfig.othersHitVolume, streak);
+        playFlat(WeakSpotConfig.client.sound.othersHitSound, WeakSpotConfig.client.sound.othersHitVolume, streak);
     }
 
     private static void playFlat(HitSound sound, double volume, int streak) {

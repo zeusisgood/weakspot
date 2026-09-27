@@ -19,12 +19,12 @@ public final class KindSwitches {
 
     /** その種類の弱点を出してよいか。 */
     public static boolean isEnabled(HitKind kind) {
-        return WeakSpotConfig.weakSpotsEnabled && !KindMask.isDisabled(disabledMask(), kind);
+        return WeakSpotConfig.client.markers.weakSpotsEnabled && !KindMask.isDisabled(disabledMask(), kind);
     }
 
     /** 自分でオフにした種類のビット（一時オフとは別）。 */
     static int disabledMask() {
-        String[] keys = WeakSpotConfig.disabledKinds;
+        String[] keys = WeakSpotConfig.client.markers.disabledKinds;
         if (keys != cachedKeys) {
             cachedKeys = keys;
             cachedMask = KindMask.fromKeys(keys);
@@ -39,7 +39,7 @@ public final class KindSwitches {
 
     /** 「弱点マーカー」タブのボタンで切り替えて、保存する。 */
     static void toggle(HitKind kind) {
-        WeakSpotConfig.disabledKinds = KindMask.toKeys(KindMask.toggled(disabledMask(), kind));
+        WeakSpotConfig.client.markers.disabledKinds = KindMask.toKeys(KindMask.toggled(disabledMask(), kind));
         WeakSpotConfig.save();
         if (!isEnabled(kind)) {
             ClientWeakSpotHandler.stopOwnWeakSpots();

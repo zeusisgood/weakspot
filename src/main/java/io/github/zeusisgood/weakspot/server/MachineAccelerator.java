@@ -45,11 +45,11 @@ public final class MachineAccelerator {
 
     /** サーバーが機械ヒットを受け付けたときに呼ぶ。combo はこのヒットを数えたあとの、そのプレイヤーの連続ヒット数。 */
     static void hit(World world, BlockPos pos, int combo) {
-        double multiplier = MachineComboBoost.multiplier(WeakSpotConfig.machineBoostMultiplier,
-                WeakSpotConfig.machineBoostMaxMultiplier, combo);
+        double multiplier = MachineComboBoost.multiplier(WeakSpotConfig.server.machine.machineBoostMultiplier,
+                WeakSpotConfig.server.machine.machineBoostMaxMultiplier, combo);
         BOOSTS.computeIfAbsent(world.provider.getDimension(), d -> new HashMap<>())
                 .computeIfAbsent(pos, p -> new MachineBoost())
-                .hit(multiplier, WeakSpotConfig.machineBoostDurationTicks);
+                .hit(multiplier, WeakSpotConfig.server.machine.machineBoostDurationTicks);
     }
 
     /** バニラのタイルエンティティの更新が終わった後（ワールドの tick の最後）に、余分に update() を呼ぶ。 */
@@ -74,7 +74,7 @@ public final class MachineAccelerator {
             if (!world.isBlockLoaded(pos)) {
                 continue;
             }
-            if (WeakSpotConfig.machineBoostParticles && particles > 0) {
+            if (WeakSpotConfig.server.machine.machineBoostParticles && particles > 0) {
                 spawnParticles(world, pos, particles, entry.getValue().multiplier());
             }
             if (RightClickTargets.isScheduledMachine(world.getBlockState(pos).getBlock())) {
@@ -97,7 +97,7 @@ public final class MachineAccelerator {
             return;
         }
         int rgb = MachineParticles.colorFor(
-                MachineParticles.comboFactor(multiplier, WeakSpotConfig.machineBoostMultiplier));
+                MachineParticles.comboFactor(multiplier, WeakSpotConfig.server.machine.machineBoostMultiplier));
         double r = (rgb >> 16 & 0xFF) / 255.0;
         double g = (rgb >> 8 & 0xFF) / 255.0;
         double b = (rgb & 0xFF) / 255.0;

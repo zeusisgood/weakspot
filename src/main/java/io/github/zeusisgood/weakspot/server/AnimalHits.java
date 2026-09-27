@@ -169,7 +169,7 @@ public final class AnimalHits {
         }
         if ((mask & Timer.TRADE.bit()) != 0
                 && counter(TRADE_HITS, entity).hit(settings.villagerTradeResetHits)) {
-            VillagerTrades.reset((EntityVillager) entity, WeakSpotConfig.villagerResetUnlocksNewTier,
+            VillagerTrades.reset((EntityVillager) entity, WeakSpotConfig.server.animal.villagerResetUnlocksNewTier,
                     entity.world.rand);
         }
     }

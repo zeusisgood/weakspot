@@ -90,7 +90,7 @@ final class BowSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.bowDrawBarEnabled && BowDraw.isDrawing(mc.player);
+        return WeakSpotConfig.client.hud.bowDrawBarEnabled && BowDraw.isDrawing(mc.player);
     }
 
     /** 照準の下の、引き具合のゲージ。左から伸び、引き切ったら色が変わる。引き切ったあとは、過剰チャージの目盛りも出す。 */

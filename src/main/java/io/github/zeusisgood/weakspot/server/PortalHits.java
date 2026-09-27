@@ -48,7 +48,7 @@ public final class PortalHits {
             return;
         }
         int combo = HitGate.accept(player, HitKind.PORTAL, new BlockPos(player), streak);
-        int added = (int) Math.round(WeakSpotConfig.portalHitTicks * ComboFactor.factor(combo));
+        int added = (int) Math.round(WeakSpotConfig.server.portal.portalHitTicks * ComboFactor.factor(combo));
         try {
             PORTAL_COUNTER.get().setInt(player, Math.min(player.getMaxInPortalTime(), counter + added));
         } catch (IllegalAccessException | RuntimeException e) {

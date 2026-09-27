@@ -76,7 +76,7 @@ final class LadderSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.ladderBoostBarEnabled && boost.isActive(ClientWeakSpotHandler.clientTick)
+        return WeakSpotConfig.client.hud.ladderBoostBarEnabled && boost.isActive(ClientWeakSpotHandler.clientTick)
                 && mc.player.isOnLadder();
     }
 

@@ -91,7 +91,7 @@ final class WeakSpotRenderer {
         if (camera == null) {
             return;
         }
-        List<WeakSpot> others = WeakSpotConfig.otherMarkerEnabled && WeakSpotConfig.otherMarkerAlpha > 0
+        List<WeakSpot> others = WeakSpotConfig.client.markers.otherMarkerEnabled && WeakSpotConfig.client.markers.otherMarkerAlpha > 0
                 ? OtherMarkers.visible(camera, partialTicks)
                 : Collections.emptyList();
         if (spot == null && FLASHES.isEmpty() && others.isEmpty()) {
@@ -117,14 +117,14 @@ final class WeakSpotRenderer {
         }
         long nowMs = Minecraft.getSystemTime();
         if (!others.isEmpty()) {
-            int rgb = MarkerColor.parse(WeakSpotConfig.otherMarkerColor, DEFAULT_OTHER_COLOR);
+            int rgb = MarkerColor.parse(WeakSpotConfig.client.markers.otherMarkerColor, DEFAULT_OTHER_COLOR);
             float[] disk = {(rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F};
             float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
             float[] center = MarkerColor.towardWhite(rgb, 0.75F);
-            MarkerShape shape = WeakSpotConfig.otherMarkerShape == null ? MarkerShape.RING
-                    : WeakSpotConfig.otherMarkerShape;
+            MarkerShape shape = WeakSpotConfig.client.markers.otherMarkerShape == null ? MarkerShape.RING
+                    : WeakSpotConfig.client.markers.otherMarkerShape;
             for (WeakSpot other : others) {
-                drawMarker(other, shape, disk, ring, center, (float) WeakSpotConfig.otherMarkerAlpha, nowMs,
+                drawMarker(other, shape, disk, ring, center, (float) WeakSpotConfig.client.markers.otherMarkerAlpha, nowMs,
                         cx, cy, cz);
             }
         }
@@ -185,7 +185,7 @@ final class WeakSpotRenderer {
                                    float alpha, long nowMs, double cx, double cy, double cz) {
         double u = spot.u;
         double v = spot.v;
-        if (WeakSpotConfig.weakSpotTrailEnabled) {
+        if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
             for (MarkerMotion.Afterimage image : spot.motion.afterimages(nowMs)) {
                 float a = (float) image.alpha(nowMs) * alpha;
                 drawFill(spot, shape, image.u, image.v, spot.radius, cx, cy, cz, disk, 0.35F * a);
@@ -200,7 +200,7 @@ final class WeakSpotRenderer {
         if (shape.hasCenterDot()) {
             drawDisk(spot, u, v, spot.radius * 0.3, cx, cy, cz, center[0], center[1], center[2], 0.9F * alpha);
         }
-        double head = WeakSpotConfig.weakSpotTrailEnabled ? spot.motion.headHighlight(nowMs) : 0;
+        double head = WeakSpotConfig.client.markers.weakSpotTrailEnabled ? spot.motion.headHighlight(nowMs) : 0;
         if (head > 0) {
             drawFill(spot, shape, u, v, spot.radius, cx, cy, cz, WHITE, (float) (HEAD_WHITE * head) * alpha);
         }
@@ -213,7 +213,7 @@ final class WeakSpotRenderer {
      * 深度テストを切って薄くもう一度描く。他のプレイヤーのマークは、壁越しに見えてしまうので透かさない。
      */
     private static boolean seeThrough(WeakSpot spot) {
-        return spot.entity != null && WeakSpotConfig.animalSpotSeeThrough;
+        return spot.entity != null && WeakSpotConfig.client.markers.animalSpotSeeThrough;
     }
 
     /** 形の中を塗る。RING は輪の部分（内側の半径との間）だけ塗る。 */

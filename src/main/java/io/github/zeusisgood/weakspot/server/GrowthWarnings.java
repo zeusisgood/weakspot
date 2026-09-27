@@ -36,20 +36,20 @@ public final class GrowthWarnings {
 
     /** 成長のヒットの効果をかけたあとに呼ぶ。changed は効果の前後で状態が変わったか。 */
     static void onGrowthHit(EntityPlayerMP player, World world, BlockPos pos, boolean changed) {
-        if (!WeakSpotConfig.growthWarnings) {
+        if (!WeakSpotConfig.server.growth.growthWarnings) {
             return;
         }
         int light = needsLight(world.getBlockState(pos).getBlock()) ? world.getLightFromNeighbors(pos.up()) : -1;
         boolean dark = light >= 0 && light < MIN_LIGHT;
         GrowthStuck.Warning warning = STUCK.computeIfAbsent(player.getUniqueID(), id -> new GrowthStuck())
-                .onHit(pos.toLong(), changed, dark, WeakSpotConfig.growthStuckHits, world.getTotalWorldTime());
+                .onHit(pos.toLong(), changed, dark, WeakSpotConfig.server.growth.growthStuckHits, world.getTotalWorldTime());
         TextComponentTranslation message;
         switch (warning) {
             case DARK:
                 message = new TextComponentTranslation("weakspot.growth.dark", light);
                 break;
             case STUCK:
-                message = new TextComponentTranslation("weakspot.growth.stuck", WeakSpotConfig.growthStuckHits);
+                message = new TextComponentTranslation("weakspot.growth.stuck", WeakSpotConfig.server.growth.growthStuckHits);
                 break;
             default:
                 return;

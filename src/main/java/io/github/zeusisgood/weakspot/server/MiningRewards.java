@@ -32,11 +32,11 @@ public final class MiningRewards {
      */
     static void onMiningHit(EntityPlayerMP player) {
         MiningStats total = ServerStats.total(player);
-        for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.milestones,
-                WeakSpotConfig.milestoneRepeatInterval, total.hits)) {
+        for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.server.milestones.milestones,
+                WeakSpotConfig.server.milestones.milestoneRepeatInterval, total.hits)) {
             int index = (int) reached[1];
-            giveXp(player, Milestones.amountAt(WeakSpotConfig.milestoneXp, index));
-            repairHeldTool(player, Milestones.amountAt(WeakSpotConfig.milestoneRepair, index));
+            giveXp(player, Milestones.amountAt(WeakSpotConfig.server.milestones.milestoneXp, index));
+            repairHeldTool(player, Milestones.amountAt(WeakSpotConfig.server.milestones.milestoneRepair, index));
             WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.MINING, -1, reached[0]), player);
         }
         checkTotal(player, total);
@@ -48,10 +48,10 @@ public final class MiningRewards {
      */
     static void onKindHit(EntityPlayerMP player, HitKind kind) {
         MiningStats total = ServerStats.total(player);
-        if (WeakSpotConfig.kindMilestonesEnabled) {
-            for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.milestones,
-                    WeakSpotConfig.milestoneRepeatInterval, total.count(kind))) {
-                giveXp(player, Milestones.amountAt(WeakSpotConfig.milestoneXp, (int) reached[1]));
+        if (WeakSpotConfig.server.milestones.kindMilestonesEnabled) {
+            for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.server.milestones.milestones,
+                    WeakSpotConfig.server.milestones.milestoneRepeatInterval, total.count(kind))) {
+                giveXp(player, Milestones.amountAt(WeakSpotConfig.server.milestones.milestoneXp, (int) reached[1]));
                 WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.KIND, kind.ordinal(), reached[0]),
                         player);
             }
@@ -61,12 +61,12 @@ public final class MiningRewards {
 
     /** すべての種類のヒット数の合計の節目（1.7.0）。ごほうびは経験値だけ。 */
     private static void checkTotal(EntityPlayerMP player, MiningStats total) {
-        if (!WeakSpotConfig.totalMilestonesEnabled) {
+        if (!WeakSpotConfig.server.milestones.totalMilestonesEnabled) {
             return;
         }
-        for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.totalMilestones,
-                WeakSpotConfig.totalMilestoneRepeatInterval, total.totalHits())) {
-            giveXp(player, Milestones.amountAt(WeakSpotConfig.totalMilestoneXp, (int) reached[1]));
+        for (long[] reached : Milestones.reachedWithRepeat(WeakSpotConfig.server.milestones.totalMilestones,
+                WeakSpotConfig.server.milestones.totalMilestoneRepeatInterval, total.totalHits())) {
+            giveXp(player, Milestones.amountAt(WeakSpotConfig.server.milestones.totalMilestoneXp, (int) reached[1]));
             WeakSpotMod.network.sendTo(new MilestoneMessage(MilestoneMessage.TOTAL, -1, reached[0]), player);
         }
     }
@@ -82,8 +82,8 @@ public final class MiningRewards {
         ItemStack stack = player.getHeldItemMainhand();
         int damage = !stack.isEmpty() && stack.isItemStackDamageable() ? stack.getItemDamage() : 0;
         RepairSettlement result = RepairSettlement.settle(REPAIR_CARRY.getOrDefault(player.getUniqueID(), 0),
-                confirmedHits, WeakSpotConfig.hitsPerRepair, WeakSpotConfig.repairPerStep,
-                WeakSpotConfig.maxRepairPerBreak, damage);
+                confirmedHits, WeakSpotConfig.server.repair.hitsPerRepair, WeakSpotConfig.server.repair.repairPerStep,
+                WeakSpotConfig.server.repair.maxRepairPerBreak, damage);
         REPAIR_CARRY.put(player.getUniqueID(), result.carry);
         repairHeldTool(player, result.repair);
     }

@@ -252,7 +252,7 @@ final class KindsTab extends StatsScreenTab {
         screen.drawString(screen.font(), I18n.format("weakspot.kinds.column.onOff"), center - 64, top + 40, 0xAAAAAA);
         screen.drawString(screen.font(), I18n.format("weakspot.kinds.column.color"), center - 26, top + 40, 0xAAAAAA);
         screen.drawString(screen.font(), I18n.format("weakspot.kinds.column.shape"), center + 66, top + 40, 0xAAAAAA);
-        if (!WeakSpotConfig.weakSpotsEnabled) {
+        if (!WeakSpotConfig.client.markers.weakSpotsEnabled) {
             // 題の行の右に出す（列の見出しと重ならないように）
             screen.drawRight(I18n.format("weakspot.kinds.pausedAll", ToggleKeyHandler.keyName()), center + 154, top,
                     0xFFFF55);

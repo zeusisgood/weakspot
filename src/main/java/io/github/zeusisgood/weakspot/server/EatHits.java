@@ -19,14 +19,14 @@ public final class EatHits {
     }
 
     public static void onHit(EntityPlayerMP player, int streak) {
-        if (!HitGate.allowed(player, HitKind.EAT) || WeakSpotConfig.eatHitTicks <= 0
+        if (!HitGate.allowed(player, HitKind.EAT) || WeakSpotConfig.server.eat.eatHitTicks <= 0
                 || !EatDraw.isEating(player)) {
             return;
         }
         if (!HitGate.ready(player, HitKind.EAT)) {
             return;
         }
-        EatDraw.add(player, WeakSpotConfig.eatHitTicks);
+        EatDraw.add(player, WeakSpotConfig.server.eat.eatHitTicks);
         int combo = HitGate.accept(player, HitKind.EAT, new BlockPos(player), streak);
         VehicleHits.boostFromRider(player, combo);
     }

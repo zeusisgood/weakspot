@@ -94,8 +94,8 @@ final class ComboHud {
             shotsStepTime = time;
             shotsStepCombo = newCombo;
         }
-        if (MILESTONES.reached(newCombo) && WeakSpotConfig.comboDisplayEnabled
-                && WeakSpotConfig.comboMilestoneEffects) {
+        if (MILESTONES.reached(newCombo) && WeakSpotConfig.client.combo.comboDisplayEnabled
+                && WeakSpotConfig.client.combo.comboMilestoneEffects) {
             stepTime = time;
             stepCombo = newCombo;
             ComboEffects.playStep(newCombo);
@@ -143,7 +143,7 @@ final class ComboHud {
             return;
         }
         Minecraft mc = Minecraft.getMinecraft();
-        if (!WeakSpotConfig.comboDisplayEnabled || mc.gameSettings.hideGUI || mc.player == null) {
+        if (!WeakSpotConfig.client.combo.comboDisplayEnabled || mc.gameSettings.hideGUI || mc.player == null) {
             return;
         }
         double now = ClientWeakSpotHandler.clientTick + event.getPartialTicks();
@@ -159,7 +159,7 @@ final class ComboHud {
         } else if (combo == 1 && lastKind == HitKind.MACHINE && ClientWeakSpotHandler.machineSpotActive()) {
             // 1 ヒット目はコンボの数字が出ないので、数字の位置に機械の表示だけを出す（1.6.0）
             FontRenderer font = mc.fontRenderer;
-            float scale = (float) WeakSpotConfig.comboScale;
+            float scale = (float) WeakSpotConfig.client.combo.comboScale;
             float[] center = center(event.getResolution(), 0, font.FONT_HEIGHT * scale);
             lastCx = center[0];
             drawKindLabel(mc, center[1] - font.FONT_HEIGHT * scale / 2, now);
@@ -253,7 +253,7 @@ final class ComboHud {
     /** 「機械 4倍速」「走り ×1.25」。top はコンボの表示の下端、cx はその中心。 */
     private static void drawKindLabel(Minecraft mc, float top, String text, int baseRgb, double glow, int glowRgb) {
         FontRenderer font = mc.fontRenderer;
-        float scale = (float) WeakSpotConfig.comboScale * KIND_LABEL_SCALE;
+        float scale = (float) WeakSpotConfig.client.combo.comboScale * KIND_LABEL_SCALE;
         float width = font.getStringWidth(text) * scale;
         float height = font.FONT_HEIGHT * scale;
         float cy = top + 2 * scale + height / 2;
@@ -273,7 +273,7 @@ final class ComboHud {
 
     /** コンボの数字の中心 {x, y}（設定 comboPosition による）。 */
     private static float[] center(ScaledResolution res, float textWidth, float textHeight) {
-        switch (WeakSpotConfig.comboPosition) {
+        switch (WeakSpotConfig.client.combo.comboPosition) {
             case RIGHT_OF_CROSSHAIR:
                 return new float[] {res.getScaledWidth() / 2F + CROSSHAIR_GAP + textWidth / 2, res.getScaledHeight() / 2F};
             case TOP_CENTER:
@@ -293,7 +293,7 @@ final class ComboHud {
     private static float draw(Minecraft mc, ScaledResolution res, String text, int rgb, double alpha, double bounce,
                               double barFraction, double glow, int glowRgb, boolean strongGlow, double now) {
         FontRenderer font = mc.fontRenderer;
-        float scale = (float) WeakSpotConfig.comboScale;
+        float scale = (float) WeakSpotConfig.client.combo.comboScale;
         String shown = TextFormatting.BOLD + text;
         float textWidth = font.getStringWidth(shown) * scale;
         float textHeight = font.FONT_HEIGHT * scale;

@@ -110,13 +110,13 @@ public final class RightClickHits {
         IBlockState first = world.getBlockState(pos);
         if (first.getBlock() instanceof BlockMushroom) {
             BlockMushroom mushroom = (BlockMushroom) first.getBlock();
-            if (world.rand.nextDouble() < WeakSpotConfig.mushroomGrowChance
+            if (world.rand.nextDouble() < WeakSpotConfig.server.growth.mushroomGrowChance
                     && mushroom.canGrow(world, pos, first, false)) {
                 mushroom.grow(world, world.rand, pos, first);
             }
             return;
         }
-        for (int i = 0; i < WeakSpotConfig.growthTicksPerHit; i++) {
+        for (int i = 0; i < WeakSpotConfig.server.growth.growthTicksPerHit; i++) {
             IBlockState state = world.getBlockState(pos);
             if (!RightClickTargets.isGrowable(world, pos, state, settings)) {
                 return;

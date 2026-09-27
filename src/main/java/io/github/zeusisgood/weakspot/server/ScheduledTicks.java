@@ -104,7 +104,7 @@ public final class ScheduledTicks {
         if (dispenser) {
             // 次の信号なら、前の信号の残りは捨てて出し直す
             Map<BlockPos, Burst> bursts = BURSTS.computeIfAbsent(server.provider.getDimension(), d -> new HashMap<>());
-            int extraShots = ScheduledBoost.dispenseCount(multiplier, WeakSpotConfig.machineBoostMultiplier) - 1;
+            int extraShots = ScheduledBoost.dispenseCount(multiplier, WeakSpotConfig.server.machine.machineBoostMultiplier) - 1;
             if (extraShots > 0 && DISPENSE != null) {
                 bursts.put(pos, new Burst(state.getBlock(), extraShots, now + ScheduledBoost.BURST_INTERVAL_TICKS));
             } else {

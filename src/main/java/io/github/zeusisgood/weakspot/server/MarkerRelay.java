@@ -68,8 +68,8 @@ public final class MarkerRelay {
         if (event.phase != TickEvent.Phase.END || MARKERS.isEmpty()) {
             return;
         }
-        double range = WeakSpotConfig.markerShareRange;
-        int minInterval = Math.max(0, WeakSpotConfig.markerSendMinIntervalTicks - INTERVAL_JITTER_TICKS);
+        double range = WeakSpotConfig.server.general.markerShareRange;
+        int minInterval = Math.max(0, WeakSpotConfig.server.general.markerSendMinIntervalTicks - INTERVAL_JITTER_TICKS);
         for (Iterator<Marker> it = MARKERS.values().iterator(); it.hasNext(); ) {
             Marker marker = it.next();
             long now = marker.owner.world.getTotalWorldTime();

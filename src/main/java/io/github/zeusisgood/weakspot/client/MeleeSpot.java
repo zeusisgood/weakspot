@@ -65,7 +65,7 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.meleeChargeBarEnabled && charge(mc) > 0;
+        return WeakSpotConfig.client.hud.meleeChargeBarEnabled && charge(mc) > 0;
     }
 
     @Override

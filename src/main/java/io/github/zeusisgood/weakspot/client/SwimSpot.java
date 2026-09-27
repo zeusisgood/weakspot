@@ -104,7 +104,7 @@ final class SwimSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.swimBoostBarEnabled && boost.isActive(ClientWeakSpotHandler.clientTick)
+        return WeakSpotConfig.client.hud.swimBoostBarEnabled && boost.isActive(ClientWeakSpotHandler.clientTick)
                 && mc.player.isInWater() && !mc.player.isRiding();
     }
 

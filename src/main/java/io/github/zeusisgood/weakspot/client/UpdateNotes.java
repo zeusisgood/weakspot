@@ -48,14 +48,14 @@ final class UpdateNotes {
         }
         checked = true;
         String version = WeakSpotMod.VERSION;
-        String last = WeakSpotConfig.lastSeenVersion == null ? "" : WeakSpotConfig.lastSeenVersion.trim();
+        String last = WeakSpotConfig.client.updates.lastSeenVersion == null ? "" : WeakSpotConfig.client.updates.lastSeenVersion.trim();
         if (version.equals(last)) {
             return;
         }
         boolean fresh = last.isEmpty() && !WeakSpotMod.configExistedAtStart;
-        WeakSpotConfig.lastSeenVersion = version;
+        WeakSpotConfig.client.updates.lastSeenVersion = version;
         WeakSpotConfig.save();
-        if (!fresh && WeakSpotConfig.showUpdateNotes) {
+        if (!fresh && WeakSpotConfig.client.updates.showUpdateNotes) {
             show(mc, version);
         }
     }

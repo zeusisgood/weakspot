@@ -102,9 +102,9 @@ public final class MoveHits {
         state.lastHit.put(kind, now);
         int combo = HitGate.accept(player, kind, new BlockPos(player), streak);
         if (kind == HitKind.SPRINT) {
-            SPRINT_SPEED.set(player, TimedBoostMath.multiplier(WeakSpotConfig.sprintBoostMultiplier,
-                    WeakSpotConfig.sprintBoostMaxMultiplier, combo));
-            state.sprintRemaining = WeakSpotConfig.sprintBoostDurationTicks;
+            SPRINT_SPEED.set(player, TimedBoostMath.multiplier(WeakSpotConfig.server.sprint.sprintBoostMultiplier,
+                    WeakSpotConfig.server.sprint.sprintBoostMaxMultiplier, combo));
+            state.sprintRemaining = WeakSpotConfig.server.sprint.sprintBoostDurationTicks;
         }
     }
 

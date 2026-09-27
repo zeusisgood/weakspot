@@ -97,6 +97,8 @@ public class WeakSpotMod {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+        // クライアントだけで遊ぶ（サーバーを立てない）ときも、ワールドに入る前に移す
+        WeakSpotConfig.migrate();
         WeakSpotConfig.warnIfMisconfigured();
         proxy.init();
     }
