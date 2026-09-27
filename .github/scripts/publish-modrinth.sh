@@ -28,15 +28,7 @@ work=$(mktemp -d)
 jar="weakspot-$version.jar"
 gh release download "v$version" --pattern "$jar" --dir "$work"
 
-# 更新内容: 英語のお知らせ weakspot.news.<版> の 1 行と、GitHub の Release へのリンク
-news=$(awk -v k="weakspot.news.$version" 'index($0, k "=") == 1 {print substr($0, length(k) + 2)}' \
-  src/main/resources/assets/weakspot/lang/en_us.lang)
-release_url="https://github.com/zeusisgood/weakspot/releases/tag/v$version"
-if [ -n "$news" ]; then
-  changelog="$news"$'\n\n'"Full changelog: $release_url"
-else
-  changelog="Full changelog: $release_url"
-fi
+changelog=$(bash "$(dirname "$0")/changelog.sh" "$version")
 
 jq -n \
   --arg project "$MODRINTH_PROJECT_ID" \

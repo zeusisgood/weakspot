@@ -1,6 +1,6 @@
 # ビルドとテスト（PR と main への push）。main で版（build.gradle の version）が新しくなったら、
 # 同じビルドの jar で、タグ vX.Y.Z と GitHub Release を作る（本文は CHANGELOG.md のその版の節）。
-# そのあと、Release の jar を Modrinth にも上げる（.github/scripts/publish-modrinth.sh）。
+# そのあと、Release の jar を Modrinth と CurseForge にも上げる（.github/scripts/publish-*.sh）。
 name: CI
 
 on:
@@ -74,3 +74,10 @@ jobs:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
         run: bash .github/scripts/publish-modrinth.sh "${{ steps.version.outputs.version }}"
+      - name: Publish to CurseForge
+        # CurseForge は上げ済みの版を確かめられないので、Release を今作ったときだけ流す（失敗したら curseforge-publish.yml を手動で）
+        if: steps.version.outputs.new == 'true'
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+        run: bash .github/scripts/publish-curseforge.sh "${{ steps.version.outputs.version }}"
