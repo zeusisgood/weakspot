@@ -1,4 +1,4 @@
-# 弱点破壊 Mod 追加仕様書（v1.9.4）【下書き】
+# 弱点破壊 Mod 追加仕様書（v1.9.4）
 
 `SPEC_v1.9.3.md`（Mod 1.9.3）に対する**パッチ**の仕様。ここに書かれていないことは、それと現行実装のままとする。
 この仕様書は `doc/spec/SPEC_v1.9.4.md`。
@@ -6,7 +6,6 @@
 - 対象: Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860
 - 前提: 1.9.3 がリリース済み
 - この仕様書の内容は、Mod のバージョン **1.9.4** として、リリースする
-- **下書き**: ユーザーが「実装」と言うまで実装しない
 
 ---
 
@@ -26,7 +25,7 @@
 | キー | 今 | 新（日本語） | 新（英語） |
 |---|---|---|---|
 | `weakspot.stats.averageHits` | 1ブロックあたりの平均ヒット数 / Average hits per block | 採掘ヒット数 ÷ 壊したブロック数 | Mining hits ÷ blocks broken |
-| `weakspot.command.stats.session` / `.total` の `avg hits %s` | 平均 / avg hits | 「ヒット÷ブロック」に当たる言い方にする | `hits/blocks %s` |
+| `weakspot.command.stats.session` / `.total` の `avg hits %s` | 平均 / avg hits | `ヒット÷ブロック %s` | `hits/blocks %s` |
 
 - 統計画面の列の幅に収まること（右の数字の列と重ならない）を確かめる
 - `doc/play.md` の統計の表（「1 ブロックあたりの平均ヒット数｜採掘ヒット数 ÷ 壊したブロック数」）の名前も合わせ、「壊しきらなかったブロックへのヒットも数える」と書き足す
