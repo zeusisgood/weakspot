@@ -5,6 +5,8 @@ import io.github.zeusisgood.weakspot.common.VillagerBreeding;
 import io.github.zeusisgood.weakspot.common.VillagerBreeding.Mate;
 import io.github.zeusisgood.weakspot.common.VillagerBreeding.Reason;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -17,19 +19,26 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.village.Village;
 
 /**
  * 村人が繁殖できない理由を、アクションバーに出す（1.8.4）。大人の村人への動物の状態の問い合わせ（しゃがんで素手で
- * 右クリックを押しっぱなし）のたびに調べる。古いクライアントは翻訳キーを持たないので、文章は ServerLang で作る。
+ * 右クリックを押しっぱなし）のたびに調べる。文は 1.9.6 から翻訳キーで送り、プレイヤーの言語で表示する（PlayerText。
+ * キーを持っていない古いクライアントには、ServerLang で作った文章）。
  */
 final class VillagerBreedHints {
 
     /** 同じ文章を送り直す間隔（アクションバーは 3 秒ほどで消える）。 */
     private static final long RESEND_TICKS = 20;
 
+    /** 案内の翻訳キーを足した版。 */
+    private static final String KEYS_SINCE = "1.8.4";
+
+    /** 前に送った案内（翻訳キーと値を並べた文字列）。同じものを続けて送らないため。 */
     private static final Map<UUID, String> LAST_TEXT = new HashMap<>();
     private static final Map<UUID, Long> LAST_TICK = new HashMap<>();
 
@@ -41,7 +50,8 @@ final class VillagerBreedHints {
             return;
         }
         List<Reason> reasons = reasons(villager);
-        String text = text(player, villager, reasons, settings);
+        List<Line> lines = lines(villager, reasons, settings);
+        String text = signature(lines);
         UUID id = player.getUniqueID();
         long now = player.world.getTotalWorldTime();
         Long last = LAST_TICK.get(id);
@@ -50,7 +60,8 @@ final class VillagerBreedHints {
         }
         LAST_TEXT.put(id, text);
         LAST_TICK.put(id, now);
-        TextComponentString message = new TextComponentString(text);
+        ITextComponent message = PlayerText.understands(player, KEYS_SINCE) ? component(lines)
+                : new TextComponentString(serverText(player, lines));
         message.getStyle().setColor(reasons.isEmpty() ? TextFormatting.GREEN : TextFormatting.GOLD);
         player.sendStatusMessage(message, true);
     }
@@ -93,39 +104,83 @@ final class VillagerBreedHints {
         return max;
     }
 
-    private static String text(EntityPlayerMP player, EntityVillager villager, List<Reason> reasons,
-            SyncedSettings settings) {
-        if (reasons.isEmpty()) {
-            return ServerLang.format(player, "weakspot.breed.ready");
+    /** 案内の 1 つ分: 翻訳キーと値。 */
+    private static final class Line {
+        final String key;
+        final Object[] args;
+
+        Line(String key, Object... args) {
+            this.key = key;
+            this.args = args;
         }
-        StringBuilder joined = new StringBuilder();
-        for (Reason reason : reasons) {
-            if (joined.length() > 0) {
-                joined.append(ServerLang.format(player, "weakspot.breed.separator"));
-            }
-            joined.append(reasonText(player, villager, reason, settings));
-        }
-        return ServerLang.format(player, "weakspot.breed.line", joined);
     }
 
-    private static String reasonText(EntityPlayerMP player, EntityVillager villager, Reason reason,
-            SyncedSettings settings) {
+    /** 案内の中身。理由がなければ「繁殖できる」の 1 つ、あれば理由を並べる。 */
+    private static List<Line> lines(EntityVillager villager, List<Reason> reasons, SyncedSettings settings) {
+        List<Line> lines = new ArrayList<>();
+        if (reasons.isEmpty()) {
+            lines.add(new Line("weakspot.breed.ready"));
+        }
+        for (Reason reason : reasons) {
+            lines.add(reasonLine(villager, reason, settings));
+        }
+        return lines;
+    }
+
+    private static Line reasonLine(EntityVillager villager, Reason reason, SyncedSettings settings) {
         String key = "weakspot.breed." + reason.name().toLowerCase(Locale.ROOT);
         switch (reason) {
             case DOORS: {
                 Village village = villager.world.getVillageCollection().getNearestVillage(new BlockPos(villager), 0);
                 int villagers = village.getNumVillagers();
                 int doors = village.getNumVillageDoors();
-                return ServerLang.format(player, key, villagers, doors,
-                        VillagerBreeding.doorsNeeded(villagers, doors));
+                return new Line(key, villagers, doors, VillagerBreeding.doorsNeeded(villagers, doors));
             }
             case COOLDOWN: {
                 boolean boost = settings.animalBreedingEnabled && settings.animalBreedingHits > 0;
-                return ServerLang.format(player, boost ? key + ".boost" : key,
-                        VillagerBreeding.clock(villager.getGrowingAge()));
+                return new Line(boost ? key + ".boost" : key, VillagerBreeding.clock(villager.getGrowingAge()));
             }
             default:
-                return ServerLang.format(player, key);
+                return new Line(key);
         }
+    }
+
+    /** 同じ案内かを比べるための文字列（翻訳キーと値を並べる）。 */
+    private static String signature(List<Line> lines) {
+        StringBuilder sb = new StringBuilder();
+        for (Line line : lines) {
+            sb.append(line.key).append(Arrays.toString(line.args)).append(';');
+        }
+        return sb.toString();
+    }
+
+    /** 翻訳キーで送る形。「繁殖: 理由 / 理由」の、理由の部分も翻訳キー。 */
+    private static ITextComponent component(List<Line> lines) {
+        if (lines.size() == 1 && lines.get(0).key.equals("weakspot.breed.ready")) {
+            return new TextComponentTranslation("weakspot.breed.ready");
+        }
+        ITextComponent joined = new TextComponentString("");
+        for (int i = 0; i < lines.size(); i++) {
+            if (i > 0) {
+                joined.appendSibling(new TextComponentTranslation("weakspot.breed.separator"));
+            }
+            joined.appendSibling(new TextComponentTranslation(lines.get(i).key, lines.get(i).args));
+        }
+        return new TextComponentTranslation("weakspot.breed.line", joined);
+    }
+
+    /** キーを持っていない古いクライアント向けに、サーバーで作る文章（ServerLang）。 */
+    private static String serverText(EntityPlayerMP player, List<Line> lines) {
+        if (lines.size() == 1 && lines.get(0).key.equals("weakspot.breed.ready")) {
+            return ServerLang.format(player, "weakspot.breed.ready");
+        }
+        StringBuilder joined = new StringBuilder();
+        for (Line line : lines) {
+            if (joined.length() > 0) {
+                joined.append(ServerLang.format(player, "weakspot.breed.separator"));
+            }
+            joined.append(ServerLang.format(player, line.key, line.args));
+        }
+        return ServerLang.format(player, "weakspot.breed.line", joined);
     }
 }
