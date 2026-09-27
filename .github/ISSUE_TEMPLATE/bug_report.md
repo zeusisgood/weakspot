@@ -25,4 +25,5 @@ assignees: ''
 - Java / OS: 
 
 ## 補足（ログ・スクリーンショット） / Additional context (logs, screenshots)
+<!-- ログ（logs/latest.log）の日本語が文字化けしていても、そのまま添付して大丈夫です（日本語の Windows では Shift_JIS で書かれるため）。 -->
 
