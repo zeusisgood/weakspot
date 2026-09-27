@@ -135,6 +135,12 @@
 
 ## 2b. （ほかの内容。決まりしだい足す）
 
+### 2b.1 統計の平均ヒット数の計算（1.9.4 のあとの相談。ユーザーの判断）
+
+- 今の平均（`MiningStats.averageHitsPerBlock()`）は、採掘ヒット数（壊しきらなかったブロックへのヒットも含む）÷ 壊したブロック数で、「最多ヒット数」（壊したブロックだけ）と食い違って見える。1.9.4 では名前だけを中身どおりにした（`SPEC_v1.9.4.md`）
+- この版で、壊したブロックへのヒット数（`hitsOnBrokenBlocks`。`recordBlockBroken(hitsOnBlock)` で足す）を新しく数え、平均を「壊したブロックへのヒット数 ÷ 壊したブロック数」にする。名前は「1 ブロックあたりの平均ヒット数」に戻す
+- 統計の送る内容（`MiningStats.writeTo` / `readFrom`）と保存（NBT のキー `hitsOnBrokenBlocks`。項目の追加なので 1.9.x のワールドも読める。古いワールドの値は 0 から数え始める）が増える。1.10.0 はマイナーなので、ここに入れる
+
 ## 3. README・doc・お知らせ
 
 - `README.md`・`README.en.md` の種類の一覧、`doc/play.md`（泳ぎの節）、`doc/config.md`（1.6 の表）、`doc/architecture.md`（泳ぎの弱点の項目）

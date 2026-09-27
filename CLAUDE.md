@@ -80,6 +80,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
+`doc/spec/SPEC_v1.9.4.md`（統計の「平均ヒット数」の名前）の下書き。ユーザーが「実装」と言うまで実装しない。計算の修正は `SPEC_v1.10.0.md` の 2b.1。
+
 配布サイトへの自動公開（下の TODO）。ユーザーがアカウント・プロジェクト・トークンを用意してから、ワークフローを足す。
 
 - ライセンスは **MIT**（1.9.1 のあと。`LICENSE`、`Copyright (c) 2026 zeusisgood`。ユーザーの判断: Modpack 歓迎。再配布は止めず、README で Releases へのリンクをお願いするだけ）。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
