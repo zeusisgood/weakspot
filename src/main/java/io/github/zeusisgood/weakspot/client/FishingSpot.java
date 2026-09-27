@@ -13,7 +13,6 @@ import io.github.zeusisgood.weakspot.network.HitMessage;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraftforge.client.event.MouseEvent;
@@ -242,16 +241,7 @@ final class FishingSpot {
         long nowMs = Minecraft.getSystemTime();
         double radius = FishingMath.SPOT_SCREEN_RADIUS;
 
-        GlStateManager.pushMatrix();
-        GlStateManager.disableTexture2D();
-        GlStateManager.enableBlend();
-        GlStateManager.tryBlendFuncSeparate(
-                GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
-                GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-        GlStateManager.disableDepth();
-        // HUD の図形は時計回りに頂点を並べるので、カリングを切らないと塗りが消える（1.7.1）
-        GlStateManager.disableCull();
-        GlStateManager.glLineWidth(2.0F);
+        HudSpot.beginOverlay();
 
         boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
         float[][] look = MarkerLook.palette(HitKind.FISHING, DISK, RING, new float[] {1.0F, 0.95F, 0.7F});
@@ -293,12 +283,6 @@ final class FishingSpot {
             }
         }
 
-        GlStateManager.glLineWidth(1.0F);
-        GlStateManager.enableCull();
-        GlStateManager.enableDepth();
-        GlStateManager.disableBlend();
-        GlStateManager.enableTexture2D();
-        GlStateManager.color(1, 1, 1, 1);
-        GlStateManager.popMatrix();
+        HudSpot.endOverlay();
     }
 }
