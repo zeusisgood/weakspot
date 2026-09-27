@@ -81,6 +81,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
+`doc/spec/SPEC_v1.9.5.md`（ヒット音の和音・段階の音・駆け上がり）の下書き。ユーザーが「実装」と言うまで実装しない。
+
 1.9.4（統計の「平均ヒット数」の名前、Mods の一覧のロゴ）をリリースした。計算の修正は `SPEC_v1.10.0.md` の 2b.1。
 
 配布サイトへの自動公開は、Modrinth・CurseForge とも仕組みができた（CurseForge は、ユーザーがプロジェクトを作り、`CURSEFORGE_TOKEN` と `CURSEFORGE_PROJECT_ID` を登録したら動く。1.9.4 は「CurseForge publish」を手動で 1 回流す）。配布サイトのページが公開されたら、README のダウンロードを並べ替える。
