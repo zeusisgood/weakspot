@@ -31,6 +31,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - 作業は `main` 以外のブランチで行い、`main` への PR を作ります。PR ごとに GitHub Actions（[`.github/workflows/ci.yml`](../.github/workflows/ci.yml)）がビルドと全テストを実行し、成功しないと Merge できません。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
 - `main` に取り込まれた時、`build.gradle` の `version` がまだ Release のない版なら、同じワークフローがタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を自動で作成します。版を上げない変更（文書だけなど）では作成しません。
+- 続けて、Release の jar を Modrinth にも上げます（[`.github/scripts/publish-modrinth.sh`](../.github/scripts/publish-modrinth.sh)。Modrinth にその版がすでにあれば何もしません）。失敗した時や古い版を上げ直す時は、Actions の「Modrinth publish」を手動で実行します。Modrinth の説明文は `doc/store/description.md` を変えると自動で反映されます（「Modrinth description」）。
 
 ## バージョンの方針
 

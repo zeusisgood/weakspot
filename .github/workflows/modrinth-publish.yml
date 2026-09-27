@@ -1,0 +1,31 @@
+# GitHub Release の jar を、手動で Modrinth に上げる（自動の公開が失敗したときや、古い版を上げ直すとき）。
+# Actions の画面の「Run workflow」で、版（空なら build.gradle の版）を指定して流す。
+name: Modrinth publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (empty = the version in build.gradle)'
+        required: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Publish
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          version="$INPUT_VERSION"
+          if [ -z "$version" ]; then
+            version=$(sed -n "s/^version = '\(.*\)'/\1/p" build.gradle)
+          fi
+          bash .github/scripts/publish-modrinth.sh "$version"
