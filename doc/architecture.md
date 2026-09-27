@@ -8,7 +8,7 @@
 
 ## 全体
 
-クライアントとサーバーの**両方に Mod が必要**（1.1.0 からは同じマイナー同士なら接続できる。1.0.x とは接続できない。1.2.0 で通信内容が変わったので、1.1.x とも接続できない。1.3.0 でも変わったので、1.2.x とも接続できない。1.4.0 で設定 `growthExtraBlocks` の意味が変わったので、1.3.x とも接続できない。1.5.0 で `SyncedSettings` に `meleeWeakSpotScale` を足したので、1.4.x とも接続できない。1.6.0 でも通信内容が変わったので、1.5.x とも接続できない。1.7.0 でも変わったので、1.6.x とも接続できない。1.8.0 でも変わったので、1.7.x とも接続できない。1.9.0 でも変わったので、1.8.x とも接続できない）。パッケージは `com.example.weakspot`。
+クライアントとサーバーの**両方に Mod が必要**（1.1.0 からは同じマイナー同士なら接続できる。1.0.x とは接続できない。1.2.0 で通信内容が変わったので、1.1.x とも接続できない。1.3.0 でも変わったので、1.2.x とも接続できない。1.4.0 で設定 `growthExtraBlocks` の意味が変わったので、1.3.x とも接続できない。1.5.0 で `SyncedSettings` に `meleeWeakSpotScale` を足したので、1.4.x とも接続できない。1.6.0 でも通信内容が変わったので、1.5.x とも接続できない。1.7.0 でも変わったので、1.6.x とも接続できない。1.8.0 でも変わったので、1.7.x とも接続できない。1.9.0 でも変わったので、1.8.x とも接続できない）。パッケージは `io.github.zeusisgood.weakspot`（1.9.2 までは `com.example.weakspot`）。
 
 弱点の種類は `common/HitKind`（ほかに動物 ANIMAL・釣り FISHING・弓 BOW・近接 MELEE、1.6.0 から乗り物 VEHICLE・食事 EAT・睡眠 SLEEP、1.7.0 からはしご LADDER・エリトラ ELYTRA・エンチャント ENCHANT・収穫 HARVEST・投げる物 THROW・走り SPRINT、1.8.0 からネザーゲート PORTAL。通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前。下の各項目）。基本の3種類: **採掘**（左の長押し。対象は、壊せて、今の破壊速度で 1 tick に進む量 `getPlayerRelativeBlockHardness` が 1.0 未満のブロック。1.0 以上のブロックはバニラの `PlayerControllerMP.clickBlock` がクリックした瞬間に壊し、「掘っている」状態にも入らないので、弱点も耐久バーも出せない。素手の土などは対象）、**成長**（素手で右クリックを押しっぱなし。成長できる `IGrowable` と、追加リスト `growthExtraBlocks` に書いたブロック）、**機械**（しゃがんで両手が空のまま右クリックを押しっぱなし。`ITickable` の TE と、1.4.4 から予約された tick で動くレッドストーンの部品 `RightClickTargets.isScheduledMachine` = `BlockRedstoneDiode` / `BlockObserver` / `BlockDispenser`）。耐久回復は採掘だけが対象。節目は採掘・種類ごと・合計（1.7.0）。
 

@@ -13,7 +13,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - devcontainer で **JDK 8** を使う。ビルドは公式 MDK ベースの **ForgeGradle 3 + Gradle 4.9**（仕様書の FG 2.3 ではない）。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
 - ビルド + テスト: `./gradlew build` → 成果物は `build/libs/weakspot-<version>.jar`（reobf 済み）
-- テストのみ: `./gradlew test`、1クラスだけ: `./gradlew test --tests com.example.weakspot.common.WeakSpotPlacerTest`
+- テストのみ: `./gradlew test`、1クラスだけ: `./gradlew test --tests io.github.zeusisgood.weakspot.common.WeakSpotPlacerTest`
 - 専用サーバー起動: `./gradlew runServer`（作業ディレクトリは `run/`、`nogui` 付き。`run/eula.txt` は同意済み）。止めるときはコンソールで `stop`。
   - パイプで `stop` を流しても Gradle 経由では届かない。Claude が起動を確かめるときは `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を確認する。
   - devcontainer が使えない環境（クラウドのセッションなど。`runServer` が FML の `NetworkRegistry.newChannel` の NPE で落ちる）では、`runServer` での確認はしなくてよい（ユーザーの指示）。ユーザーが jar をダウンロードして試す。止まる条件の「runServer が起動しない」にも当たらない。ビルドとテストは通すこと。
@@ -40,7 +40,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 **仕組みの詳細（各機能の中身・通信・サーバーの各クラス・設定の移行など）は `doc/architecture.md`**（1.8.8 のあとに `CLAUDE.md` から移した）。コードに触る前に、関係する所を読むこと。仕組みを変えたら、そちらを直す（この節は約束事だけ）。
 
-- クライアントとサーバーの**両方に Mod が必要**（同じマイナー同士なら接続できる）。パッケージは `com.example.weakspot`。
+- クライアントとサーバーの**両方に Mod が必要**（同じマイナー同士なら接続できる）。パッケージは `io.github.zeusisgood.weakspot`（1.9.3 で `com.example.weakspot` から改名。通信・保存データ・設定はクラス名を使っていないので、改名しても互換は変わらない。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ）。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。
 - `common/` は Minecraft に依存しない純粋な計算だけ（1.7.10 への移植を見込んで、MC クラスを持ち込まない）。単体テストはここ（と `compat/`・`config/` の golden テスト）にある。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（専用サーバーではロードされない）。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
@@ -93,8 +93,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 ### 1.10.0 に向けたメモ（ユーザーの判断: 1.8.8 のあとの相談で、いったん見送り。1.9.2 のあとの相談で、次のように決めた）
 
 - 1.10.0 は、ほかの内容もまとめる（ユーザーの判断）。下書きの仕様書は `doc/spec/SPEC_v1.10.0.md`（今は泳ぎの弱点）。**ユーザーが「実装」と明示するまで実装しない**。
-- パッケージ名の改名は、**1.9.3（パッチ）として単独で先に出す**（`doc/spec/SPEC_v1.9.3.md`。新しい名前は `io.github.zeusisgood.weakspot`）。
+- パッケージ名の改名は、**1.9.3 で済んだ**（単独のパッチとして出した。`doc/spec/SPEC_v1.9.3.md`）。
 - 設定のカテゴリ分けは、**1.10.0 に入れる**（2 段: `server`／`client` → 種類・用途。項目の名前は変えない。仕様書の 2 の節）。
 - 以下は 1.8.8 のあとのメモ（経緯）。
-- **パッケージ名の改名**（`com.example.weakspot` → 例 `io.github.zeusisgood.weakspot`）: 通信・保存データはクラス名を使っていないので互換は保てるが、全ファイルに触る。ほかの整理と重ならない時期（1.9.0 が落ち着いたあと、または 1.7.10 への移植を始める前）に、単独の版で行う。
 - **設定のカテゴリ分け**（138 項目が `general` に並んでいて、設定画面で探しにくい）: カテゴリを分けると設定キー（`general.xxx`）が変わるので、設定ファイルの移行（`configVersion` 7。古いキーの値を新しいカテゴリへ移して消す）と一緒に、マイナーで行う。「キー名を変えない」方針を、この版だけ移行つきで破ることになるので、行うときに改めて相談する。
