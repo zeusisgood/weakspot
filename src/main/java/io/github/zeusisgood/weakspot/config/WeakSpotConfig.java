@@ -496,6 +496,10 @@ public final class WeakSpotConfig {
     @Config.RangeDouble(min = 0.0, max = 1.0)
     public static double myHitVolume = 0.25;
 
+    @Config.Comment({"[クライアント] 自分のヒット音に、コンボで音を重ねるか（1.9.5）",
+            "オンなら、コンボ 25 から 2 音、100 から 3 音の和音になる。オフなら 1 音のまま"})
+    public static boolean hitChordEnabled = true;
+
     @Config.Comment({"[クライアント] 他のプレイヤーのヒット音の音量（0 で聞こえなくなる）",
             "バニラの「プレイヤー」音量も掛かる"})
     @Config.RangeDouble(min = 0.0, max = 1.0)

@@ -5,6 +5,7 @@ import io.github.zeusisgood.weakspot.AnimalTargets;
 import io.github.zeusisgood.weakspot.RightClickTargets;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
+import io.github.zeusisgood.weakspot.common.HitPitch;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import io.github.zeusisgood.weakspot.server.MachineStates;
@@ -78,6 +79,9 @@ public final class ClientWeakSpotHandler {
         int broken = OwnHits.STREAK.expire(clientTick);
         if (broken > 0) {
             ComboHud.onBreak(broken, clientTick);
+            if (broken >= HitPitch.BREAK_SOUND_FROM) {
+                HitSounds.playBreak();
+            }
         }
         if (!WeakSpotConfig.weakSpotsEnabled) {
             stopOwnWeakSpots();

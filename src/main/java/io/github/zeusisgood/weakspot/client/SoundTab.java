@@ -21,12 +21,15 @@ final class SoundTab extends StatsScreenTab {
     private static final int BUTTON_OTHERS_SOUND = 30;
     private static final int BUTTON_OTHERS_VOLUME = 31;
     private static final int BUTTON_OTHERS_PREVIEW = 32;
+    /** 自分のヒット音に、コンボで音を重ねるか（1.9.5）。 */
+    private static final int BUTTON_CHORD = 40;
     /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
 
     private final List<GuiButton> buttons = new ArrayList<>();
     private GuiButton mySound;
     private GuiButton othersSound;
+    private GuiButton chord;
 
     SoundTab(StatsScreen screen) {
         super(screen);
@@ -53,6 +56,8 @@ final class SoundTab extends StatsScreenTab {
             HitSounds.playOtherFlat(1);
         }));
         add(new GuiButton(BUTTON_OTHERS_PREVIEW, center + 94, y, 60, 20, I18n.format("weakspot.sound.preview")));
+
+        chord = add(new GuiButton(BUTTON_CHORD, center - 100, screen.top() + 146, 200, 20, ""));
         updateLabels();
     }
 
@@ -83,6 +88,11 @@ final class SoundTab extends StatsScreenTab {
                 updateLabels();
                 HitSounds.playOtherFlat(1);
                 return true;
+            case BUTTON_CHORD:
+                WeakSpotConfig.hitChordEnabled = !WeakSpotConfig.hitChordEnabled;
+                WeakSpotConfig.save();
+                updateLabels();
+                return true;
             case BUTTON_MY_PREVIEW:
                 HitSounds.clear();
                 HitSounds.playScale(HitSounds::playOwn, PREVIEW_TICKS_PER_NOTE, 0);
@@ -99,6 +109,8 @@ final class SoundTab extends StatsScreenTab {
     private void updateLabels() {
         mySound.displayString = instrumentLabel(WeakSpotConfig.myHitSound);
         othersSound.displayString = instrumentLabel(WeakSpotConfig.othersHitSound);
+        chord.displayString = I18n.format("weakspot.sound.chord",
+                I18n.format(WeakSpotConfig.hitChordEnabled ? "options.on" : "options.off"));
     }
 
     private static String instrumentLabel(HitSound sound) {
@@ -113,6 +125,8 @@ final class SoundTab extends StatsScreenTab {
         screen.drawString(screen.font(), I18n.format("weakspot.sound.others"), labelX, top + 92, 0xFFFFFF);
         screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.note"), screen.width / 2, top + 132,
                 0xAAAAAA);
+        screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.comboNote"), screen.width / 2,
+                top + 172, 0xAAAAAA);
     }
 
     /** 音量（0〜100%）のスライダー。動かし終えたとき（マウスを離したとき）に、値を保存して1音鳴らす。 */

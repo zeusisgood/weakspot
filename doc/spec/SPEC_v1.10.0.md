@@ -108,7 +108,7 @@
 
 | カテゴリ | 項目 |
 |---|---|
-| `sound`（音） | `myHitSound` `myHitVolume` `othersHitSound` `othersHitVolume` |
+| `sound`（音） | `myHitSound` `myHitVolume` `hitChordEnabled` `othersHitSound` `othersHitVolume` |
 | `markers`（マーカー） | `weakSpotsEnabled` `disabledKinds` `myMarkerColors` `myMarkerShapes` `weakSpotTrailEnabled` `animalSpotSeeThrough` `otherMarkerEnabled` `otherMarkerColor` `otherMarkerAlpha` `otherMarkerShape` |
 | `combo`（コンボ） | `comboDisplayEnabled` `comboScale` `comboPosition` `comboMilestoneEffects` `othersComboDisplay` |
 | `hud`（ゲージ・表示） | `blockHealthBarEnabled` `machineBarEnabled` `growthBarEnabled` `machineParticlesVisible` `bowDrawBarEnabled` `vehicleBoostBarEnabled` `ladderBoostBarEnabled` `throwChargeBarEnabled` `meleeChargeBarEnabled` `sprintBoostBarEnabled` `swimBoostBarEnabled` |
@@ -117,6 +117,7 @@
 - `configVersion` は `general` に残す（古い形の設定ファイルを見分けるため。`general` にはこれだけが残る）
 - 上の表にない項目が見つかったら、近いカテゴリに入れ、仕様書と `doc/config.md` に書き足す
 - 作り方（目安）: `@Config` のクラスを `server` / `client` のカテゴリで分け、下の段は入れ子のオブジェクトにする。コードからの参照の形は実装で決める（項目の名前と意味は変えない）
+- このとき `WeakSpotConfig`（今 745 行）を、カテゴリごとの入れ子のクラスに分けて整理する（1.9.4 のあとの相談。ユーザーの判断）。設定の説明の翻訳が揃っているかは `resources/LangFilesTest` が確かめるので、翻訳キーの付け替えと一緒に、テストの決まり（`weakspot.general.<項目>.tooltip`）も新しい形に直す
 
 ### 2.3 移行（`configVersion` 7）
 

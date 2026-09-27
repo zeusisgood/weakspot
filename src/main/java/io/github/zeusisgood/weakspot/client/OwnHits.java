@@ -32,7 +32,7 @@ final class OwnHits {
      */
     static int register(HitKind kind) {
         int hitStreak = STREAK.hit(ClientWeakSpotHandler.clientTick);
-        HitSounds.playOwn(hitStreak);
+        HitSounds.playHit(hitStreak);
         ComboHud.onHit(kind, hitStreak, ClientWeakSpotHandler.clientTick + ClientWeakSpotHandler.framePartialTicks);
         LAST_HIT_TICK[kind.ordinal()] = ClientWeakSpotHandler.clientTick;
         return hitStreak;

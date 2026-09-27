@@ -1,10 +1,11 @@
 {
   "homepage": "https://github.com/zeusisgood/weakspot/releases",
   "promos": {
-    "1.12.2-latest": "1.9.4",
-    "1.12.2-recommended": "1.9.4"
+    "1.12.2-latest": "1.9.5",
+    "1.12.2-recommended": "1.9.5"
   },
   "1.12.2": {
+    "1.9.5": "Hit sounds stack into chords with combos; clearer combo step sounds",
     "1.9.4": "Clearer name for the stats average; logo in the Mods list",
     "1.9.3": "Internal cleanup (no gameplay changes)",
     "1.9.2": "Chat notice when a new version is out"

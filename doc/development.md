@@ -29,6 +29,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 ## ブランチとリリース
 
 - 作業は `main` 以外のブランチで行い、`main` への PR を作ります。PR ごとに GitHub Actions（[`.github/workflows/ci.yml`](../.github/workflows/ci.yml)）がビルドと全テストを実行し、成功しないと Merge できません。
+- テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）の確認も含まれます。配布サイトへ上げるスクリプトは、CI で `shellcheck` にかけます。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
 - `main` に取り込まれた時、`build.gradle` の `version` がまだ Release のない版なら、同じワークフローがタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を自動で作成します。版を上げない変更（文書だけなど）では作成しません。
 - 続けて、Release の jar を Modrinth と CurseForge にも上げます（[`.github/scripts/`](../.github/scripts/) の `publish-modrinth.sh`・`publish-curseforge.sh`。更新内容は英語のお知らせの 1 行と Release へのリンク）。Modrinth はその版がすでにあれば何もしません。CurseForge は上げ済みか確かめられないため、Release を作った時だけ上げます。失敗した時は、Actions の「Modrinth publish」「CurseForge publish」を手動で実行します（CurseForge は、Files に無いことを先に確かめる）。Modrinth の説明文は `doc/store/description.md` を変えると自動で反映されます（「Modrinth description」）。

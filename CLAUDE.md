@@ -27,7 +27,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 機能の追加・不具合の修正ごとに**パッチ**を上げる（1.1.0 → 1.1.1）。
   - 互換性を破るときは**マイナー**を上げる（1.1.x → 1.2.0）。迷ったらマイナー。互換性を破る変更とは、通信内容の変更（パケットの追加・削除・中身の変更）、古い版で読めなくなるサーバー保存データの形式変更、設定キーの削除や意味の変更。通信内容を変えたら必ずマイナーを上げる。
   - `@Mod` の `acceptableRemoteVersions` で、同じマイナー同士（例: `[1.1,1.2)`）なら接続できるようにする。マイナーを上げるときは、`build.gradle` と `WeakSpotMod.VERSION` に加えて、この範囲も新しいマイナーに書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-  - 現行は 1.9.4。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
+  - 現行は 1.9.5。範囲は `WeakSpotMod.ACCEPTED_VERSIONS = "[1.9,1.10)"`（Maven のバージョン範囲の書式。Forge の `VersionRange`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに GitHub Actions（`.github/workflows/ci.yml` の `release`）が作る。Claude はタグを付けない（クラウドのセッションはタグを push できない）。
 - **遊び方（プレイヤーから見える動き。`doc/play.md`）を変えたときは、ガイドの本の文章（`en_us.lang` と `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`。1.8.5）も合わせて直す**（ユーザーの指示）。技術的なこと（設定の名前・値、通信、バージョン）は書かない。本の 1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい）で、題・小見出し・「↩ 目次」を含めてはみ出さないこと。ページを足すときは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動で作る。目次の 1 ページも 14 行まで）。
 - リリースの流れ: `CHANGELOG.md` の一番上に新しい版の節を足し、README と `README.en.md` の**ダウンロードのリンク（jar の直リンクの版 `releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と文字の「最新版 X.Y.Z」/「latest: X.Y.Z」）**、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直し、`doc/spec/README.md` の表に 1 行足し（まだなら）、遊び方が変わったら `doc/play.md` も直し（種類・操作が変わったら `README.en.md` の表も）、更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで。1.7.1）。新しい版の通知（1.9.2）のため、直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md`（英語。版の番号は書かない）も直す（下の「配布サイトの説明文」）→ コミット → 作業用ブランチに push → `main` への PR を作る（下の「ブランチと PR の約束」）。ユーザーが Merge すると、Actions がタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を作り、続けてその jar を **Modrinth** にも上げる（`.github/scripts/publish-modrinth.sh`。更新内容は英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク。Modrinth にその版がもうあれば何もしない。失敗したら Actions の「Modrinth publish」を手動で流す）。**CurseForge** にも上げる（`publish-curseforge.sh`。更新内容は同じ `changelog.sh`。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る。どちらかがなければ何もせず成功で終わる）。
@@ -43,7 +43,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - クライアントとサーバーの**両方に Mod が必要**（同じマイナー同士なら接続できる）。パッケージは `io.github.zeusisgood.weakspot`（1.9.3 で `com.example.weakspot` から改名。通信・保存データ・設定はクラス名を使っていないので、改名しても互換は変わらない。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ）。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。
-- `common/` は Minecraft に依存しない純粋な計算だけ（1.7.10 への移植を見込んで、MC クラスを持ち込まない）。単体テストはここ（と `compat/`・`config/` の golden テスト）にある。
+- `common/` は Minecraft に依存しない純粋な計算だけ（1.7.10 への移植を見込んで、MC クラスを持ち込まない）。単体テストはここ（と `compat/`・`config/` の golden テスト）にある。`resources/` のテスト（1.9.4 のあと）は、ファイルの揃い具合を確かめる: `LangFilesTest`（日英の翻訳のキーが一致、設定の全項目に説明、全種類に名前、コードに書いた翻訳キーが翻訳にある）と `ReleaseFilesTest`（版を上げたときに直すファイル: `build.gradle` と `WeakSpotMod.VERSION`・`ACCEPTED_VERSIONS`・README の日英のリンクと「最近の更新」・`CHANGELOG.md`・`doc/spec/README.md`・`weakspot.news.<版>`・`update.json`）。リリースの流れの直し忘れは、このテストで CI が赤くなる。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（専用サーバーではロードされない）。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
 - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**行う（tick 単位だと素早い照準移動を取りこぼす）。
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲み、古いサーバーでは出さない**。
@@ -81,6 +81,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
+1.9.5（ヒット音の和音・段階の音・駆け上がり・コンボが切れた音）をリリースした。
+
 1.9.4（統計の「平均ヒット数」の名前、Mods の一覧のロゴ）をリリースした。計算の修正は `SPEC_v1.10.0.md` の 2b.1。
 
 配布サイトへの自動公開は、Modrinth・CurseForge とも仕組みができた（CurseForge は、ユーザーがプロジェクトを作り、`CURSEFORGE_TOKEN` と `CURSEFORGE_PROJECT_ID` を登録したら動く。1.9.4 は「CurseForge publish」を手動で 1 回流す）。配布サイトのページが公開されたら、README のダウンロードを並べ替える。
@@ -90,7 +92,12 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ### TODO（ユーザーの判断: いつかやる。やるときに相談する）
 
-- なし
+- 1.10.0 のあとの候補（1.9.4 のあとの相談。まだどの版に入れるかは決めていない。1.10.0 にはまだ入れない）:
+  - **A. ゲーム内のリンク先を配布サイトに**: 新しい版の通知の [ダウンロード]（`UpdateCheckNotice`）と、更新のお知らせの [変更点を見る]（`UpdateNotes.RELEASES_URL`）を、GitHub の Release から Modrinth・CurseForge のページへ。配布サイトの審査が通って公開されてから。パッチでも出せる
+  - **B. 進捗（アドバンスメント）**: 「初めての弱点」「コンボ 100」「全種類に当てた」などを Minecraft の進捗の画面に出す。通信は本体の仕組みなのでパッチでも出せる
+  - **D. `/weakspot top`**: サーバー内の採掘ヒット数・最大コンボなどの上位をチャットに出す。サーバーだけの変更なのでパッチでも出せる
+- **音階の往復**（1.9.5 の相談。ユーザーの判断: 1.9.5 の和音を聞いてから決める）: 上のドで下のドに戻る代わりに、上がったら下がる往復にする。足すなら設定で選べる形（初期値は今のまま）
+- **プレイ動画**（1.9.4 のあとの相談。ユーザーの判断: いつか撮る）: 30〜60 秒（採掘のコンボと音階・節目の花火・ほかの種類を少しずつ・K キーのメニュー。BGM なし）を YouTube に上げ、`doc/store/description.md` の冒頭に埋め込む（Modrinth は自動、CurseForge は貼り替え）。README には 10 秒ほどの MP4 を余裕があれば。撮影はスクショと同じ設定（チャット非表示・チュートリアルの案内なし・ほかの Mod の表示なし）
 
 ### 1.10.0 に向けたメモ（ユーザーの判断: 1.8.8 のあとの相談で、いったん見送り。1.9.2 のあとの相談で、次のように決めた）
 
