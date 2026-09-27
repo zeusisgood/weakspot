@@ -463,6 +463,31 @@ public final class WeakSpotConfig {
     @Config.RangeInt(min = 0, max = 200)
     public static int portalMinHitIntervalTicks = 4;
 
+    @Config.Comment({"[サーバー] 泳ぎの弱点のオン・オフ（1.10.0）",
+            "オフにすると、全員の泳ぎの弱点が出ない"})
+    public static boolean swimWeakSpotEnabled = true;
+
+    @Config.Comment({"[サーバー] 泳ぎの弱点に当てたときの、泳ぐ速さの倍率（1.10.0）",
+            "コンボの掛け数を上乗せする。ボート（乗り物）と同じ値にすると、同じだけ当てればボートのほうが常に速い"})
+    @Config.RangeDouble(min = 1.0, max = 100.0)
+    public static double swimBoostMultiplier = 1.5;
+
+    @Config.Comment("[サーバー] 泳ぐ速さの倍率の上限（1.10.0）。0 で上限なし")
+    @Config.RangeDouble(min = 0.0, max = 1000.0)
+    public static double swimBoostMaxMultiplier = 0;
+
+    @Config.Comment("[サーバー] 泳ぎの加速の持続時間（tick。1.10.0）。ヒットのたびにこの長さに戻る")
+    @Config.RangeInt(min = 1, max = 1200)
+    public static int swimBoostDurationTicks = 40;
+
+    @Config.Comment("[サーバー] 泳ぎの弱点に当てた瞬間の突進で進む距離（ブロック、おおよそ。1.10.0）。コンボでは大きくならない")
+    @Config.RangeDouble(min = 0.0, max = 10.0)
+    public static double swimDashDistance = 0.3;
+
+    @Config.Comment("[サーバー] 泳ぎのヒットを受け付ける最小間隔（tick。1.10.0）。クライアントも同じ間隔でヒットを制限する")
+    @Config.RangeInt(min = 0, max = 200)
+    public static int swimMinHitIntervalTicks = 6;
+
 
     @Config.Comment({"[サーバー] 近接の溜めた攻撃が何回当たるごとに、手に持っている物の耐久を回復するか。0 で回復しない",
             "余りはログアウトまで持ち越す。サーバーだけが使う（クライアントには送らない）"})
@@ -589,9 +614,12 @@ public final class WeakSpotConfig {
     @Config.Comment({"[クライアント] ダッシュが加速している間、照準の上に残り時間のゲージ（赤）を表示するか（1.7.0）"})
     public static boolean sprintBoostBarEnabled = true;
 
+    @Config.Comment({"[クライアント] 泳ぎが加速している間、照準の上に残り時間のゲージ（深い青）を表示するか（1.10.0）"})
+    public static boolean swimBoostBarEnabled = true;
+
     @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（1.7.0。統計画面の「弱点マーカー」タブで変えられる）",
             "1 行に 1 つ、mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra,",
-            "enchant, harvest, throw, sprint, portal のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
+            "enchant, harvest, throw, sprint, portal, swim のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
     public static String[] disabledKinds = {};
 
     @Config.Comment({"[クライアント] 自分の弱点の色（1.7.0）。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）",

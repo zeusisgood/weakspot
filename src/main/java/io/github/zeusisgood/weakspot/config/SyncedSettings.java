@@ -148,6 +148,14 @@ public final class SyncedSettings {
     public int portalMinHitIntervalTicks;
     public int portalHitTicks;
 
+    // 泳ぎ（速さはクライアントで足す。残り時間のゲージのため、倍率・時間も送る。1.10.0）
+    public boolean swimWeakSpotEnabled;
+    public int swimMinHitIntervalTicks;
+    public double swimBoostMultiplier;
+    public double swimBoostMaxMultiplier;
+    public int swimBoostDurationTicks;
+    public double swimDashDistance;
+
     // 他のプレイヤーの弱点マーク
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
@@ -191,7 +199,9 @@ public final class SyncedSettings {
             "harvestWeakSpotEnabled", "harvestMinHitIntervalTicks", "throwWeakSpotEnabled",
             "throwMinHitIntervalTicks", "throwChargePerHit", "sprintWeakSpotEnabled", "sprintMinHitIntervalTicks",
             "sprintBoostMultiplier", "sprintBoostMaxMultiplier", "sprintBoostDurationTicks",
-            "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "markerShareRange",
+            "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "swimWeakSpotEnabled",
+            "swimMinHitIntervalTicks", "swimBoostMultiplier", "swimBoostMaxMultiplier", "swimBoostDurationTicks",
+            "swimDashDistance", "markerShareRange",
             "markerSendMinIntervalTicks"
     };
     private static final Field[] FIELDS = new Field[WIRE.length];

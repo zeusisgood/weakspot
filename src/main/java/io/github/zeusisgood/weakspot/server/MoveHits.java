@@ -15,8 +15,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * はしご・エリトラ・走りの弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。
- * はしご・エリトラの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
+ * はしご・エリトラ・走り・泳ぎ（1.10.0）の弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。
+ * はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
  * 走りは、移動速度に一時的な修正（保存しない）をかける（乗り物の馬と同じ。自分のクライアントにも届いて効く）。
  * サーバーの位置はクライアントより遅れて届くので、登っている・飛んでいる・走っていることは、直前 RECENT_TICKS の
  * どこかでそうだったかで確かめる。
@@ -35,6 +35,7 @@ public final class MoveHits {
         long ladderTick = Long.MIN_VALUE / 2;
         long elytraTick = Long.MIN_VALUE / 2;
         long sprintTick = Long.MIN_VALUE / 2;
+        long swimTick = Long.MIN_VALUE / 2;
         final Map<HitKind, Long> lastHit = new HashMap<>();
         /** 走りの加速の残り tick（0 以下なら、かけていない）。 */
         int sprintRemaining;
@@ -56,8 +57,9 @@ public final class MoveHits {
         boolean ladder = player.isOnLadder() && !player.isRiding();
         boolean elytra = player.isElytraFlying();
         boolean sprint = player.isSprinting() && !player.isRiding() && !elytra;
+        boolean swim = player.isInWater() && !player.isRiding();
         if (state == null) {
-            if (!ladder && !elytra && !sprint) {
+            if (!ladder && !elytra && !sprint && !swim) {
                 return;
             }
             state = new State();
@@ -72,12 +74,15 @@ public final class MoveHits {
         if (sprint) {
             state.sprintTick = now;
         }
+        if (swim) {
+            state.swimTick = now;
+        }
         if (state.sprintRemaining > 0 && --state.sprintRemaining <= 0) {
             SPRINT_SPEED.clear(player);
         }
     }
 
-    /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT。 */
+    /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT / SWIM。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, int streak) {
         if (!HitGate.allowed(player, kind)) {
             return;
@@ -109,6 +114,8 @@ public final class MoveHits {
                 return state.ladderTick;
             case ELYTRA:
                 return state.elytraTick;
+            case SWIM:
+                return state.swimTick;
             default:
                 return state.sprintTick;
         }
