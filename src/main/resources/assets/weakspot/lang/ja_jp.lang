@@ -7,7 +7,7 @@ weakspot.stats.column.total=累計
 weakspot.stats.hits=採掘ヒット数
 weakspot.stats.blocks=壊したブロック数
 weakspot.stats.blocksWithHit=弱点を当てて壊したブロック数
-weakspot.stats.averageHits=1ブロックあたりの平均ヒット数
+weakspot.stats.averageHits=採掘ヒット数 ÷ 壊したブロック数
 weakspot.stats.maxHits=1ブロックでの最多ヒット数
 weakspot.stats.growthHits=成長ヒット数
 weakspot.stats.machineHits=機械ヒット数
@@ -92,8 +92,8 @@ weakspot.command.reload=[弱点] 設定（weakspot.cfg）を読み直しまし�
 weakspot.command.reload.failed=設定を読み直せませんでした。サーバーを再起動してください（詳しくはサーバーのログ）
 weakspot.command.offline=オンラインのプレイヤーだけ指定できます
 weakspot.command.stats.header=[弱点] %s の統計
-weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、合計ヒット %s
-weakspot.command.stats.total=  累計: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、合計ヒット %s
+weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒットして壊した数 %s、ヒット÷ブロック %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、合計ヒット %s
+weakspot.command.stats.total=  累計: ヒット %s、壊した数 %s、ヒットして壊した数 %s、ヒット÷ブロック %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、合計ヒット %s
 weakspot.command.reset=[弱点] %s の統計の累計を消しました
 
 # ガイドの本（1.4.1。1.8.5 から章立て）。遊び方（doc/play.md）を変えたら、ここも合わせて直す。1 ページは 14 行まで
@@ -318,6 +318,7 @@ weakspot.news.1.8.6=クリエイティブでもすべての弱点が出るよう
 weakspot.news.1.8.7=採掘にもコンボ倍率。コンボ表示の下に種類ごとの倍率を表示
 weakspot.news.1.8.8=内部の整理（遊び方に変更なし）
 weakspot.news.1.9.1=不具合報告の文章を整理した
+weakspot.news.1.9.4=統計の平均ヒット数の名前を直し、Mod 一覧にロゴを付けた
 weakspot.news.1.9.3=内部の名前を整理した（遊び方に変更なし）
 weakspot.news.1.9.2=新しい版が出たらチャットで知らせるようにした
 weakspot.news.1.9.0=サーバーで採掘・成長・機械・動物を止められるようにし、内部を整理した（1.8.x と接続不可）

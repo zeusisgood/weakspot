@@ -1,4 +1,4 @@
-<img src="doc/images/icon.png" alt="" width="96" align="right">
+<img src="doc/images/icon-transparent.png" alt="" width="96" align="right">
 
 # Weak Spot Mining（弱点破壊 Mod）
 
@@ -12,7 +12,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 ## ⬇ ダウンロード
 
-- **[weakspot-1.9.3.jar をダウンロード](https://github.com/zeusisgood/weakspot/releases/download/v1.9.3/weakspot-1.9.3.jar)**（最新版 1.9.3。クリックで直接ダウンロード）
+- **[weakspot-1.9.4.jar をダウンロード](https://github.com/zeusisgood/weakspot/releases/download/v1.9.4/weakspot-1.9.4.jar)**（最新版 1.9.4。クリックで直接ダウンロード）
 - [他のバージョン・リリースノート（Releases）](https://github.com/zeusisgood/weakspot/releases/latest)
 
 対応: **Minecraft Java Edition 1.12.2 + Forge**（開発・動作確認は Forge 14.23.5.2860。古い Forge では一部の機能が動かない可能性あり）。マルチプレイでは、サーバーと全員に同じマイナーバージョンが必要です（詳細は [doc/install.md](doc/install.md)）。
@@ -52,6 +52,12 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 ## 最近の更新
 
+### 1.9.4
+
+- 統計の「1 ブロックあたりの平均ヒット数」の名前を、計算の中身どおり「採掘ヒット数 ÷ 壊したブロック数」に変更
+- ゲーム内の Mods の一覧にロゴと英語の説明を追加
+- 通信内容・保存データ・設定に変更なし。1.9.x 同士はそのまま接続可能
+
 ### 1.9.3
 
 - 内部のパッケージ名を変更（ログやクラッシュレポートに出る名前が変わる）
@@ -61,12 +67,6 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 - 新しいバージョンが公開されると、ワールドに入った時にチャットで通知（[この版は通知しない] で停止可能）
 - 通信内容・保存データに変更なし。1.9.x 同士はそのまま接続可能
-
-### 1.9.1
-
-- 不具合報告（`/weakspot bug`）の案内と issue の見出しを整理（概要・再現手順・実際の動作・期待される動作・環境・補足）
-- 古い Java で OS 名が不正確な場合（Windows 10・11 が 8.1 と表示）に注記を追加
-- 通信内容・保存データ・設定に変更なし。1.9.x 同士はそのまま接続可能
 
 全ての更新履歴は [CHANGELOG.md](CHANGELOG.md) を参照。
 
