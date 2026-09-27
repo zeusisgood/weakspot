@@ -2,14 +2,14 @@
 {
   "modid": "weakspot",
   "name": "Weak Spot Mining",
-  "description": "ブロックを壊すとき、面に出る弱点を狙うと破壊が一気に進む。",
+  "description": "Fortnite-style weak spots for mining, farming, travel and more. Aim at the glowing circle to speed things up.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "",
+  "url": "https://github.com/zeusisgood/weakspot",
   "updateUrl": "",
-  "authorList": [],
+  "authorList": ["zeusisgood"],
   "credits": "",
-  "logoFile": "",
+  "logoFile": "logo.png",
   "screenshots": [],
   "dependencies": []
 }

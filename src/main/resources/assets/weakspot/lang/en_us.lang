@@ -7,7 +7,7 @@ weakspot.stats.column.total=All Time
 weakspot.stats.hits=Mining hits
 weakspot.stats.blocks=Blocks broken
 weakspot.stats.blocksWithHit=Blocks broken with a hit
-weakspot.stats.averageHits=Average hits per block
+weakspot.stats.averageHits=Mining hits ÷ blocks broken
 weakspot.stats.maxHits=Most hits on one block
 weakspot.stats.growthHits=Growth hits
 weakspot.stats.machineHits=Machine hits
@@ -92,8 +92,8 @@ weakspot.command.reload=[Weak Spot] Reloaded the config (weakspot.cfg)
 weakspot.command.reload.failed=Could not reload the config. Please restart the server (see the server log)
 weakspot.command.offline=Only online players can be specified
 weakspot.command.stats.header=[Weak Spot] Stats of %s
-weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
-weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, avg hits %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
+weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, hits/blocks %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
+weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, hits/blocks %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, total hits %s
 weakspot.command.reset=[Weak Spot] Reset the all-time stats of %s
 
 # The guide book (1.4.1, chapters since 1.8.5). Update it along with doc/play.md. Keep each page within 14 lines.
