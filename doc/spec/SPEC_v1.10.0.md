@@ -15,8 +15,8 @@
 - バージョンは 1.9.2 → **1.10.0**（`build.gradle` の `version` と `WeakSpotMod.VERSION`）。`ACCEPTED_VERSIONS` を `[1.10,1.11)` にする
 - 弱点の種類を足すので、統計の送る並びと `SyncedSettings` が変わる（通信内容の変更）。**1.9.x とは接続できない**。サーバーと全員のクライアントを同時に更新する
 - 統計の保存は項目の追加だけ（1.9.x のワールドはそのまま読める）
-- 設定はキーの追加だけ（移行は要らない）
-- パッケージ名の改名は 1.9.3 で先に済ませる（`SPEC_v1.9.3.md`）。設定のカテゴリ分けは、この版に入れる（2 の節。分け方は相談中）
+- 設定はカテゴリに分ける（2 の節）。古い `weakspot.cfg` は、初めて起動したときに自動で移行する
+- パッケージ名の改名は 1.9.3 で先に済ませる（`SPEC_v1.9.3.md`）。設定のカテゴリ分けは、この版に入れる（2 の節）
 
 ## 1. 泳ぎの弱点（`HitKind.SWIM`）
 
@@ -57,7 +57,7 @@
 - ヒットの受付は `server/MoveHits`（はしご・ダッシュ・エリトラと同じ。前置きは `HitGate`）。受け付ける条件: 水の中にいる、乗り物に乗っていない
 - 統計・コンボ・節目は、ほかの種類と同じ（`MiningStats` の配列は自動。保存のキーは `saveKey` の規則）
 
-### 1.6 設定
+### 1.6 設定（`server.swim` と `client.hud`。2 の節）
 
 | キー | 初期値 | 側 | 説明 |
 |---|---|---|---|
@@ -79,11 +79,59 @@
 - コンボの掛け数の表示（「泳ぎ ×1.25」）に入れる
 - 「弱点マーカー」タブ（`KindMask`）に入れる
 
-## 2. 設定のカテゴリ分け（相談中）
+## 2. 設定のカテゴリ分け
 
-- `general` に並んでいる約 140 項目を、カテゴリに分ける。設定キーが変わるので、設定ファイルの移行（`configVersion` 7。古いキーの値を新しいカテゴリへ移して消す）と一緒に行う
-- 泳ぎの設定（1.6）も、最初からカテゴリに入れる
-- 分け方は、決まりしだいここに書く
+### 2.1 やりたいこと（ユーザーの判断）
+
+- `general` に並んでいる約 140 項目が、設定画面で探しにくい。1.10.0 はマイナーなので、この版で分ける（`CLAUDE.md` の「キー名を変えない」方針を、この版だけ移行つきで破る）
+- 相談の結果: **2 段**（上の段がどちらの値が効くか `server` / `client`、その下を種類・用途）。**項目の名前は今のまま**で、カテゴリだけを付ける（`SyncedSettings` の「同じ名前」、種類の表の `<種類>WeakSpotEnabled` / `<種類>MinHitIntervalTicks` の決まりをそのまま使う）
+
+### 2.2 カテゴリと項目
+
+設定ファイルでは `server { vehicle { D:vehicleBoostMultiplier=1.5 } }` の形になる（以下、`server.vehicle.vehicleBoostMultiplier` と書く）。
+
+**server（サーバー）**
+
+| カテゴリ | 項目 |
+|---|---|
+| `general`（共通） | `giveGuideBook` `markerShareRange` `markerSendMinIntervalTicks` |
+| `mining`（採掘） | `miningWeakSpotEnabled` `miningComboBonus` `boostMultiplier` `boostDurationTicks` `weakSpotRadiusRatio` `edgeMargin` `minMoveDistance` `weakSpotMinRadius` `weakSpotMaxRadiusRatio` `minFaceSize` `lingerTicks` `minHitIntervalTicks` |
+| `repair`（道具の修理） | `hitsPerRepair` `repairPerStep` `maxRepairPerBreak` |
+| `milestones`（節目） | `milestones` `milestoneXp` `milestoneRepair` `milestoneRepeatInterval` `kindMilestonesEnabled` `totalMilestonesEnabled` `totalMilestones` `totalMilestoneXp` `totalMilestoneRepeatInterval` |
+| `growth`（成長） | `growth…` の 8 項目、`mushroomGrowChance` |
+| `machine`（機械） | `machine…` の 6 項目、`excludedBlocks` |
+| `animal`（動物） | `animal…` `sheep…` `chicken…` `villager…` の 15 項目 |
+| `fishing` `bow` `sleep` `eat` `vehicle` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal` `swim` | その種類の名前で始まる項目 |
+| `melee`（近接） | `melee…` の 4 項目、`critsPerRepair` `critRepairPerStep` |
+
+**client（クライアント）**
+
+| カテゴリ | 項目 |
+|---|---|
+| `sound`（音） | `myHitSound` `myHitVolume` `othersHitSound` `othersHitVolume` |
+| `markers`（マーカー） | `weakSpotsEnabled` `disabledKinds` `myMarkerColors` `myMarkerShapes` `weakSpotTrailEnabled` `animalSpotSeeThrough` `otherMarkerEnabled` `otherMarkerColor` `otherMarkerAlpha` `otherMarkerShape` |
+| `combo`（コンボ） | `comboDisplayEnabled` `comboScale` `comboPosition` `comboMilestoneEffects` `othersComboDisplay` |
+| `hud`（ゲージ・表示） | `blockHealthBarEnabled` `machineBarEnabled` `growthBarEnabled` `machineParticlesVisible` `bowDrawBarEnabled` `vehicleBoostBarEnabled` `ladderBoostBarEnabled` `throwChargeBarEnabled` `meleeChargeBarEnabled` `sprintBoostBarEnabled` `swimBoostBarEnabled` |
+| `updates`（更新） | `showUpdateNotes` `lastSeenVersion` `checkForUpdates` `skippedUpdateVersion` |
+
+- `configVersion` は `general` に残す（古い形の設定ファイルを見分けるため。`general` にはこれだけが残る）
+- 上の表にない項目が見つかったら、近いカテゴリに入れ、仕様書と `doc/config.md` に書き足す
+- 作り方（目安）: `@Config` のクラスを `server` / `client` のカテゴリで分け、下の段は入れ子のオブジェクトにする。コードからの参照の形は実装で決める（項目の名前と意味は変えない）
+
+### 2.3 移行（`configVersion` 7）
+
+- 1.10.0 を初めて起動したとき（`WeakSpotConfig.migrate`、`serverStarting`）、古い `general.<項目>` の値を新しいカテゴリの同じ名前の項目へ移し、古い項目を消す。書き換えていた値はそのまま引き継ぐ
+- クライアントだけで起動した（サーバーを立てない）ときも、クライアントの項目が移るようにする（ワールドに入る前の、保存できる時点で行う）
+- `configVersion` を 7 にする
+- 手で直す必要はない。サーバーの管理者が `weakspot.cfg` をスクリプトなどで書き換えている場合は、キーの直しが要る（`CHANGELOG.md` に書く）
+- 移行は golden テストで確かめる（1.9.x の形の設定ファイル → 1.10.0 の形。値が引き継がれること、古いキーが残らないこと）
+
+### 2.4 設定画面・翻訳
+
+- 設定画面は、`server` / `client` → カテゴリ → 項目の順にたどる形になる
+- カテゴリの名前（上の表のかっこの中）と説明を `en_us.lang` / `ja_jp.lang` に足す
+- 項目の説明の翻訳キー（今は `weakspot.general.<項目>.tooltip`）は、新しいカテゴリに合わせて機械的に付け替える（文章は変えない）
+- `doc/config.md` の表を、カテゴリごとに並べ替える
 
 ## 2b. （ほかの内容。決まりしだい足す）
 
