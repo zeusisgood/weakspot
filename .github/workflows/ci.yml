@@ -1,5 +1,6 @@
 # ビルドとテスト（PR と main への push）。main で版（build.gradle の version）が新しくなったら、
 # 同じビルドの jar で、タグ vX.Y.Z と GitHub Release を作る（本文は CHANGELOG.md のその版の節）。
+# そのあと、Release の jar を Modrinth にも上げる（.github/scripts/publish-modrinth.sh）。
 name: CI
 
 on:
@@ -67,3 +68,9 @@ jobs:
           awk -v v="## $version" '$0 == v {f = 1; next} /^## / {f = 0} f' CHANGELOG.md > notes.md
           gh release create "v$version" "jar/weakspot-$version.jar" \
             --title "$version" --notes-file notes.md --target "$GITHUB_SHA"
+      - name: Publish to Modrinth
+        # Release の有無に関係なく毎回流す（Modrinth にその版がもうあれば何もしない。前回失敗した分もここで上がる）
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+        run: bash .github/scripts/publish-modrinth.sh "${{ steps.version.outputs.version }}"
