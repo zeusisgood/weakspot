@@ -15,18 +15,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
-import net.minecraftforge.client.event.MouseEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 釣りの弱点（自分だけ。他のプレイヤーには見せない）。浮きが水に入って魚を待っている間、浮きのまわり（半径1ブロック）の
- * 水面の上の点に弱点を出し、釣り竿を持って、照準が重なっているときに左クリックで叩く。
+ * 水面の上の点に弱点を出し、釣り竿を持って、照準を重ねるだけで当たり（1.10.1。それまでは左クリックで叩いた。左クリックは
+ * 今は止めず、通常どおり掘る・攻撃する）。
  *
  * 弱点はワールドの1点（浮きからの水平の差 dx, dz。浮きが揺れても追従する）で、描くときに画面上の位置へ変換して、
  * 画面上で一定の大きさ（半径 12 GUI ピクセル）の円として描く（浮きが遠くても近くても同じ大きさ）。
@@ -189,26 +188,10 @@ final class FishingSpot {
             double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, SCREEN.fovDegrees(),
                     SCREEN.viewportHeight());
             aimed = FishingMath.isAimed(p[2], allowed);
-        }
-    }
-
-    /**
-     * 弱点に照準が重なっているときの左クリックは、弱点のヒットだけにして、Minecraft の通常の左クリック
-     * （照準の先のブロックを掘る、動物を攻撃する）は止める。MouseEvent をキャンセルすると、攻撃のキーが押された扱いにならない。
-     * 弱点から外れているときは、今までどおり。
-     */
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onMouse(MouseEvent event) {
-        if (event.getButton() != 0 || !event.isButtonstate()) {
-            return;
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.currentScreen != null || !aimed || !shown(mc)) {
-            return;
-        }
-        event.setCanceled(true);
-        if (OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
-            onHit();
+            // 照準を重ねるだけで当たり（1.10.1。それまでは左クリック）
+            if (aimed && OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
+                onHit();
+            }
         }
     }
 

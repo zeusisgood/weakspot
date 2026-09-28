@@ -26,6 +26,11 @@ final class SleepSpot extends ScreenSpotKind {
     }
 
     @Override
+    boolean hitsOnHover() {
+        return true;
+    }
+
+    @Override
     boolean eligible(Minecraft mc, GuiScreen gui) {
         if (!(gui instanceof GuiSleepMP) || mc.player == null || !mc.player.isPlayerSleeping()
                 || !KindSwitches.isEnabled(HitKind.SLEEP) || mc.player.isSpectator()) {
