@@ -33,16 +33,11 @@ public class ReleaseFilesTest {
                 find(MOD_SOURCE, "String ACCEPTED_VERSIONS = \"([^\"]+)\""));
     }
 
+    /** README のダウンロードは配布サイトへのリンクだけ（版ごとに直さない）。「最近の更新」は版ごとに足す。 */
     @Test
-    public void readmesLinkTheCurrentJar() {
-        String jar = "releases/download/v" + VERSION + "/weakspot-" + VERSION + ".jar";
-        String ja = ResourceFiles.read("README.md");
-        String en = ResourceFiles.read("README.en.md");
-        assertTrue("README.md: download link", ja.contains(jar));
-        assertTrue("README.md: 最新版 " + VERSION, ja.contains("最新版 " + VERSION));
-        assertTrue("README.md: 最近の更新 ### " + VERSION, ja.contains("\n### " + VERSION + "\n"));
-        assertTrue("README.en.md: download link", en.contains(jar));
-        assertTrue("README.en.md: latest: " + VERSION, en.contains("latest: " + VERSION));
+    public void readmeHasTheCurrentVersionInRecentUpdates() {
+        assertTrue("README.md: 最近の更新 ### " + VERSION,
+                ResourceFiles.read("README.md").contains("\n### " + VERSION + "\n"));
     }
 
     @Test

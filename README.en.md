@@ -2,7 +2,7 @@
 
 # Weak Spot Mining
 
-[![Latest](https://img.shields.io/github/v/release/zeusisgood/weakspot?label=latest)](https://github.com/zeusisgood/weakspot/releases/latest)
+[![CurseForge](https://img.shields.io/curseforge/dt/1714015?logo=curseforge&label=CurseForge)](https://www.curseforge.com/minecraft/mc-mods/weakspot)
 
 [日本語](README.md) | English
 
@@ -12,8 +12,7 @@ A Minecraft mod that brings Fortnite's "weak spot" harvesting to Minecraft. A gl
 
 ## ⬇ Download
 
-- **[Download weakspot-1.10.0.jar](https://github.com/zeusisgood/weakspot/releases/download/v1.10.0/weakspot-1.10.0.jar)** (latest: 1.10.0)
-- [Other versions and release notes](https://github.com/zeusisgood/weakspot/releases/latest)
+- **[CurseForge](https://www.curseforge.com/minecraft/mc-mods/weakspot)**
 
 Requires **Minecraft Java Edition 1.12.2 + Forge**. Developed and tested with Forge 14.23.5.2860; much older Forge builds may not run every feature.
 
@@ -64,4 +63,4 @@ Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. T
 [MIT License](LICENSE).
 
 - **Modpacks are welcome.** No permission needed. If you add it to a pack, I'd love to hear about it through an [issue](https://github.com/zeusisgood/weakspot/issues/new/choose) ("Modpack notice"), but it's entirely optional.
-- When sharing the mod, please link to this page or the [Releases](https://github.com/zeusisgood/weakspot/releases) page instead of re-uploading the jar.
+- When sharing the mod, a link to the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) is appreciated.

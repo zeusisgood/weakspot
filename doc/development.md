@@ -62,7 +62,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
 2. `build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
-4. README と `README.en.md` のダウンロードのリンク（`releases/download/vX.Y.Z/weakspot-X.Y.Z.jar` と「最新版 X.Y.Z」/「latest: X.Y.Z」）、README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。
+4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
 5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`en_us.lang` / `ja_jp.lang` の `weakspot.guide.*`）を直す。種類・操作が変わったら `README.en.md` の表も。
 6. 更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで）。
 7. 直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
@@ -80,15 +80,15 @@ Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge 
   - Modrinth は、`main` でこのファイルが変わると `.github/workflows/modrinth-description.yml` が API（`PATCH /v2/project/<ID>`）で反映する。Secrets の `MODRINTH_TOKEN`（スコープ「プロジェクトを書く」）と Variables の `MODRINTH_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる。Actions の画面から手動でも流せる）。
   - CurseForge は API で説明を変えられないので手動。このファイルを直した PR では、本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
 - **画像**（1.9.3 のあと）: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`。1.9.4）用）。AI 生成なので、Modrinth の開示の「資産」に入れてある。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
-- 配布サイトのページが公開されたら: README の「⬇ ダウンロード」を CurseForge → Modrinth → GitHub の順に並べ、案内のリンク（「このページまたは Releases」）を配布サイトに差し替える。GitHub の Release は jar 付きで続ける（ゲーム内の [変更点を見る] と自動化の起点のため）。
+- 配布サイトのページ（1.10.0 のあと）: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（ゲーム内の [変更点を見る] と自動化の起点のため）。Modrinth は審査が済んだら、ダウンロードの CurseForge の下に 1 行足す。
 
 ## ライセンスと issue
 
-- ライセンスは MIT（1.9.1 のあと。`LICENSE`、`Copyright (c) 2026 zeusisgood`）。Modpack 歓迎。再配布は止めず、README で Releases へのリンクをお願いするだけ。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
+- ライセンスは MIT（1.9.1 のあと。`LICENSE`、`Copyright (c) 2026 zeusisgood`）。Modpack 歓迎。再配布は止めず、README で CurseForge のページへのリンクを「助かります」とお願いするだけ（Modpack 歓迎の行とぶつからないように、「再アップロードしないで」とは書かない）。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
 - issue の雛形は、不具合報告 `bug_report.md`・要望 `feature_request.md`・Modpack の報告 `modpack.md`。README のライセンスの節で、Modpack に入れたら issue で「教えてもらえると励みになります」（任意）と書く。
 
 ## ブランチの片付け
 
-- 取り込んだブランチは GitHub の設定「Automatically delete head branches」で自動で消える。取り込まれたあとの作業は、同じ名前のブランチを `main` から作り直し、新しい PR にする。
+- 取り込んだブランチは GitHub の設定「Automatically delete head branches」で自動で消える。作業ごとに、始めるときに `main` から新しい名前のブランチを切る（取り込まれたブランチを同じ名前で作り直さない。ユーザーの判断）。
 - 自動で消えなかったブランチを消してよいのは、中身がすべて `main` に入っているものだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチと、作業中のセッションのブランチは残す。
 - タグはブランチと別なので、ブランチを消しても残る。
