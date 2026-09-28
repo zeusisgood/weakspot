@@ -32,6 +32,8 @@ eclipse/
 .DS_Store
 Thumbs.db
 *.log
+# log4j の出力（テストで Forge の Configuration を使うと、リポジトリ直下に書かれる）
+logs/
 *.swp
 
 # Files from Forge MDK
