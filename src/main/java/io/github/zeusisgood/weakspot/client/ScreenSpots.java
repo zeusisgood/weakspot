@@ -15,7 +15,8 @@ import org.lwjgl.input.Mouse;
 
 /**
  * 画面の上のマーカー（ScreenSpotKind）を、まとめて回す（1.8.8。それまでは睡眠・エンチャントが、それぞれにイベントを
- * 受けていた）。DrawScreenEvent.Post で描き、MouseInputEvent.Pre で左クリックが円の中ならキャンセルして当てる
+ * 受けていた）。DrawScreenEvent.Post で描く。重ねたら当たりの種類（睡眠。1.10.1）は、そこでカーソルが円の中なら当てる。
+ * クリックで当てる種類（エンチャント）は、MouseInputEvent.Pre で左クリックが円の中ならキャンセルして当てる
  * （当てたクリックは、ボタンやスロットに届かない）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -41,6 +42,9 @@ final class ScreenSpots {
             }
             ensure(k, gui);
             if (k.markerVisible(gui)) {
+                if (k.hitsOnHover() && inside(k, event.getMouseX(), event.getMouseY())) {
+                    hit(k, gui);
+                }
                 draw(k);
             }
             k.drawExtra(mc, gui);
@@ -83,30 +87,39 @@ final class ScreenSpots {
         Minecraft mc = Minecraft.getMinecraft();
         GuiScreen gui = event.getGui();
         for (ScreenSpotKind k : KINDS) {
-            if (!k.eligible(mc, gui) || k.shownOn != gui || !k.markerVisible(gui)) {
+            if (k.hitsOnHover() || !k.eligible(mc, gui) || k.shownOn != gui || !k.markerVisible(gui)) {
                 continue;
             }
             double mouseX = Mouse.getEventX() * gui.width / (double) mc.displayWidth;
             double mouseY = gui.height - Mouse.getEventY() * gui.height / (double) mc.displayHeight - 1;
-            if (Math.hypot(mouseX - k.x, mouseY - k.y) > ScreenSpotKind.RADIUS) {
+            if (!inside(k, mouseX, mouseY)) {
                 continue;
             }
             // 当てたクリックは、ボタンやスロットに届かないようにする
             event.setCanceled(true);
-            if (!OwnHits.canHit(k.kind, k.minHitInterval(ClientSettings.get()))) {
-                return;
-            }
-            int streak = OwnHits.register(k.kind);
-            WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(k.kind, streak));
-            k.onHit();
-            if (k.place(gui, k.x, k.y)) {
-                if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
-                    k.motion.moveTo(k.x, k.y, Minecraft.getSystemTime());
-                } else {
-                    k.motion.jumpTo(k.x, k.y);
-                }
-            }
+            hit(k, gui);
             return;
+        }
+    }
+
+    private static boolean inside(ScreenSpotKind k, double mouseX, double mouseY) {
+        return Math.hypot(mouseX - k.x, mouseY - k.y) <= ScreenSpotKind.RADIUS;
+    }
+
+    /** 当てる（最小間隔の中なら何もしない）。当てたら次の位置へ移す。 */
+    private static void hit(ScreenSpotKind k, GuiScreen gui) {
+        if (!OwnHits.canHit(k.kind, k.minHitInterval(ClientSettings.get()))) {
+            return;
+        }
+        int streak = OwnHits.register(k.kind);
+        WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(k.kind, streak));
+        k.onHit();
+        if (k.place(gui, k.x, k.y)) {
+            if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
+                k.motion.moveTo(k.x, k.y, Minecraft.getSystemTime());
+            } else {
+                k.motion.jumpTo(k.x, k.y);
+            }
         }
     }
 }

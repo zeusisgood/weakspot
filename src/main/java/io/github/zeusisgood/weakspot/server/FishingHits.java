@@ -16,10 +16,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
@@ -47,9 +44,6 @@ public final class FishingHits {
     private static final Field STATE = Reflect.field(EntityFishHook.class, "the fishing weak spot",
             "currentState", "field_190627_av");
 
-    /** 釣りのヒットを受け付けた直後の、左クリックを止める時間（tick）。 */
-    private static final int SUPPRESS_TICKS = 3;
-
     private static final Map<UUID, Track> TRACKS = new HashMap<>();
 
     private FishingHits() {
@@ -61,7 +55,6 @@ public final class FishingHits {
         int initialWait;
         int lastWait;
         long lastHitTick = Long.MIN_VALUE / 2;
-        long lastAcceptedTick = Long.MIN_VALUE / 2;
     }
 
     private static boolean available() {
@@ -168,7 +161,6 @@ public final class FishingHits {
             return;
         }
         track.lastHitTick = now;
-        track.lastAcceptedTick = now;
         try {
             int wait = read(WAIT, hook);
             WAIT.setInt(hook, FishingMath.waitAfterHit(wait, FishingMath.ticksPerHit(settings.fishingHits)));
@@ -176,31 +168,6 @@ public final class FishingHits {
             return;
         }
         HitGate.accept(player, HitKind.FISHING, new BlockPos(hook), streak);
-    }
-
-    /**
-     * 釣りの弱点を叩いた直後の、左クリックのバニラの動作（ブロックを掘る、動物を攻撃する）を止める。
-     * クライアントは、弱点に重なっている左クリックを最初から送らない（MouseEvent で止める）ので、これは念のため。
-     * 弱点をオフにしているプレイヤーは、ヒットが受け付けられないので、止まらない。
-     */
-    private static boolean justHit(EntityPlayer player) {
-        Track track = TRACKS.get(player.getUniqueID());
-        return track != null && !player.world.isRemote
-                && player.world.getTotalWorldTime() - track.lastAcceptedTick <= SUPPRESS_TICKS;
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        if (justHit(event.getEntityPlayer())) {
-            event.setCanceled(true);
-        }
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onAttackEntity(AttackEntityEvent event) {
-        if (justHit(event.getEntityPlayer())) {
-            event.setCanceled(true);
-        }
     }
 
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
