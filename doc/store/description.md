@@ -22,7 +22,7 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 | Harvest | Hold right click with an empty hand on a ripe crop | Harvests and replants it |
 | Machine | Sneak and hold right click with an empty hand on a furnace or other machine | Speeds the machine up |
 | Animal | Hold right click with an empty hand on an animal (sneak for horses, villagers, etc.) | Speeds up growing up, breeding cooldown, wool, eggs and villager trade restocking |
-| Fishing | Hold a fishing rod and left click the spot near the bobber | Fish bite sooner |
+| Fishing | Hold a fishing rod and aim at the spot near the bobber | Fish bite sooner |
 | Bow | Aim at the spot while drawing a bow | Draws faster; after a full draw, arrows hit harder |
 | Melee | Hold a sword or axe near enemies and aim at the spot | Charges up your next attack into a strong critical hit |
 | Throwing | Hold ender pearls, snowballs, etc. and aim at the spot | Your next throw flies faster and farther |
@@ -33,7 +33,7 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 | Elytra | Aim at the spot while flying | Launches you where you look |
 | Portal | Aim at the spot while standing in a nether portal | Travels sooner |
 | Swim | Aim at the spot while swimming | A short dash, then faster swimming |
-| Sleeping | Click the marker on the sleep screen at night | Morning comes sooner |
+| Sleeping | Move the cursor over the marker on the sleep screen at night | Morning comes sooner |
 | Enchanting | Click the marker on the enchanting table screen | Rerolls the three offers (costs nothing) |
 
 ## Controls

@@ -1,10 +1,11 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.10.0",
-    "1.12.2-recommended": "1.10.0"
+    "1.12.2-latest": "1.10.1",
+    "1.12.2-recommended": "1.10.1"
   },
   "1.12.2": {
+    "1.10.1": "Sleep and fishing spots are hit by just aiming at them",
     "1.10.0": "New swim weak spot; settings grouped into categories; milestones shown to everyone",
     "1.9.6": "Server messages now show in your language",
     "1.9.5": "Hit sounds stack into chords with combos; clearer combo step sounds",
