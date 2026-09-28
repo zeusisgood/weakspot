@@ -2,7 +2,7 @@
 
 # Weak Spot Mining（弱点破壊 Mod）
 
-[![最新版](https://img.shields.io/github/v/release/zeusisgood/weakspot?label=%E6%9C%80%E6%96%B0%E7%89%88)](https://github.com/zeusisgood/weakspot/releases/latest)
+[![CurseForge](https://img.shields.io/curseforge/dt/1714015?logo=curseforge&label=CurseForge)](https://www.curseforge.com/minecraft/mc-mods/weakspot)
 
 日本語 | [English](README.en.md)
 
@@ -12,8 +12,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 ## ⬇ ダウンロード
 
-- **[weakspot-1.10.0.jar をダウンロード](https://github.com/zeusisgood/weakspot/releases/download/v1.10.0/weakspot-1.10.0.jar)**（最新版 1.10.0。クリックで直接ダウンロード）
-- [他のバージョン・リリースノート（Releases）](https://github.com/zeusisgood/weakspot/releases/latest)
+- **[CurseForge](https://www.curseforge.com/minecraft/mc-mods/weakspot)**
 
 対応: **Minecraft Java Edition 1.12.2 + Forge**（開発・動作確認は Forge 14.23.5.2860。古い Forge では一部の機能が動かない可能性あり）。マルチプレイでは、サーバーと全員に同じマイナーバージョンが必要です（詳細は [doc/install.md](doc/install.md)）。
 
@@ -91,4 +90,4 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 [MIT License](LICENSE)。
 
 - **Modpack への同梱は自由**です。許可や連絡は不要ですが、[issue](https://github.com/zeusisgood/weakspot/issues/new/choose)（「Modpack の報告」）で教えてもらえると励みになります。
-- 紹介や配布の際は、jar を再アップロードせず、このページまたは [Releases](https://github.com/zeusisgood/weakspot/releases) へのリンクで案内してください。
+- 紹介や配布の際は、jar を再アップロードせず、[CurseForge のページ](https://www.curseforge.com/minecraft/mc-mods/weakspot)へのリンクで案内してください。

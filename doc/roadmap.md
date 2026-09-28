@@ -24,4 +24,4 @@
 ## 配布サイト
 
 - Modrinth・CurseForge とも、自動公開の仕組みはできた。CurseForge は、ユーザーがプロジェクトを作り、`CURSEFORGE_TOKEN` と `CURSEFORGE_PROJECT_ID` を登録したら動く（1.9.4 は「CurseForge publish」を手動で 1 回流す）。
-- ページが公開されたら、README のダウンロードを並べ替える（[development.md](development.md) の「配布サイト」）。
+- CurseForge は公開済みで、README などのダウンロードは CurseForge を指す。Modrinth は審査中。済んだら README のダウンロードに 1 行足し、ゲーム内のリンク（上の A）を両方の配布サイトへ（[development.md](development.md) の「配布サイト」）。
