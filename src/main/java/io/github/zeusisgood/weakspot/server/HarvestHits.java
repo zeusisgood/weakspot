@@ -48,7 +48,7 @@ final class HarvestHits {
         ItemStack seed = block.getPickBlock(state, null, world, pos, player);
         List<ItemStack> result = new ArrayList<>();
         boolean seedUsed = false;
-        double factor = WeakSpotConfig.harvestComboBonus ? ComboFactor.factor(combo) : 1;
+        double factor = WeakSpotConfig.server.harvest.harvestComboBonus ? ComboFactor.factor(combo) : 1;
         // 種と別の収穫物がないとき（ニンジンなど）は、種そのものが収穫物なので、植え直しに使った残りを増やす
         boolean seedIsCrop = !seed.isEmpty() && !containsOther(drops, seed);
         for (ItemStack drop : drops) {

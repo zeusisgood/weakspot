@@ -123,7 +123,7 @@ final class HudSpot {
     /** 当てたあと、次の位置へ動かす。 */
     void relocate(EntityPlayer player) {
         next(player, yaw, pitch);
-        if (WeakSpotConfig.weakSpotTrailEnabled) {
+        if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
             motion.moveTo(yaw, pitch, Minecraft.getSystemTime());
         } else {
             motion.jumpTo(yaw, pitch);
@@ -197,7 +197,7 @@ final class HudSpot {
         double scale = new ScaledResolution(mc).getScaleFactor();
         long nowMs = Minecraft.getSystemTime();
         double radius = FishingMath.SPOT_SCREEN_RADIUS;
-        boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         int rgb = MarkerLook.color(kind, defaultRgb);
         float[][] look = palette == null ? ScreenProjection.lookOf(rgb)
                 : MarkerLook.palette(kind, palette[0], palette[1], palette[2]);

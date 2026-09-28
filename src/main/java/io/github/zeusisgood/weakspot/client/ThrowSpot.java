@@ -50,7 +50,7 @@ final class ThrowSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.throwChargeBarEnabled && charge(mc) > 0;
+        return WeakSpotConfig.client.hud.throwChargeBarEnabled && charge(mc) > 0;
     }
 
     @Override

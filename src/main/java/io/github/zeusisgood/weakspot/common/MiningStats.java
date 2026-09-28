@@ -11,6 +11,8 @@ public final class MiningStats {
     public long blocksBroken;
     /** そのうち、弱点に1回以上当てて壊した数。 */
     public long blocksBrokenWithHit;
+    /** 壊したブロックに当てた採掘ヒットの合計（壊しきらなかったブロックへのヒットは数えない。1.10.0 から。平均に使う）。 */
+    public long hitsOnBrokenBlocks;
     /** 1つのブロックで当てた回数の最大。 */
     public long maxHitsOnBlock;
     /** ヒットで得た追加進捗の合計（通常速度の tick 数）。短縮できた時間の推定に使う。 */
@@ -69,13 +71,17 @@ public final class MiningStats {
         blocksBroken++;
         if (hitsOnBlock > 0) {
             blocksBrokenWithHit++;
+            hitsOnBrokenBlocks += hitsOnBlock;
         }
         maxHitsOnBlock = Math.max(maxHitsOnBlock, hitsOnBlock);
     }
 
-    /** 壊したブロック1つあたりの平均ヒット数。まだ1つも壊していなければ NaN。 */
+    /**
+     * 壊したブロック1つあたりの平均ヒット数（壊したブロックへのヒット数 ÷ 壊した数。最多ヒット数と同じく、壊したブロックだけで数える）。
+     * まだ1つも壊していなければ NaN。
+     */
     public double averageHitsPerBlock() {
-        return blocksBroken == 0 ? Double.NaN : (double) hits / blocksBroken;
+        return blocksBroken == 0 ? Double.NaN : (double) hitsOnBrokenBlocks / blocksBroken;
     }
 
     public double savedSeconds() {
@@ -86,6 +92,7 @@ public final class MiningStats {
         hits = 0;
         blocksBroken = 0;
         blocksBrokenWithHit = 0;
+        hitsOnBrokenBlocks = 0;
         maxHitsOnBlock = 0;
         savedTicks = 0;
         maxStreak = 0;
@@ -116,11 +123,12 @@ public final class MiningStats {
         double readDouble();
     }
 
-    /** 送る並び（1.9.0 から、全体の数のあとに種類の順）。種類を足すと通信が変わる（マイナー）。 */
+    /** 送る並び（1.9.0 から、全体の数のあとに種類の順）。種類や項目を足すと通信が変わる（マイナー）。 */
     public void writeTo(Writer out) {
         out.writeLong(hits);
         out.writeLong(blocksBroken);
         out.writeLong(blocksBrokenWithHit);
+        out.writeLong(hitsOnBrokenBlocks);
         out.writeLong(maxHitsOnBlock);
         out.writeDouble(savedTicks);
         out.writeLong(maxStreak);
@@ -136,6 +144,7 @@ public final class MiningStats {
         stats.hits = in.readLong();
         stats.blocksBroken = in.readLong();
         stats.blocksBrokenWithHit = in.readLong();
+        stats.hitsOnBrokenBlocks = in.readLong();
         stats.maxHitsOnBlock = in.readLong();
         stats.savedTicks = in.readDouble();
         stats.maxStreak = in.readLong();

@@ -218,7 +218,7 @@ final class FishingSpot {
         double[] next = FishingMath.nextSpot(dx, dz, RANDOM);
         dx = next[0];
         dz = next[1];
-        if (WeakSpotConfig.weakSpotTrailEnabled) {
+        if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
             MOTION.moveTo(dx, dz, Minecraft.getSystemTime());
         } else {
             MOTION.jumpTo(dx, dz);
@@ -243,7 +243,7 @@ final class FishingSpot {
 
         HudSpot.beginOverlay();
 
-        boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         float[][] look = MarkerLook.palette(HitKind.FISHING, DISK, RING, new float[] {1.0F, 0.95F, 0.7F});
         MarkerShape shape = MarkerLook.shape(HitKind.FISHING);
         if (trail) {

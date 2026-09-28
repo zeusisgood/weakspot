@@ -31,7 +31,7 @@ public final class SleepHits {
         if (!HitGate.ready(player, HitKind.SLEEP)) {
             return;
         }
-        world.setWorldTime(SleepTime.advance(world.getWorldTime(), WeakSpotConfig.sleepHitTicks));
+        world.setWorldTime(SleepTime.advance(world.getWorldTime(), WeakSpotConfig.server.sleep.sleepHitTicks));
         // 20 tick ごとの時刻の送信を待たずに、すぐに知らせる（空の明るさがすぐに変わるように）
         player.mcServer.getPlayerList().sendPacketToAllPlayersInDimension(new SPacketTimeUpdate(
                 world.getTotalWorldTime(), world.getWorldTime(), true), world.provider.getDimension());

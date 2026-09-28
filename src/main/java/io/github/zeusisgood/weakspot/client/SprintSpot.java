@@ -80,7 +80,7 @@ final class SprintSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.sprintBoostBarEnabled && boost.isActive(ClientWeakSpotHandler.clientTick)
+        return WeakSpotConfig.client.hud.sprintBoostBarEnabled && boost.isActive(ClientWeakSpotHandler.clientTick)
                 && !mc.player.isRiding();
     }
 

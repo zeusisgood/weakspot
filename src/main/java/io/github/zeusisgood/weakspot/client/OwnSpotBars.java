@@ -41,7 +41,7 @@ final class OwnSpotBars {
      * 合っているとき。出すときは、サーバーに値を問い合わせる（間隔があいていなければ送らない）。
      */
     static boolean machineBar(Minecraft mc) {
-        if (!WeakSpotConfig.machineBarEnabled || !ClientWeakSpotHandler.machineSpotActive()
+        if (!WeakSpotConfig.client.hud.machineBarEnabled || !ClientWeakSpotHandler.machineSpotActive()
                 || !MachineStates.hasBar(mc.world.getTileEntity(spot().pos))) {
             return false;
         }

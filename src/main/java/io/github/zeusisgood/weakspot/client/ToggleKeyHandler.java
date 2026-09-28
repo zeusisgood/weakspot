@@ -50,9 +50,9 @@ public final class ToggleKeyHandler {
         if (!TOGGLE.isPressed() || mc.currentScreen != null || mc.player == null) {
             return;
         }
-        WeakSpotConfig.weakSpotsEnabled = WeakSpotSwitch.toggled(WeakSpotConfig.weakSpotsEnabled);
+        WeakSpotConfig.client.markers.weakSpotsEnabled = WeakSpotSwitch.toggled(WeakSpotConfig.client.markers.weakSpotsEnabled);
         WeakSpotConfig.save();
-        boolean on = WeakSpotConfig.weakSpotsEnabled;
+        boolean on = WeakSpotConfig.client.markers.weakSpotsEnabled;
         if (!on) {
             ClientWeakSpotHandler.stopOwnWeakSpots();
         }
@@ -77,8 +77,8 @@ public final class ToggleKeyHandler {
             lastSentKinds = null;
             return;
         }
-        boolean on = WeakSpotConfig.weakSpotsEnabled;
-        boolean particles = WeakSpotConfig.machineParticlesVisible;
+        boolean on = WeakSpotConfig.client.markers.weakSpotsEnabled;
+        boolean particles = WeakSpotConfig.client.hud.machineParticlesVisible;
         int kinds = KindSwitches.disabledMask();
         if (lastSent == null || lastSent != on || lastSentParticles == null || lastSentParticles != particles
                 || lastSentKinds == null || lastSentKinds != kinds) {
@@ -99,7 +99,7 @@ public final class ToggleKeyHandler {
             return;
         }
         reminded = true;
-        if (!WeakSpotConfig.weakSpotsEnabled) {
+        if (!WeakSpotConfig.client.markers.weakSpotsEnabled) {
             mc.ingameGUI.setOverlayMessage(I18n.format("weakspot.toggle.offReminder", TOGGLE.getDisplayName()), false);
         }
     }

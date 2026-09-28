@@ -12,12 +12,12 @@ A Minecraft mod that brings Fortnite's "weak spot" harvesting to Minecraft. A gl
 
 ## ⬇ Download
 
-- **[Download weakspot-1.9.6.jar](https://github.com/zeusisgood/weakspot/releases/download/v1.9.6/weakspot-1.9.6.jar)** (latest: 1.9.6)
+- **[Download weakspot-1.10.0.jar](https://github.com/zeusisgood/weakspot/releases/download/v1.10.0/weakspot-1.10.0.jar)** (latest: 1.10.0)
 - [Other versions and release notes](https://github.com/zeusisgood/weakspot/releases/latest)
 
 Requires **Minecraft Java Edition 1.12.2 + Forge**. Developed and tested with Forge 14.23.5.2860; much older Forge builds may not run every feature.
 
-For multiplayer, install it on the server **and** on every player's client, all on the same minor version (for example 1.9.x). In single player, only your client needs it.
+For multiplayer, install it on the server **and** on every player's client, all on the same minor version (for example 1.10.x). In single player, only your client needs it.
 
 ## Controls
 
@@ -47,6 +47,7 @@ You can change the keys under Options → Controls → Weak Spot Mining.
 | Sprint | Aim at the spot while sprinting | Runs faster |
 | Elytra | Aim at the spot while flying | Launches you where you look |
 | Portal | Aim at the spot while standing in a nether portal | Travels sooner |
+| Swim | Aim at the spot while swimming | A short dash, then faster swimming |
 | Sleeping | Click the marker on the sleep screen at night | Morning comes sooner |
 | Enchanting | Click the marker on the enchanting table screen | Rerolls the three offers (costs nothing) |
 

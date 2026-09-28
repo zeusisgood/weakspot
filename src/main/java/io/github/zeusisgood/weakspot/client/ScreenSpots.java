@@ -60,7 +60,7 @@ final class ScreenSpots {
 
     private static void draw(ScreenSpotKind k) {
         long nowMs = Minecraft.getSystemTime();
-        boolean trail = WeakSpotConfig.weakSpotTrailEnabled;
+        boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         float[][] look = k.look();
         MarkerShape shape = MarkerLook.shape(k.kind);
         double radius = ScreenSpotKind.RADIUS;
@@ -100,7 +100,7 @@ final class ScreenSpots {
             WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(k.kind, streak));
             k.onHit();
             if (k.place(gui, k.x, k.y)) {
-                if (WeakSpotConfig.weakSpotTrailEnabled) {
+                if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
                     k.motion.moveTo(k.x, k.y, Minecraft.getSystemTime());
                 } else {
                     k.motion.jumpTo(k.x, k.y);

@@ -6,9 +6,9 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 
 ## Features
 
-- **17 kinds of weak spots**, from mining and farming to travel, combat and even sleeping
+- **18 kinds of weak spots**, from mining and farming to travel, combat and even sleeping
 - **Combo system** with a rising hit sound and a per-kind multiplier shown on screen
-- **Stats and milestones**: hits per kind, with rewards at milestones
+- **Stats and milestones**: hits per kind, with rewards at milestones (announced to everyone on the server)
 - **Customizable**: turn each kind on or off, change marker colors and shapes, pick hit sounds
 - **In-game guide book** that explains every kind (English and Japanese)
 - **Multiplayer friendly**: see other players' hits, and server admins can tune or disable each kind
@@ -32,6 +32,7 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 | Sprint | Aim at the spot while sprinting | Runs faster |
 | Elytra | Aim at the spot while flying | Launches you where you look |
 | Portal | Aim at the spot while standing in a nether portal | Travels sooner |
+| Swim | Aim at the spot while swimming | A short dash, then faster swimming |
 | Sleeping | Click the marker on the sleep screen at night | Morning comes sooner |
 | Enchanting | Click the marker on the enchanting table screen | Rerolls the three offers (costs nothing) |
 
@@ -48,11 +49,11 @@ Keys can be changed under Options → Controls → Weak Spot Mining.
 
 - Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with Forge 14.23.5.2860).
 - **Single player**: install it on your client.
-- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.9.x).
+- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.10.x).
 
 ## Settings
 
-Open the Mods menu, or edit `config/weakspot.cfg`. Every setting has a description in English. Server settings (such as turning off a kind) are sent to connected players automatically.
+Open the Mods menu, or edit `config/weakspot.cfg`. Settings are grouped into server and client categories, and every setting has a description in English. Server settings (such as turning off a kind) are sent to connected players automatically.
 
 ## Bug reports
 

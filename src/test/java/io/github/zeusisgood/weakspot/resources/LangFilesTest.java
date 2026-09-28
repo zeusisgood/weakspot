@@ -5,12 +5,10 @@ import static org.junit.Assert.assertTrue;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -50,21 +48,39 @@ public class LangFilesTest {
         assertTrue("empty values: " + empty, empty.isEmpty());
     }
 
-    /** 設定画面の説明: weakspot.general.<キーを小文字にしたもの>.tooltip（CLAUDE.md の設定の約束事）。 */
+    /**
+     * 設定画面の説明: weakspot.<カテゴリ>.<キーを小文字にしたもの>.tooltip（CLAUDE.md の設定の約束事）。
+     * カテゴリの名前（weakspot.<カテゴリ>）と説明（.tooltip）も要る。古い形（weakspot.general.<項目>）は残さない。
+     */
     @Test
     public void everySettingHasATooltip() {
         List<String> missing = new ArrayList<>();
-        for (Field field : WeakSpotConfig.class.getFields()) {
-            int modifiers = field.getModifiers();
-            if (!Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers)) {
-                continue;
+        Set<String> expected = new HashSet<>();
+        for (WeakSpotConfig.Setting setting : WeakSpotConfig.settings()) {
+            expected.add(setting.tooltipKey());
+            String category = "weakspot." + setting.category;
+            for (int i = category.indexOf('.', "weakspot.".length()); ; i = category.indexOf('.', i + 1)) {
+                String prefix = i < 0 ? category : category.substring(0, i);
+                expected.add(prefix);
+                expected.add(prefix + ".tooltip");
+                if (i < 0) {
+                    break;
+                }
             }
-            String key = "weakspot.general." + field.getName().toLowerCase(Locale.ROOT) + ".tooltip";
+        }
+        for (String key : expected) {
             if (!EN.containsKey(key) || !JA.containsKey(key)) {
                 missing.add(key);
             }
         }
         assertTrue("settings without a tooltip: " + missing, missing.isEmpty());
+        List<String> stale = new ArrayList<>();
+        for (String k : EN.keySet()) {
+            if (k.matches("weakspot\\.(general|server|client)(\\..*)?") && !expected.contains(k)) {
+                stale.add(k);
+            }
+        }
+        assertTrue("tooltips of no setting: " + stale, stale.isEmpty());
     }
 
     /** 種類の名前（weakspot.kind.<key>）と、統計の行の名前（StatsTab.statsKey と同じ決まり）。 */
@@ -111,7 +127,8 @@ public class LangFilesTest {
         List<String> bad = new ArrayList<>();
         for (Map<String, String> entries : java.util.Arrays.asList(EN, JA)) {
             entries.forEach((key, value) -> {
-                if ((key.startsWith("weakspot.version.") || key.startsWith("weakspot.breed."))
+                if ((key.startsWith("weakspot.version.") || key.startsWith("weakspot.breed.")
+                        || key.startsWith("weakspot.milestone.broadcast."))
                         && format.matcher(value).find()) {
                     bad.add(key + "=" + value);
                 }

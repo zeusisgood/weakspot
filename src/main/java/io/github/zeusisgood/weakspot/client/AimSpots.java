@@ -31,6 +31,7 @@ final class AimSpots {
             new ThrowSpot(),
             new MeleeSpot(),
             new PortalSpot(),
+            new SwimSpot(),
     };
 
     private AimSpots() {

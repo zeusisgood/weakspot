@@ -1,18 +1,17 @@
-# 弱点破壊 Mod 追加仕様書（v1.10.0）【下書き】
+# 弱点破壊 Mod 追加仕様書（v1.10.0）
 
-`SPEC_v1.9.2.md`（Mod 1.9.2）に対する**マイナー**の仕様。ここに書かれていないことは、それと現行実装のままとする。
+`SPEC_v1.9.6.md`（Mod 1.9.6）に対する**マイナー**の仕様。ここに書かれていないことは、それと現行実装のままとする。
 この仕様書は `doc/spec/SPEC_v1.10.0.md`。
 
 - 対象: Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860
-- 前提: 1.9.2 がリリース済み
+- 前提: 1.9.6 がリリース済み
 - この仕様書の内容は、Mod のバージョン **1.10.0** として、リリースする
-- **下書き**: 1.10.0 にはほかの内容もまとめる（ユーザーの判断）。内容が揃い、ユーザーが「実装」と明示するまで実装しない
 
 ---
 
 ## 0. バージョンと互換性
 
-- バージョンは 1.9.2 → **1.10.0**（`build.gradle` の `version` と `WeakSpotMod.VERSION`）。`ACCEPTED_VERSIONS` を `[1.10,1.11)` にする
+- バージョンは 1.9.6 → **1.10.0**（`build.gradle` の `version` と `WeakSpotMod.VERSION`）。`ACCEPTED_VERSIONS` を `[1.10,1.11)` にする
 - 弱点の種類を足すので、統計の送る並びと `SyncedSettings` が変わる（通信内容の変更）。**1.9.x とは接続できない**。サーバーと全員のクライアントを同時に更新する
 - 統計の保存は項目の追加だけ（1.9.x のワールドはそのまま読める）
 - 設定はカテゴリに分ける（2 の節）。古い `weakspot.cfg` は、初めて起動したときに自動で移行する
@@ -110,7 +109,7 @@
 |---|---|
 | `sound`（音） | `myHitSound` `myHitVolume` `hitChordEnabled` `othersHitSound` `othersHitVolume` |
 | `markers`（マーカー） | `weakSpotsEnabled` `disabledKinds` `myMarkerColors` `myMarkerShapes` `weakSpotTrailEnabled` `animalSpotSeeThrough` `otherMarkerEnabled` `otherMarkerColor` `otherMarkerAlpha` `otherMarkerShape` |
-| `combo`（コンボ） | `comboDisplayEnabled` `comboScale` `comboPosition` `comboMilestoneEffects` `othersComboDisplay` |
+| `combo`（コンボ） | `comboDisplayEnabled` `comboScale` `comboPosition` `comboMilestoneEffects` `othersComboDisplay` `showOthersMilestones` |
 | `hud`（ゲージ・表示） | `blockHealthBarEnabled` `machineBarEnabled` `growthBarEnabled` `machineParticlesVisible` `bowDrawBarEnabled` `vehicleBoostBarEnabled` `ladderBoostBarEnabled` `throwChargeBarEnabled` `meleeChargeBarEnabled` `sprintBoostBarEnabled` `swimBoostBarEnabled` |
 | `updates`（更新） | `showUpdateNotes` `lastSeenVersion` `checkForUpdates` `skippedUpdateVersion` |
 
@@ -133,14 +132,26 @@
 - カテゴリの名前（上の表のかっこの中）と説明を `en_us.lang` / `ja_jp.lang` に足す
 - 項目の説明の翻訳キー（今は `weakspot.general.<項目>.tooltip`）は、新しいカテゴリに合わせて機械的に付け替える（文章は変えない）
 - `doc/config.md` の表を、カテゴリごとに並べ替える
+- 設定の説明（`@Config.Comment` と翻訳の `.tooltip`）に付いている版の注記（「（1.9.0）」「(1.9.5)」など）を外す（1.9.6 のあとの相談。ユーザーの判断。版は更新履歴にあるため。説明の文そのものは変えない）
 
-## 2b. （ほかの内容。決まりしだい足す）
+## 2b. ほかの内容
 
 ### 2b.1 統計の平均ヒット数の計算（1.9.4 のあとの相談。ユーザーの判断）
 
 - 今の平均（`MiningStats.averageHitsPerBlock()`）は、採掘ヒット数（壊しきらなかったブロックへのヒットも含む）÷ 壊したブロック数で、「最多ヒット数」（壊したブロックだけ）と食い違って見える。1.9.4 では名前だけを中身どおりにした（`SPEC_v1.9.4.md`）
 - この版で、壊したブロックへのヒット数（`hitsOnBrokenBlocks`。`recordBlockBroken(hitsOnBlock)` で足す）を新しく数え、平均を「壊したブロックへのヒット数 ÷ 壊したブロック数」にする。名前は「1 ブロックあたりの平均ヒット数」に戻す
 - 統計の送る内容（`MiningStats.writeTo` / `readFrom`）と保存（NBT のキー `hitsOnBrokenBlocks`。項目の追加なので 1.9.x のワールドも読める。古いワールドの値は 0 から数え始める）が増える。1.10.0 はマイナーなので、ここに入れる
+
+### 2b.2 ほかのプレイヤーの節目をチャットで全員に（1.9.6 のあとの相談。ユーザーの判断）
+
+- 誰かが節目（採掘・種類ごと・全種類の合計。`Milestones` の判定そのまま）に届いたら、**本人以外の全員**のチャットに知らせる（本人には今までどおりの演出とチャット）
+  - 例: `[WeakSpot] zeusisgood さんの採掘の弱点ヒットが 1000 回に達しました！`（採掘・種類ごと・合計で文を分ける。種類の名前は翻訳キー `weakspot.kind.<key>` を入れ子に）
+- **すべての節目を流す**（ユーザーの判断: 範囲はしぼらない。サーバーの設定も作らない）
+- 送り方: サーバーが `PlayerText`（1.9.6）で翻訳キーと値を送る。翻訳キーは `weakspot.milestone.broadcast.<mining|kind|total>`（`since` は 1.10.0。1.10.0 同士しか接続できないので、いつも翻訳キーで送ることになる）
+- 色: 金 `#FFAA00`（チャットの `GOLD`）。7 が並ぶ数（`Milestones.isLucky`）はピンク `#FF55FF`（`LIGHT_PURPLE`）
+- 各プレイヤーの設定 `showOthersMilestones`（`[クライアント]`、初期値 true。`client.combo`）: オフなら、ほかの人の節目のチャットを表示しない（クライアントが `ClientChatReceivedEvent` で、翻訳キーが `weakspot.milestone.broadcast.` で始まるものを取り消す）
+- サーバーから送る文なので、`LangFilesTest` の書式の確認（`%s` だけ）の対象に `weakspot.milestone.broadcast.*` を足す
+- ユーザーに確認してもらうこと: 2 人以上で、片方が節目に届くと、もう片方のチャットに知らせが出ること。本人には出ないこと。`showOthersMilestones` をオフにすると出なくなること
 
 ## 3. README・doc・お知らせ
 

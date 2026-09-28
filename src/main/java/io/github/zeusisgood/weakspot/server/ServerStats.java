@@ -118,6 +118,8 @@ public final class ServerStats {
         MiningStats stats = new MiningStats();
         stats.blocksBroken = tag.getLong("blocksBroken");
         stats.blocksBrokenWithHit = tag.getLong("blocksBrokenWithHit");
+        // 1.10.0 から。1.9.x までのワールドにはないので 0 から数える
+        stats.hitsOnBrokenBlocks = tag.getLong("hitsOnBrokenBlocks");
         stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
         stats.savedTicks = tag.getDouble("savedTicks");
         stats.maxStreak = tag.getLong("maxStreak");
@@ -136,6 +138,7 @@ public final class ServerStats {
         NBTTagCompound tag = new NBTTagCompound();
         tag.setLong("blocksBroken", stats.blocksBroken);
         tag.setLong("blocksBrokenWithHit", stats.blocksBrokenWithHit);
+        tag.setLong("hitsOnBrokenBlocks", stats.hitsOnBrokenBlocks);
         tag.setLong("maxHitsOnBlock", stats.maxHitsOnBlock);
         tag.setDouble("savedTicks", stats.savedTicks);
         tag.setLong("maxStreak", stats.maxStreak);

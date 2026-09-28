@@ -127,7 +127,7 @@ public final class ServerBoostTracker {
         // 1 回のヒットで進む量に、コンボの掛け数を掛ける（1.8.7）
         int combo = HitGate.accept(player, HitKind.MINING, pos, streak);
         double factor = SyncedSettings.server().miningComboBonus ? ComboFactor.factor(combo) : 1;
-        double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.boostMultiplier, WeakSpotConfig.boostDurationTicks,
+        double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.server.mining.boostMultiplier, WeakSpotConfig.server.mining.boostDurationTicks,
                 factor);
         mining.extraTicks += extra;
         mining.hits++;

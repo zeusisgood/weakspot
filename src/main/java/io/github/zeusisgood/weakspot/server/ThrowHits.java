@@ -32,7 +32,7 @@ public final class ThrowHits {
             return;
         }
         int combo = HitGate.accept(player, HitKind.THROW, new BlockPos(player), streak);
-        ThrowCharge.add(player, WeakSpotConfig.throwChargePerHit * ComboFactor.factor(combo));
+        ThrowCharge.add(player, WeakSpotConfig.server.throwing.throwChargePerHit * ComboFactor.factor(combo));
         VehicleHits.boostFromRider(player, combo);
     }
 

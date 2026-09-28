@@ -43,8 +43,8 @@ public final class MeleeHits {
             return;
         }
         int combo = HitGate.accept(player, HitKind.MELEE, new BlockPos(player), streak);
-        MeleeCharge.add(player, WeakSpotConfig.meleeChargePerHit * ComboFactor.factor(combo),
-                WeakSpotConfig.meleeChargeMax);
+        MeleeCharge.add(player, WeakSpotConfig.server.melee.meleeChargePerHit * ComboFactor.factor(combo),
+                WeakSpotConfig.server.melee.meleeChargeMax);
     }
 
     /**
@@ -55,7 +55,7 @@ public final class MeleeHits {
         ItemStack stack = player.getHeldItemMainhand();
         int damage = !stack.isEmpty() && stack.isItemStackDamageable() ? stack.getItemDamage() : 0;
         RepairSettlement result = RepairSettlement.settle(REPAIR_CARRY.getOrDefault(player.getUniqueID(), 0), 1,
-                WeakSpotConfig.critsPerRepair, WeakSpotConfig.critRepairPerStep, WeakSpotConfig.critRepairPerStep,
+                WeakSpotConfig.server.melee.critsPerRepair, WeakSpotConfig.server.melee.critRepairPerStep, WeakSpotConfig.server.melee.critRepairPerStep,
                 damage);
         REPAIR_CARRY.put(player.getUniqueID(), result.carry);
         MiningRewards.repairHeldTool(player, result.repair);

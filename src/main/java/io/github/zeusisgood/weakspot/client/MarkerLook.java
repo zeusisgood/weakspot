@@ -78,8 +78,8 @@ public final class MarkerLook {
         for (Map.Entry<HitKind, Integer> e : COLORS.entrySet()) {
             lines.add(e.getKey().key() + "=" + String.format("#%06X", e.getValue()));
         }
-        WeakSpotConfig.myMarkerColors = lines.toArray(new String[0]);
-        colorKeys = WeakSpotConfig.myMarkerColors;
+        WeakSpotConfig.client.markers.myMarkerColors = lines.toArray(new String[0]);
+        colorKeys = WeakSpotConfig.client.markers.myMarkerColors;
         WeakSpotConfig.save();
     }
 
@@ -94,15 +94,15 @@ public final class MarkerLook {
         for (Map.Entry<HitKind, MarkerShape> e : SHAPES.entrySet()) {
             lines.add(e.getKey().key() + "=" + e.getValue().name().toLowerCase(java.util.Locale.ROOT));
         }
-        WeakSpotConfig.myMarkerShapes = lines.toArray(new String[0]);
-        shapeKeys = WeakSpotConfig.myMarkerShapes;
+        WeakSpotConfig.client.markers.myMarkerShapes = lines.toArray(new String[0]);
+        shapeKeys = WeakSpotConfig.client.markers.myMarkerShapes;
         WeakSpotConfig.save();
     }
 
     /** 設定の配列が置き換わっていたら（設定画面で変えた、など）読み直す。 */
     private static void refresh() {
-        if (WeakSpotConfig.myMarkerColors != colorKeys) {
-            colorKeys = WeakSpotConfig.myMarkerColors;
+        if (WeakSpotConfig.client.markers.myMarkerColors != colorKeys) {
+            colorKeys = WeakSpotConfig.client.markers.myMarkerColors;
             COLORS.clear();
             for (String line : colorKeys) {
                 String[] kv = split(line);
@@ -113,8 +113,8 @@ public final class MarkerLook {
                 }
             }
         }
-        if (WeakSpotConfig.myMarkerShapes != shapeKeys) {
-            shapeKeys = WeakSpotConfig.myMarkerShapes;
+        if (WeakSpotConfig.client.markers.myMarkerShapes != shapeKeys) {
+            shapeKeys = WeakSpotConfig.client.markers.myMarkerShapes;
             SHAPES.clear();
             for (String line : shapeKeys) {
                 String[] kv = split(line);

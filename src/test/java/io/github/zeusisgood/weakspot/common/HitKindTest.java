@@ -37,6 +37,7 @@ public class HitKindTest {
         assertEquals(10, HitKind.LADDER.ordinal());
         assertEquals(15, HitKind.SPRINT.ordinal());
         assertEquals(16, HitKind.PORTAL.ordinal());
+        assertEquals(17, HitKind.SWIM.ordinal());
     }
 
     @Test
@@ -46,6 +47,7 @@ public class HitKindTest {
         org.junit.Assert.assertEquals(0xFF3DCB, HitKind.HARVEST.defaultColor());
         org.junit.Assert.assertEquals(0x55CCFF, HitKind.VEHICLE.defaultColor());
         org.junit.Assert.assertEquals(0xFFD23F, HitKind.PORTAL.defaultColor());
+        org.junit.Assert.assertEquals(0x2E6BFF, HitKind.SWIM.defaultColor());
         java.util.Set<HitKind> factor = java.util.EnumSet.noneOf(HitKind.class);
         for (HitKind kind : HitKind.values()) {
             if (kind.usesComboFactor()) {
@@ -53,6 +55,6 @@ public class HitKindTest {
             }
         }
         org.junit.Assert.assertEquals(java.util.EnumSet.of(HitKind.MINING, HitKind.VEHICLE, HitKind.LADDER,
-                HitKind.SPRINT, HitKind.ELYTRA, HitKind.THROW, HitKind.MELEE, HitKind.PORTAL, HitKind.HARVEST), factor);
+                HitKind.SPRINT, HitKind.ELYTRA, HitKind.THROW, HitKind.MELEE, HitKind.PORTAL, HitKind.HARVEST, HitKind.SWIM), factor);
     }
 }

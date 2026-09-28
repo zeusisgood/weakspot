@@ -70,11 +70,11 @@ public final class VehicleHits {
     }
 
     private static void boost(Entity vehicle, int combo) {
-        double multiplier = TimedBoostMath.multiplier(WeakSpotConfig.vehicleBoostMultiplier,
-                WeakSpotConfig.vehicleBoostMaxMultiplier, combo);
+        double multiplier = TimedBoostMath.multiplier(WeakSpotConfig.server.vehicle.vehicleBoostMultiplier,
+                WeakSpotConfig.server.vehicle.vehicleBoostMaxMultiplier, combo);
         Boost boost = BOOSTS.computeIfAbsent(vehicle, v -> new Boost());
         boost.multiplier = multiplier;
-        boost.remaining = WeakSpotConfig.vehicleBoostDurationTicks;
+        boost.remaining = WeakSpotConfig.server.vehicle.vehicleBoostDurationTicks;
         if (vehicle instanceof EntityLivingBase) {
             SPEED.set((EntityLivingBase) vehicle, multiplier);
         }

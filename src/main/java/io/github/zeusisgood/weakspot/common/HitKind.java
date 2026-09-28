@@ -35,7 +35,9 @@ public enum HitKind {
     /** 走っている間、照準の真上か真下に出る弱点に照準を合わせる（1.7.0）。 */
     SPRINT(0xFF5A5F, true),
     /** ネザーゲートの中に立っている間、照準の近くに出る弱点に照準を合わせる（1.8.0）。 */
-    PORTAL(0xFFD23F, true);
+    PORTAL(0xFFD23F, true),
+    /** 水の中を泳いでいる間、照準の近くに出る弱点に照準を合わせる（1.10.0）。 */
+    SWIM(0x2E6BFF, true);
 
     private final int defaultColor;
     private final boolean usesComboFactor;

@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 /**
  * サーバーの値が正の設定のうち、クライアントが使うもの。サーバーが自分の WeakSpotConfig から作って送り、
- * クライアントは接続中この値を使う（WeakSpotConfig の static フィールドには書き込まない。書き込むと
+ * クライアントは接続中この値を使う（WeakSpotConfig のフィールドには書き込まない。書き込むと
  * ConfigManager.sync でサーバーの値がクライアントの weakspot.cfg に保存されてしまうため）。
  *
  * 作った後は読むだけにする。項目を足すと通信内容が変わる（マイナーを上げる）。
@@ -148,6 +148,14 @@ public final class SyncedSettings {
     public int portalMinHitIntervalTicks;
     public int portalHitTicks;
 
+    // 泳ぎ（速さはクライアントで足す。残り時間のゲージのため、倍率・時間も送る。1.10.0）
+    public boolean swimWeakSpotEnabled;
+    public int swimMinHitIntervalTicks;
+    public double swimBoostMultiplier;
+    public double swimBoostMaxMultiplier;
+    public int swimBoostDurationTicks;
+    public double swimDashDistance;
+
     // 他のプレイヤーの弱点マーク
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
@@ -191,7 +199,9 @@ public final class SyncedSettings {
             "harvestWeakSpotEnabled", "harvestMinHitIntervalTicks", "throwWeakSpotEnabled",
             "throwMinHitIntervalTicks", "throwChargePerHit", "sprintWeakSpotEnabled", "sprintMinHitIntervalTicks",
             "sprintBoostMultiplier", "sprintBoostMaxMultiplier", "sprintBoostDurationTicks",
-            "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "markerShareRange",
+            "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "swimWeakSpotEnabled",
+            "swimMinHitIntervalTicks", "swimBoostMultiplier", "swimBoostMaxMultiplier", "swimBoostDurationTicks",
+            "swimDashDistance", "markerShareRange",
             "markerSendMinIntervalTicks"
     };
     private static final Field[] FIELDS = new Field[WIRE.length];
@@ -275,7 +285,7 @@ public final class SyncedSettings {
                 if (field.getName().equals("serverVersion")) {
                     continue;
                 }
-                Object value = WeakSpotConfig.class.getField(field.getName()).get(null);
+                Object value = WeakSpotConfig.setting(field.getName()).get();
                 field.set(s, value instanceof String[] ? new HashSet<>(Arrays.asList((String[]) value)) : value);
             }
         } catch (ReflectiveOperationException e) {

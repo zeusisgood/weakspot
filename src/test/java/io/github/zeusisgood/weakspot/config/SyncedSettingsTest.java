@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -24,12 +25,14 @@ public class SyncedSettingsTest {
         assertEquals(fields, new HashSet<>(Arrays.asList(SyncedSettings.WIRE)));
     }
 
-    /** serverVersion 以外は、WeakSpotConfig に同じ名前・合う型の項目がある（一覧は Set、設定は String[]）。 */
+    /** serverVersion 以外は、WeakSpotConfig の server の下に同じ名前・合う型の項目がある（一覧は Set、設定は String[]）。 */
     @Test
     public void everyFieldHasAConfigEntry() throws Exception {
         for (String name : SyncedSettings.WIRE) {
             if (!name.equals("serverVersion")) {
-                Class<?> config = WeakSpotConfig.class.getField(name).getType();
+                WeakSpotConfig.Setting setting = WeakSpotConfig.setting(name);
+                assertTrue(name, setting != null && setting.category.startsWith("server."));
+                Class<?> config = setting.field.getType();
                 Class<?> synced = SyncedSettings.class.getField(name).getType();
                 assertEquals(name, synced == Set.class ? String[].class : synced, config);
             }

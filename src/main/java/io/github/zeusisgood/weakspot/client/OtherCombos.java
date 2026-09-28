@@ -52,7 +52,7 @@ final class OtherCombos {
     public static void onRenderPlayer(RenderPlayerEvent.Post event) {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayer player = event.getEntityPlayer();
-        if (!WeakSpotConfig.othersComboDisplay || mc.gameSettings.hideGUI || player == mc.player
+        if (!WeakSpotConfig.client.combo.othersComboDisplay || mc.gameSettings.hideGUI || player == mc.player
                 || player.isInvisible()) {
             return;
         }

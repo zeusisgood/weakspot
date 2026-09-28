@@ -34,7 +34,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 版は `build.gradle` の `version` と `WeakSpotMod.VERSION` の 2 か所。必ず揃える。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.9.6**、範囲は `"[1.9,1.10)"`。
+- 現行は **1.10.0**、範囲は `"[1.10,1.11)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -57,16 +57,16 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。
 - 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。
-- **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)`**（翻訳キーで送り、キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が確かめる。新しい種類の文を足したら、テストの対象にも足す）。
+- **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)`**（翻訳キーで送り、キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品（`HitGate`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **サーバー側の採掘のブーストは時間枠ではない**（破壊完了の瞬間に「今の速さ × (経過 tick + 1) ≥ 0.7」で判定するため、追加進捗を貯めて速さに換算する。`BoostMath`）。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる。
 
 ### 設定の約束事
 
-- `@Config`（`config/weakspot.cfg`）。**キー名を変えないように、カテゴリは分けず `general` に並べる**（1.10.0 で移行つきで分ける予定。`doc/roadmap.md`）。コメントの先頭に `[サーバー]` / `[クライアント]` を書く。
-- `[サーバー]` の項目でクライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` の static フィールドに書き込まない**（`ConfigManager.sync` でクライアントの cfg に保存されてしまう）。サーバーだけが使う項目は送らない。**`SyncedSettings` に項目を足すと通信内容が変わる（マイナー）**。
-- 設定を足すときは `doc/config.md` の表と、`weakspot.general.<キーを小文字にしたもの>.tooltip` を日英の lang に足す。
-- 設定ファイルの移行は `WeakSpotConfig.migrate`（`configVersion`。`serverStarting` で呼ぶ。`preInit` の間は保存できない）。
+- `@Config`（`config/weakspot.cfg`）。カテゴリは 2 段（1.10.0）: `server`（`ServerConfig`）／`client`（`ClientConfig`）→ 種類・用途の入れ子のクラス。コードからは `WeakSpotConfig.server.mining.boostMultiplier` の形で読む。**項目の名前は変えない**（カテゴリを移すときは `configVersion` を上げて `WeakSpotConfig.migrate` で移す）。新しい種類の項目は、その種類のカテゴリに。名前から探すときは `WeakSpotConfig.setting(名前)`。コメントの先頭に `[サーバー]` / `[クライアント]` を書き、版の注記は書かない。
+- `[サーバー]` の項目でクライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` のフィールドに書き込まない**（`ConfigManager.sync` でクライアントの cfg に保存されてしまう）。サーバーだけが使う項目は送らない。**`SyncedSettings` に項目を足すと通信内容が変わる（マイナー）**。
+- 設定を足すときは `doc/config.md` の表（そのカテゴリの節）と、`weakspot.<カテゴリ>.<キーを小文字にしたもの>.tooltip`（例 `weakspot.server.mining.boostmultiplier.tooltip`）を日英の lang に足す。カテゴリを足したら、その名前 `weakspot.<カテゴリ>` と `.tooltip` も（`LangFilesTest` が確かめる）。
+- 設定ファイルの移行は `WeakSpotConfig.migrate`（`configVersion`、今は 7。`init` と `serverStarting` で呼ぶ。値は `Property` に書いてから `ConfigManager.sync` する。`preInit` の間は保存できない）。
 - パケットの中身の変更・追加・削除、統計の保存形式（NBT のキー）を古い版で読めなくする変更をしたら、マイナーを上げ、範囲を書き換え、`CHANGELOG.md` に書く。
 
 ## ユーザーとの進め方
@@ -87,4 +87,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-1.9.6（サーバーからの案内をプレイヤーの言語で・チャットの頭 `[WeakSpot]`）をリリースした。次は 1.10.0（下書きの仕様書 `doc/spec/SPEC_v1.10.0.md`。**ユーザーが「実装」と言うまで実装しない**）。候補と保留中の相談は `doc/roadmap.md`。
+1.10.0（泳ぎの弱点・設定のカテゴリ分け・節目を全員に・統計の平均）をリリースした。候補と保留中の相談は `doc/roadmap.md`。
