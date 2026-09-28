@@ -63,4 +63,4 @@ Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. T
 [MIT License](LICENSE).
 
 - **Modpacks are welcome.** No permission needed. If you add it to a pack, I'd love to hear about it through an [issue](https://github.com/zeusisgood/weakspot/issues/new/choose) ("Modpack notice"), but it's entirely optional.
-- When sharing the mod, please link to the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) instead of re-uploading the jar.
+- When sharing the mod, a link to the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) is appreciated.

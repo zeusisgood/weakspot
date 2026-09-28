@@ -67,6 +67,6 @@ Type `/weakspot bug` in chat. You get a link to a GitHub issue with your environ
 [MIT License](https://github.com/zeusisgood/weakspot/blob/main/LICENSE).
 
 - **Modpacks are welcome.** No permission needed. If you add it to a pack, I'd love to hear about it through a [GitHub issue](https://github.com/zeusisgood/weakspot/issues/new/choose) ("Modpack notice"), but it's entirely optional.
-- When sharing the mod, please link to this page instead of re-uploading the jar.
+- When sharing the mod, a link to this page is appreciated.
 
 *Not affiliated with Epic Games or Mojang. "Fortnite" is a trademark of Epic Games, Inc.*

@@ -90,4 +90,4 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 [MIT License](LICENSE)。
 
 - **Modpack への同梱は自由**です。許可や連絡は不要ですが、[issue](https://github.com/zeusisgood/weakspot/issues/new/choose)（「Modpack の報告」）で教えてもらえると励みになります。
-- 紹介や配布の際は、jar を再アップロードせず、[CurseForge のページ](https://www.curseforge.com/minecraft/mc-mods/weakspot)へのリンクで案内してください。
+- 紹介や共有の際は、[CurseForge のページ](https://www.curseforge.com/minecraft/mc-mods/weakspot)へのリンクで案内していただけると助かります。
