@@ -96,9 +96,13 @@ public final class ServerStats {
         MiningRewards.onKindHit(player, kind);
     }
 
-    /** 画面の「累計をリセット」と /weakspot reset。節目も累計で数えるので、節目をもう一度受け取れる（1.6.1）。 */
+    /**
+     * 画面の「統計をリセット」と /weakspot reset。累計と今回の両方を消す（1.10.2。それまでは累計だけで、直後に今回のほうが
+     * 大きく見えた）。節目も累計で数えるので、節目をもう一度受け取れる（1.6.1）。
+     */
     public static void resetTotal(EntityPlayer player) {
         data(player).setTag(TAG_TOTAL, write(new MiningStats()));
+        SESSIONS.put(player.getUniqueID(), new MiningStats());
     }
 
     /** この Mod の永続データ。無ければ作って付ける。 */

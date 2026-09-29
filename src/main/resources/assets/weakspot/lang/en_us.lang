@@ -25,7 +25,7 @@ weakspot.stats.timeSaved=Time saved (est.)
 weakspot.stats.time.seconds=%ss
 weakspot.stats.time.minutes=%sm %ss
 weakspot.stats.time.hours=%sh %sm
-weakspot.stats.reset=Reset All Time
+weakspot.stats.reset=Reset Stats
 weakspot.stats.reset.confirm=Click again to reset
 
 weakspot.config.remoteNotice=Connected to a server: its settings are used, except your own client settings
@@ -155,7 +155,7 @@ weakspot.command.offline=Only online players can be specified
 weakspot.command.stats.header=[WeakSpot] Stats of %s
 weakspot.command.stats.session=  This Session: hits %s, blocks %s, with a hit %s, avg hits per block %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, swim hits %s, total hits %s
 weakspot.command.stats.total=  All Time: hits %s, blocks %s, with a hit %s, avg hits per block %s, max hits %s, time saved %ss, growth hits %s, machine hits %s, max combo %s, animal hits %s, fishing hits %s, bow hits %s, melee hits %s, vehicle hits %s, eating hits %s, sleep hits %s, ladder hits %s, elytra hits %s, enchanting hits %s, harvest hits %s, throwing hits %s, sprint hits %s, portal hits %s, swim hits %s, total hits %s
-weakspot.command.reset=[WeakSpot] Reset the all-time stats of %s
+weakspot.command.reset=[WeakSpot] Reset the stats (this session and all time) of %s
 
 # The guide book (1.4.1, chapters since 1.8.5). Update it along with doc/play.md. Keep each page within 14 lines.
 weakspot.stats.guide=Guide
@@ -327,6 +327,7 @@ weakspot.milestone.totalChat=[WeakSpot] You reached %s weak spot hits in total!
 weakspot.milestone.broadcast.mining=[WeakSpot] %s reached %s mining weak spot hits!
 weakspot.milestone.broadcast.kind=[WeakSpot] %1$s reached %3$s %2$s weak spot hits!
 weakspot.milestone.broadcast.total=[WeakSpot] %s reached %s weak spot hits in total!
+weakspot.fishing.notInWater=[WeakSpot] Your bobber is not floating in water, so no fish will come. Cast again
 weakspot.enchant.hint=Hit the marker to reroll the offers
 weakspot.enchant.hintCount=Hit the marker to reroll the offers (%s)
 weakspot.enchant.hintEmpty=Put an item in to reroll the offers with weak spots

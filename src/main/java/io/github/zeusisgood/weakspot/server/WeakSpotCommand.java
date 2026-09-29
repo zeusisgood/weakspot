@@ -16,9 +16,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 
 /**
- * 管理コマンド /weakspot（OP 以上）。オンラインのプレイヤーの統計を表示する・累計を消す・設定を読み直す。
+ * 管理コマンド /weakspot（OP 以上）。オンラインのプレイヤーの統計を表示する・統計を消す・設定を読み直す。
  * 表示は翻訳キーで出す（クライアントにも Mod が入っている前提で、クライアントが翻訳する）。
- * 「累計を消す」は統計画面の「累計をリセット」と同じ処理（ServerStats.resetTotal）。
+ * 「統計を消す」は統計画面の「統計をリセット」と同じ処理（ServerStats.resetTotal。今回と累計の両方）。
  */
 public final class WeakSpotCommand extends CommandBase {
 

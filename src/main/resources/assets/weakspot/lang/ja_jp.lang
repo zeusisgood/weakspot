@@ -25,7 +25,7 @@ weakspot.stats.timeSaved=短縮できた時間（推定）
 weakspot.stats.time.seconds=%s秒
 weakspot.stats.time.minutes=%s分%s秒
 weakspot.stats.time.hours=%s時間%s分
-weakspot.stats.reset=累計をリセット
+weakspot.stats.reset=統計をリセット
 weakspot.stats.reset.confirm=もう一度押すとリセット
 
 weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定が使われます（各自の設定を除く）
@@ -155,7 +155,7 @@ weakspot.command.offline=オンラインのプレイヤーだけ指定できま�
 weakspot.command.stats.header=[WeakSpot] %s の統計
 weakspot.command.stats.session=  今回: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、泳ぎヒット %s、合計ヒット %s
 weakspot.command.stats.total=  累計: ヒット %s、壊した数 %s、ヒットして壊した数 %s、平均ヒット %s、最大ヒット %s、短縮 %s秒、成長ヒット %s、機械ヒット %s、最大連続ヒット %s、動物ヒット %s、釣りヒット %s、弓ヒット %s、近接ヒット %s、乗り物ヒット %s、飲食ヒット %s、睡眠ヒット %s、はしごヒット %s、エリトラヒット %s、エンチャントヒット %s、収穫ヒット %s、投擲物ヒット %s、ダッシュヒット %s、ゲートヒット %s、泳ぎヒット %s、合計ヒット %s
-weakspot.command.reset=[WeakSpot] %s の統計の累計を消しました
+weakspot.command.reset=[WeakSpot] %s の統計（今回と累計）を消しました
 
 # ガイドの本（1.4.1。1.8.5 から章立て）。遊び方（doc/play.md）を変えたら、ここも合わせて直す。1 ページは 14 行まで
 weakspot.stats.guide=ガイド
@@ -327,6 +327,7 @@ weakspot.milestone.totalChat=[WeakSpot] すべての弱点ヒットの合計が 
 weakspot.milestone.broadcast.mining=[WeakSpot] %s さんの採掘の弱点ヒットが %s 回に達しました！
 weakspot.milestone.broadcast.kind=[WeakSpot] %s さんの %s の弱点ヒットが %s 回に達しました！
 weakspot.milestone.broadcast.total=[WeakSpot] %s さんのすべての弱点ヒットの合計が %s 回に達しました！
+weakspot.fishing.notInWater=[WeakSpot] 浮きが水に浮いていないため、魚が来ません。投げ直してください
 weakspot.enchant.hint=マーカーに当てると、候補を引き直せます
 weakspot.enchant.hintCount=マーカーに当てると、候補を引き直せます（%s 回）
 weakspot.enchant.hintEmpty=物を置くと、弱点で候補を引き直せます
