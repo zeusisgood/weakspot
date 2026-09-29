@@ -137,9 +137,14 @@ public final class WeakSpotConfig {
             }
         }
 
-        /** 設定画面の説明の翻訳キー（Forge の決まり: weakspot.カテゴリ.小文字の名前.tooltip）。 */
+        /** 設定画面の項目の名前の翻訳キー（Forge の決まり: weakspot.カテゴリ.小文字の名前。1.10.2 から翻訳を持つ）。 */
+        public String nameKey() {
+            return WeakSpotMod.MODID + "." + category + "." + name().toLowerCase(Locale.ENGLISH);
+        }
+
+        /** 設定画面の説明の翻訳キー（名前の翻訳キー + .tooltip）。 */
         public String tooltipKey() {
-            return WeakSpotMod.MODID + "." + category + "." + name().toLowerCase(Locale.ENGLISH) + ".tooltip";
+            return nameKey() + ".tooltip";
         }
     }
 
@@ -214,6 +219,11 @@ public final class WeakSpotConfig {
         }
         ConfigManager.sync(WeakSpotMod.MODID, Config.Type.INSTANCE);
         return true;
+    }
+
+    /** ConfigManager が持っている weakspot.cfg（設定画面を組むため。1.10.2）。取り出せなければ null。 */
+    public static Configuration configuration() {
+        return cachedConfiguration();
     }
 
     /** ConfigManager の非公開の CONFIGS（ファイルの絶対パス → Configuration）から weakspot.cfg を取り出す。Forge のクラスなので名前は1つ。 */
