@@ -47,6 +47,8 @@ final class ComboHud {
     private static final int LOW_RGB = 0xFF3333;
     /** 種類の表示（「走り ×1.25」「機械 4倍速」）の文字の大きさ（コンボの数字に対する割合）。 */
     private static final float KIND_LABEL_SCALE = 0.75F;
+    /** 次の段階までのゲージの幅（GUI ピクセル。comboScale を掛ける。1.10.2）。 */
+    private static final float GAUGE_WIDTH = 40;
 
     private static final ComboMilestones MILESTONES = new ComboMilestones();
 
@@ -192,24 +194,51 @@ final class ComboHud {
         if (kind == null || !spotShown(kind)) {
             return;
         }
+        float bottom = drawKindText(mc, top, kind, now);
+        if (WeakSpotConfig.client.combo.comboFactorGaugeEnabled && (kind.usesComboFactor() || kind == HitKind.MACHINE)) {
+            drawFactorGauge(mc, bottom);
+        }
+    }
+
+    /**
+     * 次に掛け数が上がる段階（ComboFactor の 25・50・100…）までの進み具合のゲージ（1.10.2）。色は次の段階の色。
+     * 最後の段階より先は出さない。top は種類の表示の下端（表示がなければコンボの表示の下端）。
+     */
+    private static void drawFactorGauge(Minecraft mc, float top) {
+        double progress = ComboFactor.progressToNext(combo);
+        if (progress < 0) {
+            return;
+        }
+        float scale = (float) WeakSpotConfig.client.combo.comboScale;
+        float width = GAUGE_WIDTH * scale;
+        float height = Math.max(1, Math.round(2 * scale));
+        float y = top + 2 * scale;
+        float left = lastCx - width / 2;
+        fillRect(left, y, left + width, y + height, 0x000000, 0.4);
+        fillRect(left, y, left + (float) (width * progress), y + height, ComboFactor.nextStepRgb(combo), 0.9);
+    }
+
+    /** 種類の表示を描き、その下端を返す（描かなければ top）。 */
+    private static float drawKindText(Minecraft mc, float top, HitKind kind, double now) {
         int rgb = MarkerLook.color(kind);
         if (kind == HitKind.MACHINE && ClientWeakSpotHandler.dispenserSpotActive()) {
             // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2。1.6.0 から上限の設定も考える）
-            drawKindLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)), rgb,
+            return drawKindLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)), rgb,
                     ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
         } else if (kind == HitKind.MACHINE) {
             // その機械の今の速さ（サーバーと同じ計算。1.6.0）
-            drawKindLabel(mc, top, I18n.format("weakspot.combo.machine",
+            return drawKindLabel(mc, top, I18n.format("weakspot.combo.machine",
                     MachineComboBoost.speedLabel(machineSpeed(combo))), rgb,
                     ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
         } else if (kind.usesComboFactor()) {
             double factor = labelValue(kind, combo);
             if (factor > 1) {
-                drawKindLabel(mc, top, I18n.format("weakspot.combo.kind", I18n.format("weakspot.kind." + kind.key()),
-                        MachineComboBoost.label(factor)), rgb,
+                return drawKindLabel(mc, top, I18n.format("weakspot.combo.kind",
+                        I18n.format("weakspot.kind." + kind.key()), MachineComboBoost.label(factor)), rgb,
                         ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
             }
         }
+        return top;
     }
 
     /** その種類の自分の弱点が、今出ているか（採掘・機械・収穫はこのフレームで照準が合っている）。 */
@@ -251,7 +280,7 @@ final class ComboHud {
     }
 
     /** 「機械 4倍速」「走り ×1.25」。top はコンボの表示の下端、cx はその中心。 */
-    private static void drawKindLabel(Minecraft mc, float top, String text, int baseRgb, double glow, int glowRgb) {
+    private static float drawKindLabel(Minecraft mc, float top, String text, int baseRgb, double glow, int glowRgb) {
         FontRenderer font = mc.fontRenderer;
         float scale = (float) WeakSpotConfig.client.combo.comboScale * KIND_LABEL_SCALE;
         float width = font.getStringWidth(text) * scale;
@@ -269,6 +298,7 @@ final class ComboHud {
         font.drawStringWithShadow(text, -font.getStringWidth(text) / 2F, -font.FONT_HEIGHT / 2F + 1, 0xFF000000 | rgb);
         GlStateManager.popMatrix();
         GlStateManager.color(1, 1, 1, 1);
+        return cy + height / 2;
     }
 
     /** コンボの数字の中心 {x, y}（設定 comboPosition による）。 */

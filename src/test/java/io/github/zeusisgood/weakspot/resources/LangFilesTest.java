@@ -3,6 +3,7 @@ package io.github.zeusisgood.weakspot.resources;
 import static org.junit.Assert.assertTrue;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
+import io.github.zeusisgood.weakspot.config.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -58,6 +59,8 @@ public class LangFilesTest {
         Set<String> expected = new HashSet<>();
         for (WeakSpotConfig.Setting setting : WeakSpotConfig.settings()) {
             expected.add(setting.tooltipKey());
+            // 設定画面の項目の名前（1.10.2）
+            expected.add(setting.nameKey());
             String category = "weakspot." + setting.category;
             for (int i = category.indexOf('.', "weakspot.".length()); ; i = category.indexOf('.', i + 1)) {
                 String prefix = i < 0 ? category : category.substring(0, i);
@@ -81,6 +84,48 @@ public class LangFilesTest {
             }
         }
         assertTrue("tooltips of no setting: " + stale, stale.isEmpty());
+    }
+
+    /**
+     * 設定の説明の書き方（1.10.2）: サーバーの項目は「マルチプレイ時、サーバー側設定が優先されます。」で始め、
+     * クライアントの項目には断り書きを付けない。どちらも最後の行はファイルのキー。
+     */
+    @Test
+    public void settingTooltipsFollowTheRules() {
+        List<String> bad = new ArrayList<>();
+        for (WeakSpotConfig.Setting setting : WeakSpotConfig.settings()) {
+            String file = setting.category + "." + setting.name();
+            check(bad, setting, JA.get(setting.tooltipKey()), "マルチプレイ時、サーバー側設定が優先されます。\\n",
+                    "[クライアント]", "\\nファイル: " + file);
+            check(bad, setting, EN.get(setting.tooltipKey()), "In multiplayer, the server's setting takes priority.\\n",
+                    "[Client]", "\\nFile: " + file);
+        }
+        assertTrue("tooltips not following the rules: " + bad, bad.isEmpty());
+    }
+
+    private static void check(List<String> bad, WeakSpotConfig.Setting setting, String value, String serverPrefix,
+                              String clientPrefix, String suffix) {
+        if (value == null) {
+            return;
+        }
+        boolean server = setting.category.startsWith("server.");
+        if (server != value.startsWith(serverPrefix) || value.startsWith(clientPrefix) || !value.endsWith(suffix)) {
+            bad.add(setting.tooltipKey() + "=" + value);
+        }
+    }
+
+    /** 設定画面のまとめ（SettingGroups）の名前と説明（1.10.2）。 */
+    @Test
+    public void everySettingGroupHasItsNames() {
+        List<String> missing = new ArrayList<>();
+        for (String group : SettingGroups.GROUPS.keySet()) {
+            for (String key : new String[] {SettingGroups.langKey(group), SettingGroups.langKey(group) + ".tooltip"}) {
+                if (!EN.containsKey(key) || !JA.containsKey(key)) {
+                    missing.add(key);
+                }
+            }
+        }
+        assertTrue("setting groups without names: " + missing, missing.isEmpty());
     }
 
     /** 種類の名前（weakspot.kind.<key>）と、統計の行の名前（StatsTab.statsKey と同じ決まり）。 */

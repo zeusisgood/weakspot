@@ -122,6 +122,10 @@ public final class ClientConfig {
         @Config.Comment({"[クライアント] 近くのほかのプレイヤーのコンボ（10 以上）を、頭の上に「n HIT」と表示するか"})
         public boolean othersComboDisplay = true;
 
+        @Config.Comment({"[クライアント] コンボの数字の下に、次に掛け数が上がる段階（25・50・100…）までの進み具合のゲージを表示するか",
+                "コンボの掛け数を使う種類の弱点が出ている間だけ出る。色は次の段階の色"})
+        public boolean comboFactorGaugeEnabled = true;
+
         @Config.Comment({"[クライアント] ほかのプレイヤーが節目に届いたときの知らせを、チャットに表示するか",
                 "オフにすると、ほかの人の節目の知らせが出ない（自分の節目の演出とチャットは出る）"})
         public boolean showOthersMilestones = true;
