@@ -28,7 +28,7 @@ weakspot.stats.time.hours=%sh %sm
 weakspot.stats.reset=Reset Stats
 weakspot.stats.reset.confirm=Click again to reset
 
-weakspot.config.remoteNotice=Connected to a server: its settings are used, except your own client settings
+weakspot.config.remoteNotice=In multiplayer: settings marked "server's setting takes priority" use the server's value
 weakspot.gui.general=General
 weakspot.gui.general.tooltip=Guide book and update notices
 weakspot.gui.sound=Sound

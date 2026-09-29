@@ -28,7 +28,7 @@ weakspot.stats.time.hours=%s時間%s分
 weakspot.stats.reset=統計をリセット
 weakspot.stats.reset.confirm=もう一度押すとリセット
 
-weakspot.config.remoteNotice=サーバーに接続中は、サーバーの設定が使われます（各自の設定を除く）
+weakspot.config.remoteNotice=マルチプレイ中：説明に「サーバー側設定が優先」とある項目は、サーバーの値が使われます
 weakspot.gui.general=共通
 weakspot.gui.general.tooltip=ガイドの本・更新のお知らせ
 weakspot.gui.sound=音
