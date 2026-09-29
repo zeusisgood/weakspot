@@ -391,7 +391,6 @@ weakspot.milestone.totalChat=[WeakSpot] すべての弱点ヒットの合計が 
 weakspot.milestone.broadcast.mining=[WeakSpot] %s さんの採掘の弱点ヒットが %s 回に達しました！
 weakspot.milestone.broadcast.kind=[WeakSpot] %s さんの %s の弱点ヒットが %s 回に達しました！
 weakspot.milestone.broadcast.total=[WeakSpot] %s さんのすべての弱点ヒットの合計が %s 回に達しました！
-weakspot.fishing.notInWater=[WeakSpot] 浮きが水に浮いていないため、魚が来ません。投げ直してください
 weakspot.enchant.hint=マーカーに当てると、候補を引き直せます
 weakspot.enchant.hintCount=マーカーに当てると、候補を引き直せます（%s 回）
 weakspot.enchant.hintEmpty=物を置くと、弱点で候補を引き直せます

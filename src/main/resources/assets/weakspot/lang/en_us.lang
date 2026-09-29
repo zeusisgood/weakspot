@@ -391,7 +391,6 @@ weakspot.milestone.totalChat=[WeakSpot] You reached %s weak spot hits in total!
 weakspot.milestone.broadcast.mining=[WeakSpot] %s reached %s mining weak spot hits!
 weakspot.milestone.broadcast.kind=[WeakSpot] %1$s reached %3$s %2$s weak spot hits!
 weakspot.milestone.broadcast.total=[WeakSpot] %s reached %s weak spot hits in total!
-weakspot.fishing.notInWater=[WeakSpot] Your bobber is not floating in water, so no fish will come. Cast again
 weakspot.enchant.hint=Hit the marker to reroll the offers
 weakspot.enchant.hintCount=Hit the marker to reroll the offers (%s)
 weakspot.enchant.hintEmpty=Put an item in to reroll the offers with weak spots

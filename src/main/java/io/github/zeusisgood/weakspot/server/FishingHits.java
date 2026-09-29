@@ -19,8 +19,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -60,10 +58,6 @@ public final class FishingHits {
         int initialWait;
         int lastWait;
         long lastHitTick = Long.MIN_VALUE / 2;
-        /** 浮いている状態なのに位置が水の外、が続いている tick 数（1.10.2）。 */
-        int outOfWaterTicks;
-        /** この浮きで、水にないことを知らせたか。 */
-        boolean noticed;
     }
 
     private static boolean available() {
@@ -139,11 +133,6 @@ public final class FishingHits {
             track.hook = hook;
             track.initialWait = 0;
             track.lastWait = 0;
-            track.outOfWaterTicks = 0;
-            track.noticed = false;
-        }
-        if (event.player instanceof EntityPlayerMP) {
-            noticeIfStuck((EntityPlayerMP) event.player, hook, track);
         }
         if (isWaiting(hook)) {
             int wait = read(WAIT, hook);
@@ -155,33 +144,6 @@ public final class FishingHits {
             track.initialWait = 0;
             track.lastWait = 0;
         }
-    }
-
-    /** 浮いている状態なのに位置が水の外、が続いたときに、この投げにつき 1 回だけ本人のチャットで知らせるまでの tick 数。 */
-    private static final int STUCK_NOTICE_TICKS = 40;
-
-    /** 翻訳キー weakspot.fishing.* を足した版。 */
-    static final String NOTICE_SINCE = "1.10.2";
-
-    /**
-     * 浮いている状態で魚を待つ段階なのに、浮きの位置が水の外、が 2 秒続いたら、この投げにつき 1 回だけ知らせる（1.10.2）。
-     * 弱点を出していない（釣り竿を持っていない・釣りの弱点がオフ・自分の弱点がオフ）ときは知らせない。
-     */
-    private static void noticeIfStuck(EntityPlayerMP player, EntityFishHook hook, Track track) {
-        if (!waitingPhase(hook) || inWaterBlock(hook)) {
-            track.outOfWaterTicks = 0;
-            return;
-        }
-        if (track.noticed || ++track.outOfWaterTicks < STUCK_NOTICE_TICKS) {
-            return;
-        }
-        track.noticed = true;
-        if (hookOf(player) != hook || !enabled(SyncedSettings.server()) || !ServerSwitches.isEnabled(player, HitKind.FISHING)) {
-            return;
-        }
-        ITextComponent text = PlayerText.of(player, NOTICE_SINCE, "weakspot.fishing.notInWater");
-        text.getStyle().setColor(TextFormatting.YELLOW);
-        player.sendMessage(text);
     }
 
     /** クライアントからの状態の問い合わせ（サーバースレッド）。待ち時間の段階か、と進み具合を返す。 */
