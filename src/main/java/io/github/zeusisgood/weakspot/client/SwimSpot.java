@@ -13,7 +13,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * 泳ぎの弱点（自分だけ。1.10.0）。水の中で動いている間、照準のまわり（10〜20 度）に深い青の弱点を出し、照準を合わせるだけで
+ * 泳ぎの弱点（自分だけ。1.10.0）。水の中で動いている間、照準の上下（10〜20 度。1.10.2 から上下だけ）に深い青の弱点を出し、照準を合わせるだけで
  * ヒットにする。当てると、視線の方向に小さく突進し、しばらく泳ぐ速さを上げる。1.12.2 の移動速度の値は水中の移動に効かない
  * ので、はしごと同じく、その tick の移動の (倍率 − 1) 倍をクライアントで足す（上下も含む）。サーバーは検証だけ（MoveHits）。
  */
@@ -56,7 +56,8 @@ final class SwimSpot extends AimSpotKind {
 
     @Override
     int placement(EntityPlayerSP player) {
-        return HudSpot.FREE;
+        // 上下だけ（ダッシュ・はしごと同じ。1.10.2。それまではどこにでも）
+        return HudSpot.VERTICAL;
     }
 
     @Override
