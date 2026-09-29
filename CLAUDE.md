@@ -34,7 +34,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 版は `build.gradle` の `version` と `WeakSpotMod.VERSION` の 2 か所。必ず揃える。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.10.1**、範囲は `"[1.10,1.11)"`。
+- 現行は **1.10.2**、範囲は `"[1.10,1.11)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -65,7 +65,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - `@Config`（`config/weakspot.cfg`）。カテゴリは 2 段（1.10.0）: `server`（`ServerConfig`）／`client`（`ClientConfig`）→ 種類・用途の入れ子のクラス。コードからは `WeakSpotConfig.server.mining.boostMultiplier` の形で読む。**項目の名前は変えない**（カテゴリを移すときは `configVersion` を上げて `WeakSpotConfig.migrate` で移す）。新しい種類の項目は、その種類のカテゴリに。名前から探すときは `WeakSpotConfig.setting(名前)`。コメントの先頭に `[サーバー]` / `[クライアント]` を書き、版の注記は書かない。
 - `[サーバー]` の項目でクライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` のフィールドに書き込まない**（`ConfigManager.sync` でクライアントの cfg に保存されてしまう）。サーバーだけが使う項目は送らない。**`SyncedSettings` に項目を足すと通信内容が変わる（マイナー）**。
-- 設定を足すときは `doc/config.md` の表（そのカテゴリの節）と、`weakspot.<カテゴリ>.<キーを小文字にしたもの>.tooltip`（例 `weakspot.server.mining.boostmultiplier.tooltip`）を日英の lang に足す。カテゴリを足したら、その名前 `weakspot.<カテゴリ>` と `.tooltip` も（`LangFilesTest` が確かめる）。
+- 設定画面は、ファイルのカテゴリではなく `config/SettingGroups` のまとめ（種類・用途）で出す（1.10.2）。設定を足すときは、`SettingGroups` のまとめ、`doc/config.md` のそのまとめの表、日英の lang の名前 `weakspot.<カテゴリ>.<キーを小文字にしたもの>` と説明 `.tooltip` を足す。説明は、サーバーの項目なら「マルチプレイ時、サーバー側設定が優先されます。」で始め、最後の行にファイルのキー（「ファイル: server.mining.boostMultiplier」）。クライアントの項目は断り書きなし（`LangFilesTest`・`SettingGroupsTest` が確かめる）。カテゴリを足したら、その名前 `weakspot.<カテゴリ>` と `.tooltip` も。
 - 設定ファイルの移行は `WeakSpotConfig.migrate`（`configVersion`、今は 7。`init` と `serverStarting` で呼ぶ。値は `Property` に書いてから `ConfigManager.sync` する。`preInit` の間は保存できない）。
 - パケットの中身の変更・追加・削除、統計の保存形式（NBT のキー）を古い版で読めなくする変更をしたら、マイナーを上げ、範囲を書き換え、`CHANGELOG.md` に書く。
 
@@ -87,4 +87,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-1.10.1（睡眠と釣りを重ねるだけで当たりに）をリリースした。1.10.0（泳ぎの弱点・設定のカテゴリ分け・節目を全員に・統計の平均）。候補と保留中の相談は `doc/roadmap.md`。
+1.10.2（設定画面のまとめ直し・コンボのゲージ・統計のリセット・泳ぎを上下だけ・釣りの修正）をリリースした。1.10.1（睡眠と釣りを重ねるだけで当たりに）。1.10.0（泳ぎの弱点・設定のカテゴリ分け・節目を全員に・統計の平均）。候補と保留中の相談は `doc/roadmap.md`。
