@@ -29,7 +29,8 @@
 | 共通 | `server.general` の `giveGuideBook`、`client.updates`（`lastSeenVersion` を除く） |
 | 音 | `client.sound` |
 | マーカー | `client.markers`（`animalSpotSeeThrough` を除く）、`server.general` の `markerShareRange` `markerSendMinIntervalTicks` |
-| コンボ・節目 | `client.combo`、`server.milestones` |
+| コンボ | `client.combo`（`showOthersMilestones` を除く） |
+| 節目 | `showOthersMilestones`、`server.milestones` |
 | 採掘 | `server.mining`、`server.repair`、`client.hud` の `blockHealthBarEnabled` |
 | 成長 | `server.growth`、`growthBarEnabled` |
 | 収穫 | `server.harvest` |
@@ -64,6 +65,13 @@
 ## 3. `configVersion` を画面に出さない
 
 - 1 のとおり（ファイルには残す。移行の目印として必要）
+
+## 3b. 項目の名前を日本語・英語に（ユーザーの判断）
+
+- 今の設定画面は、項目の名前に設定のキー（`boostMultiplier` など）がそのまま出ている。Forge の設定画面は、項目の翻訳キー（`weakspot.<カテゴリ>.<キーを小文字にしたもの>`。説明の `.tooltip` と同じ形の、`.tooltip` のないもの）に翻訳があれば、それを名前に出すので、**すべての項目の名前を日英の lang に足す**
+- 名前は短く（日本語 12 字・英語 25 字くらいまで。横に入力欄があるため）。詳しいことは説明に書く。例: `boostMultiplier` = 「採掘の速さの倍率」/ "Mining speed multiplier"、`swimBoostBarEnabled` = 「加速のゲージを表示」/ "Show the boost gauge"、`myHitVolume` = 「自分のヒット音の音量」/ "My hit volume"
+- **説明の最後に、ファイルのキーを書く**（例: 「ファイル: server.mining.boostMultiplier」/ "File: server.mining.boostMultiplier"）。名前が日本語になっても、`weakspot.cfg` を直接直す人が探せるように
+- テスト（`resources/LangFilesTest`）: すべての項目に日英の名前があること。説明の最後がファイルのキーであること
 
 ## 4. コンボのボーナスのゲージ（ユーザーの判断）
 
@@ -109,11 +117,12 @@
 ## 9. `CLAUDE.md` に書くこと
 
 - 現行を 1.10.2 に
-- 設定の約束事に: 設定画面はファイルのカテゴリではなく、`WeakSpotGuiFactory` のまとめで出す。設定を足したら、まとめの表にも入れる（テストが確かめる）。説明の先頭は、サーバーの項目なら「マルチプレイ時、サーバー側設定が優先されます。」
+- 設定の約束事に: 設定画面はファイルのカテゴリではなく、`WeakSpotGuiFactory` のまとめで出す。設定を足したら、まとめの表にも入れ、日英の名前（`weakspot.<カテゴリ>.<小文字のキー>`）も足す（テストが確かめる）。説明の先頭は、サーバーの項目なら「マルチプレイ時、サーバー側設定が優先されます。」
 
 ## 10. ユーザーに確認してもらうこと
 
-- 設定画面が種類・用途のまとめで出て、泳ぎの設定と泳ぎのゲージの表示が同じ所にあること。`configVersion` と `lastSeenVersion` が出ないこと
+- 設定画面が種類・用途のまとめで出て（コンボと節目は別）、泳ぎの設定と泳ぎのゲージの表示が同じ所にあること。`configVersion` と `lastSeenVersion` が出ないこと
+- 項目の名前が日本語（英語の設定なら英語）で出て、はみ出していないこと。説明の最後にファイルのキーが出ること
 - 設定画面で値を変えて閉じ、ゲームを再起動しても残っていること。シングルプレイでサーバーの項目（例: 採掘の倍率）を変えると、すぐ効くこと
 - サーバーの項目の説明が「マルチプレイ時、サーバー側設定が優先されます。」で始まること
 - コンボの数字の下に、次の段階までのゲージが出て、25・50・100 で光ること。設定で消せること
