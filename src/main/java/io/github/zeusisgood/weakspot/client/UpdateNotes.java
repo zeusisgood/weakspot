@@ -24,7 +24,8 @@ final class UpdateNotes {
 
     /** ワールドに入ってから出すまでの tick（入ったときのほかのメッセージに埋もれないように）。 */
     private static final int DELAY_TICKS = 40;
-    static final String RELEASES_URL = "https://github.com/zeusisgood/weakspot/releases/tag/v";
+    /** 配布サイトのファイルの一覧（1.11.0 から。それまでは GitHub の Release）。版ごとの変更点もここで読める。 */
+    static final String DOWNLOAD_URL = "https://www.curseforge.com/minecraft/mc-mods/weakspot/files";
 
     /** この起動で、もう確かめたか。 */
     private static boolean checked;
@@ -67,7 +68,7 @@ final class UpdateNotes {
         first.getStyle().setColor(TextFormatting.GOLD);
         first.appendText(" ");
         first.appendSibling(link(new TextComponentTranslation("weakspot.news.link"),
-                new ClickEvent(ClickEvent.Action.OPEN_URL, RELEASES_URL + version)));
+                new ClickEvent(ClickEvent.Action.OPEN_URL, DOWNLOAD_URL)));
         mc.player.sendMessage(first);
 
         TextComponentTranslation second = new TextComponentTranslation("weakspot.news.bugHint",

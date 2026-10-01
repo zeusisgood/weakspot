@@ -80,7 +80,7 @@ final class UpdateCheckNotice {
         first.getStyle().setColor(TextFormatting.GOLD);
         first.appendText(" ");
         first.appendSibling(UpdateNotes.link(new TextComponentTranslation("weakspot.updateCheck.link"),
-                new ClickEvent(ClickEvent.Action.OPEN_URL, UpdateNotes.RELEASES_URL + target)));
+                new ClickEvent(ClickEvent.Action.OPEN_URL, UpdateNotes.DOWNLOAD_URL)));
         first.appendText(" ");
         ITextComponent skip = new TextComponentTranslation("weakspot.updateCheck.skip");
         // 灰色 #AAAAAA に下線
