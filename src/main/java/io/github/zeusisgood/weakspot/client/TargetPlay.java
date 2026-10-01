@@ -94,6 +94,8 @@ public final class TargetPlay {
     private static double eyeY;
     private static double eyeZ;
     private static int lastCountdown;
+    /** 前の tick に右クリックを押していたか（押し直しでやめる）。 */
+    private static boolean useWasDown = true;
     /** 結果の表示。 */
     private static long resultTick = Long.MIN_VALUE / 2;
     private static int resultHits;
@@ -117,6 +119,7 @@ public final class TargetPlay {
                 active = true;
                 startTick = now;
                 lastCountdown = 0;
+                useWasDown = true;
                 break;
             case TargetMessage.SCORE:
                 hits = newHits;
@@ -190,7 +193,11 @@ public final class TargetPlay {
             clear();
             return;
         }
-        if (mc.currentScreen != null || !holdsTarget(player)) {
+        boolean useDown = mc.gameSettings.keyBindUseItem.isKeyDown();
+        boolean pressedAgain = useDown && !useWasDown
+                && ClientWeakSpotHandler.clientTick - startTick >= TargetRules.CANCEL_GUARD_TICKS;
+        useWasDown = useDown;
+        if (mc.currentScreen != null || !holdsTarget(player) || pressedAgain) {
             cancelByClient(mc);
             return;
         }

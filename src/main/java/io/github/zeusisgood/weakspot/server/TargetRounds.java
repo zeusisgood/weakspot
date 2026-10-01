@@ -53,17 +53,16 @@ public final class TargetRounds {
         return player.mcServer.getTickCounter();
     }
 
-    /** 「弱点の的」の右クリック。ラウンドがなければ始め、あればやめる（始めた直後の押しっぱなしは除く）。 */
+    /**
+     * 「弱点の的」の右クリック。ラウンドがなければ始める。ラウンド中の右クリックは無視する（押しっぱなしでも 4 tick ごとに
+     * 届くため）。もう一度押してやめるのは、クライアントが押し直しを見て知らせる（TargetActionMessage.CANCEL）。
+     */
     public static void toggle(EntityPlayerMP player, EnumHand hand) {
-        Round round = ROUNDS.get(player.getUniqueID());
-        long now = now(player);
-        if (round != null) {
-            if (now - round.start >= TargetRules.CANCEL_GUARD_TICKS) {
-                cancel(player, true);
-            }
+        if (ROUNDS.containsKey(player.getUniqueID())) {
             return;
         }
-        round = new Round();
+        long now = now(player);
+        Round round = new Round();
         round.start = now;
         round.hand = hand;
         round.slot = player.inventory.currentItem;
