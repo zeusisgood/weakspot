@@ -55,14 +55,16 @@ public final class AnimalTargets {
 
     /**
      * プレイヤーが今の手の状態で、この動物の弱点を出せるか（動いているタイマーがあるかは別）。
-     * 素手（両手が空。餌を持った右クリックは「繁殖・餌やり」なので出さない）で、しゃがみが要る動物ではしゃがんでいること。
+     * 素手（両手が空。1.11.0 から、右クリックで何もしないアイテムも空とみなす。HeldItems。餌を持った右クリックは「繁殖・餌やり」
+     * なので出さない）で、しゃがみが要る動物ではしゃがんでいること。
      */
     public static boolean isTarget(EntityPlayer player, Entity entity, SyncedSettings settings) {
         if (!settings.enabled(HitKind.ANIMAL) || !PlayerRules.canUse(player) || !isCandidate(entity)
                 || settings.animalExcludedEntities.contains(id(entity))) {
             return false;
         }
-        if (!player.getHeldItemMainhand().isEmpty() || !player.getHeldItemOffhand().isEmpty()) {
+        if (!HeldItems.isFreeFor(player.getHeldItemMainhand(), entity, settings)
+                || !HeldItems.isFreeFor(player.getHeldItemOffhand(), entity, settings)) {
             return false;
         }
         return !requiresSneak(entity, settings) || player.isSneaking();

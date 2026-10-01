@@ -36,6 +36,10 @@ public final class SyncedSettings {
     public int lingerTicks;
     /** 弱点の大きさの倍率（1.11.0。種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う）。 */
     public double spotSize;
+    /** 右クリックで何もしないアイテムを、素手と同じに扱うか（1.11.0。HeldItems）。 */
+    public boolean heldItemsCountAsEmptyHand;
+    /** 素手と同じに扱わないアイテム。登録名。 */
+    public Set<String> heldItemExcludes;
 
     // 採掘（全体のオン・オフとコンボ倍率のオン・オフは 1.9.0）
     public boolean miningWeakSpotEnabled;
@@ -193,7 +197,8 @@ public final class SyncedSettings {
      */
     static final String[] WIRE = {
             "serverVersion", "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance", "weakSpotMinRadius",
-            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "spotSize", "miningWeakSpotEnabled",
+            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "spotSize", "heldItemsCountAsEmptyHand",
+            "heldItemExcludes", "miningWeakSpotEnabled",
             "miningComboBonus",
             "boostMultiplier", "boostDurationTicks", "minHitIntervalTicks", "growthWeakSpotEnabled",
             "growthMinHitIntervalTicks", "growthMinRadius", "growthExcludedBlocks", "growthExtraBlocks",

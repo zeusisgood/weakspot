@@ -88,6 +88,14 @@ public final class ServerConfig {
         @Config.RangeDouble(min = 0.5, max = 2.0)
         public double spotSize = 1.0;
 
+        @Config.Comment({"[サーバー] 右クリックで何もしないアイテム（ツルハシ・棒・インゴットなど）を持っていても、",
+                "素手と同じに成長・収穫・機械・動物の弱点を出すか（自動で見分ける。動物の餌などは外す）"})
+        public boolean heldItemsCountAsEmptyHand = true;
+
+        @Config.Comment({"[サーバー] 素手と同じに扱わないアイテム（登録名。1 行に 1 つ。例: modid:wrench）",
+                "自動で見分けられない、右クリックで何かする Mod のアイテムを書く"})
+        public String[] heldItemExcludes = {};
+
         @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
                 "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
         @Config.RangeDouble(min = 0.0, max = 256.0)

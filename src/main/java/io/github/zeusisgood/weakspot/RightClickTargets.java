@@ -52,12 +52,13 @@ public final class RightClickTargets {
 
     /** 右クリックで出る弱点の種類。対象でなければ null。 */
     public static HitKind classify(World world, EntityPlayer player, BlockPos pos, SyncedSettings settings) {
-        if (!PlayerRules.canUse(player) || !player.getHeldItemMainhand().isEmpty()) {
+        if (!PlayerRules.canUse(player) || !HeldItems.isFree(player.getHeldItemMainhand(), settings)) {
             return null;
         }
         IBlockState state = world.getBlockState(pos);
         // サーバーの設定で止めた種類は、対象にしない（1.9.0。収穫は isHarvestable の中で見る）
-        if (settings.enabled(HitKind.MACHINE) && player.isSneaking() && player.getHeldItemOffhand().isEmpty()
+        if (settings.enabled(HitKind.MACHINE) && player.isSneaking()
+                && HeldItems.isFree(player.getHeldItemOffhand(), settings)
                 && isMachine(world, pos, state, settings)) {
             return HitKind.MACHINE;
         }
