@@ -80,7 +80,7 @@ Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge 
   - Modrinth は、`main` でこのファイルが変わると `.github/workflows/modrinth-description.yml` が API（`PATCH /v2/project/<ID>`）で反映する。Secrets の `MODRINTH_TOKEN`（スコープ「プロジェクトを書く」）と Variables の `MODRINTH_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる。Actions の画面から手動でも流せる）。
   - CurseForge は API で説明を変えられないので手動。このファイルを直した PR では、本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
 - **画像**（1.9.3 のあと）: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`。1.9.4）用）。AI 生成なので、Modrinth の開示の「資産」に入れてある。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
-- 配布サイトのページ（1.10.0 のあと）: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（ゲーム内の [変更点を見る] と自動化の起点のため）。Modrinth は審査が済んだら、ダウンロードの CurseForge の下に 1 行足す。
+- 配布サイトのページ（1.10.0 のあと）: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（自動化の起点のため）。ゲーム内の [変更点を見る]・[ダウンロード] は 1.11.0 から CurseForge のファイルの一覧を指す。Modrinth は審査が済んだら、ダウンロードの CurseForge の下に 1 行足す。
 
 ## ライセンスと issue
 
