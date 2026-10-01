@@ -2,7 +2,7 @@
 name: 要望 / Feature request
 about: 機能の追加や変更を提案する / Suggest an idea
 title: "[要望 / Request] "
-labels: ''
+labels: 'enhancement'
 assignees: ''
 ---
 

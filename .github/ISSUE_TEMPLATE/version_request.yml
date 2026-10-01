@@ -1,0 +1,88 @@
+name: 別の Minecraft の版への対応 / Other Minecraft version
+description: 1.12.2 以外の版・ローダーへの対応を要望する / Ask for a port to another Minecraft version or loader
+title: "[版の要望 / Version request] "
+labels: ["version-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        今は Minecraft 1.12.2 + Forge だけに対応しています。ほかの版への移植の予定は未定ですが、要望の多さを参考にします。
+        同じ版・ローダーの要望が既にあれば、新しく作らずに 👍 を付けてください。
+
+        Only Minecraft 1.12.2 + Forge is supported right now. There is no plan for a port yet, but requests help decide.
+        If someone already asked for the same version and loader, please add a 👍 there instead.
+  - type: dropdown
+    id: minecraft
+    attributes:
+      label: Minecraft の版 / Minecraft version
+      options:
+        - "1.16.5"
+        - "1.18.2"
+        - "1.19.2"
+        - "1.20.1"
+        - "1.21.x"
+        - その他（備考に） / Other (write in Notes)
+    validations:
+      required: true
+  - type: dropdown
+    id: loader
+    attributes:
+      label: ローダー / Mod loader
+      options:
+        - Forge
+        - NeoForge
+        - Fabric
+        - Quilt
+        - どれでもよい / Any
+    validations:
+      required: true
+  - type: dropdown
+    id: play
+    attributes:
+      label: 遊び方 / How you play
+      options:
+        - ソロ / Singleplayer
+        - 友人とのマルチ / Multiplayer with friends
+        - 公開サーバー / Public server
+        - Modpack
+    validations:
+      required: false
+  - type: input
+    id: modpack
+    attributes:
+      label: Modpack の名前・リンク（あれば） / Modpack name or link (if any)
+    validations:
+      required: false
+  - type: dropdown
+    id: kinds
+    attributes:
+      label: 特に欲しい種類 / Kinds you want most
+      multiple: true
+      options:
+        - 採掘 / Mining
+        - 作物・苗木 / Growth
+        - 収穫 / Harvest
+        - 機械 / Machine
+        - 動物 / Animal
+        - 釣り / Fishing
+        - 弓 / Bow
+        - 近接 / Melee
+        - 投擲物 / Throwing
+        - 飲食 / Eating
+        - 乗り物 / Vehicle
+        - はしご / Ladder
+        - ダッシュ / Sprint
+        - エリトラ / Elytra
+        - ネザーゲート / Portal
+        - 泳ぎ / Swim
+        - 睡眠 / Sleeping
+        - エンチャント / Enchanting
+        - 全部 / All of them
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考 / Notes
+    validations:
+      required: false

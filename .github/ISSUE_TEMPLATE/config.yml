@@ -1,1 +1,8 @@
 blank_issues_enabled: true
+contact_links:
+  - name: 遊び方 / How to play
+    url: https://github.com/zeusisgood/weakspot/blob/main/doc/play.md
+    about: 種類ごとの遊び方・コンボ・統計など（日本語） / Kinds, combos and stats (Japanese)
+  - name: CurseForge
+    url: https://www.curseforge.com/minecraft/mc-mods/weakspot
+    about: ダウンロードと説明 / Downloads and description
