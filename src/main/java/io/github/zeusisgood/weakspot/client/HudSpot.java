@@ -174,7 +174,7 @@ final class HudSpot {
             return false;
         }
         double scale = new ScaledResolution(mc).getScaleFactor();
-        double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, screen.fovDegrees(),
+        double allowed = FishingMath.allowedAngle(radius() * scale, screen.fovDegrees(),
                 screen.viewportHeight());
         return FishingMath.isAimed(p[2], allowed);
     }
@@ -189,6 +189,11 @@ final class HudSpot {
         return screen.project(eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE);
     }
 
+    /** 画面の上の半径（GUI の座標。1.11.0 から設定 spotSize と種類ごとの倍率を掛ける）。 */
+    private double radius() {
+        return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(kind);
+    }
+
     /** HUD に描く（RenderGameOverlayEvent.Post の中で、beginOverlay と endOverlay の間で呼ぶ）。 */
     void draw(Minecraft mc) {
         if (!has || !screen.isValid()) {
@@ -196,7 +201,7 @@ final class HudSpot {
         }
         double scale = new ScaledResolution(mc).getScaleFactor();
         long nowMs = Minecraft.getSystemTime();
-        double radius = FishingMath.SPOT_SCREEN_RADIUS;
+        double radius = radius();
         boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         int rgb = MarkerLook.color(kind, defaultRgb);
         float[][] look = palette == null ? ScreenProjection.lookOf(rgb)

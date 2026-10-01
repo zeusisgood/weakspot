@@ -63,6 +63,11 @@ public enum HitKind {
         return usesComboFactor;
     }
 
+    /** 弱点の大きさの、種類ごとの決まった倍率（1.11.0。設定 spotSize に掛ける）。釣りだけ少し小さい。 */
+    public double sizeFactor() {
+        return this == FISHING ? 0.75 : 1.0;
+    }
+
     /** 設定・翻訳キーに使う名前（小文字。"harvest" など）。 */
     public String key() {
         return name().toLowerCase(java.util.Locale.ROOT);

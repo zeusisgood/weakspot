@@ -59,6 +59,11 @@ final class FishingSpot {
     private static float progress;
     private static long receivedTick = Long.MIN_VALUE / 2;
     /** 問い合わせの相手は自分の浮きだけなので、相手は区別しない。 */
+    /** 画面の上の半径（GUI の座標。1.11.0 から設定 spotSize × 釣りの倍率 0.75）。 */
+    private static double radius() {
+        return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(HitKind.FISHING);
+    }
+
     private static final QueryThrottle<Boolean> QUERIES = new QueryThrottle<>(QUERY_INTERVAL_TICKS, false);
 
     // 弱点（浮きからの水平の差。当たり判定の位置と、表示の位置 motion）
@@ -185,7 +190,7 @@ final class FishingSpot {
         double[] p = SCREEN.project(hookX + dx, hookY + LIFT, hookZ + dz);
         if (p != null && mc.currentScreen == null) {
             double scale = new ScaledResolution(mc).getScaleFactor();
-            double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, SCREEN.fovDegrees(),
+            double allowed = FishingMath.allowedAngle(radius() * scale, SCREEN.fovDegrees(),
                     SCREEN.viewportHeight());
             aimed = FishingMath.isAimed(p[2], allowed);
             // 照準を重ねるだけで当たり（1.10.1。それまでは左クリック）
@@ -222,7 +227,7 @@ final class FishingSpot {
         }
         double scale = new ScaledResolution(mc).getScaleFactor();
         long nowMs = Minecraft.getSystemTime();
-        double radius = FishingMath.SPOT_SCREEN_RADIUS;
+        double radius = radius();
 
         HudSpot.beginOverlay();
 

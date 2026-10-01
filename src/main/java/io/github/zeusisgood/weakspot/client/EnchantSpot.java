@@ -75,14 +75,14 @@ final class EnchantSpot extends ScreenSpotKind {
      */
     @Override
     boolean place(GuiScreen gui, double prevX, double prevY) {
-        double left = (gui.width - PANEL_WIDTH) / 2.0 - PANEL_GAP - RADIUS;
-        double right = (gui.width + PANEL_WIDTH) / 2.0 + PANEL_GAP + RADIUS;
-        double top = (gui.height - PANEL_HEIGHT) / 2.0 - PANEL_GAP - RADIUS;
-        double bottom = (gui.height + PANEL_HEIGHT) / 2.0 + PANEL_GAP + RADIUS;
-        double minX = EDGE + RADIUS;
-        double maxX = gui.width - EDGE - RADIUS;
-        double minY = EDGE + RADIUS;
-        double maxY = gui.height - EDGE - RADIUS;
+        double left = (gui.width - PANEL_WIDTH) / 2.0 - PANEL_GAP - radius();
+        double right = (gui.width + PANEL_WIDTH) / 2.0 + PANEL_GAP + radius();
+        double top = (gui.height - PANEL_HEIGHT) / 2.0 - PANEL_GAP - radius();
+        double bottom = (gui.height + PANEL_HEIGHT) / 2.0 + PANEL_GAP + radius();
+        double minX = EDGE + radius();
+        double maxX = gui.width - EDGE - radius();
+        double minY = EDGE + radius();
+        double maxY = gui.height - EDGE - radius();
         if (maxX <= minX || maxY <= minY) {
             return false;
         }

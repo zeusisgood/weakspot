@@ -34,6 +34,8 @@ public final class SyncedSettings {
     public double weakSpotMaxRadiusRatio;
     public double minFaceSize;
     public int lingerTicks;
+    /** 弱点の大きさの倍率（1.11.0。種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う）。 */
+    public double spotSize;
 
     // 採掘（全体のオン・オフとコンボ倍率のオン・オフは 1.9.0）
     public boolean miningWeakSpotEnabled;
@@ -163,6 +165,11 @@ public final class SyncedSettings {
     private SyncedSettings() {
     }
 
+    /** その種類の弱点の大きさの倍率（1.11.0。spotSize × 種類ごとの決まった倍率）。 */
+    public double spotSize(HitKind kind) {
+        return (spotSize > 0 ? spotSize : 1) * kind.sizeFactor();
+    }
+
     /** 成長の弱点の追加リストを読んだもの。 */
     public GrowthFilters growthFilters() {
         GrowthFilters filters = growthFilters;
@@ -180,7 +187,8 @@ public final class SyncedSettings {
      */
     static final String[] WIRE = {
             "serverVersion", "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance", "weakSpotMinRadius",
-            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "miningWeakSpotEnabled", "miningComboBonus",
+            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "spotSize", "miningWeakSpotEnabled",
+            "miningComboBonus",
             "boostMultiplier", "boostDurationTicks", "minHitIntervalTicks", "growthWeakSpotEnabled",
             "growthMinHitIntervalTicks", "growthMinRadius", "growthExcludedBlocks", "growthExtraBlocks",
             "machineWeakSpotEnabled", "machineMinHitIntervalTicks", "excludedBlocks", "machineBoostMultiplier",

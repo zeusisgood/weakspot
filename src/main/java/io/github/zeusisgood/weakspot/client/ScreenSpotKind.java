@@ -15,7 +15,8 @@ import net.minecraft.client.gui.GuiScreen;
  */
 abstract class ScreenSpotKind {
 
-    static final double RADIUS = 12;
+    /** 基本の半径（GUI の座標）。実際の半径は radius()（1.11.0 から設定 spotSize を掛ける）。 */
+    private static final double RADIUS = 12;
 
     final HitKind kind;
     final Random random = new Random();
@@ -30,6 +31,11 @@ abstract class ScreenSpotKind {
 
     ScreenSpotKind(HitKind kind) {
         this.kind = kind;
+    }
+
+    /** 半径（GUI の座標。設定 spotSize と種類ごとの倍率を掛けたもの）。 */
+    final double radius() {
+        return RADIUS * ClientSettings.get().spotSize(kind);
     }
 
     /** この画面で、この種類を出すか（種類がオン・設定・画面の種類など）。false の間は、出している画面を忘れる。 */

@@ -108,8 +108,10 @@ final class WeakSpot {
         double minRadius = kind == HitKind.GROWTH || kind == HitKind.HARVEST
                 ? Math.max(settings.weakSpotMinRadius, settings.growthMinRadius)
                 : settings.weakSpotMinRadius;
-        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio, minRadius,
-                settings.weakSpotMaxRadiusRatio, settings.edgeMargin, settings.minMoveDistance);
+        double size = settings.spotSize(kind);
+        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio * size,
+                minRadius * size, settings.weakSpotMaxRadiusRatio * size, settings.edgeMargin,
+                settings.minMoveDistance);
         double[] min = {box.minX, box.minY, box.minZ};
         double[] max = {box.maxX, box.maxY, box.maxZ};
         double plane = face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? max[axis] : min[axis];
@@ -150,8 +152,9 @@ final class WeakSpot {
         if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
             return null;
         }
-        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio,
-                settings.weakSpotMinRadius, settings.weakSpotMaxRadiusRatio, settings.edgeMargin,
+        double size = settings.spotSize(kind);
+        WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio * size,
+                settings.weakSpotMinRadius * size, settings.weakSpotMaxRadiusRatio * size, settings.edgeMargin,
                 settings.minMoveDistance);
         WeakSpot spot = new WeakSpot(kind, entity, entity.getPosition(), face, 0, rect, layout, box);
         spot.follow(box);

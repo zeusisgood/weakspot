@@ -80,6 +80,11 @@ public final class ServerConfig {
                 "統計画面（K キー）の「ガイド」ボタンでも読める。サーバーだけが使う（クライアントには送らない）"})
         public boolean giveGuideBook = true;
 
+        @Config.Comment({"[サーバー] 弱点の大きさの倍率（すべての種類。見た目と当たり判定の両方）",
+                "釣りはこの値にさらに 0.75 を掛ける。的当てには掛けない"})
+        @Config.RangeDouble(min = 0.5, max = 2.0)
+        public double spotSize = 1.0;
+
         @Config.Comment({"[サーバー] 他のプレイヤーの弱点マークを転送する範囲（ブロック）。マークからこの距離以内のプレイヤーにだけ見える",
                 "0 で転送しない（他のプレイヤーのマークは見えなくなる）"})
         @Config.RangeDouble(min = 0.0, max = 256.0)
