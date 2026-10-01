@@ -7,9 +7,9 @@ import org.junit.Test;
 public class MachineComboBoostTest {
 
     @Test
-    public void defaultsReachSixteenAtAThousand() {
+    public void defaultsReachTheCapOfSixteen() {
         assertEquals(4.0, MachineComboBoost.multiplier(4.0, 16.0, 1), 0);
-        assertEquals(10.0, MachineComboBoost.multiplier(4.0, 16.0, 250), 0);
+        assertEquals(14.0, MachineComboBoost.multiplier(4.0, 16.0, 250), 0);
         assertEquals(16.0, MachineComboBoost.multiplier(4.0, 16.0, 1000), 0);
     }
 

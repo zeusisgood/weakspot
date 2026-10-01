@@ -24,25 +24,89 @@ public final class HitPitch {
 
     /** 長音階の 1 オクターブの 7 音（上のドを除く）。音階の何度下かを数えるのに使う。 */
     private static final int[] SEVEN = {0, 2, 4, 5, 7, 9, 11};
-    /** このコンボから、旋律の 3 度下を重ねる（1.9.5。コンボの数字の橙と同じ区切り）。 */
-    public static final int TWO_NOTES_FROM = 25;
-    /** このコンボから、さらに 5 度下も重ねる（1.9.5。コンボの数字の虹色と同じ区切り）。 */
-    public static final int THREE_NOTES_FROM = 100;
     /** このコンボ以上で途切れたとき、下がる 2 音を鳴らす（1.9.5）。 */
     public static final int BREAK_SOUND_FROM = 10;
 
+    /** 和音の形（旋律から何度下を重ねるか。音階の度数）。1.11.0 でコンボの段階（ComboTier）に合わせて増やした。 */
+    private static final int[] THIRD = {-2};
+    private static final int[] TRIAD = {-2, -4};
+    private static final int[] TRIAD_OCTAVE = {-2, -4, -7};
+    private static final int[] SIXTH = {-2, -4, -5};
+    private static final int[] SEVENTH = {-2, -4, -6};
+    private static final int[] NINTH = {-2, -4, -6, -8};
+    private static final int[] SUS4 = {-3, -4};
+    /** 400 から 100 ごとに巡る形。 */
+    private static final int[][] CYCLE = {SIXTH, SEVENTH, NINTH, SUS4};
+    /** sus4 の解決の音（少し遅れて鳴らす）。 */
+    private static final int RESOLVE = -2;
+    /** このコンボから、旋律にベルを重ねる。 */
+    public static final int BELL_FROM = 300;
+
+    /** そのコンボで旋律の下に重ねる度数（1.11.0）。 */
+    static int[] chordOffsets(int streak) {
+        if (streak >= 400) {
+            return CYCLE[(streak / 100 - 4) % CYCLE.length];
+        }
+        if (streak >= 300) {
+            return NINTH;
+        }
+        if (streak >= 250) {
+            return SUS4;
+        }
+        if (streak >= 200) {
+            return NINTH;
+        }
+        if (streak >= 150) {
+            return SEVENTH;
+        }
+        if (streak >= 100) {
+            return SIXTH;
+        }
+        if (streak >= 75) {
+            return TRIAD_OCTAVE;
+        }
+        if (streak >= 50) {
+            return TRIAD;
+        }
+        if (streak >= 25) {
+            return THIRD;
+        }
+        return new int[0];
+    }
+
     /**
      * 1 回のヒットで鳴らすピッチ（1.9.5）。先頭が旋律（forStreak）、続けて重ねる音（旋律より下。ピッチの上限 2.0 のため）。
-     * コンボ 1〜24 は旋律だけ、25〜99 は 3 度下（音階で 2 つ下）も、100 以上は 5 度下（4 つ下）も。chords が false なら旋律だけ。
+     * 1.11.0 から、重ねる形はコンボの段階ごと（chordOffsets）。下のドより低くなる音は 1 オクターブ上げる（下限 0.5 のため）。
+     * chords が false なら旋律だけ。
      */
     public static float[] forHit(int streak, boolean chords) {
         int degree = (Math.max(streak, 1) - 1) % MAJOR_SCALE.length;
-        int notes = !chords || streak < TWO_NOTES_FROM ? 1 : streak < THREE_NOTES_FROM ? 2 : 3;
-        float[] pitches = new float[notes];
-        for (int i = 0; i < notes; i++) {
-            pitches[i] = pitchOfDegree(degree - 2 * i);
+        int[] offsets = chords ? chordOffsets(streak) : new int[0];
+        float[] pitches = new float[1 + offsets.length];
+        pitches[0] = pitchOfDegree(degree);
+        for (int i = 0; i < offsets.length; i++) {
+            pitches[i + 1] = pitchOfDegree(lowest(degree + offsets[i]));
         }
         return pitches;
+    }
+
+    /** sus4 の形のとき、少し遅れて鳴らす解決の音（なければ 0）。 */
+    public static float resolveFor(int streak, boolean chords) {
+        if (!chords || chordOffsets(streak) != SUS4) {
+            return 0;
+        }
+        int degree = (Math.max(streak, 1) - 1) % MAJOR_SCALE.length;
+        return pitchOfDegree(lowest(degree + RESOLVE));
+    }
+
+    /** 旋律にベルを重ねるか（300 から）。 */
+    public static boolean withBell(int streak, boolean chords) {
+        return chords && streak >= BELL_FROM;
+    }
+
+    /** 下のド（-7）より低い度数を 1 オクターブ上げる。 */
+    private static int lowest(int degree) {
+        return degree < -SEVEN.length ? degree + SEVEN.length : degree;
     }
 
     /** コンボが途切れたときの下がる 2 音（下のソ → 下のド。1.9.5）。 */

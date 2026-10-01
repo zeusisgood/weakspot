@@ -101,7 +101,7 @@ public final class ServerConfig {
         public boolean miningWeakSpotEnabled = true;
 
         @Config.Comment({"[サーバー] 採掘のコンボ倍率のオン・オフ",
-                "オンなら、1 回のヒットで進む量にコンボの掛け数（25 で ×1.25 … 1000 で ×4）を掛ける"})
+                "オンなら、1 回のヒットで進む量にコンボの掛け数（25 で ×1.25 … 300 で ×4、その先も 100 ごとに +0.5）を掛ける"})
         public boolean miningComboBonus = true;
 
         @Config.Comment("[サーバー] ヒット時の破壊速度の倍率")
@@ -284,7 +284,7 @@ public final class ServerConfig {
         public double machineBoostMultiplier = 4.0;
 
         @Config.Comment({"[サーバー] 機械の倍率の上限。クライアントにも送る（HUD の「機械 n倍速」）。コンボが続くと machineBoostMultiplier に掛け数を掛ける",
-                "（25 で ×1.25、50 で ×1.5、100 で ×2、250 で ×2.5、500 で ×3、1000 で ×4）。その結果をこの値で抑える",
+                "（25 で ×1.25、50 で ×1.5、100 で ×2、150 で ×2.5、200 で ×3、250 で ×3.5、300 で ×4、その先も 100 ごとに +0.5）。その結果をこの値で抑える",
                 "機械 Mod の不具合やサーバーの負荷が気になるときに下げる。machineBoostMultiplier より小さいときも、こちらを優先する"})
         @Config.RangeDouble(min = 1.0, max = 100.0)
         public double machineBoostMaxMultiplier = 16.0;
@@ -498,11 +498,11 @@ public final class ServerConfig {
                 "馬・豚・トロッコ・ボートに乗って動いている間、照準の近くに弱点が出る。当てると、その乗り物が少しの間速くなる"})
         public boolean vehicleWeakSpotEnabled = true;
 
-        @Config.Comment("[サーバー] 乗り物の弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+        @Config.Comment("[サーバー] 乗り物の弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 300 で ×4、その先も 100 ごとに +0.5）を上乗せする")
         @Config.RangeDouble(min = 1.0, max = 100.0)
         public double vehicleBoostMultiplier = 1.5;
 
-        @Config.Comment({"[サーバー] 乗り物の速さの倍率の上限。0 なら上限なし（初期値。コンボ 1000 で 6 倍になる）",
+        @Config.Comment({"[サーバー] 乗り物の速さの倍率の上限。0 なら上限なし（初期値。コンボ 300 で 6 倍、その先も上がり続ける）",
                 "速すぎて困るときに、3.0 などを書く"})
         @Config.RangeDouble(min = 0.0, max = 100.0)
         public double vehicleBoostMaxMultiplier = 0.0;
@@ -526,7 +526,7 @@ public final class ServerConfig {
                 "はしご・ツタを登り降りしている間、照準の真上か真下に弱点が出る。当てると、登り降りが少しの間速くなる"})
         public boolean ladderWeakSpotEnabled = true;
 
-        @Config.Comment("[サーバー] はしごの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+        @Config.Comment("[サーバー] はしごの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 300 で ×4、その先も 100 ごとに +0.5）を上乗せする")
         @Config.RangeDouble(min = 1.0, max = 100.0)
         public double ladderBoostMultiplier = 1.5;
 
@@ -593,7 +593,7 @@ public final class ServerConfig {
         @Config.RangeInt(min = 0, max = 200)
         public int harvestMinHitIntervalTicks = 4;
 
-        @Config.Comment({"[サーバー] 収穫で、コンボの掛け数（25 で ×1.25 … 1000 で ×4）だけ収穫物を増やすか（種は増やさない）",
+        @Config.Comment({"[サーバー] 収穫で、コンボの掛け数（25 で ×1.25 … 300 で ×4、その先も 100 ごとに +0.5）だけ収穫物を増やすか（種は増やさない）",
                 "サーバーだけが使う（クライアントには送らない）"})
         public boolean harvestComboBonus = true;
 
@@ -629,7 +629,7 @@ public final class ServerConfig {
                 "地面を走っている間、照準の真上か真下に弱点が出る。当てると、少しの間速く走れる"})
         public boolean sprintWeakSpotEnabled = true;
 
-        @Config.Comment("[サーバー] ダッシュの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せする")
+        @Config.Comment("[サーバー] ダッシュの弱点に当てたときの速さの倍率。コンボの掛け数（25 で ×1.25 … 300 で ×4、その先も 100 ごとに +0.5）を上乗せする")
         @Config.RangeDouble(min = 1.0, max = 100.0)
         public double sprintBoostMultiplier = 1.5;
 

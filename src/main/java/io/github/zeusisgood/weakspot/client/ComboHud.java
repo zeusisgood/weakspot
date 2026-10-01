@@ -30,7 +30,7 @@ import org.lwjgl.opengl.GL11;
 /**
  * 自分の連続ヒット（コンボ）の画面表示。数は OwnHits.STREAK（ヒット音の音階と同じ数）。
  * 2 以上で「12 HIT」と出し、ヒットのたびに弾ませる。下のバーは途切れるまでの残り時間。
- * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、100、250、500、1000（以降 1000 ごと）で
+ * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、75、100、150、200、250、300（以降 100 ごと）で
  * 光を出す（音・花火・タイトルは ComboEffects。1.8.9 で分けた）。
  * 直前にヒットした種類の弱点が出ている間は、その下に種類の表示を出す（1.8.7）: コンボの掛け数を使う種類は「走り ×1.25」
  * （掛け数が 1 より大きいとき）、機械は今の速さ「機械 4倍速」、ディスペンサー・ドロッパーは「発射 ×2」。色はその種類の弱点の色。
@@ -151,12 +151,12 @@ final class ComboHud {
         double now = ClientWeakSpotHandler.clientTick + event.getPartialTicks();
         ComboEffects.drawTitle(mc, event.getResolution(), now);
         if (combo >= ComboDisplay.MIN_SHOWN) {
-            boolean big = stepCombo >= 250 && lastHitTime == stepTime;
+            boolean big = stepCombo >= ComboMilestones.STRONG_FROM && lastHitTime == stepTime;
             double bounce = ComboDisplay.bounceScale(now - lastHitTime,
                     big ? ComboDisplay.BIG_BOUNCE_PEAK : ComboDisplay.BOUNCE_PEAK);
             float bottom = draw(mc, event.getResolution(), I18n.format("weakspot.combo.hit", combo), colorOf(combo), 1,
                     bounce, HitStreak.remainingFraction(now - lastHitTime),
-                    ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= 250, now);
+                    ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= ComboMilestones.STRONG_FROM, now);
             drawKindLabel(mc, bottom, now);
         } else if (combo == 1 && lastKind == HitKind.MACHINE && ClientWeakSpotHandler.machineSpotActive()) {
             // 1 ヒット目はコンボの数字が出ないので、数字の位置に機械の表示だけを出す（1.6.0）
@@ -178,7 +178,7 @@ final class ComboHud {
         }
     }
 
-    /** 段階の光の色（250 以上は段階の色、それより下はその数の色）。 */
+    /** 段階の光の色（150 以上は段階の色、それより下と虹色はその数の色）。 */
     private static int glowRgb(int step) {
         int rgb = ComboMilestones.glowRgb(step);
         return rgb >= 0 ? rgb : colorOf(step);
@@ -201,21 +201,18 @@ final class ComboHud {
     }
 
     /**
-     * 次に掛け数が上がる段階（ComboFactor の 25・50・100…）までの進み具合のゲージ（1.10.2）。色は次の段階の色。
-     * 最後の段階より先は出さない。top は種類の表示の下端（表示がなければコンボの表示の下端）。
+     * 次に掛け数が上がる段階（ComboFactor の 25・50・100…、300 から 100 ごと）までの進み具合のゲージ（1.10.2）。
+     * 色は次の段階の色。top は種類の表示の下端（表示がなければコンボの表示の下端）。
      */
     private static void drawFactorGauge(Minecraft mc, float top) {
         double progress = ComboFactor.progressToNext(combo);
-        if (progress < 0) {
-            return;
-        }
         float scale = (float) WeakSpotConfig.client.combo.comboScale;
         float width = GAUGE_WIDTH * scale;
         float height = Math.max(1, Math.round(2 * scale));
         float y = top + 2 * scale;
         float left = lastCx - width / 2;
         fillRect(left, y, left + width, y + height, 0x000000, 0.4);
-        fillRect(left, y, left + (float) (width * progress), y + height, ComboFactor.nextStepRgb(combo), 0.9);
+        fillRect(left, y, left + (float) (width * progress), y + height, colorOf(ComboFactor.nextStep(combo)), 0.9);
     }
 
     /** 種類の表示を描き、その下端を返す（描かなければ top）。 */
@@ -317,7 +314,7 @@ final class ComboHud {
     /**
      * @param barFraction 残り時間のバー（0〜1）。負なら描かない
      * @param glow 段階の演出の光の濃さ（0 なら描かない）
-     * @param strongGlow 250 以上の段階の強い光
+     * @param strongGlow 150 以上の段階の強い光
      * @return 描いたものの下端（「機械 ×n」をその下に出す）
      */
     private static float draw(Minecraft mc, ScaledResolution res, String text, int rgb, double alpha, double bounce,
@@ -375,7 +372,7 @@ final class ComboHud {
         return bottom;
     }
 
-    /** コンボの数の色（段階の色。100 以上は虹色）。頭の上のコンボ（OtherCombos）も使う。 */
+    /** コンボの数の色（段階の色。400 以上は虹色）。頭の上のコンボ（OtherCombos）も使う。 */
     static int colorOf(int value) {
         ComboTier tier = ComboTier.of(value);
         if (tier != ComboTier.RAINBOW) {

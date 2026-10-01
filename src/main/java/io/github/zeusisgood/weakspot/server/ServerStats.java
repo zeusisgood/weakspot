@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
+import io.github.zeusisgood.weakspot.common.ComboMilestones;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.HitStreak;
 import io.github.zeusisgood.weakspot.common.MiningStats;
@@ -53,7 +54,12 @@ public final class ServerStats {
     public static int countStreak(EntityPlayerMP player) {
         long now = player.mcServer.getTickCounter();
         int count = STREAKS.computeIfAbsent(player.getUniqueID(), id -> new HitStreak()).hit(now);
+        long bestBefore = total(player).maxStreak;
         record(player, stats -> stats.recordStreak(count));
+        if (count > bestBefore && ComboMilestones.isStep(count)) {
+            // 最大コンボを初めて超えて段階に届いたら、ほかの全員に知らせる（1.11.0）
+            MiningRewards.broadcastCombo(player, count);
+        }
         return count;
     }
 

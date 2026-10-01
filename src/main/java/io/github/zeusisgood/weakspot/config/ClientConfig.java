@@ -116,7 +116,7 @@ public final class ClientConfig {
                 "BELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央）"})
         public ComboPosition comboPosition = ComboPosition.BELOW_CROSSHAIR;
 
-        @Config.Comment("[クライアント] コンボが 10、25、50、100、250、500、1000（以降 1000 ごと）に達したときの演出（強調音・光・花火・タイトル）")
+        @Config.Comment("[クライアント] コンボが 10、25、50、75、100、150、200、250、300（以降 100 ごと）に達したときの演出（強調音・光・花火・タイトル）")
         public boolean comboMilestoneEffects = true;
 
         @Config.Comment({"[クライアント] 近くのほかのプレイヤーのコンボ（10 以上）を、頭の上に「n HIT」と表示するか"})

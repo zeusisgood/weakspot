@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
+import io.github.zeusisgood.weakspot.common.ComboTier;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.Milestones;
 import io.github.zeusisgood.weakspot.common.MiningStats;
@@ -109,6 +110,56 @@ public final class MiningRewards {
             }
             text.getStyle().setColor(color);
             other.sendMessage(text);
+        }
+    }
+
+    /** コンボの段階の知らせの翻訳キー weakspot.milestone.broadcast.combo を足した版。 */
+    static final String COMBO_BROADCAST_SINCE = "1.11.0";
+
+    /**
+     * 本人以外の全員のチャットに、そのプレイヤーが初めてコンボの段階に届いたことを知らせる（1.11.0。最大コンボを超えたときだけ。
+     * ServerStats.countStreak が呼ぶ）。色は段階の色に近いチャットの色。受け取った側は showOthersMilestones で消せる。
+     */
+    static void broadcastCombo(EntityPlayerMP player, int combo) {
+        MinecraftServer server = player.getServer();
+        if (server == null) {
+            return;
+        }
+        TextFormatting color = chatColor(ComboTier.of(combo));
+        for (EntityPlayerMP other : server.getPlayerList().getPlayers()) {
+            if (other == player) {
+                continue;
+            }
+            ITextComponent text = PlayerText.of(other, COMBO_BROADCAST_SINCE, "weakspot.milestone.broadcast.combo",
+                    player.getName(), combo);
+            text.getStyle().setColor(color);
+            other.sendMessage(text);
+        }
+    }
+
+    /** コンボの段階の色に近いチャットの色（1.12 のチャットは 16 色だけ）。 */
+    static TextFormatting chatColor(ComboTier tier) {
+        switch (tier) {
+            case YELLOW:
+                return TextFormatting.YELLOW;
+            case ORANGE:
+            case GOLD:
+                return TextFormatting.GOLD;
+            case RED:
+                return TextFormatting.RED;
+            case PINK:
+            case RAINBOW:
+                return TextFormatting.LIGHT_PURPLE;
+            case PURPLE:
+                return TextFormatting.DARK_PURPLE;
+            case BLUE:
+                return TextFormatting.BLUE;
+            case AQUA:
+                return TextFormatting.AQUA;
+            case GREEN:
+                return TextFormatting.GREEN;
+            default:
+                return TextFormatting.WHITE;
         }
     }
 
