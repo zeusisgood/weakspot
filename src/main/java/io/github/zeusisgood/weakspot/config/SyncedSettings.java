@@ -158,6 +158,12 @@ public final class SyncedSettings {
     public int swimBoostDurationTicks;
     public double swimDashDistance;
 
+    // 落下（落ちた距離を減らすのはサーバー。クライアントは出し始める距離と、見込みのダメージの表示に使う。1.11.0）
+    public boolean fallWeakSpotEnabled;
+    public int fallMinHitIntervalTicks;
+    public double fallMinDistance;
+    public double fallReduceBlocks;
+
     // 他のプレイヤーの弱点マーク
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
@@ -209,7 +215,8 @@ public final class SyncedSettings {
             "sprintBoostMultiplier", "sprintBoostMaxMultiplier", "sprintBoostDurationTicks",
             "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "swimWeakSpotEnabled",
             "swimMinHitIntervalTicks", "swimBoostMultiplier", "swimBoostMaxMultiplier", "swimBoostDurationTicks",
-            "swimDashDistance", "markerShareRange",
+            "swimDashDistance", "fallWeakSpotEnabled", "fallMinHitIntervalTicks", "fallMinDistance",
+            "fallReduceBlocks", "markerShareRange",
             "markerSendMinIntervalTicks"
     };
     private static final Field[] FIELDS = new Field[WIRE.length];

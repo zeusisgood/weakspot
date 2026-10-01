@@ -98,6 +98,7 @@ public final class GuideBook {
             new Page("elytra", Chapter.AIM, s("when"), s("hit"), s("tip")),
             new Page("portal", Chapter.AIM, s("when"), s("hit")),
             new Page("swim", Chapter.AIM, s("when"), s("hit")),
+            new Page("fall", Chapter.AIM, s("when"), s("hit")),
             new Page("fishing", Chapter.SCREEN, s("when"), s("hit")),
             new Page("sleep", Chapter.SCREEN, s("when"), s("hit"), s("tip")),
             new Page("enchant", Chapter.SCREEN, s("when"), s("hit"), s("tip")),

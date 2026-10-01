@@ -101,7 +101,7 @@ public final class WeakSpotCommand extends CommandBase {
                 stats.count(HitKind.MELEE), stats.count(HitKind.VEHICLE), stats.count(HitKind.EAT),
                 stats.count(HitKind.SLEEP), stats.count(HitKind.LADDER), stats.count(HitKind.ELYTRA),
                 stats.count(HitKind.ENCHANT), stats.count(HitKind.HARVEST), stats.count(HitKind.THROW),
-                stats.count(HitKind.SPRINT), stats.count(HitKind.PORTAL), stats.count(HitKind.SWIM),
+                stats.count(HitKind.SPRINT), stats.count(HitKind.PORTAL), stats.count(HitKind.SWIM), stats.count(HitKind.FALL),
                 stats.totalHits()));
     }
 

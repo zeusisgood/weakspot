@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
+import io.github.zeusisgood.weakspot.common.ComboFactor;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.TimedBoostMath;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -15,7 +16,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * はしご・エリトラ・走り・泳ぎ（1.10.0）の弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。
+ * はしご・エリトラ・走り・泳ぎ（1.10.0）・落下（1.11.0）の弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。
+ * 落下は、サーバーの落ちた距離（fallDistance）を減らす。
  * はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
  * 走りは、移動速度に一時的な修正（保存しない）をかける（乗り物の馬と同じ。自分のクライアントにも届いて効く）。
  * サーバーの位置はクライアントより遅れて届くので、登っている・飛んでいる・走っていることは、直前 RECENT_TICKS の
@@ -36,6 +38,7 @@ public final class MoveHits {
         long elytraTick = Long.MIN_VALUE / 2;
         long sprintTick = Long.MIN_VALUE / 2;
         long swimTick = Long.MIN_VALUE / 2;
+        long fallTick = Long.MIN_VALUE / 2;
         final Map<HitKind, Long> lastHit = new HashMap<>();
         /** 走りの加速の残り tick（0 以下なら、かけていない）。 */
         int sprintRemaining;
@@ -58,8 +61,9 @@ public final class MoveHits {
         boolean elytra = player.isElytraFlying();
         boolean sprint = player.isSprinting() && !player.isRiding() && !elytra;
         boolean swim = player.isInWater() && !player.isRiding();
+        boolean fall = falling(player);
         if (state == null) {
-            if (!ladder && !elytra && !sprint && !swim) {
+            if (!ladder && !elytra && !sprint && !swim && !fall) {
                 return;
             }
             state = new State();
@@ -77,12 +81,21 @@ public final class MoveHits {
         if (swim) {
             state.swimTick = now;
         }
+        if (fall) {
+            state.fallTick = now;
+        }
         if (state.sprintRemaining > 0 && --state.sprintRemaining <= 0) {
             SPRINT_SPEED.clear(player);
         }
     }
 
-    /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT / SWIM。 */
+    /** 落ちているか（1.11.0。落下の弱点を受け付ける条件。距離はクライアントの方が先に進むので、ここでは 0 より大きいかだけ）。 */
+    private static boolean falling(EntityPlayer player) {
+        return !player.onGround && player.fallDistance > 0 && !player.isElytraFlying() && !player.isInWater()
+                && !player.isInLava() && !player.isRiding() && !player.isOnLadder() && !player.capabilities.isFlying;
+    }
+
+    /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT / SWIM / FALL。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, int streak) {
         if (!HitGate.allowed(player, kind)) {
             return;
@@ -105,6 +118,10 @@ public final class MoveHits {
             SPRINT_SPEED.set(player, TimedBoostMath.multiplier(WeakSpotConfig.server.sprint.sprintBoostMultiplier,
                     WeakSpotConfig.server.sprint.sprintBoostMaxMultiplier, combo));
             state.sprintRemaining = WeakSpotConfig.server.sprint.sprintBoostDurationTicks;
+        } else if (kind == HitKind.FALL) {
+            // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める。1.11.0）
+            player.fallDistance = (float) Math.max(0, player.fallDistance
+                    - WeakSpotConfig.server.fall.fallReduceBlocks * ComboFactor.factor(combo));
         }
     }
 
@@ -116,6 +133,8 @@ public final class MoveHits {
                 return state.elytraTick;
             case SWIM:
                 return state.swimTick;
+            case FALL:
+                return state.fallTick;
             default:
                 return state.sprintTick;
         }

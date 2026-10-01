@@ -73,6 +73,9 @@ public final class ServerConfig {
     @Config.Comment("泳ぎ")
     public final Swim swim = new Swim();
 
+    @Config.Comment("落下")
+    public final Fall fall = new Fall();
+
     /** 共通（server.general） */
     public static final class General {
 
@@ -702,6 +705,30 @@ public final class ServerConfig {
         public int swimMinHitIntervalTicks = 6;
 
         Swim() {
+        }
+    }
+
+    /** 落下（server.fall。1.11.0） */
+    public static final class Fall {
+
+        @Config.Comment({"[サーバー] 落下の弱点のオン・オフ",
+                "オフにすると、全員の落下の弱点が出ない"})
+        public boolean fallWeakSpotEnabled = true;
+
+        @Config.Comment("[サーバー] 落下の弱点を出し始める、落ちた距離（ブロック）。3 を超えるとダメージを受ける")
+        @Config.RangeDouble(min = 0.0, max = 256.0)
+        public double fallMinDistance = 3.0;
+
+        @Config.Comment({"[サーバー] 落下の弱点に 1 回当てたときに減らす、落ちた距離（ブロック）",
+                "コンボの掛け数を上乗せする。着地のダメージは、残りの距離から決まる"})
+        @Config.RangeDouble(min = 0.0, max = 256.0)
+        public double fallReduceBlocks = 3.0;
+
+        @Config.Comment("[サーバー] 落下のヒットを受け付ける最小間隔（tick）。クライアントも同じ間隔でヒットを制限する")
+        @Config.RangeInt(min = 0, max = 200)
+        public int fallMinHitIntervalTicks = 6;
+
+        Fall() {
         }
     }
 

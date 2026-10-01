@@ -63,7 +63,7 @@ public final class ClientConfig {
 
         @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（統計画面の「弱点マーカー」タブで変えられる）",
                 "1 行に 1 つ、mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra,",
-                "enchant, harvest, throw, sprint, portal, swim のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
+                "enchant, harvest, throw, sprint, portal, swim, fall のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
         public String[] disabledKinds = {};
 
         @Config.Comment({"[クライアント] 自分の弱点の色。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）",
@@ -174,6 +174,9 @@ public final class ClientConfig {
 
         @Config.Comment({"[クライアント] 泳ぎが加速している間、照準の上に残り時間のゲージ（深い青）を表示するか"})
         public boolean swimBoostBarEnabled = true;
+
+        @Config.Comment({"[クライアント] 落ちている間、照準の上に、着地したときの見込みのダメージ（ハート）を表示するか"})
+        public boolean fallDamageHintEnabled = true;
 
         Hud() {
         }

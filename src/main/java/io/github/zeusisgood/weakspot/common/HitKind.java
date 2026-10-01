@@ -37,7 +37,9 @@ public enum HitKind {
     /** ネザーゲートの中に立っている間、照準の近くに出る弱点に照準を合わせる（1.8.0）。 */
     PORTAL(0xFFD23F, true),
     /** 水の中を泳いでいる間、照準の近くに出る弱点に照準を合わせる（1.10.0）。 */
-    SWIM(0x2E6BFF, true);
+    SWIM(0x2E6BFF, true),
+    /** 高い所から落ちている間、照準の近くに出る弱点に照準を合わせる（1.11.0）。落下ダメージが減る。 */
+    FALL(0xEAF6FF, true);
 
     private final int defaultColor;
     private final boolean usesComboFactor;

@@ -69,6 +69,8 @@ public final class SettingGroups {
         g.put("portal", list("portalWeakSpotEnabled", "portalHitTicks", "portalMinHitIntervalTicks"));
         g.put("swim", list("swimWeakSpotEnabled", "swimBoostMultiplier", "swimBoostMaxMultiplier",
                 "swimBoostDurationTicks", "swimDashDistance", "swimMinHitIntervalTicks", "swimBoostBarEnabled"));
+        g.put("fall", list("fallWeakSpotEnabled", "fallMinDistance", "fallReduceBlocks", "fallMinHitIntervalTicks",
+                "fallDamageHintEnabled"));
         g.put("sleep", list("sleepWeakSpotEnabled", "sleepHitTicks", "sleepMinHitIntervalTicks"));
         g.put("enchant", list("enchantWeakSpotEnabled", "enchantMinHitIntervalTicks"));
         GROUPS = Collections.unmodifiableMap(g);

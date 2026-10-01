@@ -37,6 +37,7 @@ public final class HitHandlers {
         HANDLERS.put(HitKind.ELYTRA, move);
         HANDLERS.put(HitKind.SPRINT, move);
         HANDLERS.put(HitKind.SWIM, move);
+        HANDLERS.put(HitKind.FALL, move);
         HANDLERS.put(HitKind.ENCHANT, (player, kind, pos, entityId, streak) -> EnchantHits.onHit(player, streak));
         HANDLERS.put(HitKind.THROW, (player, kind, pos, entityId, streak) -> ThrowHits.onHit(player, streak));
         HANDLERS.put(HitKind.PORTAL, (player, kind, pos, entityId, streak) -> PortalHits.onHit(player, streak));

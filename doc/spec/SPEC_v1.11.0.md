@@ -226,7 +226,7 @@ Minecraft の進捗の画面に「WeakSpot」のタブを足す。
 | `fallMinHitIntervalTicks` | 6 | サーバー | 落下のヒットの最小受付間隔（tick） |
 | `fallDamageHintEnabled` | true | クライアント | 落下中、照準の上に見込みのダメージを出すか |
 
-- `fallMinDistance` は `SyncedSettings` で送る（クライアントが出すかを決めるため）。オン・オフと間隔は、名前の規則で種類の表に自動で入る。`fallReduceBlocks` はサーバーだけが使う
+- `fallMinDistance` と `fallReduceBlocks` は `SyncedSettings` で送る（クライアントが出すかを決めるのと、見込みのダメージの表示のため。実装のときに `fallReduceBlocks` も送ることにした）。オン・オフと間隔は、名前の規則で種類の表に自動で入る
 - `SettingGroups` に「落下」のまとめ、`disabledKinds` の候補に `fall`
 
 ### 8.6 見た目
