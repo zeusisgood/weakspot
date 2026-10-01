@@ -85,7 +85,7 @@ Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge 
 ## ライセンスと issue
 
 - ライセンスは MIT（1.9.1 のあと。`LICENSE`、`Copyright (c) 2026 zeusisgood`）。Modpack 歓迎。再配布は止めず、README で CurseForge のページへのリンクを「助かります」とお願いするだけ（Modpack 歓迎の行とぶつからないように、「再アップロードしないで」とは書かない）。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
-- issue の雛形は、不具合報告 `bug_report.md`・要望 `feature_request.md`・Modpack の報告 `modpack.md`。README のライセンスの節で、Modpack に入れたら issue で「教えてもらえると励みになります」（任意）と書く。
+- issue の雛形は、不具合報告 `bug_report.md`（ラベル `bug`）・要望 `feature_request.md`（`enhancement`）・Modpack の報告 `modpack.md`（`modpack`）の Markdown と、記入欄の形式（issue forms）の別の版への対応 `version_request.yml`（`version-request`）・ほかの Mod との相性 `compatibility.yml`（`compatibility`）。不具合報告は `/weakspot bug` の本文と見出しを揃えているので Markdown のまま。白紙の issue は許可したまま（ゲームからのリンクの本文が消えないように）。`config.yml` に遊び方と CurseForge への案内のリンク。ラベルはリポジトリに先に作っておく（無いと付かない）。README のライセンスの節で、Modpack に入れたら issue で「教えてもらえると励みになります」（任意）と書く。
 
 ## ブランチの片付け
 

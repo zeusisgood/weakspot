@@ -1,0 +1,62 @@
+name: ほかの Mod との相性 / Compatibility with another mod
+description: ほかの Mod と一緒に入れたときの問題を報告する / Report a problem that happens together with another mod
+title: "[相性 / Compatibility] "
+labels: ["compatibility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ゲーム内で `/weakspot bug` を使うと、環境と Mod の一覧をクリップボードにコピーできます。下の「ログ・環境」に貼ってください。
+
+        Type `/weakspot bug` in game to copy your environment and mod list to the clipboard, then paste it into "Logs and environment" below.
+  - type: input
+    id: other-mod
+    attributes:
+      label: 相手の Mod の名前と版 / Other mod and its version
+      placeholder: "例 / e.g. OptiFine HD U G5"
+    validations:
+      required: true
+  - type: input
+    id: weakspot
+    attributes:
+      label: WeakSpot の版 / WeakSpot version
+      placeholder: "例 / e.g. 1.10.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: symptom
+    attributes:
+      label: 起きること / What happens
+      options:
+        - 起動しない・落ちる / Game does not start or crashes
+        - 弱点が出ない・当たらない / Weak spots do not appear or cannot be hit
+        - 表示が崩れる / Display is broken
+        - 効果が出ない・効きすぎる / Effect does not work or is too strong
+        - 相手の Mod の機能が動かない / The other mod's feature breaks
+        - その他 / Other
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: 詳しい様子・再現手順 / Details and steps to reproduce
+      value: |
+        1. 
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: ログ・環境 / Logs and environment
+      description: |
+        logs/latest.log やクラッシュレポート（crash-reports/）。日本語が文字化けしていても、そのまま添付して大丈夫です。
+        logs/latest.log or a crash report (crash-reports/).
+      render: text
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: 備考 / Notes
+    validations:
+      required: false
