@@ -102,6 +102,7 @@ public final class GuideBook {
             new Page("fishing", Chapter.SCREEN, s("when"), s("hit")),
             new Page("sleep", Chapter.SCREEN, s("when"), s("hit"), s("tip")),
             new Page("enchant", Chapter.SCREEN, s("when"), s("hit"), s("tip")),
+            new Page("target", Chapter.MORE, s("how"), s("rule"), s("reward")),
             new Page("multi", Chapter.MORE, s("others"), s("together")),
             new Page("markers", Chapter.MORE, s("onoff", STATS_KEY), s("look")),
             new Page("help", Chapter.MORE, s("busy", TOGGLE_KEY), s("bug"), s("update")),

@@ -2,7 +2,13 @@ package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.HitStreak;
+import io.github.zeusisgood.weakspot.common.TargetRules;
+import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.Arrays;
+import java.util.Random;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * 自分のヒットの共通の処理（1.8.9 で ClientWeakSpotHandler から分けた）: 連続ヒット（コンボ）、ヒット音、コンボの表示、
@@ -35,8 +41,28 @@ final class OwnHits {
         HitSounds.playHit(hitStreak);
         ComboHud.onHit(kind, hitStreak, ClientWeakSpotHandler.clientTick + ClientWeakSpotHandler.framePartialTicks);
         LAST_HIT_TICK[kind.ordinal()] = ClientWeakSpotHandler.clientTick;
+        goldParticles();
         return hitStreak;
     }
+
+    /** 的当ての金のご褒美（1.11.0）: 当てたとき、目の前に金の粒を散らす。 */
+    private static void goldParticles() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (!WeakSpotConfig.client.markers.goldHitParticles || !TargetRecords.unlocked(TargetRules.Tier.GOLD)
+                || mc.player == null || mc.world == null) {
+            return;
+        }
+        Vec3d eye = mc.player.getPositionEyes(1);
+        Vec3d at = eye.add(mc.player.getLookVec().scale(1.5));
+        for (int i = 0; i < GOLD_PARTICLES; i++) {
+            // 赤石の粉の粒は、速さの欄が色（赤・緑・青）になる
+            mc.world.spawnParticle(EnumParticleTypes.REDSTONE, at.x + (RANDOM.nextDouble() - 0.5) * 0.6,
+                    at.y + (RANDOM.nextDouble() - 0.5) * 0.6, at.z + (RANDOM.nextDouble() - 0.5) * 0.6, 1.0, 0.84, 0.0);
+        }
+    }
+
+    private static final int GOLD_PARTICLES = 8;
+    private static final Random RANDOM = new Random();
 
     /** ワールドを出たとき。 */
     static void clearIntervals() {

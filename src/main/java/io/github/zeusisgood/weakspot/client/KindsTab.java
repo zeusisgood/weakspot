@@ -3,6 +3,7 @@ package io.github.zeusisgood.weakspot.client;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MarkerColor;
 import io.github.zeusisgood.weakspot.common.MarkerShape;
+import io.github.zeusisgood.weakspot.common.TargetRules;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
@@ -55,8 +56,7 @@ final class KindsTab extends StatsScreenTab {
             add(new GuiButton(BUTTON_KIND_SHAPE_NEXT + i, center + 136, 0, 12, 20, "▶"));
             GuiTextField field = new GuiTextField(BUTTON_KIND_COLOR + 50 + i, screen.font(), center, 0, 48, 18);
             field.setMaxStringLength(7);
-            Integer custom = MarkerLook.customColor(kind);
-            field.setText(custom == null ? "" : String.format("#%06X", custom));
+            field.setText(colorText(kind));
             colorFields[i] = field;
             colorInvalid[i] = false;
         }
@@ -147,40 +147,54 @@ final class KindsTab extends StatsScreenTab {
     }
 
     /**
-     * ▶（direction = 1）で次、◀（-1）で前の色に切り替える。「初期値」→ 12 色 → 「初期値」の輪（1.8.3 で ◀ を足した）。
-     * 今の色が 12 色にないとき（打ち込んだ色）は、▶ で最初、◀ で最後の色にする。
+     * ▶（direction = 1）で次、◀（-1）で前の色に切り替える。「初期値」→ 12 色 →（的当てのご褒美を解放していれば）
+     * 銀のきらめき・虹 →「初期値」の輪（1.8.3 で ◀ を足した。ご褒美は 1.11.0）。
+     * 今の色が輪にないとき（打ち込んだ色）は、▶ で最初、◀ で最後の色にする。
      */
     private void stepColor(HitKind kind, int direction) {
-        Integer custom = MarkerLook.customColor(kind);
-        int count = MarkerLook.PRESETS.length;
-        // 輪の位置: 0 = 初期値、1〜count = 12 色
-        int position = -1;
-        if (custom == null) {
-            position = 0;
-        } else {
-            for (int j = 0; j < count; j++) {
-                if (MarkerLook.PRESETS[j] == custom) {
-                    position = j + 1;
-                }
+        List<Object> ring = new ArrayList<>();
+        ring.add(null);
+        for (int rgb : MarkerLook.PRESETS) {
+            ring.add(rgb);
+        }
+        for (String special : new String[] {MarkerLook.SILVER, MarkerLook.RAINBOW}) {
+            if (MarkerLook.specialUnlocked(special)) {
+                ring.add(special);
             }
         }
-        int next;
-        if (position < 0) {
-            next = direction > 0 ? 1 : count;
+        String special = MarkerLook.special(kind);
+        Object current = special != null && MarkerLook.specialUnlocked(special) ? special : MarkerLook.customColor(kind);
+        int position = ring.indexOf(current);
+        int next = position < 0 ? (direction > 0 ? 1 : ring.size() - 1)
+                : Math.floorMod(position + direction, ring.size());
+        Object chosen = ring.get(next);
+        if (chosen instanceof String) {
+            MarkerLook.setSpecial(kind, (String) chosen);
         } else {
-            next = Math.floorMod(position + direction, count + 1);
+            MarkerLook.setColor(kind, (Integer) chosen);
         }
-        Integer rgb = next == 0 ? null : Integer.valueOf(MarkerLook.PRESETS[next - 1]);
-        MarkerLook.setColor(kind, rgb);
         int i = kind.ordinal();
-        colorFields[i].setText(rgb == null ? "" : String.format("#%06X", rgb));
+        colorFields[i].setText(colorText(kind));
         colorInvalid[i] = false;
     }
 
-    /** 形を、▶ で 円 → 輪 → ひし形 → 四角 → 円、◀ で逆に切り替える。 */
+    /** 入力欄に出す色（特別な色は名前、書き換えていなければ空）。 */
+    private static String colorText(HitKind kind) {
+        String special = MarkerLook.special(kind);
+        if (special != null && MarkerLook.specialUnlocked(special)) {
+            return special;
+        }
+        Integer custom = MarkerLook.customColor(kind);
+        return custom == null ? "" : String.format("#%06X", custom);
+    }
+
+    /** 形を、▶ で 円 → 輪 → ひし形 → 四角 →（銅を解放していれば）星 → 円、◀ で逆に切り替える。 */
     private void stepShape(HitKind kind, int direction) {
         MarkerShape[] shapes = MarkerShape.values();
-        int next = Math.floorMod(MarkerLook.shape(kind).ordinal() + direction, shapes.length);
+        int next = MarkerLook.shape(kind).ordinal();
+        do {
+            next = Math.floorMod(next + direction, shapes.length);
+        } while (shapes[next] == MarkerShape.STAR && !TargetRecords.unlocked(TargetRules.Tier.BRONZE));
         MarkerLook.setShape(kind, shapes[next]);
         updateLabels();
     }
@@ -191,6 +205,12 @@ final class KindsTab extends StatsScreenTab {
         String text = colorFields[i].getText().trim();
         if (text.isEmpty()) {
             MarkerLook.setColor(kind, null);
+            colorInvalid[i] = false;
+            return;
+        }
+        String lower = text.toLowerCase(java.util.Locale.ROOT);
+        if ((MarkerLook.SILVER.equals(lower) || MarkerLook.RAINBOW.equals(lower)) && MarkerLook.specialUnlocked(lower)) {
+            MarkerLook.setSpecial(kind, lower);
             colorInvalid[i] = false;
             return;
         }

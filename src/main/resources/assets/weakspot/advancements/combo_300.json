@@ -1,0 +1,23 @@
+{
+    "display": {
+        "icon": {
+            "item": "minecraft:diamond"
+        },
+        "title": {
+            "translate": "weakspot.advancement.combo_300.title"
+        },
+        "description": {
+            "translate": "weakspot.advancement.combo_300.description"
+        },
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "parent": "weakspot:combo_100",
+    "criteria": {
+        "done": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

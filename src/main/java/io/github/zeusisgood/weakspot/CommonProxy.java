@@ -4,6 +4,7 @@ import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.network.MarkerMessage.MarkerData;
+import java.util.List;
 import net.minecraft.util.math.BlockPos;
 
 /** 物理サーバー用。クライアント専用の処理は ClientProxy で行う。 */
@@ -26,7 +27,7 @@ public class CommonProxy {
     }
 
     /** 自分の統計が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
-    public void onStatsReceived(MiningStats session, MiningStats total) {
+    public void onStatsReceived(MiningStats session, MiningStats total, List<String> topNames, List<Long> topScores) {
     }
 
     /** 近くの他のプレイヤーの弱点マークが届いた。marker が null なら消えた（サーバー → クライアントのパケットから呼ばれる）。 */
@@ -64,5 +65,9 @@ public class CommonProxy {
      * MINING / KIND / TOTAL、kindId は種類ごとの節目の HitKind の番号。
      */
     public void onMilestone(int type, int kindId, long milestone) {
+    }
+
+    /** 的当ての状態が届いた（1.11.0。サーバー → クライアントのパケットから呼ばれる。type は TargetMessage の種類）。 */
+    public void onTarget(byte type, int hits, long best, boolean newBest, int newTier) {
     }
 }

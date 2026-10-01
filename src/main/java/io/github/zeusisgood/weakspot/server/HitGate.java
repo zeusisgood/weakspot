@@ -117,6 +117,7 @@ public final class HitGate {
         MeleeHits.forget(player, leave);
         ThrowHits.forget(player, leave);
         MarkerRelay.forget(player, leave);
+        TargetRounds.forget(player, leave);
         if (leave == Leave.LOGOUT) {
             ServerSwitches.forgetOnLogout(player);
             MiningRewards.forgetOnLogout(player);

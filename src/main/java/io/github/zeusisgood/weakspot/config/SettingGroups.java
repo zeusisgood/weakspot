@@ -29,7 +29,7 @@ public final class SettingGroups {
                 "showUpdateNotes", "checkForUpdates", "skippedUpdateVersion"));
         g.put("sound", list("myHitSound", "myHitVolume", "hitChordEnabled", "othersHitSound", "othersHitVolume"));
         g.put("markers", list("weakSpotsEnabled", "disabledKinds", "myMarkerColors", "myMarkerShapes",
-                "weakSpotTrailEnabled", "otherMarkerEnabled", "otherMarkerColor", "otherMarkerAlpha", "otherMarkerShape",
+                "goldHitParticles", "weakSpotTrailEnabled", "otherMarkerEnabled", "otherMarkerColor", "otherMarkerAlpha", "otherMarkerShape",
                 "markerShareRange", "markerSendMinIntervalTicks"));
         g.put("combo", list("comboDisplayEnabled", "comboScale", "comboPosition", "comboMilestoneEffects",
                 "othersComboDisplay", "comboFactorGaugeEnabled"));

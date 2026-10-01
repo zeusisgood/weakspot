@@ -1,0 +1,23 @@
+{
+    "display": {
+        "icon": {
+            "item": "weakspot:target"
+        },
+        "title": {
+            "translate": "weakspot.advancement.target_gold.title"
+        },
+        "description": {
+            "translate": "weakspot.advancement.target_gold.description"
+        },
+        "frame": "goal",
+        "show_toast": true,
+        "announce_to_chat": true,
+        "hidden": false
+    },
+    "parent": "weakspot:target_silver",
+    "criteria": {
+        "done": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

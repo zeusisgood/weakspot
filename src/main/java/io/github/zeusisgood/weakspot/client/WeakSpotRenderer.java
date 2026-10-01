@@ -255,6 +255,7 @@ final class WeakSpotRenderer {
     /** 形の i 番目の頂点（面から少し浮かせる）。 */
     private static double[] shapePoint(WeakSpot spot, MarkerShape shape, double u, double v, double distance, int i) {
         double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
+        distance *= shape.pointScale(i);
         return spot.worldPoint(u + distance * Math.cos(angle), v + distance * Math.sin(angle), LIFT * 1.2);
     }
 

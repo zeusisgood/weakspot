@@ -147,7 +147,8 @@ final class ScreenProjection {
             buffer.pos(x, y, 0).color(rgb[0], rgb[1], rgb[2], a).endVertex();
             for (int i = 0; i <= shape.sides; i++) {
                 double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
-                buffer.pos(x + outer * Math.cos(angle), y + outer * Math.sin(angle), 0)
+                double r = outer * shape.pointScale(i);
+                buffer.pos(x + r * Math.cos(angle), y + r * Math.sin(angle), 0)
                         .color(rgb[0], rgb[1], rgb[2], a).endVertex();
             }
         } else {
@@ -176,7 +177,8 @@ final class ScreenProjection {
         buffer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
         for (int i = 0; i < shape.sides; i++) {
             double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
-            buffer.pos(x + outer * Math.cos(angle), y + outer * Math.sin(angle), 0)
+            double r = outer * shape.pointScale(i);
+            buffer.pos(x + r * Math.cos(angle), y + r * Math.sin(angle), 0)
                     .color(rgb[0], rgb[1], rgb[2], a).endVertex();
         }
         tessellator.draw();

@@ -12,7 +12,12 @@ public enum MarkerShape {
     /** ひし形。 */
     DIAMOND(4, 0, 1.0, true),
     /** 四角（辺は u, v の軸に平行）。 */
-    SQUARE(4, Math.PI / 4, 0.8 * Math.sqrt(2), true);
+    SQUARE(4, Math.PI / 4, 0.8 * Math.sqrt(2), true),
+    /** 星（1.11.0。的当ての銅のご褒美。頂点を外・内と交互に置く）。 */
+    STAR(10, -Math.PI / 2, 1.2, true);
+
+    /** 星の内側の頂点の、外側に対する比率。 */
+    public static final double STAR_INNER_RATIO = 0.45;
 
     /** 輪の内側の半径の比率（RING の太さ）。 */
     public static final double RING_INNER_RATIO = 0.7;
@@ -31,6 +36,11 @@ public enum MarkerShape {
         this.rotation = rotation;
         this.radiusScale = radiusScale;
         this.filled = filled;
+    }
+
+    /** i 番目の頂点までの距離の倍率（星は内側の頂点だけ小さい。ほかは 1）。 */
+    public double pointScale(int i) {
+        return this == STAR && i % 2 == 1 ? STAR_INNER_RATIO : 1.0;
     }
 
     /** 中心に小さな点を描く形か（円、ひし形、四角。RING は中抜きなので描かない）。 */

@@ -14,6 +14,8 @@ import io.github.zeusisgood.weakspot.network.SettingsMessage;
 import io.github.zeusisgood.weakspot.network.StatsMessage;
 import io.github.zeusisgood.weakspot.network.StatsRequestMessage;
 import io.github.zeusisgood.weakspot.network.SwitchMessage;
+import io.github.zeusisgood.weakspot.network.TargetActionMessage;
+import io.github.zeusisgood.weakspot.network.TargetMessage;
 import io.github.zeusisgood.weakspot.server.MachineAccelerator;
 import io.github.zeusisgood.weakspot.server.MachineStates;
 import io.github.zeusisgood.weakspot.server.VehicleHits;
@@ -79,6 +81,9 @@ public class WeakSpotMod {
         network.registerMessage(QueryMessage.Handler.class, QueryMessage.class, 9, Side.SERVER);
         network.registerMessage(StateMessage.Handler.class, StateMessage.class, 10, Side.CLIENT);
         network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 11, Side.CLIENT);
+        // 1.11.0: 的当て
+        network.registerMessage(TargetMessage.Handler.class, TargetMessage.class, 12, Side.CLIENT);
+        network.registerMessage(TargetActionMessage.Handler.class, TargetActionMessage.class, 13, Side.SERVER);
     }
 
     @Mod.EventHandler

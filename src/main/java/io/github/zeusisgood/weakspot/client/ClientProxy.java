@@ -5,6 +5,7 @@ import io.github.zeusisgood.weakspot.CommonProxy;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.network.MarkerMessage.MarkerData;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.client.ClientCommandHandler;
@@ -34,8 +35,11 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void onStatsReceived(MiningStats session, MiningStats total) {
-        Minecraft.getMinecraft().addScheduledTask(() -> StatsScreen.receive(session, total));
+    public void onStatsReceived(MiningStats session, MiningStats total, List<String> topNames, List<Long> topScores) {
+        Minecraft.getMinecraft().addScheduledTask(() -> {
+            TargetRecords.receive(total.targetBest, total.targetRounds, topNames, topScores);
+            StatsScreen.receive(session, total);
+        });
     }
 
     @Override
@@ -77,5 +81,10 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void onMilestone(int type, int kindId, long milestone) {
         Minecraft.getMinecraft().addScheduledTask(() -> MilestoneEffects.show(type, kindId, milestone));
+    }
+
+    @Override
+    public void onTarget(byte type, int hits, long best, boolean newBest, int newTier) {
+        Minecraft.getMinecraft().addScheduledTask(() -> TargetPlay.receive(type, hits, best, newBest, newTier));
     }
 }

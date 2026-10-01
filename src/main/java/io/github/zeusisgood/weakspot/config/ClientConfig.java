@@ -74,6 +74,9 @@ public final class ClientConfig {
                 "形は circle, ring, diamond, square。書いていない種類は円。統計画面の「弱点マーカー」タブで変えられる"})
         public String[] myMarkerShapes = {};
 
+        @Config.Comment({"[クライアント] 弱点に当てたとき、金の粒を散らすか（的当ての金のご褒美。届いていないワールドでは出ない）"})
+        public boolean goldHitParticles = false;
+
         @Config.Comment({"[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）",
                 "見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く"})
         public boolean weakSpotTrailEnabled = true;

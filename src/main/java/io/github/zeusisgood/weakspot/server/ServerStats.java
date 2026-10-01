@@ -5,13 +5,17 @@ import io.github.zeusisgood.weakspot.common.ComboMilestones;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.HitStreak;
 import io.github.zeusisgood.weakspot.common.MiningStats;
+import io.github.zeusisgood.weakspot.network.StatsMessage;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
@@ -60,6 +64,7 @@ public final class ServerStats {
             // 最大コンボを初めて超えて段階に届いたら、ほかの全員に知らせる（1.11.0）
             MiningRewards.broadcastCombo(player, count);
         }
+        WeakSpotAdvancements.onHit(player, count);
         return count;
     }
 
@@ -107,9 +112,34 @@ public final class ServerStats {
      * 大きく見えた）。節目も累計で数えるので、節目をもう一度受け取れる（1.6.1）。
      */
     public static void resetTotal(EntityPlayer player) {
-        data(player).setTag(TAG_TOTAL, write(new MiningStats()));
+        // 的当ての記録は消さない（ご褒美の解放が消えてしまうため。1.11.0）
+        MiningStats before = total(player);
+        MiningStats fresh = new MiningStats();
+        fresh.targetBest = before.targetBest;
+        fresh.targetRounds = before.targetRounds;
+        data(player).setTag(TAG_TOTAL, write(fresh));
         SESSIONS.put(player.getUniqueID(), new MiningStats());
     }
+
+    /** 統計画面に送る中身（今回・累計と、的当てのサーバー内の上位 10 人。1.11.0）。 */
+    public static StatsMessage message(EntityPlayerMP player) {
+        List<String> names = new ArrayList<>();
+        List<Long> scores = new ArrayList<>();
+        MinecraftServer server = player.getServer();
+        if (server != null) {
+            for (Leaderboard.Entry entry : Leaderboard.ranking(server, Leaderboard.Category.TARGET)) {
+                if (names.size() >= TOP_SHOWN) {
+                    break;
+                }
+                names.add(entry.name);
+                scores.add(entry.value(Leaderboard.Category.TARGET));
+            }
+        }
+        return new StatsMessage(session(player), total(player), names, scores);
+    }
+
+    /** 統計画面に出す、的当ての上位の人数。 */
+    private static final int TOP_SHOWN = 10;
 
     /** この Mod の永続データ。無ければ作って付ける。 */
     static NBTTagCompound data(EntityPlayer player) {
@@ -133,6 +163,9 @@ public final class ServerStats {
         stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
         stats.savedTicks = tag.getDouble("savedTicks");
         stats.maxStreak = tag.getLong("maxStreak");
+        // 1.11.0 から
+        stats.targetBest = tag.getLong("targetBest");
+        stats.targetRounds = tag.getLong("targetRounds");
         for (HitKind kind : HitKind.values()) {
             String key = MiningStats.saveKey(kind);
             String legacy = MiningStats.legacySaveKey(kind);
@@ -152,6 +185,8 @@ public final class ServerStats {
         tag.setLong("maxHitsOnBlock", stats.maxHitsOnBlock);
         tag.setDouble("savedTicks", stats.savedTicks);
         tag.setLong("maxStreak", stats.maxStreak);
+        tag.setLong("targetBest", stats.targetBest);
+        tag.setLong("targetRounds", stats.targetRounds);
         for (HitKind kind : HitKind.values()) {
             tag.setLong(MiningStats.saveKey(kind), stats.count(kind));
         }
