@@ -10,7 +10,7 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 - **Target practice**: craft a Weak Spot Target and play a 30-second aiming mini-game anywhere. Your best score unlocks new marker looks (star shape, silver sparkle, gold sparks, rainbow)
 - **Combo system** with a rising hit sound and a per-kind multiplier shown on screen
 - **Stats, milestones and advancements**: hits per kind, rewards at milestones (announced to everyone on the server), an advancement tab and a server leaderboard (`/weakspot top`)
-- **Customizable**: turn each kind on or off, change marker colors, shapes and size, pick hit sounds
+- **Customizable**: turn each kind on or off, change marker colors, shapes and size, pick hit sounds and scales
 - **In-game guide book** that explains every kind (English and Japanese)
 - **Multiplayer friendly**: see other players' hits, and server admins can tune or disable each kind
 
