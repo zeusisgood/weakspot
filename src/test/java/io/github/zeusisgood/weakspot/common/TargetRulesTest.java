@@ -37,11 +37,11 @@ public class TargetRulesTest {
 
     @Test
     public void tiersByBest() {
-        assertEquals(TargetRules.Tier.NONE, TargetRules.Tier.of(14));
-        assertEquals(TargetRules.Tier.BRONZE, TargetRules.Tier.of(15));
-        assertEquals(TargetRules.Tier.SILVER, TargetRules.Tier.of(30));
-        assertEquals(TargetRules.Tier.GOLD, TargetRules.Tier.of(45));
-        assertEquals(TargetRules.Tier.RAINBOW, TargetRules.Tier.of(60));
+        assertEquals(TargetRules.Tier.NONE, TargetRules.Tier.of(24));
+        assertEquals(TargetRules.Tier.BRONZE, TargetRules.Tier.of(25));
+        assertEquals(TargetRules.Tier.SILVER, TargetRules.Tier.of(50));
+        assertEquals(TargetRules.Tier.GOLD, TargetRules.Tier.of(75));
+        assertEquals(TargetRules.Tier.RAINBOW, TargetRules.Tier.of(100));
         assertEquals(TargetRules.Tier.RAINBOW, TargetRules.Tier.of(200));
         assertEquals(TargetRules.Tier.SILVER, TargetRules.Tier.BRONZE.next());
         assertNull(TargetRules.Tier.RAINBOW.next());

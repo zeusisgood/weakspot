@@ -1,7 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
-import io.github.zeusisgood.weakspot.common.HitPitch;
 import io.github.zeusisgood.weakspot.common.Milestones;
 import io.github.zeusisgood.weakspot.network.MilestoneMessage;
 import net.minecraft.client.Minecraft;
@@ -87,7 +86,7 @@ final class MilestoneEffects {
 
         HitSounds.accentScale(lucky || grand ? 1 : 2, 0);
         if (lucky || grand) {
-            HitSounds.accentScale(1, HitPitch.SCALE_LENGTH + 2);
+            HitSounds.accentScale(1, HitSounds.scale().perOctave() + 3);
         }
     }
 

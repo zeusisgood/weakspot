@@ -4,7 +4,6 @@ import io.github.zeusisgood.weakspot.FallDamage;
 import io.github.zeusisgood.weakspot.common.ComboFactor;
 import io.github.zeusisgood.weakspot.common.FallMath;
 import io.github.zeusisgood.weakspot.common.HitKind;
-import io.github.zeusisgood.weakspot.common.HitPitch;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.Minecraft;
@@ -107,11 +106,11 @@ final class FallSpot extends AimSpotKind {
         // 段階が下がった瞬間の文字と音（死亡見込みから一気にダメージなしなら「ノーダメージ」だけ）
         if (after == FallMath.Outlook.SAFE && before != FallMath.Outlook.SAFE) {
             showMessage("weakspot.fall.noDamage", SAFE_RGB);
-            HitSounds.accentRun(new float[] {HitPitch.forStreak(1), HitPitch.forStreak(3), HitPitch.forStreak(5)},
+            HitSounds.accentRun(ComboEffects.pitches(new int[] {0, 2, 4}),
                     0, 2);
         } else if (after == FallMath.Outlook.HURT && before == FallMath.Outlook.LETHAL) {
             showMessage("weakspot.fall.survive", SURVIVE_RGB);
-            HitSounds.accentRun(new float[] {HitPitch.forStreak(3), HitPitch.forStreak(8)}, 2, 2);
+            HitSounds.accentRun(ComboEffects.pitches(new int[] {2, HitSounds.scale().perOctave()}), 2, 2);
         }
     }
 

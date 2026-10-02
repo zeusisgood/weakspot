@@ -199,6 +199,9 @@ public final class TargetPlay {
                 break;
             case TargetMessage.RECORD:
                 TargetRecords.best = best;
+                if (newTier >= 0 && newTier < TargetRules.Tier.values().length) {
+                    TargetRecords.earned = TargetRules.Tier.values()[newTier];
+                }
                 break;
             default:
                 break;
@@ -586,7 +589,7 @@ public final class TargetPlay {
         rows.add(new String[] {I18n.format("weakspot.target.result.top"), top});
         String counts = I18n.format("weakspot.target.result.counts", resultGood, resultDecoys,
                 resultDecoys * TargetRules.MISS_PENALTY);
-        TargetRules.Tier next = TargetRules.Tier.of(resultBest).next();
+        TargetRules.Tier next = TargetRecords.tier().next();
         String reward = next == null ? I18n.format("weakspot.target.result.allDone")
                 : I18n.format("weakspot.target.result.next",
                         I18n.format("weakspot.target.tier." + tierKey(next)), next.from - resultBest);

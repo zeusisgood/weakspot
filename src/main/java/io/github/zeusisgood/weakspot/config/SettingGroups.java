@@ -27,7 +27,8 @@ public final class SettingGroups {
         Map<String, List<String>> g = new LinkedHashMap<>();
         g.put("general", list("spotSize", "heldItemsCountAsEmptyHand", "heldItemExcludes", "giveGuideBook",
                 "showUpdateNotes", "checkForUpdates", "skippedUpdateVersion"));
-        g.put("sound", list("myHitSound", "myHitVolume", "hitChordEnabled", "othersHitSound", "othersHitVolume"));
+        g.put("sound", list("myHitSound", "myHitVolume", "hitChordEnabled", "hitScaleDirection", "hitScaleType",
+                "hitScaleOctaves", "othersHitSound", "othersHitVolume"));
         g.put("markers", list("weakSpotsEnabled", "disabledKinds", "myMarkerColors", "myMarkerShapes",
                 "goldHitParticles", "weakSpotTrailEnabled", "otherMarkerEnabled", "otherMarkerColor", "otherMarkerAlpha", "otherMarkerShape",
                 "markerShareRange", "markerSendMinIntervalTicks"));

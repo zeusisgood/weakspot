@@ -12,6 +12,8 @@ final class TargetRecords {
 
     static long best;
     static long rounds;
+    /** 取った進捗の段階（1.11.1。しきい値を上げる前に解放した段階を残す。ログインのときサーバーが送る）。 */
+    static TargetRules.Tier earned = TargetRules.Tier.NONE;
     static final List<String> TOP_NAMES = new ArrayList<>();
     static final List<Long> TOP_SCORES = new ArrayList<>();
 
@@ -27,8 +29,10 @@ final class TargetRecords {
         TOP_SCORES.addAll(scores);
     }
 
+    /** ご褒美の段階（自己ベストの段階と、取った進捗の段階の高いほう）。 */
     static TargetRules.Tier tier() {
-        return TargetRules.Tier.of(best);
+        TargetRules.Tier byBest = TargetRules.Tier.of(best);
+        return earned.atLeast(byBest) ? earned : byBest;
     }
 
     /** そのご褒美を使えるか。 */

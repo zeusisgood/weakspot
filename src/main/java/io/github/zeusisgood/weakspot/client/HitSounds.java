@@ -2,6 +2,8 @@ package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitPitch;
+import io.github.zeusisgood.weakspot.common.HitScale;
+import io.github.zeusisgood.weakspot.config.ClientConfig;
 import io.github.zeusisgood.weakspot.config.HitSound;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
@@ -70,13 +72,14 @@ final class HitSounds {
     static void playHit(int streak) {
         double volume = WeakSpotConfig.client.sound.myHitVolume * (soundTick <= duckUntil ? DUCKED_VOLUME : 1);
         boolean chords = WeakSpotConfig.client.sound.hitChordEnabled;
-        float[] pitches = HitPitch.forHit(streak, chords);
+        HitScale scale = scale();
+        float[] pitches = scale.forHit(streak, chords);
         // 重ねる音が多いほど 1 音を小さくする（1.11.0。9 の和音などで大きくなりすぎないように）
         double chordVolume = volume * CHORD_VOLUME * Math.min(1, 2.0 / Math.max(1, pitches.length - 1));
         for (int i = 0; i < pitches.length; i++) {
             playFlatPitch(WeakSpotConfig.client.sound.myHitSound, i == 0 ? volume : chordVolume, pitches[i]);
         }
-        float resolve = HitPitch.resolveFor(streak, chords);
+        float resolve = scale.resolveFor(streak, chords);
         if (resolve > 0) {
             schedule(RESOLVE_DELAY_TICKS,
                     () -> playFlatPitch(WeakSpotConfig.client.sound.myHitSound, chordVolume, resolve));
@@ -109,18 +112,28 @@ final class HitSounds {
         duckUntil = Math.max(duckUntil, end);
     }
 
-    /** 音階（下のドから上のドまで）を、段階・節目の音で鳴らす。 */
+    /** 音階（下のドから上のドまで。各自の音階の種類）を、段階・節目の音で鳴らす。 */
     static void accentScale(int ticksPerNote, int startDelay) {
-        float[] pitches = new float[HitPitch.SCALE_LENGTH];
-        for (int i = 0; i < pitches.length; i++) {
-            pitches[i] = HitPitch.forStreak(i + 1);
+        accentRun(scale().oneOctave(), ticksPerNote, startDelay);
+    }
+
+    /** 各自の音階の設定（1.11.1。hitScaleType / hitScaleDirection / hitScaleOctaves。変わったときだけ作り直す）。 */
+    private static HitScale cachedScale = HitScale.DEFAULT;
+
+    static HitScale scale() {
+        ClientConfig.Sound sound = WeakSpotConfig.client.sound;
+        HitScale scale = cachedScale;
+        if (scale.type != sound.hitScaleType || scale.direction != sound.hitScaleDirection
+                || scale.octaves != sound.hitScaleOctaves) {
+            scale = new HitScale(sound.hitScaleType, sound.hitScaleDirection, sound.hitScaleOctaves);
+            cachedScale = scale;
         }
-        accentRun(pitches, ticksPerNote, startDelay);
+        return scale;
     }
 
     /** 自分のコンボが途切れた音（下がる 2 音。自分のヒット音の楽器で小さめ）。 */
     static void playBreak() {
-        float[] notes = HitPitch.breakNotes();
+        float[] notes = scale().breakNotes();
         double volume = WeakSpotConfig.client.sound.myHitVolume * BREAK_VOLUME;
         for (int i = 0; i < notes.length; i++) {
             float pitch = notes[i];
@@ -136,7 +149,7 @@ final class HitSounds {
         }
         Minecraft.getMinecraft().getSoundHandler().playSound(new PositionedSoundRecord(
                 soundOf(WeakSpotConfig.client.sound.othersHitSound), SoundCategory.PLAYERS, volume,
-                HitPitch.forStreak(streak), pos));
+                scale().melody(streak), pos));
     }
 
     /** 他のプレイヤーが的当て（1.11.0）の ✕ に当てた: 本人と同じ低い音（音符ブロックのプリング、ピッチ 0.5）。 */
@@ -155,7 +168,7 @@ final class HitSounds {
     }
 
     private static void playFlat(HitSound sound, double volume, int streak) {
-        playFlatPitch(sound, volume, HitPitch.forStreak(streak));
+        playFlatPitch(sound, volume, scale().melody(streak));
     }
 
     private static void playFlatPitch(HitSound sound, double volume, float pitch) {
@@ -167,9 +180,17 @@ final class HitSounds {
                 false, 0, ISound.AttenuationType.NONE, 0, 0, 0));
     }
 
-    /** 音階を最低音から最高音まで ticksPerNote ごとに鳴らす。note は連続ヒット数を受け取って1音鳴らす処理。 */
+    /**
+     * 音階を 1 周（上がって戻るなら最低音から最高音まで、往復なら上がって下がるまで）ticksPerNote ごとに鳴らす。
+     * note は連続ヒット数を受け取って1音鳴らす処理。
+     */
     static void playScale(IntConsumer note, int ticksPerNote, int startDelay) {
-        for (int i = 0; i < HitPitch.SCALE_LENGTH; i++) {
+        playScale(note, ticksPerNote, startDelay, scale().cycleLength());
+    }
+
+    /** 音階の始めの count 音を鳴らす（設定を切り替えたときの短い試聴。1.11.1）。 */
+    static void playScale(IntConsumer note, int ticksPerNote, int startDelay, int count) {
+        for (int i = 0; i < count; i++) {
             int streak = i + 1;
             schedule(startDelay + i * ticksPerNote, () -> note.accept(streak));
         }

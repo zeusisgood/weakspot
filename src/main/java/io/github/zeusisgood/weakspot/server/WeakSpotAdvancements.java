@@ -57,6 +57,21 @@ public final class WeakSpotAdvancements {
         }
     }
 
+    /**
+     * 取った的当ての進捗のいちばん上の段階（1.11.1。しきい値を上げても、1.11.0 で解放した段階を残すため）。
+     * 進捗が見つからなければ数えない。
+     */
+    static TargetRules.Tier earnedTargetTier(EntityPlayerMP player) {
+        TargetRules.Tier[] all = TargetRules.Tier.values();
+        for (int i = all.length - 1; i > 0; i--) {
+            Advancement advancement = find(player, "target_" + all[i].name().toLowerCase(java.util.Locale.ROOT));
+            if (advancement != null && player.getAdvancements().getProgress(advancement).isDone()) {
+                return all[i];
+            }
+        }
+        return TargetRules.Tier.NONE;
+    }
+
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.player instanceof EntityPlayerMP)) {

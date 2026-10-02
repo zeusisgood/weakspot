@@ -132,7 +132,12 @@ public final class TargetRounds {
         tellOthers(player, -1);
         long previousTop = Leaderboard.best(server, Leaderboard.Category.TARGET);
         MiningStats before = ServerStats.total(player);
+        // 1.11.0 で取った段階（進捗）も、もう届いている段階として数える（1.11.1）
+        TargetRules.Tier earned = WeakSpotAdvancements.earnedTargetTier(player);
         TargetRules.Tier oldTier = TargetRules.Tier.of(before.targetBest);
+        if (earned.atLeast(oldTier)) {
+            oldTier = earned;
+        }
         int hits = round.hits;
         ServerStats.record(player, stats -> stats.recordTargetRound(hits));
         long best = Math.max(before.targetBest, hits);
@@ -141,7 +146,8 @@ public final class TargetRounds {
         Leaderboard.update(player);
         List<Leaderboard.Entry> ranking = Leaderboard.ranking(server, Leaderboard.Category.TARGET);
         Leaderboard.Entry top = ranking.isEmpty() ? null : ranking.get(0);
-        send(player, new TargetMessage(TargetMessage.END, hits, best, newBest, tier != oldTier ? tier.ordinal() : -1)
+        send(player, new TargetMessage(TargetMessage.END, hits, best, newBest,
+                tier.ordinal() > oldTier.ordinal() ? tier.ordinal() : -1)
                 .withResult(round.good, round.decoys, top == null ? "" : top.name,
                         top == null ? 0 : top.value(Leaderboard.Category.TARGET)));
         WeakSpotAdvancements.onTargetBest(player, best);
@@ -155,12 +161,16 @@ public final class TargetRounds {
         }
     }
 
-    /** ログイン: ご褒美の解放のため、自己ベストを送る。 */
+    /**
+     * ログイン: ご褒美の解放のため、自己ベストと、取った進捗のいちばん上の段階（1.11.1。RECORD では newTier の欄を
+     * これに使う。しきい値を上げても、1.11.0 で解放した段階を残すため。古いクライアントは RECORD の newTier を読まない）を送る。
+     */
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.player instanceof EntityPlayerMP) {
             EntityPlayerMP player = (EntityPlayerMP) event.player;
-            send(player, new TargetMessage(TargetMessage.RECORD, 0, ServerStats.total(player).targetBest, false, -1));
+            send(player, new TargetMessage(TargetMessage.RECORD, 0, ServerStats.total(player).targetBest, false,
+                    WeakSpotAdvancements.earnedTargetTier(player).ordinal()));
         }
     }
 
