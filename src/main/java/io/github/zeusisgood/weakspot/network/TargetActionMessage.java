@@ -6,12 +6,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** クライアント → サーバー: 的当て（1.11.0）で当てた（当たり・ハズレ）、やめた（画面を開いた・持ち替えた）。 */
+/** クライアント → サーバー: 的当て（1.11.0）で当てた（当たり・ハズレ）。 */
 public class TargetActionMessage implements IMessage {
 
     public static final byte HIT = 0;
     public static final byte DECOY = 1;
-    public static final byte CANCEL = 2;
 
     private byte action;
 

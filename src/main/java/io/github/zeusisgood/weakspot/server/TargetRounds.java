@@ -1,6 +1,5 @@
 package io.github.zeusisgood.weakspot.server;
 
-import io.github.zeusisgood.weakspot.ItemTarget;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.common.TargetRules;
@@ -15,7 +14,6 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -28,8 +26,8 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
  * 的当てのラウンド（1.11.0。サーバーが正）。「弱点の的」の右クリックで始め（カウントダウン 3 秒 + 30 秒）、ヒットは
  * クライアントの知らせ（TargetActionMessage）を、ラウンド中か・間隔で確かめて数える（当たり +1、ハズレ −5、0 より下に
  * ならない）。終わったら記録（MiningStats の targetBest・targetRounds。「統計をリセット」では消さない）を残し、
- * サーバーの 1 位を上回ったら全員に知らせる。持ち替え・もう一度の右クリック・画面を開く（クライアントから）・死亡・
- * ディメンション移動・ログアウトでやめる（記録なし）。ラウンドのヒットは、いつものコンボ・統計・節目には入れない。
+ * サーバーの 1 位を上回ったら全員に知らせる。死亡・ディメンション移動・ログアウトでやめる（記録なし）。
+ * 的は使い捨て（始めた時点で 1 つ使う。ItemTarget）なので、持ち替え・画面を開くではやめない。ラウンドのヒットは、いつものコンボ・統計・節目には入れない。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class TargetRounds {
@@ -41,8 +39,6 @@ public final class TargetRounds {
         long start;
         int hits;
         long lastHit = Long.MIN_VALUE / 2;
-        EnumHand hand;
-        int slot;
     }
 
     private static final Map<UUID, Round> ROUNDS = new HashMap<>();
@@ -55,18 +51,16 @@ public final class TargetRounds {
     }
 
     /**
-     * 「弱点の的」の右クリック。ラウンドがなければ始める。ラウンド中の右クリックは無視する（押しっぱなしでも 4 tick ごとに
-     * 届くため）。もう一度押してやめるのは、クライアントが押し直しを見て知らせる（TargetActionMessage.CANCEL）。
+     * 「弱点の的」の右クリック。ラウンドがなければ始めて true（呼ぶ側が的を 1 つ使う）。ラウンド中の右クリックは無視する
+     * （押しっぱなしでも 4 tick ごとに届くため。もう 1 つ使うこともない）。自分ではやめられない（30 秒で終わる）。
      */
-    public static void toggle(EntityPlayerMP player, EnumHand hand) {
+    public static boolean start(EntityPlayerMP player) {
         if (ROUNDS.containsKey(player.getUniqueID())) {
-            return;
+            return false;
         }
         long now = now(player);
         Round round = new Round();
         round.start = now;
-        round.hand = hand;
-        round.slot = player.inventory.currentItem;
         ROUNDS.put(player.getUniqueID(), round);
         if (ServerStats.total(player).targetRounds == 0) {
             // 初めてのときは、始まる前にルールを伝える（ハズレのことを先に知らせる）
@@ -76,16 +70,13 @@ public final class TargetRounds {
         }
         send(player, new TargetMessage(TargetMessage.START, 0, 0, false, -1));
         tellOthers(player, 0);
+        return true;
     }
 
     /** クライアントからの知らせ（サーバースレッド）。 */
     public static void onAction(EntityPlayerMP player, byte action) {
         Round round = ROUNDS.get(player.getUniqueID());
         if (round == null) {
-            return;
-        }
-        if (action == TargetActionMessage.CANCEL) {
-            cancel(player, false);
             return;
         }
         long now = now(player);
@@ -113,11 +104,7 @@ public final class TargetRounds {
                 ROUNDS.remove(id);
                 continue;
             }
-            boolean holding = player.getHeldItem(round.hand).getItem() == ItemTarget.INSTANCE
-                    && (round.hand != EnumHand.MAIN_HAND || player.inventory.currentItem == round.slot);
-            if (!holding) {
-                cancel(player, true);
-            } else if (now(player) - round.start >= TargetRules.COUNTDOWN_TICKS + TargetRules.ROUND_TICKS) {
+            if (now(player) - round.start >= TargetRules.COUNTDOWN_TICKS + TargetRules.ROUND_TICKS) {
                 finish(player, round, server);
             }
         }
@@ -146,16 +133,6 @@ public final class TargetRounds {
                 text.getStyle().setColor(TextFormatting.GOLD);
                 other.sendMessage(text);
             }
-        }
-    }
-
-    private static void cancel(EntityPlayerMP player, boolean notify) {
-        if (ROUNDS.remove(player.getUniqueID()) == null) {
-            return;
-        }
-        tellOthers(player, -1);
-        if (notify) {
-            send(player, new TargetMessage(TargetMessage.CANCEL, 0, 0, false, -1));
         }
     }
 

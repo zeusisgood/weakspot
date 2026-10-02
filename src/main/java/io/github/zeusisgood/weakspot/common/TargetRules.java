@@ -16,15 +16,18 @@ public final class TargetRules {
     public static final int MISS_PENALTY = 5;
     /** クライアントのヒットの最小間隔（tick）。サーバーは 2 tick 甘くする。 */
     public static final int MIN_HIT_INTERVAL_TICKS = 4;
-    /** 始めてから、この tick の間のもう一度の右クリックは、やめる操作とみなさない（押しっぱなしの連打を除く）。 */
-    public static final int CANCEL_GUARD_TICKS = 10;
     /** ハズレの位置を変える間隔（tick）。 */
     public static final int DECOY_MOVE_TICKS = 40;
 
-    /** 段階ごとの、弱点の半径（GUI のピクセル）・照準からの距離（度）・動きの速さ（度 / tick）・ハズレの数。 */
+    /**
+     * 段階ごとの、弱点の半径（GUI のピクセル）・始めたときの向きを中心にした枠の半分の幅（左右・上下、度）・
+     * 動きの速さ（度 / tick）・ハズレの数。
+     */
     private static final double[] RADIUS = {16, 11, 8};
-    private static final double[] MIN_OFFSET = {5, 10, 12};
-    private static final double[] MAX_OFFSET = {12, 18, 24};
+    private static final double[] WINDOW_YAW = {15, 25, 30};
+    private static final double[] WINDOW_PITCH = {10, 15, 18};
+    /** 次の的を、前の的から最低でも離す角度（度）。 */
+    public static final double MIN_SEPARATION = 8;
     private static final double[] SPEED = {0, 0.35, 0.8};
     private static final int[] DECOYS = {0, 0, 2};
 
@@ -40,12 +43,33 @@ public final class TargetRules {
         return RADIUS[clamp(phase)];
     }
 
-    public static double minOffset(int phase) {
-        return MIN_OFFSET[clamp(phase)];
+    public static double windowYaw(int phase) {
+        return WINDOW_YAW[clamp(phase)];
     }
 
-    public static double maxOffset(int phase) {
-        return MAX_OFFSET[clamp(phase)];
+    public static double windowPitch(int phase) {
+        return WINDOW_PITCH[clamp(phase)];
+    }
+
+    /** 枠の上下の端が真上・真下を越えないように、基準の pitch を寄せる。 */
+    public static double anchorPitch(double lookPitch) {
+        double limit = 85 - WINDOW_PITCH[WINDOW_PITCH.length - 1];
+        return Math.max(-limit, Math.min(limit, lookPitch));
+    }
+
+    /**
+     * 枠の中を動く的の 1 tick 分（offset は基準からのずれ、half は枠の半分の幅）。端を越えたら跳ね返る。
+     * 返すのは {新しいずれ, 新しい速さ}。
+     */
+    public static double[] bounce(double offset, double velocity, double half) {
+        double next = offset + velocity;
+        if (next > half) {
+            return new double[] {2 * half - next, -Math.abs(velocity)};
+        }
+        if (next < -half) {
+            return new double[] {-2 * half - next, Math.abs(velocity)};
+        }
+        return new double[] {next, velocity};
     }
 
     public static double speed(int phase) {

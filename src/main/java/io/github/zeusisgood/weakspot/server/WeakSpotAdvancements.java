@@ -26,6 +26,10 @@ public final class WeakSpotAdvancements {
 
     /** 受け付けたヒットのたび（ServerStats.countStreak から。combo はヒット後のコンボ）。 */
     static void onHit(EntityPlayerMP player, int combo) {
+        if (!isDone(player, "root")) {
+            // 初めての弱点: 弱点の的のレシピもレシピ本に出す
+            GuideBookGiver.unlockTargetRecipe(player);
+        }
         grant(player, "root");
         if (combo >= 100) {
             grant(player, "combo_100");

@@ -1,6 +1,5 @@
 package io.github.zeusisgood.weakspot.client;
 
-import io.github.zeusisgood.weakspot.ItemTarget;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.BowMath;
 import io.github.zeusisgood.weakspot.common.FishingMath;
@@ -22,7 +21,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -37,7 +35,8 @@ import org.lwjgl.opengl.GL11;
 /**
  * 的当て（1.11.0）のクライアント側。サーバーの知らせ（TargetMessage）で始まり・終わり、カウントダウン（見本「● 当てる　✕ 当てない」）、
  * 30 秒の間の弱点（オレンジの ●）とハズレ（赤い ✕。最後の 10 秒）を照準のまわりに出して、照準を合わせたらサーバーへ知らせる。
- * ヒット数はサーバーの数を出す。画面を開く・持ち替えたらやめる。ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
+ * ヒット数はサーバーの数を出す。的は始めたときの向きを中心にした枠の中だけに出し、画面にないときは矢印で方向を示す。
+ * 自分ではやめられない（持ち替え・画面を開いても続く）。ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class TargetPlay {
@@ -47,8 +46,9 @@ public final class TargetPlay {
     private static final int GOLD = 0xFFD700;
     /** 弱点の点を置く、目からの距離（ブロック。向きだけが意味を持つ）。 */
     private static final double SPOT_DISTANCE = 16.0;
-    /** 照準からこれより離れた弱点は、照準の近くに出し直す（度）。 */
-    private static final double RELOCATE_DEGREES = 35.0;
+    /** 枠の外を向いたときの矢印の大きさと、画面の中心からの距離（画面の短い辺に対する比率）。 */
+    private static final double ARROW_SIZE = 7;
+    private static final double ARROW_RADIUS = 0.36;
     private static final int RESULT_TICKS = 80;
     private static final int POPUP_TICKS = 20;
 
@@ -57,6 +57,7 @@ public final class TargetPlay {
 
     /** 方向（yaw / pitch）で持つ的。 */
     private static final class Spot {
+        /** 基準の向きからのずれ（度）。 */
         double yaw;
         double pitch;
         double vyaw;
@@ -98,8 +99,9 @@ public final class TargetPlay {
     private static long bestAtStart;
     private static long passedTick = Long.MIN_VALUE / 2;
     private static final int PASS_GLOW_TICKS = 12;
-    /** 前の tick に右クリックを押していたか（押し直しでやめる）。 */
-    private static boolean useWasDown = true;
+    /** 始めたときの向き（的はこのまわりの枠の中だけに出す）。 */
+    private static double anchorYaw;
+    private static double anchorPitch;
     /** 結果の表示。 */
     private static long resultTick = Long.MIN_VALUE / 2;
     private static int resultHits;
@@ -125,7 +127,10 @@ public final class TargetPlay {
                 lastCountdown = 0;
                 bestAtStart = TargetRecords.best;
                 passedTick = Long.MIN_VALUE / 2;
-                useWasDown = true;
+                if (mc.player != null) {
+                    anchorYaw = mc.player.rotationYaw;
+                    anchorPitch = TargetRules.anchorPitch(mc.player.rotationPitch);
+                }
                 break;
             case TargetMessage.SCORE:
                 hits = newHits;
@@ -182,13 +187,6 @@ public final class TargetPlay {
         SCREEN.invalidate();
     }
 
-    /** 自分からやめる（画面を開いた・持ち替えた）。 */
-    private static void cancelByClient(Minecraft mc) {
-        WeakSpotMod.network.sendToServer(new TargetActionMessage(TargetActionMessage.CANCEL));
-        mc.ingameGUI.setOverlayMessage(I18n.format("weakspot.target.cancelled"), false);
-        clear();
-    }
-
     private static long into() {
         return ClientWeakSpotHandler.clientTick - startTick - TargetRules.COUNTDOWN_TICKS;
     }
@@ -202,14 +200,6 @@ public final class TargetPlay {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null) {
             clear();
-            return;
-        }
-        boolean useDown = mc.gameSettings.keyBindUseItem.isKeyDown();
-        boolean pressedAgain = useDown && !useWasDown
-                && ClientWeakSpotHandler.clientTick - startTick >= TargetRules.CANCEL_GUARD_TICKS;
-        useWasDown = useDown;
-        if (mc.currentScreen != null || !holdsTarget(player) || pressedAgain) {
-            cancelByClient(mc);
             return;
         }
         long into = into();
@@ -235,40 +225,31 @@ public final class TargetPlay {
         long now = ClientWeakSpotHandler.clientTick;
         if (spot == null) {
             spot = new Spot(false);
-            place(spot, player, phase, null);
+            place(spot, phase, null);
         }
         while (DECOYS.size() < TargetRules.decoys(phase)) {
             Spot decoy = new Spot(true);
-            place(decoy, player, phase, spot);
+            place(decoy, phase, spot);
             DECOYS.add(decoy);
         }
-        move(spot, player, phase);
+        move(spot, phase);
         for (Spot decoy : DECOYS) {
             if (now - decoy.placedTick >= TargetRules.DECOY_MOVE_TICKS) {
-                place(decoy, player, phase, spot);
+                place(decoy, phase, spot);
             } else {
-                move(decoy, player, phase);
+                move(decoy, phase);
             }
         }
     }
 
-    private static boolean holdsTarget(EntityPlayerSP player) {
-        return player.getHeldItem(EnumHand.MAIN_HAND).getItem() == ItemTarget.INSTANCE
-                || player.getHeldItem(EnumHand.OFF_HAND).getItem() == ItemTarget.INSTANCE;
-    }
-
-    /** 照準のまわり（段階の距離）に置く。avoid があれば、そこから離す。 */
-    private static void place(Spot s, EntityPlayerSP player, int phase, Spot avoid) {
-        double min = TargetRules.minOffset(phase);
-        double max = TargetRules.maxOffset(phase);
+    /** 始めたときの向きを中心にした、段階の枠の中に置く。avoid があれば、そこから MIN_SEPARATION 以上離す。 */
+    private static void place(Spot s, int phase, Spot avoid) {
+        double w = TargetRules.windowYaw(phase);
+        double h = TargetRules.windowPitch(phase);
         for (int i = 0; i < 20; i++) {
-            double angle = RANDOM.nextDouble() * Math.PI * 2;
-            double r = min + RANDOM.nextDouble() * (max - min);
-            s.yaw = player.rotationYaw + r * Math.cos(angle);
-            s.pitch = Math.max(-80, Math.min(80, player.rotationPitch + r * Math.sin(angle)));
-            boolean farFromPrevious = avoid == null
-                    || BowMath.angleBetween(s.yaw, s.pitch, avoid.yaw, avoid.pitch) > TargetRules.radius(phase) / 2;
-            if (farFromPrevious) {
+            s.yaw = (RANDOM.nextDouble() * 2 - 1) * w;
+            s.pitch = (RANDOM.nextDouble() * 2 - 1) * h;
+            if (avoid == null || Math.hypot(s.yaw - avoid.yaw, s.pitch - avoid.pitch) > TargetRules.MIN_SEPARATION) {
                 break;
             }
         }
@@ -279,30 +260,23 @@ public final class TargetPlay {
         s.placedTick = ClientWeakSpotHandler.clientTick;
     }
 
-    /** 段階の速さで動かす。照準から離れすぎたら、照準の方へ向きを変える。とても離れたら出し直す。 */
-    private static void move(Spot s, EntityPlayerSP player, int phase) {
+    /** 段階の速さで、枠の中を動かす（端で跳ね返る）。止まっている段階から動く段階になったら、向きを決め直す。 */
+    private static void move(Spot s, int phase) {
         double speed = TargetRules.speed(phase);
-        double offset = BowMath.angleBetween(s.yaw, s.pitch, player.rotationYaw, player.rotationPitch);
-        if (offset > RELOCATE_DEGREES) {
-            place(s, player, phase, null);
-            return;
-        }
         if (speed <= 0) {
             return;
         }
-        if (offset > TargetRules.maxOffset(phase)) {
-            double dy = BowMath.wrapDegrees(player.rotationYaw - s.yaw);
-            double dp = player.rotationPitch - s.pitch;
-            double len = Math.max(1e-6, Math.hypot(dy, dp));
-            s.vyaw = speed * dy / len;
-            s.vpitch = speed * dp / len;
-        } else if (Math.hypot(s.vyaw, s.vpitch) < speed * 0.5) {
+        if (Math.hypot(s.vyaw, s.vpitch) < speed * 0.5) {
             double heading = RANDOM.nextDouble() * Math.PI * 2;
             s.vyaw = speed * Math.cos(heading);
             s.vpitch = speed * Math.sin(heading);
         }
-        s.yaw += s.vyaw;
-        s.pitch = Math.max(-80, Math.min(80, s.pitch + s.vpitch));
+        double[] y = TargetRules.bounce(s.yaw, s.vyaw, TargetRules.windowYaw(phase));
+        double[] p = TargetRules.bounce(s.pitch, s.vpitch, TargetRules.windowPitch(phase));
+        s.yaw = y[0];
+        s.vyaw = y[1];
+        s.pitch = p[0];
+        s.vpitch = p[1];
     }
 
     /** 毎フレーム、照準が的に合ったかを見る（RenderWorldLastEvent。ほかの照準の弱点と同じ）。 */
@@ -337,7 +311,7 @@ public final class TargetPlay {
                 POPUPS.add(new Popup(p[0] / scale, p[1] / scale, now));
                 WeakSpotMod.network.sendToServer(new TargetActionMessage(TargetActionMessage.DECOY));
                 playNote(mc, 0.5F, 1.0F);
-                place(decoy, player, phase, spot);
+                place(decoy, phase, spot);
                 return;
             }
         }
@@ -350,12 +324,12 @@ public final class TargetPlay {
             Spot previous = new Spot(false);
             previous.yaw = spot.yaw;
             previous.pitch = spot.pitch;
-            place(spot, player, phase, previous);
+            place(spot, phase, previous);
         }
     }
 
     private static double[] project(Spot s) {
-        double[] d = BowMath.vector(s.yaw, s.pitch);
+        double[] d = BowMath.vector(anchorYaw + s.yaw, anchorPitch + s.pitch);
         return SCREEN.project(eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE);
     }
 
@@ -419,6 +393,8 @@ public final class TargetPlay {
         if (p != null) {
             ScreenProjection.drawMarker(p[0] / scale, p[1] / scale, radius, MarkerShape.CIRCLE,
                     ScreenProjection.lookOf(SPOT_RGB), 0.55F, 0.95F);
+        } else {
+            drawArrow(mc, res, spot);
         }
         for (Spot decoy : DECOYS) {
             double[] d = project(decoy);
@@ -427,6 +403,36 @@ public final class TargetPlay {
             }
         }
         HudSpot.endOverlay();
+    }
+
+    /** 的が画面にないとき、画面の端寄りに的の方向を示す三角（オレンジ）。 */
+    private static void drawArrow(Minecraft mc, ScaledResolution res, Spot s) {
+        EntityPlayerSP player = mc.player;
+        double dx = BowMath.wrapDegrees(anchorYaw + s.yaw - player.rotationYaw);
+        double dy = anchorPitch + s.pitch - player.rotationPitch;
+        double len = Math.hypot(dx, dy);
+        if (len < 1e-6) {
+            return;
+        }
+        dx /= len;
+        dy /= len;
+        double r = Math.min(res.getScaledWidth(), res.getScaledHeight()) * ARROW_RADIUS;
+        double cx = res.getScaledWidth() / 2.0 + dx * r;
+        double cy = res.getScaledHeight() / 2.0 + dy * r;
+        float red = (SPOT_RGB >> 16 & 0xFF) / 255F;
+        float green = (SPOT_RGB >> 8 & 0xFF) / 255F;
+        float blue = (SPOT_RGB & 0xFF) / 255F;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(cx + dx * ARROW_SIZE, cy + dy * ARROW_SIZE, 0).color(red, green, blue, 0.95F).endVertex();
+        double backX = cx - dx * ARROW_SIZE * 0.6;
+        double backY = cy - dy * ARROW_SIZE * 0.6;
+        double sideX = -dy * ARROW_SIZE * 0.7;
+        double sideY = dx * ARROW_SIZE * 0.7;
+        buffer.pos(backX + sideX, backY + sideY, 0).color(red, green, blue, 0.95F).endVertex();
+        buffer.pos(backX - sideX, backY - sideY, 0).color(red, green, blue, 0.95F).endVertex();
+        tessellator.draw();
     }
 
     /** 赤い ✕（輪と斜めの 2 本）。 */

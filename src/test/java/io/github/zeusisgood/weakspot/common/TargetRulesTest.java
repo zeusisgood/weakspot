@@ -47,4 +47,25 @@ public class TargetRulesTest {
         assertNull(TargetRules.Tier.RAINBOW.next());
         assertTrue(TargetRules.Tier.GOLD.atLeast(TargetRules.Tier.SILVER));
     }
+
+    @Test
+    public void spotsBounceInsideTheWindow() {
+        double[] r = TargetRules.bounce(14, 2, 15);
+        assertEquals(15 - 1, r[0], 1e-9);
+        assertEquals(-2, r[1], 1e-9);
+        r = TargetRules.bounce(-14, -2, 15);
+        assertEquals(-15 + 1, r[0], 1e-9);
+        assertEquals(2, r[1], 1e-9);
+        r = TargetRules.bounce(0, 1, 15);
+        assertEquals(1, r[0], 1e-9);
+    }
+
+    @Test
+    public void windowGrowsAndStaysAwayFromStraightUpOrDown() {
+        assertTrue(TargetRules.windowYaw(2) > TargetRules.windowYaw(0));
+        assertTrue(TargetRules.windowPitch(2) > TargetRules.windowPitch(0));
+        assertEquals(30, TargetRules.anchorPitch(30), 1e-9);
+        assertEquals(85 - TargetRules.windowPitch(2), TargetRules.anchorPitch(90), 1e-9);
+        assertEquals(-(85 - TargetRules.windowPitch(2)), TargetRules.anchorPitch(-90), 1e-9);
+    }
 }
