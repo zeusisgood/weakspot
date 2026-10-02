@@ -6,10 +6,11 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 
 ## Features
 
-- **18 kinds of weak spots**, from mining and farming to travel, combat and even sleeping
+- **19 kinds of weak spots**, from mining and farming to travel, combat, falling and even sleeping
+- **Target practice**: craft a Weak Spot Target and play a 30-second aiming mini-game anywhere. Your best score unlocks new marker looks (star shape, silver sparkle, gold sparks, rainbow)
 - **Combo system** with a rising hit sound and a per-kind multiplier shown on screen
-- **Stats and milestones**: hits per kind, with rewards at milestones (announced to everyone on the server)
-- **Customizable**: turn each kind on or off, change marker colors and shapes, pick hit sounds
+- **Stats, milestones and advancements**: hits per kind, rewards at milestones (announced to everyone on the server), an advancement tab and a server leaderboard (`/weakspot top`)
+- **Customizable**: turn each kind on or off, change marker colors, shapes and size, pick hit sounds
 - **In-game guide book** that explains every kind (English and Japanese)
 - **Multiplayer friendly**: see other players' hits, and server admins can tune or disable each kind
 
@@ -33,8 +34,11 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 | Elytra | Aim at the spot while flying | Launches you where you look |
 | Portal | Aim at the spot while standing in a nether portal | Travels sooner |
 | Swim | Aim at the spot while swimming | A short dash, then faster swimming |
+| Fall | Aim at the spot while falling from a height | Takes less fall damage |
 | Sleeping | Move the cursor over the marker on the sleep screen at night | Morning comes sooner |
 | Enchanting | Click the marker on the enchanting table screen | Rerolls the three offers (costs nothing) |
+
+Growth, harvest, machine and animal spots also appear while you hold an item that does nothing on right click (pickaxes, sticks, ingots...).
 
 ## Controls
 
@@ -42,6 +46,7 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 |---|---|
 | **K** | Weak Spot menu (stats, hit sounds, per-kind on/off, colors and shapes, settings, guide book) |
 | **HOME** | Turn all weak spots on or off (for example while building) |
+| **Right click** (holding a Weak Spot Target) | 30-second target practice |
 
 Keys can be changed under Options → Controls → Weak Spot Mining.
 
@@ -49,7 +54,7 @@ Keys can be changed under Options → Controls → Weak Spot Mining.
 
 - Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with Forge 14.23.5.2860).
 - **Single player**: install it on your client.
-- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.10.x).
+- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.11.x).
 
 ## Settings
 

@@ -18,6 +18,9 @@
 
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
+| 弱点の大きさ | `server.general.spotSize` | 1.0 | 全種類の弱点の大きさの倍率（見た目と当たり判定の両方。0.5〜2.0）。釣りはさらに 0.75 倍。的当てには効かない |
+| 持ち物も素手と同じに | `server.general.heldItemsCountAsEmptyHand` | true | 右クリックで何もしないアイテム（ツルハシ・棒・インゴットなど）を持っていても、成長・収穫・機械・動物の弱点を出すか（自動判定。動物の餌などは除外） |
+| 素手と同じに扱わない物 | `server.general.heldItemExcludes` | （空） | 素手と同じに扱わないアイテムの登録名（1 行に 1 つ。例 `modid:wrench`）。右クリックで何かするのに自動判定で漏れる Mod のアイテム用 |
 | ガイドの本を渡す | `server.general.giveGuideBook` | true | 初回ログインのプレイヤーにガイドの本を渡すか（1 人 1 回）。**サーバー専用** |
 | 更新のお知らせ | `client.updates.showUpdateNotes` | true | バージョン更新後、初めてワールドに入った時にチャットで更新のお知らせを表示するか |
 | 新しい版の通知 | `client.updates.checkForUpdates` | true | 新しいバージョンが公開されていたら、ワールドに入った時にチャットで通知するか（Forge の `versionCheck` が false の時は通知なし） |
@@ -40,7 +43,8 @@
 | 自分の弱点を出す | `client.markers.weakSpotsEnabled` | true | 自分の弱点のオン／オフ（HOME キーで切り替え） |
 | オフにした種類 | `client.markers.disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal`）。統計画面の「弱点マーカー」タブで変更可能 |
 | 自分の弱点の色 | `client.markers.myMarkerColors` | （空） | 自分の弱点の色（1 行に `種類=#RRGGBB`）。未記入の種類は初期値。「弱点マーカー」タブで変更可能 |
-| 自分の弱点の形 | `client.markers.myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`）。未記入の種類は円。「弱点マーカー」タブで変更可能 |
+| 自分の弱点の形 | `client.markers.myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`・`star`（的当ての銅で解放））。未記入の種類は円。「弱点マーカー」タブで変更可能 |
+| 金の粒 | `client.markers.goldHitParticles` | false | 弱点に当てた時に金の粒を散らすか（的当ての金で解放。届いていないワールドでは出ない）。K キーの「的当て」タブでも切り替え可能 |
 | 移動の残像 | `client.markers.weakSpotTrailEnabled` | true | 弱点の移動演出（元の位置から素早く動き、残像を残す）。見た目のみで、当たり判定は即座に移動先。オフでその場で切り替わる。他プレイヤーのマークにも有効 |
 | ほかの人のマーク | `client.markers.otherMarkerEnabled` | true | 他プレイヤーの弱点マークを表示するか |
 | ほかの人のマークの色 | `client.markers.otherMarkerColor` | #3FA9FF | 他プレイヤーの弱点マークの色（#RRGGBB）。読めない値の場合は水色 |
@@ -56,7 +60,7 @@
 | コンボを表示 | `client.combo.comboDisplayEnabled` | true | コンボ数を画面に表示するか |
 | コンボの大きさ | `client.combo.comboScale` | 1.0 | コンボの数字の大きさの倍率（0.5〜2.0） |
 | コンボの位置 | `client.combo.comboPosition` | BELOW_CROSSHAIR | コンボの表示位置。`BELOW_CROSSHAIR`（照準の下）、`RIGHT_OF_CROSSHAIR`（照準の右）、`TOP_CENTER`（画面上部中央。ボスバーがあればその下）から選択 |
-| コンボの節目の演出 | `client.combo.comboMilestoneEffects` | true | コンボが 10・25・50・100・250・500・1000（以降 1000 ごと）に達した時の演出（強調音・光・花火・タイトル）を出すか |
+| コンボの節目の演出 | `client.combo.comboMilestoneEffects` | true | コンボが 10・25・50・75・100・150・200・250・300（以降 100 ごと）に達した時の演出（強調音・光・花火・タイトル）を出すか |
 | ほかの人のコンボ | `client.combo.othersComboDisplay` | true | 近くの他プレイヤーのコンボ（10 以上）を、頭上に「n HIT」と表示するか |
 | 次の倍率のゲージ | `client.combo.comboFactorGaugeEnabled` | true | コンボの数字の下に、次に掛け数が上がる段階（25・50・100…）までの進み具合のゲージを表示するか。掛け数を使う種類の弱点が出ている間だけ出る。色は次の段階の色 |
 
@@ -124,7 +128,7 @@
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
 | 機械の弱点 | `server.machine.machineWeakSpotEnabled` | true | 機械の弱点のオン／オフ（オフでしゃがんで素手の右クリックは GUI を開く） |
-| 機械の速さの倍率 | `server.machine.machineBoostMultiplier` | 4.0 | 機械ヒット時に、機械の処理を毎 tick 何倍実行するか。コンボ継続でさらに掛け数（×1.25〜×4）を乗算。クライアントにも送信（HUD の「機械 n倍速」） |
+| 機械の速さの倍率 | `server.machine.machineBoostMultiplier` | 4.0 | 機械ヒット時に、機械の処理を毎 tick 何倍実行するか。コンボ継続でさらに掛け数（×1.25〜、300 で ×4、以降も上昇）を乗算。クライアントにも送信（HUD の「機械 n倍速」） |
 | 倍率の上限 | `server.machine.machineBoostMaxMultiplier` | 16.0 | 機械の倍率（コンボの掛け数を乗算した後）の上限。機械 Mod の不具合やサーバー負荷が気になる時に下げる。クライアントにも送信 |
 | 加速の粒子を出す | `server.machine.machineBoostParticles` | true | 加速中の機械の周囲に、速度に応じた色の粒子を出すか（近くのプレイヤーに表示。各自の `machineParticlesVisible` がオフの人には送信しない）。**サーバー専用** |
 | 加速が続く時間 | `server.machine.machineBoostDurationTicks` | 6 | 機械の加速の持続時間（tick）。複数プレイヤーが同じ機械を加速しても効果は重複しない |
@@ -205,8 +209,8 @@
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
 | 乗り物の弱点 | `server.vehicle.vehicleWeakSpotEnabled` | true | 乗り物の弱点のオン／オフ |
-| 速さの倍率 | `server.vehicle.vehicleBoostMultiplier` | 1.5 | 乗り物の弱点に当てた時の速度倍率。コンボの掛け数（25 で ×1.25 … 1000 で ×4）を上乗せ |
-| 倍率の上限 | `server.vehicle.vehicleBoostMaxMultiplier` | 0 | 乗り物の速度倍率の上限。0 で上限なし（初期値。コンボ 1000 で 6 倍） |
+| 速さの倍率 | `server.vehicle.vehicleBoostMultiplier` | 1.5 | 乗り物の弱点に当てた時の速度倍率。コンボの掛け数（25 で ×1.25 … 300 で ×4、以降も上昇）を上乗せ |
+| 倍率の上限 | `server.vehicle.vehicleBoostMaxMultiplier` | 0 | 乗り物の速度倍率の上限。0 で上限なし（初期値。コンボ 300 で 6 倍、以降も上昇） |
 | 加速が続く時間 | `server.vehicle.vehicleBoostDurationTicks` | 40 | 乗り物の加速の持続時間（tick）。ヒットのたびにこの長さに戻る |
 | ヒットの最小間隔 | `server.vehicle.vehicleMinHitIntervalTicks` | 6 | 乗り物ヒットの最小受付間隔（tick） |
 | 加速のゲージ | `client.hud.vehicleBoostBarEnabled` | true | 乗り物の加速中、照準の上に残り時間のゲージ（水色）を表示するか |
@@ -261,6 +265,16 @@
 | ヒットの最小間隔 | `server.swim.swimMinHitIntervalTicks` | 6 | 泳ぎヒットの最小受付間隔（tick） |
 | 加速のゲージ | `client.hud.swimBoostBarEnabled` | true | 泳ぎの加速中に、照準の上に残り時間のゲージ（深い青）を表示するか |
 
+## 落下
+
+| 名前 | ファイルのキー | 初期値 | 説明 |
+|---|---|---|---|
+| 落下の弱点 | `server.fall.fallWeakSpotEnabled` | true | 落下の弱点のオン／オフ |
+| 出し始める距離 | `server.fall.fallMinDistance` | 3.0 | 着地した時の見込みの落下距離（今までの落下 + 地面までの高さ。ブロック）がこれを超えると、落ち始めから弱点を出す。3 を超えるとダメージを受ける |
+| 1 ヒットで減らす距離 | `server.fall.fallReduceBlocks` | 3.0 | 1 回当てるごとに減らす落下距離（ブロック。コンボの掛け数を上乗せ）。着地のダメージは残りの距離から決まる |
+| ヒットの最小間隔 | `server.fall.fallMinHitIntervalTicks` | 6 | 落下ヒットの最小受付間隔（tick） |
+| 落下ダメージの見込み | `client.hud.fallDamageHintEnabled` | true | 落ちている間、照準の上に着地した時の見込みのダメージ（ハート）を表示するか |
+
 ## 睡眠
 
 | 名前 | ファイルのキー | 初期値 | 説明 |
@@ -286,13 +300,14 @@
 
 ## 管理コマンド（サーバー）
 
-権限レベル 2（OP）以上で使用できます。シングルプレイではチート有効時に使用可能です。対象はオンラインのプレイヤーのみです（オフラインのプレイヤーを指定すると案内が表示されます）。プレイヤー名は Tab キーで補完できます。
+`top` と `bug` 以外は、権限レベル 2（OP）以上で使用できます。シングルプレイではチート有効時に使用可能です。対象はオンラインのプレイヤーのみです（オフラインのプレイヤーを指定すると案内が表示されます）。プレイヤー名は Tab キーで補完できます。
 
 | コマンド | 内容 |
 |---|---|
 | `/weakspot` | 使い方を表示 |
 | `/weakspot stats <プレイヤー>` | そのプレイヤーの統計（今回・累計）をチャットに表示 |
 | `/weakspot reset <プレイヤー>` | そのプレイヤーの統計（今回と累計）を消去（統計画面の「統計をリセット」と同じ。節目も再度受け取り可能になる） |
+| `/weakspot top [mining\|combo\|target\|total]` | サーバー内の上位 10 人を表示（mining: 採掘ヒット数、combo: 最大コンボ、target: 的当ての自己ベスト、total: 全種類のヒット数。省略時は mining。オフラインの人も含む）。**誰でも使用可能** |
 | `/weakspot reload` | `config/weakspot.cfg` を再読み込みし、接続中の全員に設定を再送信（再起動せずに設定を反映） |
 | `/weakspot bug` | 不具合の報告方法を表示（**誰でも使用可能**。クライアント側のコマンドで、サーバーには送信しない） |
 

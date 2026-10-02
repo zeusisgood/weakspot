@@ -31,6 +31,10 @@ final class OtherCombos {
     private static final float TEXT_SCALE = 0.025F;
 
     private static final Map<Integer, int[]> COMBOS = new HashMap<>();
+    /** 的当て中の人（1.11.0）: {ヒット数, 届いた tick}。ラウンドは 33 秒なので、それより長く届かなければ消す。 */
+    private static final Map<Integer, int[]> TARGETS = new HashMap<>();
+    private static final int TARGET_STALE_TICKS = 700;
+    private static final double TARGET_ABOVE = 0.28;
 
     private OtherCombos() {
     }
@@ -44,8 +48,18 @@ final class OtherCombos {
         }
     }
 
+    /** 的当てのヒット数（1.11.0。負なら終わった）。 */
+    static void receiveTarget(int entityId, int hits) {
+        if (hits < 0) {
+            TARGETS.remove(entityId);
+        } else {
+            TARGETS.put(entityId, new int[] {hits, (int) ClientWeakSpotHandler.clientTick});
+        }
+    }
+
     static void clear() {
         COMBOS.clear();
+        TARGETS.clear();
     }
 
     @SubscribeEvent
@@ -56,16 +70,27 @@ final class OtherCombos {
                 || player.isInvisible()) {
             return;
         }
+        double y = event.getY() + player.height + 0.5 + ABOVE_NAME;
         int[] entry = COMBOS.get(player.getEntityId());
-        if (entry == null || entry[0] < MIN_SHOWN) {
-            return;
-        }
-        if (ClientWeakSpotHandler.clientTick - entry[1] > STALE_TICKS) {
+        if (entry != null && ClientWeakSpotHandler.clientTick - entry[1] > STALE_TICKS) {
             COMBOS.remove(player.getEntityId());
-            return;
+            entry = null;
         }
-        draw(mc, I18n.format("weakspot.combo.hit", entry[0]), ComboHud.colorOf(entry[0]), event.getX(),
-                event.getY() + player.height + 0.5 + ABOVE_NAME, event.getZ());
+        if (entry != null && entry[0] >= MIN_SHOWN) {
+            draw(mc, I18n.format("weakspot.combo.hit", entry[0]), ComboHud.colorOf(entry[0]), event.getX(), y,
+                    event.getZ());
+            y += TARGET_ABOVE;
+        }
+        int[] target = TARGETS.get(player.getEntityId());
+        if (target != null && ClientWeakSpotHandler.clientTick - target[1] > TARGET_STALE_TICKS) {
+            TARGETS.remove(player.getEntityId());
+            target = null;
+        }
+        if (target != null) {
+            // 的当て中（1.11.0）
+            draw(mc, I18n.format("weakspot.target.others", target[0]), TargetPlay.OTHERS_RGB, event.getX(), y,
+                    event.getZ());
+        }
     }
 
     /** カメラからの相対位置 (x, y, z) に、カメラの方を向いた文字を描く（深度テストあり）。 */

@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.BowMath;
+import io.github.zeusisgood.weakspot.common.FallMath;
 import io.github.zeusisgood.weakspot.common.FishingMath;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MarkerColor;
@@ -32,12 +33,17 @@ final class HudSpot {
     /**
      * 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0）、
      * 上下だけで yaw は出した時点のまま（弓を馬・豚の上で引いたとき。弓を引く短い間なので、向きを追いかけない。1.8.6 で
-     * BowSpot から移した）。
+     * BowSpot から移した）、足元の方向の枠（FEET_WINDOW。落下）。
      */
     static final int FREE = 0;
     static final int VERTICAL = 1;
     static final int HORIZONTAL = 2;
     static final int VERTICAL_FIXED = 3;
+    /**
+     * 足元の方向の枠（1.11.0。落下）: 出した時点の向きを覚え、下向き 40〜80 度・左右 ±25 度の枠の中だけに出す
+     * （FallMath.nextWindowSpot）。照準から離れても出し直さず、画面にないときは方向の矢印を出す。
+     */
+    static final int FEET_WINDOW = 4;
 
     private boolean has;
     private int mode;
@@ -53,6 +59,8 @@ final class HudSpot {
     private double eyeZ;
     private double viewYaw;
     private double viewPitch;
+    /** FEET_WINDOW の枠の中心の向き（出した時点の yaw）。 */
+    private double anchorYaw;
 
     /**
      * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。1.7.0 から、色と形は種類ごとの設定
@@ -94,6 +102,9 @@ final class HudSpot {
     /** まだ出ていなければ（出し方が変わったときも）、今の視線の近くに newMode の出し方で出す。 */
     void ensure(EntityPlayer player, int newMode) {
         if (has && mode == newMode) {
+            if (mode == FEET_WINDOW) {
+                return;
+            }
             // 照準から離れすぎた弱点は、今の照準の近くに出し直す（1.8.2。ヒットには数えない。その場で切り替える）
             if (BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL,
                     mode != HORIZONTAL)) {
@@ -103,6 +114,7 @@ final class HudSpot {
             return;
         }
         mode = newMode;
+        anchorYaw = player.rotationYaw;
         next(player, player.rotationYaw, player.rotationPitch);
         motion.jumpTo(yaw, pitch);
         has = true;
@@ -132,7 +144,11 @@ final class HudSpot {
 
     private void next(EntityPlayer player, double prevYaw, double prevPitch) {
         // 1.8.1: 交互に出し、照準が水平から離れすぎたら水平の側に出す（真上・真下まで行かないように）
-        if (mode == VERTICAL || mode == VERTICAL_FIXED) {
+        if (mode == FEET_WINDOW) {
+            double[] n = FallMath.nextWindowSpot(anchorYaw, prevYaw, prevPitch, random);
+            yaw = n[0];
+            pitch = n[1];
+        } else if (mode == VERTICAL || mode == VERTICAL_FIXED) {
             pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
             yaw = player.rotationYaw;
             pitch = BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, pitchSide, screen.fovDegrees(),
@@ -174,7 +190,7 @@ final class HudSpot {
             return false;
         }
         double scale = new ScaledResolution(mc).getScaleFactor();
-        double allowed = FishingMath.allowedAngle(FishingMath.SPOT_SCREEN_RADIUS * scale, screen.fovDegrees(),
+        double allowed = FishingMath.allowedAngle(radius() * scale, screen.fovDegrees(),
                 screen.viewportHeight());
         return FishingMath.isAimed(p[2], allowed);
     }
@@ -189,6 +205,13 @@ final class HudSpot {
         return screen.project(eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE);
     }
 
+    /** 画面の上の半径（GUI の座標。1.11.0 から設定 spotSize と種類ごとの倍率を掛ける）。 */
+    private double radius() {
+        return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(kind);
+    }
+
+    private static final float[] ARROW_EDGE = {0x1A / 255F, 0x1A / 255F, 0x1A / 255F};
+
     /** HUD に描く（RenderGameOverlayEvent.Post の中で、beginOverlay と endOverlay の間で呼ぶ）。 */
     void draw(Minecraft mc) {
         if (!has || !screen.isValid()) {
@@ -196,7 +219,7 @@ final class HudSpot {
         }
         double scale = new ScaledResolution(mc).getScaleFactor();
         long nowMs = Minecraft.getSystemTime();
-        double radius = FishingMath.SPOT_SCREEN_RADIUS;
+        double radius = radius();
         boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         int rgb = MarkerLook.color(kind, defaultRgb);
         float[][] look = palette == null ? ScreenProjection.lookOf(rgb)
@@ -221,6 +244,11 @@ final class HudSpot {
         }
         double[] p = projectAt(u, v);
         if (p == null) {
+            if (mode == FEET_WINDOW) {
+                // 枠の外を向いている: 弱点の方向に矢印（弱点の色に、濃い縁 #1A1A1A）
+                ScreenProjection.edgeArrow(new ScaledResolution(mc), BowMath.wrapDegrees(yaw - viewYaw),
+                        pitch - viewPitch, look[0], ARROW_EDGE);
+            }
             return;
         }
         double gx = p[0] / scale;

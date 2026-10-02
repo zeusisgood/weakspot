@@ -37,7 +37,9 @@ public enum HitKind {
     /** ネザーゲートの中に立っている間、照準の近くに出る弱点に照準を合わせる（1.8.0）。 */
     PORTAL(0xFFD23F, true),
     /** 水の中を泳いでいる間、照準の近くに出る弱点に照準を合わせる（1.10.0）。 */
-    SWIM(0x2E6BFF, true);
+    SWIM(0x2E6BFF, true),
+    /** 高い所から落ちている間、照準の近くに出る弱点に照準を合わせる（1.11.0）。落下ダメージが減る。 */
+    FALL(0xEAF6FF, true);
 
     private final int defaultColor;
     private final boolean usesComboFactor;
@@ -61,6 +63,11 @@ public enum HitKind {
      */
     public boolean usesComboFactor() {
         return usesComboFactor;
+    }
+
+    /** 弱点の大きさの、種類ごとの決まった倍率（1.11.0。設定 spotSize に掛ける）。釣りだけ少し小さい。 */
+    public double sizeFactor() {
+        return this == FISHING ? 0.75 : 1.0;
     }
 
     /** 設定・翻訳キーに使う名前（小文字。"harvest" など）。 */

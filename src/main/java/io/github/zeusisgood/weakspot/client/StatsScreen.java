@@ -16,7 +16,7 @@ import org.lwjgl.input.Mouse;
 /**
  * 統計画面（K キー。題は「弱点破壊」）の共通の枠: 題、タブの切り替え、「ガイド」「設定画面を開く」「完了」、
  * ホイールの送り、説明の吹き出し。タブの中身は、それぞれのクラス（1.8.9 で分けた）:
- * 「統計」StatsTab、「サウンド」SoundTab、「弱点マーカー」KindsTab。
+ * 「統計」StatsTab、「サウンド」SoundTab、「弱点マーカー」KindsTab、「的当て」TargetTab（1.11.0）。
  */
 final class StatsScreen extends GuiScreen {
 
@@ -27,14 +27,17 @@ final class StatsScreen extends GuiScreen {
     private static final int BUTTON_TAB_STATS = 10;
     private static final int BUTTON_TAB_SOUND = 11;
     private static final int BUTTON_TAB_KINDS = 12;
+    private static final int BUTTON_TAB_TARGET = 13;
     private static final int TAB_STATS = 0;
     private static final int TAB_SOUND = 1;
     private static final int TAB_KINDS = 2;
+    private static final int TAB_TARGET = 3;
 
     /** 最後に開いていたタブ（画面を開き直しても保つ）。 */
     private static int tab = TAB_STATS;
 
-    private final StatsScreenTab[] tabs = {new StatsTab(this), new SoundTab(this), new KindsTab(this)};
+    private final StatsScreenTab[] tabs = {new StatsTab(this), new SoundTab(this), new KindsTab(this),
+            new TargetTab(this)};
     private GuiButton[] tabButtons;
     private int top;
     private int bottom;
@@ -65,14 +68,16 @@ final class StatsScreen extends GuiScreen {
         int center = width / 2;
 
         tabButtons = new GuiButton[] {
-                add(new GuiButton(BUTTON_TAB_STATS, center - 154, top + 14, 74, 20,
+                add(new GuiButton(BUTTON_TAB_STATS, center - 154, top + 14, 60, 20,
                         I18n.format("weakspot.stats.tab.stats"))),
-                add(new GuiButton(BUTTON_TAB_SOUND, center - 76, top + 14, 74, 20,
+                add(new GuiButton(BUTTON_TAB_SOUND, center - 92, top + 14, 60, 20,
                         I18n.format("weakspot.stats.tab.sound"))),
-                add(new GuiButton(BUTTON_TAB_KINDS, center + 2, top + 14, 74, 20,
+                add(new GuiButton(BUTTON_TAB_KINDS, center - 30, top + 14, 60, 20,
                         I18n.format("weakspot.stats.tab.kinds"))),
+                add(new GuiButton(BUTTON_TAB_TARGET, center + 32, top + 14, 60, 20,
+                        I18n.format("weakspot.stats.tab.target"))),
         };
-        add(new GuiButton(BUTTON_GUIDE, center + 80, top + 14, 74, 20, I18n.format("weakspot.stats.guide")));
+        add(new GuiButton(BUTTON_GUIDE, center + 94, top + 14, 60, 20, I18n.format("weakspot.stats.guide")));
         for (StatsScreenTab t : tabs) {
             t.init();
         }
@@ -115,6 +120,9 @@ final class StatsScreen extends GuiScreen {
                 break;
             case BUTTON_TAB_KINDS:
                 showTab(TAB_KINDS);
+                break;
+            case BUTTON_TAB_TARGET:
+                showTab(TAB_TARGET);
                 break;
             default:
                 tabs[tab].action(button.id);

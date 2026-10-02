@@ -34,6 +34,10 @@ final class HitSounds {
     private static final List<Scheduled> QUEUE = new ArrayList<>();
     /** 重ねる音の音量（旋律に対する倍率）。 */
     private static final float CHORD_VOLUME = 0.6F;
+    /** sus4 の解決の音を遅らせる tick（1.11.0）。 */
+    private static final int RESOLVE_DELAY_TICKS = 2;
+    /** 300 から旋律に重ねるベルの音量（自分のヒット音の音量に掛ける。1.11.0）。 */
+    private static final double BELL_VOLUME = 0.5;
     /** 段階・節目の音（ベル）の音量（自分のヒット音の音量に対する倍率。上限 1.0）。 */
     private static final float ACCENT_VOLUME = 1.5F;
     /** 駆け上がりの間の、自分の通常のヒット音の音量の倍率。 */
@@ -65,9 +69,20 @@ final class HitSounds {
     /** 自分のヒット音。streak は連続ヒット数（1 始まり）。コンボで和音が厚くなり、駆け上がりの間は小さくなる。 */
     static void playHit(int streak) {
         double volume = WeakSpotConfig.client.sound.myHitVolume * (soundTick <= duckUntil ? DUCKED_VOLUME : 1);
-        float[] pitches = HitPitch.forHit(streak, WeakSpotConfig.client.sound.hitChordEnabled);
+        boolean chords = WeakSpotConfig.client.sound.hitChordEnabled;
+        float[] pitches = HitPitch.forHit(streak, chords);
+        // 重ねる音が多いほど 1 音を小さくする（1.11.0。9 の和音などで大きくなりすぎないように）
+        double chordVolume = volume * CHORD_VOLUME * Math.min(1, 2.0 / Math.max(1, pitches.length - 1));
         for (int i = 0; i < pitches.length; i++) {
-            playFlatPitch(WeakSpotConfig.client.sound.myHitSound, i == 0 ? volume : volume * CHORD_VOLUME, pitches[i]);
+            playFlatPitch(WeakSpotConfig.client.sound.myHitSound, i == 0 ? volume : chordVolume, pitches[i]);
+        }
+        float resolve = HitPitch.resolveFor(streak, chords);
+        if (resolve > 0) {
+            schedule(RESOLVE_DELAY_TICKS,
+                    () -> playFlatPitch(WeakSpotConfig.client.sound.myHitSound, chordVolume, resolve));
+        }
+        if (HitPitch.withBell(streak, chords)) {
+            playFlatPitch(HitSound.BELL, volume * BELL_VOLUME, pitches[0]);
         }
     }
 
@@ -122,6 +137,16 @@ final class HitSounds {
         Minecraft.getMinecraft().getSoundHandler().playSound(new PositionedSoundRecord(
                 soundOf(WeakSpotConfig.client.sound.othersHitSound), SoundCategory.PLAYERS, volume,
                 HitPitch.forStreak(streak), pos));
+    }
+
+    /** 他のプレイヤーが的当て（1.11.0）の ✕ に当てた: 本人と同じ低い音（音符ブロックのプリング、ピッチ 0.5）。 */
+    static void playOtherMiss(BlockPos pos) {
+        float volume = (float) WeakSpotConfig.client.sound.othersHitVolume;
+        if (volume <= 0 || Minecraft.getMinecraft().world == null) {
+            return;
+        }
+        Minecraft.getMinecraft().getSoundHandler().playSound(new PositionedSoundRecord(
+                SoundEvents.BLOCK_NOTE_PLING, SoundCategory.PLAYERS, volume, TargetPlay.MISS_PITCH, pos));
     }
 
     /** 他のプレイヤーのヒット音の試聴。実際は距離で小さくなるが、試聴は距離なしで鳴らす。 */

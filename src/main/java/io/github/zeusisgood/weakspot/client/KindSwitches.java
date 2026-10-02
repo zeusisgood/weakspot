@@ -19,7 +19,9 @@ public final class KindSwitches {
 
     /** その種類の弱点を出してよいか。 */
     public static boolean isEnabled(HitKind kind) {
-        return WeakSpotConfig.client.markers.weakSpotsEnabled && !KindMask.isDisabled(disabledMask(), kind);
+        // 的当て（1.11.0）の間は、ほかの種類の弱点を出さない
+        return WeakSpotConfig.client.markers.weakSpotsEnabled && !KindMask.isDisabled(disabledMask(), kind)
+                && !TargetPlay.active();
     }
 
     /** 自分でオフにした種類のビット（一時オフとは別）。 */

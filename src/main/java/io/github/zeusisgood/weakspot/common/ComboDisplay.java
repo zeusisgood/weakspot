@@ -15,7 +15,7 @@ public final class ComboDisplay {
     public static final int BOUNCE_TICKS = 4;
     /** ヒットした瞬間の大きさ（1 に戻る）。 */
     public static final double BOUNCE_PEAK = 1.4;
-    /** 250 以上の段階に達したヒットの大きさ（大きく弾ませる）。 */
+    /** 150 以上の段階に達したヒットの大きさ（大きく弾ませる）。 */
     public static final double BIG_BOUNCE_PEAK = 1.9;
     /** 段階の演出の光が消えるまでの時間。 */
     public static final int GLOW_TICKS = 12;
@@ -56,17 +56,9 @@ public final class ComboDisplay {
         return Math.max(0, 1 - ticksSinceStep / GLOW_TICKS);
     }
 
-    /** 虹色（100 以上）が一周する時間（ミリ秒）。段階が上がるほど速く流れる。 */
+    /** 虹色（400 以上。1.11.0 までは 100 以上）が一周する時間（ミリ秒）。100 ごとに速く流れる（800 まで）。 */
     public static long rainbowPeriodMs(int combo) {
-        if (combo >= 1000) {
-            return 1200;
-        }
-        if (combo >= 500) {
-            return 2000;
-        }
-        if (combo >= 250) {
-            return 3000;
-        }
-        return 4000;
+        int hundreds = Math.max(0, combo / 100 - 4);
+        return Math.max(800, 3000 - 300L * hundreds);
     }
 }

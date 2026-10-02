@@ -21,6 +21,20 @@ public final class MiningStats {
     /** 種類を問わない連続ヒット（コンボ）の最大。サーバーが HitStreak で数える。 */
     public long maxStreak;
 
+    /** 的当ての自己ベスト（ヒット数）と、最後まで遊んだ回数（1.11.0）。「統計をリセット」では消さない。 */
+    public long targetBest;
+    public long targetRounds;
+
+    /** 的当てを最後まで遊んだ記録を足す。自己ベストを更新したら true。 */
+    public boolean recordTargetRound(long hits) {
+        targetRounds++;
+        if (hits > targetBest) {
+            targetBest = hits;
+            return true;
+        }
+        return false;
+    }
+
     /** 連続ヒット数 count（ヒット後の数）を記録する。最大だけを残す。 */
     public void recordStreak(long count) {
         maxStreak = Math.max(maxStreak, count);
@@ -96,6 +110,8 @@ public final class MiningStats {
         maxHitsOnBlock = 0;
         savedTicks = 0;
         maxStreak = 0;
+        targetBest = 0;
+        targetRounds = 0;
         java.util.Arrays.fill(kindHits, 0);
     }
 
@@ -123,7 +139,7 @@ public final class MiningStats {
         double readDouble();
     }
 
-    /** 送る並び（1.9.0 から、全体の数のあとに種類の順）。種類や項目を足すと通信が変わる（マイナー）。 */
+    /** 送る並び（1.9.0 から、全体の数のあとに種類の順。1.11.0 から最後に的当て）。種類や項目を足すと通信が変わる（マイナー）。 */
     public void writeTo(Writer out) {
         out.writeLong(hits);
         out.writeLong(blocksBroken);
@@ -137,6 +153,8 @@ public final class MiningStats {
                 out.writeLong(kindHits[kind.ordinal()]);
             }
         }
+        out.writeLong(targetBest);
+        out.writeLong(targetRounds);
     }
 
     public static MiningStats readFrom(Reader in) {
@@ -153,6 +171,8 @@ public final class MiningStats {
                 stats.kindHits[kind.ordinal()] = in.readLong();
             }
         }
+        stats.targetBest = in.readLong();
+        stats.targetRounds = in.readLong();
         return stats;
     }
 }

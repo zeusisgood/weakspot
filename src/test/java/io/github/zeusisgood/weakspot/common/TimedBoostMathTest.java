@@ -10,7 +10,8 @@ public class TimedBoostMathTest {
     public void comboStacksWithoutCapByDefault() {
         assertEquals(1.5, TimedBoostMath.multiplier(1.5, 0, 1), 1e-9);
         assertEquals(3.0, TimedBoostMath.multiplier(1.5, 0, 100), 1e-9);
-        assertEquals(6.0, TimedBoostMath.multiplier(1.5, 0, 1000), 1e-9);
+        assertEquals(6.0, TimedBoostMath.multiplier(1.5, 0, 300), 1e-9);
+        assertEquals(11.25, TimedBoostMath.multiplier(1.5, 0, 1000), 1e-9);
     }
 
     @Test

@@ -18,7 +18,11 @@ public class MarkerShapeTest {
 
     @Test
     public void unknownValueFallsBackToRing() {
-        assertEquals(MarkerShape.RING, MarkerShape.fromName("STAR"));
+        assertEquals(MarkerShape.STAR, MarkerShape.fromName("star"));
+        assertEquals(MarkerShape.RING, MarkerShape.fromName("HEXAGON"));
+        assertEquals(1.0, MarkerShape.STAR.pointScale(0), 0);
+        assertEquals(MarkerShape.STAR_INNER_RATIO, MarkerShape.STAR.pointScale(1), 0);
+        assertEquals(1.0, MarkerShape.DIAMOND.pointScale(1), 0);
         assertEquals(MarkerShape.RING, MarkerShape.fromName(""));
         assertEquals(MarkerShape.RING, MarkerShape.fromName(null));
     }

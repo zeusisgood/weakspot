@@ -10,10 +10,13 @@ import io.github.zeusisgood.weakspot.network.QueryMessage;
 import io.github.zeusisgood.weakspot.network.StateMessage;
 import io.github.zeusisgood.weakspot.network.OtherHitMessage;
 import io.github.zeusisgood.weakspot.network.OtherMarkerMessage;
+import io.github.zeusisgood.weakspot.network.OtherTargetMessage;
 import io.github.zeusisgood.weakspot.network.SettingsMessage;
 import io.github.zeusisgood.weakspot.network.StatsMessage;
 import io.github.zeusisgood.weakspot.network.StatsRequestMessage;
 import io.github.zeusisgood.weakspot.network.SwitchMessage;
+import io.github.zeusisgood.weakspot.network.TargetActionMessage;
+import io.github.zeusisgood.weakspot.network.TargetMessage;
 import io.github.zeusisgood.weakspot.server.MachineAccelerator;
 import io.github.zeusisgood.weakspot.server.MachineStates;
 import io.github.zeusisgood.weakspot.server.VehicleHits;
@@ -42,9 +45,9 @@ public class WeakSpotMod {
 
     public static final String MODID = "weakspot";
     public static final String NAME = "Weak Spot Mining";
-    public static final String VERSION = "1.10.2";
+    public static final String VERSION = "1.11.0";
     /** 接続できる相手のバージョンの範囲（Maven の書式）。 */
-    public static final String ACCEPTED_VERSIONS = "[1.10,1.11)";
+    public static final String ACCEPTED_VERSIONS = "[1.11,1.12)";
     /** Forge の更新確認が読む、最新の版の情報（1.9.2）。リリースのたびに update.json の版を書き換える。 */
     public static final String UPDATE_JSON = "https://raw.githubusercontent.com/zeusisgood/weakspot/main/update.json";
 
@@ -79,6 +82,10 @@ public class WeakSpotMod {
         network.registerMessage(QueryMessage.Handler.class, QueryMessage.class, 9, Side.SERVER);
         network.registerMessage(StateMessage.Handler.class, StateMessage.class, 10, Side.CLIENT);
         network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 11, Side.CLIENT);
+        // 1.11.0: 的当て
+        network.registerMessage(TargetMessage.Handler.class, TargetMessage.class, 12, Side.CLIENT);
+        network.registerMessage(TargetActionMessage.Handler.class, TargetActionMessage.class, 13, Side.SERVER);
+        network.registerMessage(OtherTargetMessage.Handler.class, OtherTargetMessage.class, 14, Side.CLIENT);
     }
 
     @Mod.EventHandler

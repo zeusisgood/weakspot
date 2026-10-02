@@ -25,10 +25,11 @@ public final class SettingGroups {
 
     static {
         Map<String, List<String>> g = new LinkedHashMap<>();
-        g.put("general", list("giveGuideBook", "showUpdateNotes", "checkForUpdates", "skippedUpdateVersion"));
+        g.put("general", list("spotSize", "heldItemsCountAsEmptyHand", "heldItemExcludes", "giveGuideBook",
+                "showUpdateNotes", "checkForUpdates", "skippedUpdateVersion"));
         g.put("sound", list("myHitSound", "myHitVolume", "hitChordEnabled", "othersHitSound", "othersHitVolume"));
         g.put("markers", list("weakSpotsEnabled", "disabledKinds", "myMarkerColors", "myMarkerShapes",
-                "weakSpotTrailEnabled", "otherMarkerEnabled", "otherMarkerColor", "otherMarkerAlpha", "otherMarkerShape",
+                "goldHitParticles", "weakSpotTrailEnabled", "otherMarkerEnabled", "otherMarkerColor", "otherMarkerAlpha", "otherMarkerShape",
                 "markerShareRange", "markerSendMinIntervalTicks"));
         g.put("combo", list("comboDisplayEnabled", "comboScale", "comboPosition", "comboMilestoneEffects",
                 "othersComboDisplay", "comboFactorGaugeEnabled"));
@@ -68,6 +69,8 @@ public final class SettingGroups {
         g.put("portal", list("portalWeakSpotEnabled", "portalHitTicks", "portalMinHitIntervalTicks"));
         g.put("swim", list("swimWeakSpotEnabled", "swimBoostMultiplier", "swimBoostMaxMultiplier",
                 "swimBoostDurationTicks", "swimDashDistance", "swimMinHitIntervalTicks", "swimBoostBarEnabled"));
+        g.put("fall", list("fallWeakSpotEnabled", "fallMinDistance", "fallReduceBlocks", "fallMinHitIntervalTicks",
+                "fallDamageHintEnabled"));
         g.put("sleep", list("sleepWeakSpotEnabled", "sleepHitTicks", "sleepMinHitIntervalTicks"));
         g.put("enchant", list("enchantWeakSpotEnabled", "enchantMinHitIntervalTicks"));
         GROUPS = Collections.unmodifiableMap(g);

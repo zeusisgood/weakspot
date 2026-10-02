@@ -24,6 +24,7 @@ For multiplayer, install it on the server **and** on every player's client, all 
 |---|---|
 | **K** | Weak Spot menu (stats, hit sounds, per-kind on/off, colors and shapes, settings, guide book) |
 | **HOME** | Turn all weak spots on or off (for example while building) |
+| **Right click** (holding a Weak Spot Target) | 30-second target practice: aim at the red-and-white targets, avoid the yellow ✕. Your best score unlocks new marker looks |
 
 You can change the keys under Options → Controls → Weak Spot Mining.
 
@@ -47,10 +48,11 @@ You can change the keys under Options → Controls → Weak Spot Mining.
 | Elytra | Aim at the spot while flying | Launches you where you look |
 | Portal | Aim at the spot while standing in a nether portal | Travels sooner |
 | Swim | Aim at the spot while swimming | A short dash, then faster swimming |
+| Fall | Aim at the spot while falling from a height | Takes less fall damage |
 | Sleeping | Move the cursor over the marker on the sleep screen at night | Morning comes sooner |
 | Enchanting | Click the marker on the enchanting table screen | Rerolls the three offers (costs nothing) |
 
-Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. The in-game guide book (the Guide button in the K menu) explains every kind in English.
+Growth, harvest, machine and animal spots also appear while you hold an item that does nothing on right click (pickaxes, sticks, ingots...). Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. The in-game guide book (the Guide button in the K menu) explains every kind in English.
 
 ## More
 

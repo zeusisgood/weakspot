@@ -34,6 +34,12 @@ public final class SyncedSettings {
     public double weakSpotMaxRadiusRatio;
     public double minFaceSize;
     public int lingerTicks;
+    /** 弱点の大きさの倍率（1.11.0。種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う）。 */
+    public double spotSize;
+    /** 右クリックで何もしないアイテムを、素手と同じに扱うか（1.11.0。HeldItems）。 */
+    public boolean heldItemsCountAsEmptyHand;
+    /** 素手と同じに扱わないアイテム。登録名。 */
+    public Set<String> heldItemExcludes;
 
     // 採掘（全体のオン・オフとコンボ倍率のオン・オフは 1.9.0）
     public boolean miningWeakSpotEnabled;
@@ -156,11 +162,22 @@ public final class SyncedSettings {
     public int swimBoostDurationTicks;
     public double swimDashDistance;
 
+    // 落下（落ちた距離を減らすのはサーバー。クライアントは出し始める距離と、見込みのダメージの表示に使う。1.11.0）
+    public boolean fallWeakSpotEnabled;
+    public int fallMinHitIntervalTicks;
+    public double fallMinDistance;
+    public double fallReduceBlocks;
+
     // 他のプレイヤーの弱点マーク
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
     private SyncedSettings() {
+    }
+
+    /** その種類の弱点の大きさの倍率（1.11.0。spotSize × 種類ごとの決まった倍率）。 */
+    public double spotSize(HitKind kind) {
+        return (spotSize > 0 ? spotSize : 1) * kind.sizeFactor();
     }
 
     /** 成長の弱点の追加リストを読んだもの。 */
@@ -180,7 +197,9 @@ public final class SyncedSettings {
      */
     static final String[] WIRE = {
             "serverVersion", "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance", "weakSpotMinRadius",
-            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "miningWeakSpotEnabled", "miningComboBonus",
+            "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "spotSize", "heldItemsCountAsEmptyHand",
+            "heldItemExcludes", "miningWeakSpotEnabled",
+            "miningComboBonus",
             "boostMultiplier", "boostDurationTicks", "minHitIntervalTicks", "growthWeakSpotEnabled",
             "growthMinHitIntervalTicks", "growthMinRadius", "growthExcludedBlocks", "growthExtraBlocks",
             "machineWeakSpotEnabled", "machineMinHitIntervalTicks", "excludedBlocks", "machineBoostMultiplier",
@@ -201,7 +220,8 @@ public final class SyncedSettings {
             "sprintBoostMultiplier", "sprintBoostMaxMultiplier", "sprintBoostDurationTicks",
             "portalWeakSpotEnabled", "portalMinHitIntervalTicks", "portalHitTicks", "swimWeakSpotEnabled",
             "swimMinHitIntervalTicks", "swimBoostMultiplier", "swimBoostMaxMultiplier", "swimBoostDurationTicks",
-            "swimDashDistance", "markerShareRange",
+            "swimDashDistance", "fallWeakSpotEnabled", "fallMinHitIntervalTicks", "fallMinDistance",
+            "fallReduceBlocks", "markerShareRange",
             "markerSendMinIntervalTicks"
     };
     private static final Field[] FIELDS = new Field[WIRE.length];

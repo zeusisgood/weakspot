@@ -15,21 +15,25 @@ public class ComboMilestonesTest {
     public void trueOnlyAtTheSteps() {
         ComboMilestones milestones = new ComboMilestones();
         List<Integer> fired = new ArrayList<>();
-        for (int combo = 1; combo <= 3500; combo++) {
+        for (int combo = 1; combo <= 650; combo++) {
             if (milestones.reached(combo)) {
                 fired.add(combo);
             }
         }
-        assertEquals(Arrays.asList(10, 25, 50, 100, 250, 500, 1000, 2000, 3000), fired);
+        assertEquals(Arrays.asList(10, 25, 50, 75, 100, 150, 200, 250, 300, 400, 500, 600), fired);
     }
 
     @Test
-    public void glowColorsFrom250() {
+    public void glowColorsFrom150() {
         assertEquals(-1, ComboMilestones.glowRgb(100));
-        assertEquals(0xFF55FF, ComboMilestones.glowRgb(250));
-        assertEquals(0x55FFFF, ComboMilestones.glowRgb(500));
+        assertEquals(0x5599FF, ComboMilestones.glowRgb(150));
+        assertEquals(0x55FFFF, ComboMilestones.glowRgb(200));
+        assertEquals(0x55FF55, ComboMilestones.glowRgb(250));
+        assertEquals(0xFFD700, ComboMilestones.glowRgb(300));
+        // 虹色の段階は数字の色、500 ごとは金
+        assertEquals(-1, ComboMilestones.glowRgb(400));
+        assertEquals(0xFFD700, ComboMilestones.glowRgb(500));
         assertEquals(0xFFD700, ComboMilestones.glowRgb(1000));
-        assertEquals(0xFFD700, ComboMilestones.glowRgb(3000));
     }
 
     @Test

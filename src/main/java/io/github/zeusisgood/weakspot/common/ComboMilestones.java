@@ -1,14 +1,20 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * コンボの段階の演出（10、25、50、100、250、500、1000、以降 1000 ごと）を出すかの判定。その数に達した瞬間だけ真になる。
- * 累計ヒットの節目（Milestones）とは別物で、その連続の中だけのもの。
+ * コンボの段階の演出（10、25、50、75、100、150、200、250、300、以降 100 ごと。1.11.0 で 300 までに詰めた）を出すかの判定。
+ * その数に達した瞬間だけ真になる。累計ヒットの節目（Milestones）とは別物で、その連続の中だけのもの。
  */
 public final class ComboMilestones {
 
-    private static final int[] STEPS = {10, 25, 50, 100, 250, 500, 1000};
-    /** 1000 より上は、この数ごとに 1000 と同じ演出を出す。 */
-    public static final int GRAND_STEP = 1000;
+    private static final int[] STEPS = {10, 25, 50, 75, 100, 150, 200, 250, 300};
+    /** 300 より上は、この数ごとに段階の演出を出す。 */
+    public static final int REPEAT_STEP = 100;
+    /** この数ごとに、いちばん大きな演出（2 オクターブ・花火 3 発）を出す。 */
+    public static final int GRAND_STEP = 500;
+    /** タイトル「N COMBO!」を出す最初の段階。 */
+    public static final int TITLE_FROM = 300;
+    /** 強い光と大きな弾みを出す最初の段階。 */
+    public static final int STRONG_FROM = 150;
 
     private int lastCombo;
 
@@ -23,9 +29,11 @@ public final class ComboMilestones {
         lastCombo = 0;
     }
 
-    static boolean isStep(int combo) {
-        if (combo > GRAND_STEP) {
-            return combo % GRAND_STEP == 0;
+    /** 段階の数か（10・25・50・75・100・150・200・250・300、以降 100 ごと）。全員への知らせ（サーバー）も使う。 */
+    public static boolean isStep(int combo) {
+        int last = STEPS[STEPS.length - 1];
+        if (combo > last) {
+            return combo % REPEAT_STEP == 0;
         }
         for (int step : STEPS) {
             if (combo == step) {
@@ -36,18 +44,16 @@ public final class ComboMilestones {
     }
 
     /**
-     * 段階の演出の光の色（250 はピンク、500 は水色、1000 以上は金）。それより下の段階は -1（数字の色を使う）。
+     * 段階の演出の光の色（150 から段階の色、500 ごとは金）。それより下と、虹色の段階（400 から）は -1（数字の色を使う）。
      */
     public static int glowRgb(int step) {
-        if (step >= 1000) {
+        if (step >= GRAND_STEP && step % GRAND_STEP == 0) {
             return 0xFFD700;
         }
-        if (step >= 500) {
-            return 0x55FFFF;
+        ComboTier tier = ComboTier.of(step);
+        if (step < STRONG_FROM || tier == ComboTier.RAINBOW) {
+            return -1;
         }
-        if (step >= 250) {
-            return 0xFF55FF;
-        }
-        return -1;
+        return tier.rgb;
     }
 }

@@ -63,7 +63,7 @@ public final class ClientConfig {
 
         @Config.Comment({"[クライアント] 自分でオフにした弱点の種類（統計画面の「弱点マーカー」タブで変えられる）",
                 "1 行に 1 つ、mining, growth, machine, animal, fishing, bow, melee, vehicle, eat, sleep, ladder, elytra,",
-                "enchant, harvest, throw, sprint, portal, swim のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
+                "enchant, harvest, throw, sprint, portal, swim, fall のどれか。オフの種類は弱点が出ず、バニラの動きになる"})
         public String[] disabledKinds = {};
 
         @Config.Comment({"[クライアント] 自分の弱点の色。1 行に「種類=#RRGGBB」（例: harvest=#FF3DCB）",
@@ -73,6 +73,9 @@ public final class ClientConfig {
         @Config.Comment({"[クライアント] 自分の弱点の形。1 行に「種類=形」（例: bow=diamond）",
                 "形は circle, ring, diamond, square。書いていない種類は円。統計画面の「弱点マーカー」タブで変えられる"})
         public String[] myMarkerShapes = {};
+
+        @Config.Comment({"[クライアント] 弱点に当てたとき、金の粒を散らすか（的当ての金のご褒美。届いていないワールドでは出ない）"})
+        public boolean goldHitParticles = false;
 
         @Config.Comment({"[クライアント] 弱点が移動するときの演出（古い位置から素早く動き、残像を残す）",
                 "見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く"})
@@ -116,7 +119,7 @@ public final class ClientConfig {
                 "BELOW_CROSSHAIR（照準の下）, RIGHT_OF_CROSSHAIR（照準の右）, TOP_CENTER（画面の上の中央）"})
         public ComboPosition comboPosition = ComboPosition.BELOW_CROSSHAIR;
 
-        @Config.Comment("[クライアント] コンボが 10、25、50、100、250、500、1000（以降 1000 ごと）に達したときの演出（強調音・光・花火・タイトル）")
+        @Config.Comment("[クライアント] コンボが 10、25、50、75、100、150、200、250、300（以降 100 ごと）に達したときの演出（強調音・光・花火・タイトル）")
         public boolean comboMilestoneEffects = true;
 
         @Config.Comment({"[クライアント] 近くのほかのプレイヤーのコンボ（10 以上）を、頭の上に「n HIT」と表示するか"})
@@ -174,6 +177,9 @@ public final class ClientConfig {
 
         @Config.Comment({"[クライアント] 泳ぎが加速している間、照準の上に残り時間のゲージ（深い青）を表示するか"})
         public boolean swimBoostBarEnabled = true;
+
+        @Config.Comment({"[クライアント] 落ちている間、照準の上に、着地したときの見込みのダメージ（ハート）を表示するか"})
+        public boolean fallDamageHintEnabled = true;
 
         Hud() {
         }

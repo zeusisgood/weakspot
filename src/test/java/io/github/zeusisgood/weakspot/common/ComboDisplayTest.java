@@ -45,12 +45,11 @@ public class ComboDisplayTest {
 
     @Test
     public void rainbowSpeedsUpWithTheSteps() {
-        assertEquals(4000, ComboDisplay.rainbowPeriodMs(100));
-        assertEquals(4000, ComboDisplay.rainbowPeriodMs(249));
-        assertEquals(3000, ComboDisplay.rainbowPeriodMs(250));
-        assertEquals(2000, ComboDisplay.rainbowPeriodMs(500));
-        assertEquals(1200, ComboDisplay.rainbowPeriodMs(1000));
-        assertEquals(1200, ComboDisplay.rainbowPeriodMs(4000));
+        assertEquals(3000, ComboDisplay.rainbowPeriodMs(400));
+        assertEquals(3000, ComboDisplay.rainbowPeriodMs(499));
+        assertEquals(2700, ComboDisplay.rainbowPeriodMs(500));
+        assertEquals(1500, ComboDisplay.rainbowPeriodMs(900));
+        assertEquals(800, ComboDisplay.rainbowPeriodMs(4000));
     }
 
     @Test

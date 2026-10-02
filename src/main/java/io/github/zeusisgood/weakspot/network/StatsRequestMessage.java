@@ -38,8 +38,7 @@ public class StatsRequestMessage implements IMessage {
                 if (reset) {
                     ServerStats.resetTotal(player);
                 }
-                WeakSpotMod.network.sendTo(
-                        new StatsMessage(ServerStats.session(player), ServerStats.total(player)), player);
+                WeakSpotMod.network.sendTo(ServerStats.message(player), player);
             });
         }
     }

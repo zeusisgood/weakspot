@@ -49,8 +49,8 @@ final class SleepSpot extends ScreenSpotKind {
      */
     @Override
     boolean place(GuiScreen gui, double prevX, double prevY) {
-        double[] area = SleepSpotArea.area(gui.width, gui.height, RADIUS);
-        double minMove = SleepSpotArea.minMove(gui.width, gui.height, RADIUS);
+        double[] area = SleepSpotArea.area(gui.width, gui.height, radius());
+        double minMove = SleepSpotArea.minMove(gui.width, gui.height, radius());
         double bestX = x;
         double bestY = y;
         double bestMove = -1;

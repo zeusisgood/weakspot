@@ -67,7 +67,7 @@ final class ScreenSpots {
         boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         float[][] look = k.look();
         MarkerShape shape = MarkerLook.shape(k.kind);
-        double radius = ScreenSpotKind.RADIUS;
+        double radius = k.radius();
         HudSpot.beginOverlay();
         if (trail) {
             for (MarkerMotion.Afterimage image : k.motion.afterimages(nowMs)) {
@@ -103,7 +103,7 @@ final class ScreenSpots {
     }
 
     private static boolean inside(ScreenSpotKind k, double mouseX, double mouseY) {
-        return Math.hypot(mouseX - k.x, mouseY - k.y) <= ScreenSpotKind.RADIUS;
+        return Math.hypot(mouseX - k.x, mouseY - k.y) <= k.radius();
     }
 
     /** 当てる（最小間隔の中なら何もしない）。当てたら次の位置へ移す。 */
