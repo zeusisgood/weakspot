@@ -5,6 +5,7 @@ import io.github.zeusisgood.weakspot.CommonProxy;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.network.MarkerMessage.MarkerData;
+import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
@@ -84,8 +85,8 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void onTarget(byte type, int hits, long best, boolean newBest, int newTier) {
-        Minecraft.getMinecraft().addScheduledTask(() -> TargetPlay.receive(type, hits, best, newBest, newTier));
+    public void onTarget(TargetMessage message) {
+        Minecraft.getMinecraft().addScheduledTask(() -> TargetPlay.receive(message));
     }
 
     @Override

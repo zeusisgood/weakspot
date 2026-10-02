@@ -24,7 +24,7 @@ For multiplayer, install it on the server **and** on every player's client, all 
 |---|---|
 | **K** | Weak Spot menu (stats, hit sounds, per-kind on/off, colors and shapes, settings, guide book) |
 | **HOME** | Turn all weak spots on or off (for example while building) |
-| **Right click** (holding a Weak Spot Target) | 30-second target practice: aim at the orange ● spots, avoid the red ✕. Your best score unlocks new marker looks |
+| **Right click** (holding a Weak Spot Target) | 30-second target practice: aim at the red-and-white targets, avoid the yellow ✕. Your best score unlocks new marker looks |
 
 You can change the keys under Options → Controls → Weak Spot Mining.
 

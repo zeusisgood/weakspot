@@ -1,7 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import java.util.Random;
 import org.junit.Test;
 
 public class FallMathTest {
@@ -50,5 +52,22 @@ public class FallMathTest {
         assertEquals("8.5", FallMath.heartsLabel(17));
         assertEquals("10", FallMath.heartsLabel(20));
         assertEquals("4.5", FallMath.heartsLabel(8.84));
+    }
+
+    /** 足元の枠: 下向き 40〜80 度、落ち始めの向きの ±25 度（360 度をまたいでも）、前の位置から 10 度以上離す。 */
+    @Test
+    public void windowSpotStaysAtTheFeetAndMovesAway() {
+        Random random = new Random(1);
+        double prevYaw = 175;
+        double prevPitch = 60;
+        for (int i = 0; i < 1000; i++) {
+            double[] n = FallMath.nextWindowSpot(170, prevYaw, prevPitch, random);
+            assertTrue(Math.abs(BowMath.wrapDegrees(n[0] - 170)) <= FallMath.WINDOW_YAW);
+            assertTrue(n[1] >= FallMath.WINDOW_PITCH_MIN && n[1] <= FallMath.WINDOW_PITCH_MAX);
+            assertTrue(Math.hypot(BowMath.wrapDegrees(n[0] - prevYaw), n[1] - prevPitch)
+                    >= FallMath.WINDOW_MIN_SEPARATION);
+            prevYaw = n[0];
+            prevPitch = n[1];
+        }
     }
 }

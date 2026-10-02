@@ -110,6 +110,7 @@ public final class ServerStats {
     /**
      * 画面の「統計をリセット」と /weakspot reset。累計と今回の両方を消す（1.10.2。それまでは累計だけで、直後に今回のほうが
      * 大きく見えた）。節目も累計で数えるので、節目をもう一度受け取れる（1.6.1）。
+     * ようこそのメッセージ（的の行を除く）も出す（1.11.0）。
      */
     public static void resetTotal(EntityPlayer player) {
         // 的当ての記録は消さない（ご褒美の解放が消えてしまうため。1.11.0）
@@ -119,6 +120,10 @@ public final class ServerStats {
         fresh.targetRounds = before.targetRounds;
         data(player).setTag(TAG_TOTAL, write(fresh));
         SESSIONS.put(player.getUniqueID(), new MiningStats());
+        if (player instanceof EntityPlayerMP) {
+            // 最初からやり直す感じを出すため、ようこそのメッセージをもう一度（的の行は除く。的は配り直さない）
+            GuideBookGiver.sendWelcome((EntityPlayerMP) player, false);
+        }
     }
 
     /** 統計画面に送る中身（今回・累計と、的当てのサーバー内の上位 10 人。1.11.0）。 */

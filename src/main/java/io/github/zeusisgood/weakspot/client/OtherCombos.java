@@ -88,7 +88,7 @@ final class OtherCombos {
         }
         if (target != null) {
             // 的当て中（1.11.0）
-            draw(mc, I18n.format("weakspot.target.others", target[0]), TargetPlay.SPOT_RGB, event.getX(), y,
+            draw(mc, I18n.format("weakspot.target.others", target[0]), TargetPlay.OTHERS_RGB, event.getX(), y,
                     event.getZ());
         }
     }

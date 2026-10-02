@@ -5,6 +5,7 @@ import java.nio.IntBuffer;
 import io.github.zeusisgood.weakspot.common.MarkerColor;
 import io.github.zeusisgood.weakspot.common.MarkerShape;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.Tessellator;
@@ -224,6 +225,44 @@ final class ScreenProjection {
         buffer.pos(x1, y1, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
         buffer.pos(x1, y0, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
         buffer.pos(x0, y0, 0).color(rgba[0], rgba[1], rgba[2], rgba[3]).endVertex();
+        tessellator.draw();
+    }
+
+    /** 矢印の大きさと、画面の中心からの距離（画面の短い辺に対する比率）。 */
+    private static final double ARROW_SIZE = 7;
+    private static final double ARROW_RADIUS = 0.36;
+
+    /**
+     * 画面の中心から (dx, dy)（度。右・下が正）の方向に、画面の端寄りの三角を描く（色 c、縁 edge）。弱点が画面にないときの
+     * 方向の矢印（1.11.0。的当てと落下の弱点）。beginOverlay と endOverlay の間で呼ぶ。
+     */
+    static void edgeArrow(ScaledResolution res, double dx, double dy, float[] c, float[] edge) {
+        double len = Math.hypot(dx, dy);
+        if (len < 1e-6) {
+            return;
+        }
+        dx /= len;
+        dy /= len;
+        double r = Math.min(res.getScaledWidth(), res.getScaledHeight()) * ARROW_RADIUS;
+        double cx = res.getScaledWidth() / 2.0 + dx * r;
+        double cy = res.getScaledHeight() / 2.0 + dy * r;
+        double tipX = cx + dx * ARROW_SIZE;
+        double tipY = cy + dy * ARROW_SIZE;
+        double backX = cx - dx * ARROW_SIZE * 0.6;
+        double backY = cy - dy * ARROW_SIZE * 0.6;
+        double sideX = -dy * ARROW_SIZE * 0.7;
+        double sideY = dx * ARROW_SIZE * 0.7;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(tipX, tipY, 0).color(c[0], c[1], c[2], 0.95F).endVertex();
+        buffer.pos(backX + sideX, backY + sideY, 0).color(c[0], c[1], c[2], 0.95F).endVertex();
+        buffer.pos(backX - sideX, backY - sideY, 0).color(c[0], c[1], c[2], 0.95F).endVertex();
+        tessellator.draw();
+        buffer.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(tipX, tipY, 0).color(edge[0], edge[1], edge[2], 0.95F).endVertex();
+        buffer.pos(backX + sideX, backY + sideY, 0).color(edge[0], edge[1], edge[2], 0.95F).endVertex();
+        buffer.pos(backX - sideX, backY - sideY, 0).color(edge[0], edge[1], edge[2], 0.95F).endVertex();
         tessellator.draw();
     }
 }

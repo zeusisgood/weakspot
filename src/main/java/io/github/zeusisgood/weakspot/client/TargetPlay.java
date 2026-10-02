@@ -3,7 +3,6 @@ package io.github.zeusisgood.weakspot.client;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.BowMath;
 import io.github.zeusisgood.weakspot.common.FishingMath;
-import io.github.zeusisgood.weakspot.common.MarkerShape;
 import io.github.zeusisgood.weakspot.common.TargetRules;
 import io.github.zeusisgood.weakspot.network.TargetActionMessage;
 import io.github.zeusisgood.weakspot.network.TargetMessage;
@@ -33,23 +32,35 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 的当て（1.11.0）のクライアント側。サーバーの知らせ（TargetMessage）で始まり・終わり、カウントダウン（見本「● 当てる　✕ 当てない」）、
- * 30 秒の間の弱点（オレンジの ●）とハズレ（赤い ✕。最後の 10 秒）を照準のまわりに出して、照準を合わせたらサーバーへ知らせる。
- * ヒット数はサーバーの数を出す。的は始めたときの向きを中心にした枠の中だけに出し、画面にないときは矢印で方向を示す。
+ * 的当て（1.11.0）のクライアント側。サーバーの知らせ（TargetMessage）で始まり・終わり、カウントダウン（見本「的 当てる　✕ 当てない」）、
+ * 30 秒の間の的（赤白のアーチェリーの的）とハズレ（黒い丸に黄色い ✕。最後の 10 秒）を照準のまわりに出して、照準を合わせたら
+ * サーバーへ知らせる。ヒット数はサーバーの数を出す。的は始めたときの向きを中心にした枠の中だけに出し、画面にないときは矢印で
+ * 方向を示す。終わったら、結果の板（今回・自己ベスト・サーバーの 1 位・当てた数と ✕ の数・次のご褒美）を出す。
  * 自分ではやめられない（持ち替え・画面を開いても続く）。ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class TargetPlay {
 
-    static final int SPOT_RGB = 0xFF8A2A;
-    static final int DECOY_RGB = 0xE53935;
+    /** 的の赤・白・中心の黄と、外側の縁（半透明の黒）。 */
+    private static final float[] TARGET_RED = rgb(0xD32F2F);
+    private static final float[] TARGET_WHITE = rgb(0xFFFFFF);
+    private static final float[] TARGET_YELLOW = rgb(0xFFD54F);
+    private static final float[] BLACK = rgb(0x000000);
+    /** ハズレの丸（半透明の黒）と ✕（黄）。 */
+    private static final float[] DECOY_DISK = rgb(0x1A1A1A);
+    private static final float[] DECOY_CROSS = rgb(0xFFEB3B);
+    /** ハズレに当てたときの「−5」。 */
+    private static final int PENALTY_RGB = 0xE53935;
+    /** ほかの人の頭の上の「的当て中」。 */
+    static final int OTHERS_RGB = 0xFF8A2A;
     private static final int GOLD = 0xFFD700;
+    private static final int GRAY = 0xAAAAAA;
     /** 弱点の点を置く、目からの距離（ブロック。向きだけが意味を持つ）。 */
     private static final double SPOT_DISTANCE = 16.0;
-    /** 枠の外を向いたときの矢印の大きさと、画面の中心からの距離（画面の短い辺に対する比率）。 */
-    private static final double ARROW_SIZE = 7;
-    private static final double ARROW_RADIUS = 0.36;
-    private static final int RESULT_TICKS = 80;
+    private static final int RESULT_TICKS = 100;
+    /** 結果の板の幅と行の高さ。 */
+    private static final int BOARD_WIDTH = 210;
+    private static final int LINE = 12;
     private static final int POPUP_TICKS = 20;
 
     private static final ScreenProjection SCREEN = new ScreenProjection();
@@ -106,6 +117,11 @@ public final class TargetPlay {
     private static long resultTick = Long.MIN_VALUE / 2;
     private static int resultHits;
     private static boolean resultNewBest;
+    private static long resultBest;
+    private static int resultGood;
+    private static int resultDecoys;
+    private static String resultTopName = "";
+    private static long resultTopScore;
 
     private TargetPlay() {
     }
@@ -116,10 +132,14 @@ public final class TargetPlay {
     }
 
     /** サーバーの知らせ（クライアントのスレッド）。 */
-    static void receive(byte type, int newHits, long best, boolean newBest, int newTier) {
+    static void receive(TargetMessage message) {
         Minecraft mc = Minecraft.getMinecraft();
         long now = ClientWeakSpotHandler.clientTick;
-        switch (type) {
+        int newHits = message.hits();
+        long best = message.best();
+        boolean newBest = message.newBest();
+        int newTier = message.newTier();
+        switch (message.type()) {
             case TargetMessage.START:
                 clear();
                 active = true;
@@ -145,6 +165,11 @@ public final class TargetPlay {
                 resultTick = now;
                 resultHits = newHits;
                 resultNewBest = newBest;
+                resultBest = best;
+                resultGood = message.good();
+                resultDecoys = message.decoys();
+                resultTopName = message.topName();
+                resultTopScore = message.topScore();
                 TargetRecords.best = best;
                 TargetRecords.rounds++;
                 if (newBest && newHits > 0) {
@@ -365,20 +390,26 @@ public final class TargetPlay {
         }
     }
 
-    /** 「3」「2」「1」と、見本「● 当てる　✕ 当てない」。 */
+    /** 「3」「2」「1」と、見本「(的) 当てる　(✕) 当てない」（的とハズレは本物と同じ絵）。 */
     private static void drawCountdown(Minecraft mc, ScaledResolution res, int count) {
         FontRenderer font = mc.fontRenderer;
         float cx = res.getScaledWidth() / 2F;
         float cy = res.getScaledHeight() / 2F;
         drawScaled(font, String.valueOf(count), cx, cy - 34, 4, 0xFFFFFF);
-        String hit = "● " + I18n.format("weakspot.target.sample.hit");
-        String avoid = "✕ " + I18n.format("weakspot.target.sample.avoid");
-        String gap = "    ";
-        float width = font.getStringWidth(hit + gap + avoid);
+        String hit = I18n.format("weakspot.target.sample.hit");
+        String avoid = I18n.format("weakspot.target.sample.avoid");
+        double icon = 6;
+        int gap = 18;
+        float width = (float) (icon * 2 + 4 + font.getStringWidth(hit) + gap + icon * 2 + 4 + font.getStringWidth(avoid));
         float x = cx - width / 2;
-        float y = cy + 22;
-        font.drawStringWithShadow(hit, x, y, SPOT_RGB);
-        font.drawStringWithShadow(avoid, x + font.getStringWidth(hit + gap), y, DECOY_RGB);
+        float y = cy + 26;
+        HudSpot.beginOverlay();
+        drawTarget(x + icon, y, icon, 1F);
+        double decoyX = x + icon * 2 + 4 + font.getStringWidth(hit) + gap + icon;
+        drawDecoy(decoyX, y, icon, 1F);
+        HudSpot.endOverlay();
+        font.drawStringWithShadow(hit, (float) (x + icon * 2 + 4), y - font.FONT_HEIGHT / 2F + 1, 0xFFFFFF);
+        font.drawStringWithShadow(avoid, (float) (decoyX + icon + 4), y - font.FONT_HEIGHT / 2F + 1, 0xFFFFFF);
     }
 
     /** 的とハズレを描く。 */
@@ -389,69 +420,61 @@ public final class TargetPlay {
         double scale = res.getScaleFactor();
         double radius = TargetRules.radius(TargetRules.phase(into()));
         HudSpot.beginOverlay();
-        double[] p = project(spot);
-        if (p != null) {
-            ScreenProjection.drawMarker(p[0] / scale, p[1] / scale, radius, MarkerShape.CIRCLE,
-                    ScreenProjection.lookOf(SPOT_RGB), 0.55F, 0.95F);
-        } else {
-            drawArrow(mc, res, spot);
-        }
         for (Spot decoy : DECOYS) {
             double[] d = project(decoy);
             if (d != null) {
-                drawCross(d[0] / scale, d[1] / scale, radius);
+                drawDecoy(d[0] / scale, d[1] / scale, radius, 1F);
             }
+        }
+        double[] p = project(spot);
+        if (p != null) {
+            drawTarget(p[0] / scale, p[1] / scale, radius, 1F);
+        } else {
+            drawArrow(mc, res, spot);
         }
         HudSpot.endOverlay();
     }
 
-    /** 的が画面にないとき、画面の端寄りに的の方向を示す三角（オレンジ）。 */
+    /** アーチェリーの的（外から半透明の黒の縁・赤・白・赤・中心の黄）。 */
+    static void drawTarget(double x, double y, double radius, float a) {
+        ScreenProjection.fill(x, y, radius * 1.15, BLACK, 0.45F * a);
+        ScreenProjection.fill(x, y, radius, TARGET_RED, 0.95F * a);
+        ScreenProjection.fill(x, y, radius * 0.75, TARGET_WHITE, 0.95F * a);
+        ScreenProjection.fill(x, y, radius * 0.5, TARGET_RED, 0.95F * a);
+        ScreenProjection.fill(x, y, radius * 0.25, TARGET_YELLOW, a);
+    }
+
+    /** ハズレ（半透明の黒い丸に、黄色い太い ✕ と白い縁）。 */
+    private static void drawDecoy(double x, double y, double radius, float a) {
+        ScreenProjection.fill(x, y, radius, DECOY_DISK, 0.75F * a);
+        ScreenProjection.outline(x, y, radius, TARGET_WHITE, 0.9F * a);
+        double k = radius * 0.55;
+        double w = Math.max(1.2, radius * 0.16);
+        bar(x - k, y - k, x + k, y + k, w, DECOY_CROSS, a);
+        bar(x - k, y + k, x + k, y - k, w, DECOY_CROSS, a);
+    }
+
+    /** 太さ w の線（四角形で描く。線の太さの上限がある環境でも太く見えるように）。 */
+    private static void bar(double x0, double y0, double x1, double y1, double w, float[] c, float a) {
+        double len = Math.hypot(x1 - x0, y1 - y0);
+        double nx = -(y1 - y0) / len * w / 2;
+        double ny = (x1 - x0) / len * w / 2;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder buffer = tessellator.getBuffer();
+        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+        buffer.pos(x0 + nx, y0 + ny, 0).color(c[0], c[1], c[2], a).endVertex();
+        buffer.pos(x1 + nx, y1 + ny, 0).color(c[0], c[1], c[2], a).endVertex();
+        buffer.pos(x1 - nx, y1 - ny, 0).color(c[0], c[1], c[2], a).endVertex();
+        buffer.pos(x0 - nx, y0 - ny, 0).color(c[0], c[1], c[2], a).endVertex();
+        tessellator.draw();
+    }
+
+    /** 的が画面にないとき、画面の端寄りに的の方向を示す三角（的と同じ赤に白い縁）。 */
     private static void drawArrow(Minecraft mc, ScaledResolution res, Spot s) {
         EntityPlayerSP player = mc.player;
         double dx = BowMath.wrapDegrees(anchorYaw + s.yaw - player.rotationYaw);
         double dy = anchorPitch + s.pitch - player.rotationPitch;
-        double len = Math.hypot(dx, dy);
-        if (len < 1e-6) {
-            return;
-        }
-        dx /= len;
-        dy /= len;
-        double r = Math.min(res.getScaledWidth(), res.getScaledHeight()) * ARROW_RADIUS;
-        double cx = res.getScaledWidth() / 2.0 + dx * r;
-        double cy = res.getScaledHeight() / 2.0 + dy * r;
-        float red = (SPOT_RGB >> 16 & 0xFF) / 255F;
-        float green = (SPOT_RGB >> 8 & 0xFF) / 255F;
-        float blue = (SPOT_RGB & 0xFF) / 255F;
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(cx + dx * ARROW_SIZE, cy + dy * ARROW_SIZE, 0).color(red, green, blue, 0.95F).endVertex();
-        double backX = cx - dx * ARROW_SIZE * 0.6;
-        double backY = cy - dy * ARROW_SIZE * 0.6;
-        double sideX = -dy * ARROW_SIZE * 0.7;
-        double sideY = dx * ARROW_SIZE * 0.7;
-        buffer.pos(backX + sideX, backY + sideY, 0).color(red, green, blue, 0.95F).endVertex();
-        buffer.pos(backX - sideX, backY - sideY, 0).color(red, green, blue, 0.95F).endVertex();
-        tessellator.draw();
-    }
-
-    /** 赤い ✕（輪と斜めの 2 本）。 */
-    private static void drawCross(double x, double y, double radius) {
-        float r = (DECOY_RGB >> 16 & 0xFF) / 255F;
-        float g = (DECOY_RGB >> 8 & 0xFF) / 255F;
-        float b = (DECOY_RGB & 0xFF) / 255F;
-        ScreenProjection.outline(x, y, radius, new float[] {r, g, b}, 0.9F);
-        double k = radius * 0.6;
-        GlStateManager.glLineWidth(3.0F);
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(x - k, y - k, 0).color(r, g, b, 1F).endVertex();
-        buffer.pos(x + k, y + k, 0).color(r, g, b, 1F).endVertex();
-        buffer.pos(x - k, y + k, 0).color(r, g, b, 1F).endVertex();
-        buffer.pos(x + k, y - k, 0).color(r, g, b, 1F).endVertex();
-        tessellator.draw();
-        GlStateManager.glLineWidth(2.0F);
+        ScreenProjection.edgeArrow(res, dx, dy, TARGET_RED, TARGET_WHITE);
     }
 
     /** 画面の上の中央に、ヒット数と残り時間。 */
@@ -459,7 +482,7 @@ public final class TargetPlay {
         FontRenderer font = mc.fontRenderer;
         float cx = res.getScaledWidth() / 2F;
         String hitText = I18n.format("weakspot.combo.hit", hits);
-        drawScaled(font, hitText, cx, 18, 2, SPOT_RGB);
+        drawScaled(font, hitText, cx, 18, 2, 0xFFFFFF);
         if (bestAtStart > 0) {
             // 自己ベスト。超えたら金で、超えた瞬間は大きく光る
             boolean passed = passedTick >= startTick;
@@ -467,7 +490,7 @@ public final class TargetPlay {
                     ? Math.max(0, 1 - (ClientWeakSpotHandler.clientTick - passedTick) / (double) PASS_GLOW_TICKS) : 0;
             String best = I18n.format("weakspot.target.best", bestAtStart);
             float bx = cx + font.getStringWidth(hitText) + 8 + font.getStringWidth(best) / 2F;
-            drawScaled(font, best, bx, 19, (float) (1 + 0.6 * glow), passed ? GOLD : 0xAAAAAA);
+            drawScaled(font, best, bx, 19, (float) (1 + 0.6 * glow), passed ? GOLD : GRAY);
         }
         double left = Math.max(0, (TargetRules.ROUND_TICKS - into) / 20.0);
         String time = I18n.format("weakspot.target.timeLeft", String.format("%.1f", left));
@@ -487,22 +510,75 @@ public final class TargetPlay {
             int alpha = (int) Math.max(8, 255 * (1 - t / POPUP_TICKS));
             String text = "-" + TargetRules.MISS_PENALTY;
             font.drawStringWithShadow(text, (float) popup.x - font.getStringWidth(text) / 2F,
-                    (float) (popup.y - 8 - t), alpha << 24 | DECOY_RGB);
+                    (float) (popup.y - 8 - t), alpha << 24 | PENALTY_RGB);
         }
     }
 
-    /** 終わりの「42 HIT」と「NEW BEST!」。 */
+    /**
+     * 結果の板（画面の中央の半透明の黒）: 題・大きな「42 HIT」・NEW BEST!・今回の記録・自己ベスト（あと N）・サーバーの 1 位
+     * （自分なら金で「あなた！」）・当てた数と ✕ の数・次のご褒美まで。最後の 1 秒で薄くなる。
+     */
     private static void drawResult(Minecraft mc, ScaledResolution res, double t) {
         FontRenderer font = mc.fontRenderer;
-        float cx = res.getScaledWidth() / 2F;
-        float cy = res.getScaledHeight() / 2F;
-        int alpha = (int) Math.max(8, Math.min(255, 255 * (RESULT_TICKS - t) / 20.0));
-        drawScaled(font, TextFormatting.BOLD + I18n.format("weakspot.combo.hit", resultHits), cx, cy - 40, 3,
-                alpha << 24 | SPOT_RGB);
-        if (resultNewBest) {
-            drawScaled(font, TextFormatting.BOLD + I18n.format("weakspot.target.newBest"), cx, cy - 16, 2,
-                    alpha << 24 | GOLD);
+        float fade = (float) Math.max(0.03, Math.min(1, (RESULT_TICKS - t) / 20.0));
+        int alpha = (int) (255 * fade) << 24;
+        List<String[]> rows = new ArrayList<>();
+        rows.add(new String[] {I18n.format("weakspot.target.result.this"), I18n.format("weakspot.combo.hit", resultHits)});
+        String best = I18n.format("weakspot.combo.hit", resultBest);
+        if (resultBest > resultHits) {
+            best += I18n.format("weakspot.target.result.behind", resultBest - resultHits);
         }
+        rows.add(new String[] {I18n.format("weakspot.target.result.best"), best});
+        boolean youTop = resultTopScore > 0 && resultBest >= resultTopScore;
+        String top = resultTopScore <= 0 ? "—"
+                : I18n.format("weakspot.combo.hit", resultTopScore) + I18n.format("weakspot.target.result.topName",
+                        youTop ? I18n.format("weakspot.target.result.you") : resultTopName);
+        rows.add(new String[] {I18n.format("weakspot.target.result.top"), top});
+        String counts = I18n.format("weakspot.target.result.counts", resultGood, resultDecoys,
+                resultDecoys * TargetRules.MISS_PENALTY);
+        TargetRules.Tier next = TargetRules.Tier.of(resultBest).next();
+        String reward = next == null ? I18n.format("weakspot.target.result.allDone")
+                : I18n.format("weakspot.target.result.next",
+                        I18n.format("weakspot.target.tier." + tierKey(next)), next.from - resultBest);
+
+        int height = 14 + 30 + (resultNewBest ? 14 : 0) + LINE * rows.size() + 6 + LINE * 2 + 8;
+        float cx = res.getScaledWidth() / 2F;
+        float top0 = res.getScaledHeight() / 2F - height / 2F - 10;
+        float left = cx - BOARD_WIDTH / 2F;
+        HudSpot.beginOverlay();
+        ScreenProjection.rect(left, top0, left + BOARD_WIDTH, top0 + height, new float[] {0, 0, 0, 0.6F * fade});
+        HudSpot.endOverlay();
+        GlStateManager.enableBlend();
+        float y = top0 + 6;
+        String title = I18n.format("weakspot.target.result.title");
+        font.drawStringWithShadow(title, cx - font.getStringWidth(title) / 2F, y, alpha | GRAY);
+        y += 14;
+        drawScaled(font, TextFormatting.BOLD + I18n.format("weakspot.combo.hit", resultHits), cx, y + 12, 3,
+                alpha | 0xFFFFFF);
+        y += 30;
+        if (resultNewBest) {
+            String text = TextFormatting.BOLD + I18n.format("weakspot.target.newBest");
+            font.drawStringWithShadow(text, cx - font.getStringWidth(text) / 2F, y, alpha | GOLD);
+            y += 14;
+        }
+        float labelX = left + 14;
+        float valueRight = left + BOARD_WIDTH - 14;
+        for (int i = 0; i < rows.size(); i++) {
+            String[] row = rows.get(i);
+            font.drawStringWithShadow(row[0], labelX, y, alpha | GRAY);
+            int color = i == 2 && youTop ? GOLD : 0xFFFFFF;
+            font.drawStringWithShadow(row[1], valueRight - font.getStringWidth(row[1]), y, alpha | color);
+            y += LINE;
+        }
+        y += 6;
+        font.drawStringWithShadow(counts, cx - font.getStringWidth(counts) / 2F, y, alpha | 0xFFFFFF);
+        y += LINE;
+        font.drawStringWithShadow(reward, cx - font.getStringWidth(reward) / 2F, y, alpha | (next == null ? GOLD : 0xFFFFFF));
+        GlStateManager.color(1, 1, 1, 1);
+    }
+
+    private static float[] rgb(int rgb) {
+        return new float[] {(rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F};
     }
 
     private static void drawScaled(FontRenderer font, String text, float cx, float cy, float scale, int argb) {

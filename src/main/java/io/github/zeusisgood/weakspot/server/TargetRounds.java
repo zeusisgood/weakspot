@@ -38,6 +38,9 @@ public final class TargetRounds {
     private static final class Round {
         long start;
         int hits;
+        /** 当てた数と ✕ に当てた数（結果の板に出す）。 */
+        int good;
+        int decoys;
         long lastHit = Long.MIN_VALUE / 2;
     }
 
@@ -85,7 +88,13 @@ public final class TargetRounds {
             return;
         }
         round.lastHit = now;
-        round.hits = TargetRules.afterHit(round.hits, action == TargetActionMessage.DECOY);
+        boolean decoy = action == TargetActionMessage.DECOY;
+        round.hits = TargetRules.afterHit(round.hits, decoy);
+        if (decoy) {
+            round.decoys++;
+        } else {
+            round.good++;
+        }
         send(player, new TargetMessage(TargetMessage.SCORE, round.hits, 0, false, -1));
         tellOthers(player, round.hits);
     }
@@ -110,7 +119,7 @@ public final class TargetRounds {
         }
     }
 
-    /** 最後まで遊んだ。記録を残し、自己ベスト・新しいご褒美の段階・サーバーの 1 位を知らせる。 */
+    /** 最後まで遊んだ。記録を残し、自己ベスト・新しいご褒美の段階・当てた数と ✕ の数・サーバーの 1 位を知らせる（結果の板）。 */
     private static void finish(EntityPlayerMP player, Round round, MinecraftServer server) {
         ROUNDS.remove(player.getUniqueID());
         tellOthers(player, -1);
@@ -123,8 +132,11 @@ public final class TargetRounds {
         boolean newBest = hits > before.targetBest;
         TargetRules.Tier tier = TargetRules.Tier.of(best);
         Leaderboard.update(player);
-        send(player, new TargetMessage(TargetMessage.END, hits, best, newBest,
-                tier != oldTier ? tier.ordinal() : -1));
+        List<Leaderboard.Entry> ranking = Leaderboard.ranking(server, Leaderboard.Category.TARGET);
+        Leaderboard.Entry top = ranking.isEmpty() ? null : ranking.get(0);
+        send(player, new TargetMessage(TargetMessage.END, hits, best, newBest, tier != oldTier ? tier.ordinal() : -1)
+                .withResult(round.good, round.decoys, top == null ? "" : top.name,
+                        top == null ? 0 : top.value(Leaderboard.Category.TARGET)));
         WeakSpotAdvancements.onTargetBest(player, best);
         if (hits > previousTop) {
             for (EntityPlayerMP other : server.getPlayerList().getPlayers()) {

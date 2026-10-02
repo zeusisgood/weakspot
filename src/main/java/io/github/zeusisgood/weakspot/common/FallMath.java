@@ -1,5 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
+import java.util.Random;
+
 /**
  * 落下のダメージの見込み（1.11.0。落下の弱点の表示と、進捗「九死に一生」）。バニラの EntityLivingBase#fall と
  * applyPotionDamageCalculations と同じ式（落下は防具の防御値では減らないので、耐性のポーション効果と、防具の
@@ -11,6 +13,15 @@ public final class FallMath {
     public static final double SAFE_DISTANCE = 3.0;
     /** エンチャントの保護値の上限（バニラと同じ）。 */
     private static final int MAX_PROTECTION = 20;
+
+    /**
+     * 落下の弱点を出す、足元の方向の枠（1.11.0 の試してもらったあと）: 下向き 40〜80 度、左右は落ち始めたときの向きの
+     * ±25 度（的当ての枠と同じ考え方）。次の弱点は、前の位置から WINDOW_MIN_SEPARATION 度以上離す。
+     */
+    public static final double WINDOW_PITCH_MIN = 40;
+    public static final double WINDOW_PITCH_MAX = 80;
+    public static final double WINDOW_YAW = 25;
+    public static final double WINDOW_MIN_SEPARATION = 10;
 
     /** 着地の見込み。 */
     public enum Outlook {
@@ -51,6 +62,20 @@ public final class FallMath {
             return Outlook.SAFE;
         }
         return !totem && damage >= health + absorption ? Outlook.LETHAL : Outlook.HURT;
+    }
+
+    /** 足元の枠の中の次の弱点の向き {yaw, pitch}。anchorYaw は落ち始めたときの向き、prev は前の弱点（か今の視線）。 */
+    public static double[] nextWindowSpot(double anchorYaw, double prevYaw, double prevPitch, Random random) {
+        double yaw = anchorYaw;
+        double pitch = (WINDOW_PITCH_MIN + WINDOW_PITCH_MAX) / 2;
+        for (int i = 0; i < 20; i++) {
+            yaw = anchorYaw + (random.nextDouble() * 2 - 1) * WINDOW_YAW;
+            pitch = WINDOW_PITCH_MIN + random.nextDouble() * (WINDOW_PITCH_MAX - WINDOW_PITCH_MIN);
+            if (Math.hypot(BowMath.wrapDegrees(yaw - prevYaw), pitch - prevPitch) >= WINDOW_MIN_SEPARATION) {
+                break;
+            }
+        }
+        return new double[] {yaw, pitch};
     }
 
     /** ハートの数の表示（2 点で 1。端数は多めに見る。例 4.5）。 */

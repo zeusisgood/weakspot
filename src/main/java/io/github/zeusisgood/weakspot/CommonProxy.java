@@ -4,6 +4,7 @@ import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.network.MarkerMessage.MarkerData;
+import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.List;
 import net.minecraft.util.math.BlockPos;
 
@@ -67,8 +68,8 @@ public class CommonProxy {
     public void onMilestone(int type, int kindId, long milestone) {
     }
 
-    /** 的当ての状態が届いた（1.11.0。サーバー → クライアントのパケットから呼ばれる。type は TargetMessage の種類）。 */
-    public void onTarget(byte type, int hits, long best, boolean newBest, int newTier) {
+    /** 的当ての状態が届いた（1.11.0。サーバー → クライアントのパケットから呼ばれる。END には結果の板の中身も付く）。 */
+    public void onTarget(TargetMessage message) {
     }
 
     /** 近くのほかのプレイヤーの的当てのヒット数が届いた（1.11.0。負なら終わった）。 */

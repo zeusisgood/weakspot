@@ -173,7 +173,7 @@ public class LangFilesTest {
         for (Map<String, String> entries : java.util.Arrays.asList(EN, JA)) {
             entries.forEach((key, value) -> {
                 if ((key.startsWith("weakspot.version.") || key.startsWith("weakspot.breed.")
-                        || key.startsWith("weakspot.milestone.broadcast."))
+                        || key.startsWith("weakspot.milestone.broadcast.") || key.startsWith("weakspot.welcome."))
                         && format.matcher(value).find()) {
                     bad.add(key + "=" + value);
                 }
