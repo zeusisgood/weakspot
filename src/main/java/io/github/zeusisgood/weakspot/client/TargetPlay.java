@@ -3,7 +3,9 @@ package io.github.zeusisgood.weakspot.client;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.BowMath;
 import io.github.zeusisgood.weakspot.common.FishingMath;
+import io.github.zeusisgood.weakspot.common.MarkerMotion;
 import io.github.zeusisgood.weakspot.common.TargetRules;
+import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import io.github.zeusisgood.weakspot.network.TargetActionMessage;
 import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.ArrayList;
@@ -77,6 +79,9 @@ public final class TargetPlay {
         double vpitch;
         final boolean decoy;
         long placedTick;
+        /** 表示の位置（当てて移るときに滑らせ、残像を残す。ほかの照準の弱点と同じ。1.11.0）。 */
+        final MarkerMotion motion = new MarkerMotion(0, 0);
+        boolean placedOnce;
 
         Spot(boolean decoy) {
             this.decoy = decoy;
@@ -285,6 +290,12 @@ public final class TargetPlay {
         s.vyaw = speed * Math.cos(heading);
         s.vpitch = speed * Math.sin(heading);
         s.placedTick = ClientWeakSpotHandler.clientTick;
+        if (s.placedOnce && WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
+            s.motion.moveTo(s.yaw, s.pitch, Minecraft.getSystemTime());
+        } else {
+            s.motion.jumpTo(s.yaw, s.pitch);
+        }
+        s.placedOnce = true;
     }
 
     /** 段階の速さで、枠の中を動かす（端で跳ね返る）。止まっている段階から動く段階になったら、向きを決め直す。 */
@@ -300,6 +311,8 @@ public final class TargetPlay {
         }
         double[] y = TargetRules.bounce(s.yaw, s.vyaw, TargetRules.windowYaw(phase));
         double[] p = TargetRules.bounce(s.pitch, s.vpitch, TargetRules.windowPitch(phase));
+        // ふだんの動きは、表示も同じだけずらす（滑りと残像は、移るときだけ）
+        s.motion.shift(y[0] - s.yaw, p[0] - s.pitch);
         s.yaw = y[0];
         s.vyaw = y[1];
         s.pitch = p[0];
@@ -356,7 +369,12 @@ public final class TargetPlay {
     }
 
     private static double[] project(Spot s) {
-        double[] d = BowMath.vector(anchorYaw + s.yaw, anchorPitch + s.pitch);
+        return projectAt(s.yaw, s.pitch);
+    }
+
+    /** 基準の向きからのずれ (u, v) の向きを、画面に写す。 */
+    private static double[] projectAt(double u, double v) {
+        double[] d = BowMath.vector(anchorYaw + u, anchorPitch + v);
         return SCREEN.project(eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE);
     }
 
@@ -422,20 +440,50 @@ public final class TargetPlay {
         double scale = res.getScaleFactor();
         double radius = TargetRules.radius(TargetRules.phase(into()));
         HudSpot.beginOverlay();
+        long nowMs = Minecraft.getSystemTime();
         for (Spot decoy : DECOYS) {
-            double[] d = project(decoy);
-            if (d != null) {
-                drawDecoy(d[0] / scale, d[1] / scale, radius, 1F);
-            }
+            drawWithTrail(decoy, scale, radius, nowMs);
         }
-        double[] p = project(spot);
-        if (p != null) {
-            drawTarget(p[0] / scale, p[1] / scale, radius, 1F);
-        } else {
+        if (!drawWithTrail(spot, scale, radius, nowMs)) {
             drawArrow(mc, res, spot);
         }
         HudSpot.endOverlay();
     }
+
+    /**
+     * 的かハズレを、残像（移るときに通った跡。薄い絵）と、滑っている途中の表示の位置で描く（weakSpotTrailEnabled が
+     * オフなら本当の位置に）。画面に写らなければ false。
+     */
+    private static boolean drawWithTrail(Spot s, double scale, double radius, long nowMs) {
+        boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
+        if (trail) {
+            for (MarkerMotion.Afterimage image : s.motion.afterimages(nowMs)) {
+                double[] a = projectAt(image.u, image.v);
+                if (a != null) {
+                    float alpha = (float) (TRAIL_ALPHA * image.alpha(nowMs));
+                    if (s.decoy) {
+                        drawDecoy(a[0] / scale, a[1] / scale, radius, alpha);
+                    } else {
+                        drawTarget(a[0] / scale, a[1] / scale, radius, alpha);
+                    }
+                }
+            }
+        }
+        double[] m = trail ? s.motion.position(nowMs) : new double[] {s.yaw, s.pitch};
+        double[] p = projectAt(m[0], m[1]);
+        if (p == null) {
+            return false;
+        }
+        if (s.decoy) {
+            drawDecoy(p[0] / scale, p[1] / scale, radius, 1F);
+        } else {
+            drawTarget(p[0] / scale, p[1] / scale, radius, 1F);
+        }
+        return true;
+    }
+
+    /** 残像の濃さ（ほかの弱点の残像と同じくらい）。 */
+    private static final double TRAIL_ALPHA = 0.4;
 
     /** アーチェリーの的（外から半透明の黒の縁・赤・白・赤・中心の黄）。 */
     static void drawTarget(double x, double y, double radius, float a) {
