@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
+import io.github.zeusisgood.weakspot.common.HitScale;
 import io.github.zeusisgood.weakspot.config.HitSound;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
 /**
- * 統計画面の「サウンド」タブ（1.8.9 で StatsScreen から分けた）。ヒット音の楽器と音量を変えて試聴する。
+ * 統計画面の「サウンド」タブ（1.8.9 で StatsScreen から分けた）。ヒット音の楽器と音量、音階（1.11.1）を変えて試聴する。
  * クライアントだけで完結し、値は weakspot.cfg にそのまま保存する（Forge の設定画面と同じ値になる）。
  */
 final class SoundTab extends StatsScreenTab {
@@ -23,6 +24,13 @@ final class SoundTab extends StatsScreenTab {
     private static final int BUTTON_OTHERS_PREVIEW = 32;
     /** 自分のヒット音に、コンボで音を重ねるか（1.9.5）。 */
     private static final int BUTTON_CHORD = 40;
+    /** 音階の動き・種類・音域（1.11.1）。 */
+    private static final int BUTTON_SCALE_DIRECTION = 41;
+    private static final int BUTTON_SCALE_TYPE = 42;
+    private static final int BUTTON_SCALE_OCTAVES = 43;
+    /** 音階の設定を切り替えたときの短い試聴（音の数と間隔 tick）。往復なら上がって 1 つ下がるまで分かる数。 */
+    private static final int SWITCH_PREVIEW_NOTES = 5;
+    private static final int SWITCH_PREVIEW_TICKS = 2;
     /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
 
@@ -30,6 +38,9 @@ final class SoundTab extends StatsScreenTab {
     private GuiButton mySound;
     private GuiButton othersSound;
     private GuiButton chord;
+    private GuiButton scaleDirection;
+    private GuiButton scaleType;
+    private GuiButton scaleOctaves;
 
     SoundTab(StatsScreen screen) {
         super(screen);
@@ -57,7 +68,11 @@ final class SoundTab extends StatsScreenTab {
         }));
         add(new GuiButton(BUTTON_OTHERS_PREVIEW, center + 94, y, 60, 20, I18n.format("weakspot.sound.preview")));
 
-        chord = add(new GuiButton(BUTTON_CHORD, center - 100, screen.top() + 146, 200, 20, ""));
+        int rows = screen.top() + 140;
+        chord = add(new GuiButton(BUTTON_CHORD, center - 154, rows, 150, 20, ""));
+        scaleDirection = add(new GuiButton(BUTTON_SCALE_DIRECTION, center + 4, rows, 150, 20, ""));
+        scaleType = add(new GuiButton(BUTTON_SCALE_TYPE, center - 154, rows + 24, 150, 20, ""));
+        scaleOctaves = add(new GuiButton(BUTTON_SCALE_OCTAVES, center + 4, rows + 24, 150, 20, ""));
         updateLabels();
     }
 
@@ -93,6 +108,19 @@ final class SoundTab extends StatsScreenTab {
                 WeakSpotConfig.save();
                 updateLabels();
                 return true;
+            case BUTTON_SCALE_DIRECTION:
+                WeakSpotConfig.client.sound.hitScaleDirection = WeakSpotConfig.client.sound.hitScaleDirection.next();
+                onScaleChanged();
+                return true;
+            case BUTTON_SCALE_TYPE:
+                WeakSpotConfig.client.sound.hitScaleType = WeakSpotConfig.client.sound.hitScaleType.next();
+                onScaleChanged();
+                return true;
+            case BUTTON_SCALE_OCTAVES:
+                WeakSpotConfig.client.sound.hitScaleOctaves = WeakSpotConfig.client.sound.hitScaleOctaves
+                        >= HitScale.MAX_OCTAVES ? HitScale.MIN_OCTAVES : WeakSpotConfig.client.sound.hitScaleOctaves + 1;
+                onScaleChanged();
+                return true;
             case BUTTON_MY_PREVIEW:
                 HitSounds.clear();
                 HitSounds.playScale(HitSounds::playOwn, PREVIEW_TICKS_PER_NOTE, 0);
@@ -106,11 +134,32 @@ final class SoundTab extends StatsScreenTab {
         }
     }
 
+    /**
+     * 音階の設定を切り替えた: 保存して、新しい設定の始めの数音を速めに鳴らす（1.11.1。続けて押したら前の試聴を止める）。
+     * 往復は、上がりきる手前から鳴らして、折り返しが分かるようにする。
+     */
+    private void onScaleChanged() {
+        WeakSpotConfig.save();
+        updateLabels();
+        HitSounds.clear();
+        HitScale scale = HitSounds.scale();
+        int start = scale.direction == HitScale.Direction.UP_DOWN
+                ? Math.max(0, scale.melodyLength() - SWITCH_PREVIEW_NOTES + 1) : 0;
+        HitSounds.playScale(streak -> HitSounds.playOwn(streak + start), SWITCH_PREVIEW_TICKS, 0,
+                SWITCH_PREVIEW_NOTES);
+    }
+
     private void updateLabels() {
         mySound.displayString = instrumentLabel(WeakSpotConfig.client.sound.myHitSound);
         othersSound.displayString = instrumentLabel(WeakSpotConfig.client.sound.othersHitSound);
         chord.displayString = I18n.format("weakspot.sound.chord",
                 I18n.format(WeakSpotConfig.client.sound.hitChordEnabled ? "options.on" : "options.off"));
+        scaleDirection.displayString = I18n.format("weakspot.sound.scaleDirection",
+                I18n.format("weakspot.sound.scaleDirection." + WeakSpotConfig.client.sound.hitScaleDirection.name()));
+        scaleType.displayString = I18n.format("weakspot.sound.scaleType",
+                I18n.format("weakspot.sound.scaleType." + WeakSpotConfig.client.sound.hitScaleType.name()));
+        scaleOctaves.displayString = I18n.format("weakspot.sound.scaleOctaves",
+                WeakSpotConfig.client.sound.hitScaleOctaves);
     }
 
     private static String instrumentLabel(HitSound sound) {
@@ -123,10 +172,10 @@ final class SoundTab extends StatsScreenTab {
         int top = screen.top();
         screen.drawString(screen.font(), I18n.format("weakspot.sound.mine"), labelX, top + 44, 0xFFFFFF);
         screen.drawString(screen.font(), I18n.format("weakspot.sound.others"), labelX, top + 92, 0xFFFFFF);
-        screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.note"), screen.width / 2, top + 132,
+        screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.note"), screen.width / 2, top + 128,
                 0xAAAAAA);
         screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.comboNote"), screen.width / 2,
-                top + 172, 0xAAAAAA);
+                top + 190, 0xAAAAAA);
     }
 
     /** 音量（0〜100%）のスライダー。動かし終えたとき（マウスを離したとき）に、値を保存して1音鳴らす。 */

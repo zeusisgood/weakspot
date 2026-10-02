@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.ComboMilestones;
-import io.github.zeusisgood.weakspot.common.HitPitch;
+import io.github.zeusisgood.weakspot.common.HitScale;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.ScaledResolution;
@@ -18,12 +18,10 @@ final class ComboEffects {
 
     /** 段階の演出の強調音を、ヒット音から少し遅らせる（tick）。 */
     private static final int ACCENT_DELAY_TICKS = 2;
-    /** 100 の和音（ド・ミ・ソ・上のド。連続ヒット数で表した音階の位置）。 */
-    private static final int[] CHORD = {1, 3, 5, HitPitch.SCALE_LENGTH};
-    /** 10・25・50・75 の分散和音（ド・ミ・ソ）。 */
-    private static final int[] ARPEGGIO = {1, 3, 5};
+    /** 10・25・50・75 の分散和音（ド・ミ・ソ。音階の度数。1.11.1 から各自の音階の種類で数える）。 */
+    private static final int[] ARPEGGIO = {0, 2, 4};
     /** 150 の駆け上がり（ドからソまで）。 */
-    private static final int[] SHORT_RUN = {1, 2, 3, 4, 5};
+    private static final int[] SHORT_RUN = {0, 1, 2, 3, 4};
     /** タイトル（フェードイン、表示、フェードアウトの tick）。バニラのタイトルと同じ長さ。 */
     private static final int TITLE_IN = 5;
     private static final int TITLE_STAY = 50;
@@ -48,12 +46,13 @@ final class ComboEffects {
         boolean grand = step == ComboMilestones.TITLE_FROM
                 || step >= ComboMilestones.GRAND_STEP && step % ComboMilestones.GRAND_STEP == 0;
         if (grand) {
-            float[] run = new float[HitPitch.TWO_OCTAVE_LENGTH];
+            HitScale scale = HitSounds.scale();
+            float[] run = new float[scale.twoOctaveLength()];
             for (int i = 0; i < run.length; i++) {
-                run[i] = HitPitch.twoOctave(i);
+                run[i] = scale.twoOctave(i);
             }
             HitSounds.accentRun(run, 1, ACCENT_DELAY_TICKS);
-            playChord(ACCENT_DELAY_TICKS + HitPitch.TWO_OCTAVE_LENGTH + 1);
+            playChord(ACCENT_DELAY_TICKS + run.length + 1);
             HitSounds.schedule(ACCENT_DELAY_TICKS, () -> {
                 MilestoneEffects.comboFireworks(3, glowOf(step));
                 showTitle(step);
@@ -90,16 +89,17 @@ final class ComboEffects {
         }
     }
 
-    /** 和音（同時に鳴らす）。 */
+    /** 100 の和音（ド・ミ・ソ・上のド。同時に鳴らす）。 */
     private static void playChord(int delay) {
-        HitSounds.accentRun(pitches(CHORD), 0, delay);
+        HitSounds.accentRun(pitches(new int[] {0, 2, 4, HitSounds.scale().perOctave()}), 0, delay);
     }
 
-    /** 音階の位置（連続ヒット数で表したもの）のピッチ。 */
-    private static float[] pitches(int[] notes) {
-        float[] pitches = new float[notes.length];
-        for (int i = 0; i < notes.length; i++) {
-            pitches[i] = HitPitch.forStreak(notes[i]);
+    /** 音階の度数のピッチ（各自の音階の種類）。 */
+    static float[] pitches(int[] degrees) {
+        HitScale scale = HitSounds.scale();
+        float[] pitches = new float[degrees.length];
+        for (int i = 0; i < degrees.length; i++) {
+            pitches[i] = scale.pitchOfDegree(degrees[i]);
         }
         return pitches;
     }

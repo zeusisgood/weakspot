@@ -33,6 +33,9 @@
 | 自分のヒット音 | `client.sound.myHitSound` | PLING | 自分のヒット音の楽器。`XYLOPHONE` `CHIME` `BELL` `FLUTE` `GUITAR` `HARP` `BASS` `HAT` `SNARE` `BASEDRUM` `PLING` から選択 |
 | 自分のヒット音の音量 | `client.sound.myHitVolume` | 0.25 | 自分のヒット音の音量（0〜1）。0 で無音 |
 | コンボで和音にする | `client.sound.hitChordEnabled` | true | 自分のヒット音に、コンボで音を重ねるか（25 から 2 音、100 から 3 音）。オフで 1 音のまま |
+| 音階の動き | `client.sound.hitScaleDirection` | UP | `UP`（上がりきったら最低音に戻る）／`UP_DOWN`（上がったら下がる往復）。他プレイヤーのヒット音にも使う |
+| 音階の種類 | `client.sound.hitScaleType` | MAJOR | `MAJOR`（長音階）／`PENTATONIC`（ペンタトニック）／`MINOR`（短調）。節目の駆け上がりと途切れの音にも使う |
+| 音域 | `client.sound.hitScaleOctaves` | 1 | 1〜2 オクターブ。2 なら 1 つ下のオクターブ（ピッチ 0.5）から |
 | ほかの人のヒット音 | `client.sound.othersHitSound` | XYLOPHONE | 他プレイヤーのヒット音の楽器（選択肢は `myHitSound` と同じ） |
 | ほかの人の音量 | `client.sound.othersHitVolume` | 0.4 | 他プレイヤーのヒット音の音量（0〜1）。0 で無音 |
 
