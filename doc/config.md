@@ -270,7 +270,7 @@
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
 | 落下の弱点 | `server.fall.fallWeakSpotEnabled` | true | 落下の弱点のオン／オフ |
-| 出し始める距離 | `server.fall.fallMinDistance` | 3.0 | 落下の弱点を出し始める落下距離（ブロック）。3 を超えるとダメージを受ける |
+| 出し始める距離 | `server.fall.fallMinDistance` | 3.0 | 着地した時の見込みの落下距離（今までの落下 + 地面までの高さ。ブロック）がこれを超えると、落ち始めから弱点を出す。3 を超えるとダメージを受ける |
 | 1 ヒットで減らす距離 | `server.fall.fallReduceBlocks` | 3.0 | 1 回当てるごとに減らす落下距離（ブロック。コンボの掛け数を上乗せ）。着地のダメージは残りの距離から決まる |
 | ヒットの最小間隔 | `server.fall.fallMinHitIntervalTicks` | 6 | 落下ヒットの最小受付間隔（tick） |
 | 落下ダメージの見込み | `client.hud.fallDamageHintEnabled` | true | 落ちている間、照準の上に着地した時の見込みのダメージ（ハート）を表示するか |

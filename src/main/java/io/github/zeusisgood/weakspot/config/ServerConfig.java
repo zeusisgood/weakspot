@@ -723,7 +723,7 @@ public final class ServerConfig {
                 "オフにすると、全員の落下の弱点が出ない"})
         public boolean fallWeakSpotEnabled = true;
 
-        @Config.Comment("[サーバー] 落下の弱点を出し始める、落ちた距離（ブロック）。3 を超えるとダメージを受ける")
+        @Config.Comment("[サーバー] 落下の弱点を出す、着地したときの見込みの落下距離（今までの落下 + 地面までの高さ。ブロック）。3 を超えるとダメージを受ける")
         @Config.RangeDouble(min = 0.0, max = 256.0)
         public double fallMinDistance = 3.0;
 

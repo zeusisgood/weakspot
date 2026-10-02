@@ -74,9 +74,14 @@ final class FallSpot extends AimSpotKind {
                 && !player.isRiding() && !player.isOnLadder() && !player.capabilities.isFlying;
     }
 
+    /**
+     * 落ち始めから出す（1.11.0 の試してもらったあと）: 下がっていて、このまま着地したときの落下距離（今までの落下 +
+     * 地面までの高さ。FallDamage.landingFall）が fallMinDistance を超えるとき。当ててその見込みが下がれば消える。
+     */
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return falling(player) && player.fallDistance > settings.fallMinDistance;
+        return falling(player) && (player.posY < player.prevPosY || player.fallDistance != 0)
+                && FallDamage.landingFall(player) > settings.fallMinDistance;
     }
 
     @Override
@@ -86,10 +91,11 @@ final class FallSpot extends AimSpotKind {
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
-        FallMath.Outlook before = FallDamage.outlook(player, player.fallDistance);
-        player.fallDistance = (float) Math.max(0,
+        FallMath.Outlook before = FallDamage.landingOutlook(player);
+        // サーバーと同じく、落ち始めに当てた分は負の「貯め」として着地まで残す
+        player.fallDistance = (float) Math.max(FallDamage.MIN_FALL,
                 player.fallDistance - settings.fallReduceBlocks * ComboFactor.factor(streak));
-        FallMath.Outlook after = FallDamage.outlook(player, player.fallDistance);
+        FallMath.Outlook after = FallDamage.landingOutlook(player);
         hitThisFall = true;
         for (int i = 0; i < STREAK_PARTICLES; i++) {
             mc.world.spawnParticle(EnumParticleTypes.CLOUD, player.posX + player.getRNG().nextGaussian() * 0.4,
@@ -155,7 +161,7 @@ final class FallSpot extends AimSpotKind {
     /** 死亡見込みの間、画面の縁を赤くする（beginOverlay と endOverlay の間）。 */
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        if (!spot.has() || FallDamage.outlook(mc.player, mc.player.fallDistance) != FallMath.Outlook.LETHAL) {
+        if (!spot.has() || FallDamage.landingOutlook(mc.player) != FallMath.Outlook.LETHAL) {
             return;
         }
         ScaledResolution res = new ScaledResolution(mc);
@@ -196,8 +202,9 @@ final class FallSpot extends AimSpotKind {
         float cx = res.getScaledWidth() / 2F;
         float y = res.getScaledHeight() / 2F - HINT_OFFSET - font.FONT_HEIGHT / 2F;
         if (spot.has()) {
-            double damage = FallDamage.expected(player, player.fallDistance);
-            FallMath.Outlook outlook = FallDamage.outlook(player, player.fallDistance);
+            double landing = FallDamage.landingFall(player);
+            double damage = FallDamage.expected(player, landing);
+            FallMath.Outlook outlook = FallDamage.outlook(player, landing);
             String text = (outlook == FallMath.Outlook.LETHAL ? "\u2620 " : "\u2665 ") + FallMath.heartsLabel(damage);
             int rgb = outlook == FallMath.Outlook.LETHAL ? LETHAL_RGB : outlook == FallMath.Outlook.HURT ? HURT_RGB
                     : SAFE_RGB;

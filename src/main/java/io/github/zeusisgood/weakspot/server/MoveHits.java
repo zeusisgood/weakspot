@@ -13,6 +13,7 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -43,6 +44,8 @@ public final class MoveHits {
         long fallTick = Long.MIN_VALUE / 2;
         /** この落下で、死ぬ見込みのときに落下の弱点に当てたか（進捗「九死に一生」。1.11.0）。 */
         boolean closeCall;
+        /** 死ぬ見込みのあと着地した tick（そのあと生きていたら進捗を与える。負ならなし）。 */
+        long landedTick = -1;
         final Map<HitKind, Long> lastHit = new HashMap<>();
         /** 走りの加速の残り tick（0 以下なら、かけていない）。 */
         int sprintRemaining;
@@ -91,9 +94,13 @@ public final class MoveHits {
         if (state.closeCall && (player.isInWater() || player.isRiding() || player.isElytraFlying())) {
             state.closeCall = false;
         } else if (state.closeCall && player.onGround) {
-            // 着地して生きていたら、九死に一生
+            // 着地した。すぐには与えず、しばらく生きていたら九死に一生（同じ tick の死亡の扱いの差を避ける）
             state.closeCall = false;
-            if (player.isEntityAlive() && player instanceof EntityPlayerMP) {
+            state.landedTick = now;
+        }
+        if (state.landedTick >= 0 && now - state.landedTick >= CLOSE_CALL_CONFIRM_TICKS) {
+            state.landedTick = -1;
+            if (player.isEntityAlive() && player.getHealth() > 0 && player instanceof EntityPlayerMP) {
                 WeakSpotAdvancements.grantCloseCall((EntityPlayerMP) player);
             }
         }
@@ -102,10 +109,27 @@ public final class MoveHits {
         }
     }
 
-    /** 落ちているか（1.11.0。落下の弱点を受け付ける条件。距離はクライアントの方が先に進むので、ここでは 0 より大きいかだけ）。 */
+    /** 着地のあと、九死に一生を与えるまで生きているのを確かめる tick。 */
+    private static final int CLOSE_CALL_CONFIRM_TICKS = 10;
+
+    /**
+     * 落ちているか（1.11.0。落下の弱点を受け付ける条件）。下がっている最中か、落下距離が 0 でない（当てて負の「貯め」に
+     * なっているときも含む）。サーバーの位置はクライアントより遅れるので、直前 RECENT_TICKS のどこかでそうなら受け付ける。
+     */
     private static boolean falling(EntityPlayer player) {
-        return !player.onGround && player.fallDistance > 0 && !player.isElytraFlying() && !player.isInWater()
-                && !player.isInLava() && !player.isRiding() && !player.isOnLadder() && !player.capabilities.isFlying;
+        return !player.onGround && (player.fallDistance != 0 || player.posY < player.lastTickPosY)
+                && !player.isElytraFlying() && !player.isInWater() && !player.isInLava() && !player.isRiding()
+                && !player.isOnLadder() && !player.capabilities.isFlying;
+    }
+
+    /** 死んだら、九死に一生の確かめをやめる。 */
+    @SubscribeEvent
+    public static void onDeath(LivingDeathEvent event) {
+        State state = STATES.get(event.getEntityLiving().getUniqueID());
+        if (state != null) {
+            state.closeCall = false;
+            state.landedTick = -1;
+        }
     }
 
     /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT / SWIM / FALL。 */
@@ -132,11 +156,12 @@ public final class MoveHits {
                     WeakSpotConfig.server.sprint.sprintBoostMaxMultiplier, combo));
             state.sprintRemaining = WeakSpotConfig.server.sprint.sprintBoostDurationTicks;
         } else if (kind == HitKind.FALL) {
-            if (FallDamage.outlook(player, player.fallDistance) == FallMath.Outlook.LETHAL) {
+            if (FallDamage.landingOutlook(player) == FallMath.Outlook.LETHAL) {
                 state.closeCall = true;
             }
-            // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める。1.11.0）
-            player.fallDistance = (float) Math.max(0, player.fallDistance
+            // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める。1.11.0）。落ち始めに当てた分は
+            // 負の「貯め」として着地まで残す（0 で止めると、早く当てた分が無駄になり、クライアントの見込みともずれる）
+            player.fallDistance = (float) Math.max(FallDamage.MIN_FALL, player.fallDistance
                     - WeakSpotConfig.server.fall.fallReduceBlocks * ComboFactor.factor(combo));
         }
     }
@@ -166,6 +191,7 @@ public final class MoveHits {
             if (state != null) {
                 state.sprintRemaining = 0;
                 state.closeCall = false;
+                state.landedTick = -1;
             }
             SPRINT_SPEED.clear(player);
         }
