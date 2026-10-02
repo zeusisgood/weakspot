@@ -70,7 +70,6 @@ public final class GuideBookGiver {
         if (targets) {
             line(player, "weakspot.welcome.targets", TextFormatting.WHITE, true, STARTER_TARGETS);
         }
-        line(player, "weakspot.welcome.targetRule", TextFormatting.WHITE, true);
         line(player, "weakspot.welcome.rewards", TextFormatting.WHITE, true);
         line(player, "weakspot.welcome.keys", TextFormatting.WHITE, true);
         line(player, "weakspot.welcome.guide", TextFormatting.WHITE, true);

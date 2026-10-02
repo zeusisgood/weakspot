@@ -1,14 +1,17 @@
 package io.github.zeusisgood.weakspot;
 
 import io.github.zeusisgood.weakspot.common.FallMath;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 /**
  * プレイヤーの今の状態から、落ちた距離 fallDistance で着地したときの見込み（1.11.0。両側。クライアントの表示と、
@@ -40,20 +43,33 @@ public final class FallDamage {
     public static final double MIN_FALL = -MAX_DROP;
 
     /**
-     * このまま真下に落ちて着地したときの落下距離（今までの落下 + 足元から地面までの高さ）。水・溶岩に落ちるなら 0
-     * （ダメージがない）。足元の中心から真下に調べるだけの目安。
+     * このまま真下に落ちて着地したときの落下距離（今までの落下 + 足元から地面までの高さ）。水・溶岩（流れているものも）に
+     * 落ちるなら 0（ダメージがない）。足元の中心の列を 1 ブロックずつ下に調べ、ぶつかる形のあるブロックの上面を地面とする
+     * （草・花のような形のないブロックは飛ばす。1.11.0 の 2 回目の試してもらったあと: 光線で調べていたときは、形のない水を
+     * 素通りして水底を地面と見ていた）。目安なので、体の幅や横の動きは見ない。
      */
     public static double landingFall(EntityPlayer player) {
-        Vec3d from = new Vec3d(player.posX, player.posY, player.posZ);
-        Vec3d to = new Vec3d(player.posX, player.posY - MAX_DROP, player.posZ);
-        RayTraceResult hit = player.world.rayTraceBlocks(from, to, true, true, false);
-        if (hit == null || hit.typeOfHit != RayTraceResult.Type.BLOCK) {
-            return player.fallDistance + MAX_DROP;
+        World world = player.world;
+        int x = MathHelper.floor(player.posX);
+        int z = MathHelper.floor(player.posZ);
+        int top = MathHelper.floor(player.posY);
+        int bottom = Math.max(0, top - (int) MAX_DROP);
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int y = top; y >= bottom; y--) {
+            pos.setPos(x, y, z);
+            if (!world.isBlockLoaded(pos)) {
+                break;
+            }
+            IBlockState state = world.getBlockState(pos);
+            if (state.getMaterial().isLiquid()) {
+                return 0;
+            }
+            AxisAlignedBB box = state.getCollisionBoundingBox(world, pos);
+            if (box != null && y + box.maxY <= player.posY + 1e-6) {
+                return player.fallDistance + (player.posY - (y + box.maxY));
+            }
         }
-        if (player.world.getBlockState(hit.getBlockPos()).getMaterial().isLiquid()) {
-            return 0;
-        }
-        return player.fallDistance + Math.max(0, player.posY - hit.hitVec.y);
+        return player.fallDistance + MAX_DROP;
     }
 
     /** 着地したときの見込み（landingFall から）。 */
