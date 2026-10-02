@@ -16,6 +16,8 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
 /**
@@ -134,7 +136,14 @@ final class WeakSpotRenderer {
                 // 自分の弱点の色と形は、種類ごとの設定（1.7.0。統計画面の「弱点マーカー」タブ）
                 float[][] look = MarkerLook.palette(spot.kind, OWN_DISK, OWN_RING, OWN_CENTER);
                 MarkerShape shape = MarkerLook.shape(spot.kind);
-                drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
+                if (behindLiquid(mc, spot, partialTicks)) {
+                    // 目との間に水・溶岩がある（水の面も深度を書くので、そのままでは隠れる。1.11.0）
+                    GlStateManager.disableDepth();
+                    drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
+                    GlStateManager.enableDepth();
+                } else {
+                    drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
+                }
                 if (seeThrough(spot)) {
                     GlStateManager.disableDepth();
                     drawMarker(spot, shape, look[0], look[1], look[2],
@@ -150,7 +159,14 @@ final class WeakSpotRenderer {
                 continue;
             }
             double radius = flash.spot.radius * (1 + progress * 1.2);
+            boolean liquid = behindLiquid(mc, flash.spot, partialTicks);
+            if (liquid) {
+                GlStateManager.disableDepth();
+            }
             drawRing(flash.spot, flash.u, flash.v, radius, cx, cy, cz, 1.0F, 1.0F, 1.0F, 1 - progress);
+            if (liquid) {
+                GlStateManager.enableDepth();
+            }
             if (seeThrough(flash.spot)) {
                 GlStateManager.disableDepth();
                 drawRing(flash.spot, flash.u, flash.v, radius, cx, cy, cz, 1.0F, 1.0F, 1.0F,
@@ -212,6 +228,36 @@ final class WeakSpotRenderer {
      * 自分の動物の弱点は、体の模型が当たり判定の箱より外に出ていると（ニワトリ、ゾンビの腕など）体に隠れるので、
      * 深度テストを切って薄くもう一度描く。他のプレイヤーのマークは、壁越しに見えてしまうので透かさない。
      */
+    /** 目と弱点の間を調べる刻み（ブロック）。 */
+    private static final double LIQUID_STEP = 0.2;
+
+    /**
+     * 自分のブロックの弱点で、目から弱点の中心までの間に水・溶岩（流れているものも）のブロックがあるか（1.11.0）。
+     * 1.12.2 では水の面も深度を書くので、そのまま描くと水面の後ろの弱点が隠れる。照準の先のブロックは、液体のほかに
+     * さえぎる物がないことがバニラの判定（objectMouseOver）で決まっているので、このときは深度テストを切って描いてよい。
+     */
+    private static boolean behindLiquid(Minecraft mc, WeakSpot spot, float partialTicks) {
+        if (spot.entity != null || mc.world == null || mc.player == null) {
+            return false;
+        }
+        Vec3d eye = mc.player.getPositionEyes(partialTicks);
+        double[] p = spot.worldPoint(spot.u, spot.v, 0);
+        double dx = p[0] - eye.x;
+        double dy = p[1] - eye.y;
+        double dz = p[2] - eye.z;
+        double length = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        int steps = (int) Math.ceil(length / LIQUID_STEP);
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < steps; i++) {
+            double t = i / (double) steps;
+            pos.setPos(eye.x + dx * t, eye.y + dy * t, eye.z + dz * t);
+            if (!pos.equals(spot.pos) && mc.world.getBlockState(pos).getMaterial().isLiquid()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static boolean seeThrough(WeakSpot spot) {
         return spot.entity != null && WeakSpotConfig.client.markers.animalSpotSeeThrough;
     }

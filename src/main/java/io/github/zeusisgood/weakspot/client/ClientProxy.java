@@ -21,8 +21,14 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void onOtherPlayerHit(BlockPos pos, int streak) {
-        Minecraft.getMinecraft().addScheduledTask(() -> HitSounds.playOther(pos, streak));
+    public void onOtherPlayerHit(BlockPos pos, int streak, boolean miss) {
+        Minecraft.getMinecraft().addScheduledTask(() -> {
+            if (miss) {
+                HitSounds.playOtherMiss(pos);
+            } else {
+                HitSounds.playOther(pos, streak);
+            }
+        });
     }
 
     @Override

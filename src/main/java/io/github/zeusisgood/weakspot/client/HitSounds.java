@@ -139,6 +139,16 @@ final class HitSounds {
                 HitPitch.forStreak(streak), pos));
     }
 
+    /** 他のプレイヤーが的当て（1.11.0）の ✕ に当てた: 本人と同じ低い音（音符ブロックのプリング、ピッチ 0.5）。 */
+    static void playOtherMiss(BlockPos pos) {
+        float volume = (float) WeakSpotConfig.client.sound.othersHitVolume;
+        if (volume <= 0 || Minecraft.getMinecraft().world == null) {
+            return;
+        }
+        Minecraft.getMinecraft().getSoundHandler().playSound(new PositionedSoundRecord(
+                SoundEvents.BLOCK_NOTE_PLING, SoundCategory.PLAYERS, volume, TargetPlay.MISS_PITCH, pos));
+    }
+
     /** 他のプレイヤーのヒット音の試聴。実際は距離で小さくなるが、試聴は距離なしで鳴らす。 */
     static void playOtherFlat(int streak) {
         playFlat(WeakSpotConfig.client.sound.othersHitSound, WeakSpotConfig.client.sound.othersHitVolume, streak);

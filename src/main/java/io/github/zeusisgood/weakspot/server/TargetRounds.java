@@ -14,6 +14,7 @@ import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.FMLCommonHandler;
@@ -41,6 +42,8 @@ public final class TargetRounds {
         /** 当てた数と ✕ に当てた数（結果の板に出す）。 */
         int good;
         int decoys;
+        /** ラウンドの中の連続ヒット数（✕ で 0 に戻す。近くの人のヒット音の音階）。 */
+        int streak;
         long lastHit = Long.MIN_VALUE / 2;
     }
 
@@ -92,9 +95,13 @@ public final class TargetRounds {
         round.hits = TargetRules.afterHit(round.hits, decoy);
         if (decoy) {
             round.decoys++;
+            round.streak = 0;
         } else {
             round.good++;
+            round.streak++;
         }
+        // 近くの人にもヒット音（✕ なら低い音）を鳴らす。位置は遊んでいる人
+        ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), round.streak, decoy);
         send(player, new TargetMessage(TargetMessage.SCORE, round.hits, 0, false, -1));
         tellOthers(player, round.hits);
     }

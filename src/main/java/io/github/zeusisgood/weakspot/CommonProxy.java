@@ -20,7 +20,7 @@ public class CommonProxy {
     }
 
     /** 他のプレイヤーがヒットした（サーバー → クライアントのパケットから呼ばれる）。 */
-    public void onOtherPlayerHit(BlockPos pos, int streak) {
+    public void onOtherPlayerHit(BlockPos pos, int streak, boolean miss) {
     }
 
     /** サーバーの設定値が届いた（サーバー → クライアントのパケットから呼ばれる）。 */

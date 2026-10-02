@@ -140,7 +140,12 @@ public final class ServerBoostTracker {
      * pos は鳴らす位置（ブロック。動物・近接は当てた生き物、釣りは浮き、弓は引いているプレイヤーの位置）。
      */
     static void notifyNearbyPlayers(EntityPlayerMP hitter, BlockPos pos, int streak) {
-        OtherHitMessage message = new OtherHitMessage(pos, Math.max(1, streak));
+        notifyNearbyPlayers(hitter, pos, streak, false);
+    }
+
+    /** miss: 的当て（1.11.0）の ✕ に当てた（近くの人には低い音）。 */
+    static void notifyNearbyPlayers(EntityPlayerMP hitter, BlockPos pos, int streak, boolean miss) {
+        OtherHitMessage message = new OtherHitMessage(pos, Math.max(1, streak), miss);
         double rangeSq = OTHERS_SOUND_RANGE * OTHERS_SOUND_RANGE;
         for (EntityPlayer other : hitter.world.playerEntities) {
             if (other != hitter && other instanceof EntityPlayerMP

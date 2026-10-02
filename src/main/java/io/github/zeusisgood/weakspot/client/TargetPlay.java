@@ -53,6 +53,8 @@ public final class TargetPlay {
     private static final int PENALTY_RGB = 0xE53935;
     /** ほかの人の頭の上の「的当て中」。 */
     static final int OTHERS_RGB = 0xFF8A2A;
+    /** ハズレに当てたときの低い音のピッチ（近くの人にも同じ音。HitSounds.playOtherMiss）。 */
+    static final float MISS_PITCH = 0.5F;
     private static final int GOLD = 0xFFD700;
     private static final int GRAY = 0xAAAAAA;
     /** 弱点の点を置く、目からの距離（ブロック。向きだけが意味を持つ）。 */
@@ -335,7 +337,7 @@ public final class TargetPlay {
                 streak = 0;
                 POPUPS.add(new Popup(p[0] / scale, p[1] / scale, now));
                 WeakSpotMod.network.sendToServer(new TargetActionMessage(TargetActionMessage.DECOY));
-                playNote(mc, 0.5F, 1.0F);
+                playNote(mc, MISS_PITCH, 1.0F);
                 place(decoy, phase, spot);
                 return;
             }

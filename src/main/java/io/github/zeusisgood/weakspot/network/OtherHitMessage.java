@@ -9,38 +9,47 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * サーバー → クライアント: 近くの他のプレイヤーが弱点にヒットした（すべての種類。pos は鳴らす位置）。ヒット音を鳴らすためだけに使う。
+ * miss は的当て（1.11.0）の ✕ に当てたとき（低い音を鳴らす）。
  * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
  */
 public class OtherHitMessage implements IMessage {
 
     private BlockPos pos;
     private int streak;
+    private boolean miss;
 
     public OtherHitMessage() {
     }
 
     public OtherHitMessage(BlockPos pos, int streak) {
+        this(pos, streak, false);
+    }
+
+    public OtherHitMessage(BlockPos pos, int streak, boolean miss) {
         this.pos = pos;
         this.streak = streak;
+        this.miss = miss;
     }
 
     @Override
     public void fromBytes(ByteBuf buf) {
         pos = BlockPos.fromLong(buf.readLong());
         streak = buf.readInt();
+        miss = buf.readBoolean();
     }
 
     @Override
     public void toBytes(ByteBuf buf) {
         buf.writeLong(pos.toLong());
         buf.writeInt(streak);
+        buf.writeBoolean(miss);
     }
 
     public static class Handler implements IMessageHandler<OtherHitMessage, IMessage> {
 
         @Override
         public IMessage onMessage(OtherHitMessage message, MessageContext ctx) {
-            WeakSpotMod.proxy.onOtherPlayerHit(message.pos, message.streak);
+            WeakSpotMod.proxy.onOtherPlayerHit(message.pos, message.streak, message.miss);
             return null;
         }
     }
