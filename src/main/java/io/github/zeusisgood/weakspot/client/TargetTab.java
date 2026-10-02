@@ -13,6 +13,9 @@ final class TargetTab extends StatsScreenTab {
 
     private static final int BUTTON_GOLD_PARTICLES = 700;
     private static final int ROW_HEIGHT = 11;
+    /** 金の粒のオン・オフのボタン（高さ 20 なので、その行だけ上下に間をあけて、ほかの行に重ねない）。 */
+    private static final int GOLD_BUTTON_WIDTH = 60;
+    private static final int GOLD_ROW_GAP = 6;
 
     private GuiButton goldButton;
 
@@ -22,7 +25,8 @@ final class TargetTab extends StatsScreenTab {
 
     @Override
     void init() {
-        goldButton = screen.add(new GuiButton(BUTTON_GOLD_PARTICLES, screen.width / 2 + 60, 0, 90, 20, ""));
+        goldButton = screen.add(new GuiButton(BUTTON_GOLD_PARTICLES,
+                screen.width / 2 + 150 - GOLD_BUTTON_WIDTH, 0, GOLD_BUTTON_WIDTH, 20, ""));
         goldButton.visible = false;
     }
 
@@ -79,6 +83,9 @@ final class TargetTab extends StatsScreenTab {
             if (t == TargetRules.Tier.NONE) {
                 continue;
             }
+            if (t == TargetRules.Tier.GOLD) {
+                y += GOLD_ROW_GAP;
+            }
             boolean open = TargetRecords.unlocked(t);
             String line = (open ? "✔ " : "🔒 ") + I18n.format("weakspot.target.reward." + TargetPlay.tierKey(t));
             screen.drawString(screen.font(), line, left + 6, y, open ? 0xFFFFFF : 0x888888);
@@ -86,11 +93,11 @@ final class TargetTab extends StatsScreenTab {
                     I18n.format("weakspot.target.tier." + TargetPlay.tierKey(t)), t.from);
             if (t == TargetRules.Tier.GOLD) {
                 goldButton.y = y - 6;
-                screen.drawRight(need, right - 96, y, tierRgb(t));
+                screen.drawRight(need, right - GOLD_BUTTON_WIDTH - 6, y, tierRgb(t));
             } else {
                 screen.drawRight(need, right, y, tierRgb(t));
             }
-            y += t == TargetRules.Tier.GOLD ? ROW_HEIGHT + 6 : ROW_HEIGHT;
+            y += t == TargetRules.Tier.GOLD ? ROW_HEIGHT + GOLD_ROW_GAP + 2 : ROW_HEIGHT;
         }
         y += 4;
 
