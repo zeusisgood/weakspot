@@ -87,4 +87,9 @@ public class ClientProxy extends CommonProxy {
     public void onTarget(byte type, int hits, long best, boolean newBest, int newTier) {
         Minecraft.getMinecraft().addScheduledTask(() -> TargetPlay.receive(type, hits, best, newBest, newTier));
     }
+
+    @Override
+    public void onOtherTarget(int entityId, int hits) {
+        Minecraft.getMinecraft().addScheduledTask(() -> OtherCombos.receiveTarget(entityId, hits));
+    }
 }

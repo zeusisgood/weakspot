@@ -10,6 +10,7 @@ import io.github.zeusisgood.weakspot.network.QueryMessage;
 import io.github.zeusisgood.weakspot.network.StateMessage;
 import io.github.zeusisgood.weakspot.network.OtherHitMessage;
 import io.github.zeusisgood.weakspot.network.OtherMarkerMessage;
+import io.github.zeusisgood.weakspot.network.OtherTargetMessage;
 import io.github.zeusisgood.weakspot.network.SettingsMessage;
 import io.github.zeusisgood.weakspot.network.StatsMessage;
 import io.github.zeusisgood.weakspot.network.StatsRequestMessage;
@@ -84,6 +85,7 @@ public class WeakSpotMod {
         // 1.11.0: 的当て
         network.registerMessage(TargetMessage.Handler.class, TargetMessage.class, 12, Side.CLIENT);
         network.registerMessage(TargetActionMessage.Handler.class, TargetActionMessage.class, 13, Side.SERVER);
+        network.registerMessage(OtherTargetMessage.Handler.class, OtherTargetMessage.class, 14, Side.CLIENT);
     }
 
     @Mod.EventHandler

@@ -70,4 +70,8 @@ public class CommonProxy {
     /** 的当ての状態が届いた（1.11.0。サーバー → クライアントのパケットから呼ばれる。type は TargetMessage の種類）。 */
     public void onTarget(byte type, int hits, long best, boolean newBest, int newTier) {
     }
+
+    /** 近くのほかのプレイヤーの的当てのヒット数が届いた（1.11.0。負なら終わった）。 */
+    public void onOtherTarget(int entityId, int hits) {
+    }
 }

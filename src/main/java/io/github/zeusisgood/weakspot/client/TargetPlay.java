@@ -94,6 +94,10 @@ public final class TargetPlay {
     private static double eyeY;
     private static double eyeZ;
     private static int lastCountdown;
+    /** 始めたときの自己ベストと、このラウンドでそれを超えた tick（超えていなければ負）。 */
+    private static long bestAtStart;
+    private static long passedTick = Long.MIN_VALUE / 2;
+    private static final int PASS_GLOW_TICKS = 12;
     /** 前の tick に右クリックを押していたか（押し直しでやめる）。 */
     private static boolean useWasDown = true;
     /** 結果の表示。 */
@@ -119,10 +123,17 @@ public final class TargetPlay {
                 active = true;
                 startTick = now;
                 lastCountdown = 0;
+                bestAtStart = TargetRecords.best;
+                passedTick = Long.MIN_VALUE / 2;
                 useWasDown = true;
                 break;
             case TargetMessage.SCORE:
                 hits = newHits;
+                if (bestAtStart > 0 && hits > bestAtStart && passedTick < startTick) {
+                    // 自己ベストを超えた瞬間
+                    passedTick = now;
+                    playNote(mc, 2.0F, 0.8F);
+                }
                 break;
             case TargetMessage.END:
                 clear();
@@ -441,7 +452,17 @@ public final class TargetPlay {
     private static void drawRoundInfo(Minecraft mc, ScaledResolution res, long into) {
         FontRenderer font = mc.fontRenderer;
         float cx = res.getScaledWidth() / 2F;
-        drawScaled(font, I18n.format("weakspot.combo.hit", hits), cx, 18, 2, SPOT_RGB);
+        String hitText = I18n.format("weakspot.combo.hit", hits);
+        drawScaled(font, hitText, cx, 18, 2, SPOT_RGB);
+        if (bestAtStart > 0) {
+            // 自己ベスト。超えたら金で、超えた瞬間は大きく光る
+            boolean passed = passedTick >= startTick;
+            double glow = passed
+                    ? Math.max(0, 1 - (ClientWeakSpotHandler.clientTick - passedTick) / (double) PASS_GLOW_TICKS) : 0;
+            String best = I18n.format("weakspot.target.best", bestAtStart);
+            float bx = cx + font.getStringWidth(hitText) + 8 + font.getStringWidth(best) / 2F;
+            drawScaled(font, best, bx, 19, (float) (1 + 0.6 * glow), passed ? GOLD : 0xAAAAAA);
+        }
         double left = Math.max(0, (TargetRules.ROUND_TICKS - into) / 20.0);
         String time = I18n.format("weakspot.target.timeLeft", String.format("%.1f", left));
         font.drawStringWithShadow(time, cx - font.getStringWidth(time) / 2F, 32, 0xFFFFFF);

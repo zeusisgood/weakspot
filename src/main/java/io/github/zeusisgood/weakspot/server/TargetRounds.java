@@ -4,6 +4,7 @@ import io.github.zeusisgood.weakspot.ItemTarget;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.common.TargetRules;
+import io.github.zeusisgood.weakspot.network.OtherTargetMessage;
 import io.github.zeusisgood.weakspot.network.TargetActionMessage;
 import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.ArrayList;
@@ -74,6 +75,7 @@ public final class TargetRounds {
             player.sendMessage(rules);
         }
         send(player, new TargetMessage(TargetMessage.START, 0, 0, false, -1));
+        tellOthers(player, 0);
     }
 
     /** クライアントからの知らせ（サーバースレッド）。 */
@@ -94,6 +96,7 @@ public final class TargetRounds {
         round.lastHit = now;
         round.hits = TargetRules.afterHit(round.hits, action == TargetActionMessage.DECOY);
         send(player, new TargetMessage(TargetMessage.SCORE, round.hits, 0, false, -1));
+        tellOthers(player, round.hits);
     }
 
     @SubscribeEvent
@@ -123,6 +126,7 @@ public final class TargetRounds {
     /** 最後まで遊んだ。記録を残し、自己ベスト・新しいご褒美の段階・サーバーの 1 位を知らせる。 */
     private static void finish(EntityPlayerMP player, Round round, MinecraftServer server) {
         ROUNDS.remove(player.getUniqueID());
+        tellOthers(player, -1);
         long previousTop = Leaderboard.best(server, Leaderboard.Category.TARGET);
         MiningStats before = ServerStats.total(player);
         TargetRules.Tier oldTier = TargetRules.Tier.of(before.targetBest);
@@ -146,7 +150,11 @@ public final class TargetRounds {
     }
 
     private static void cancel(EntityPlayerMP player, boolean notify) {
-        if (ROUNDS.remove(player.getUniqueID()) != null && notify) {
+        if (ROUNDS.remove(player.getUniqueID()) == null) {
+            return;
+        }
+        tellOthers(player, -1);
+        if (notify) {
             send(player, new TargetMessage(TargetMessage.CANCEL, 0, 0, false, -1));
         }
     }
@@ -162,13 +170,27 @@ public final class TargetRounds {
 
     /** 死亡・ディメンション移動・ログアウトで、ラウンドをやめる（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
-        if (ROUNDS.remove(player.getUniqueID()) != null && leave != HitGate.Leave.LOGOUT
-                && player instanceof EntityPlayerMP) {
-            send((EntityPlayerMP) player, new TargetMessage(TargetMessage.CANCEL, 0, 0, false, -1));
+        if (ROUNDS.remove(player.getUniqueID()) != null && player instanceof EntityPlayerMP) {
+            tellOthers((EntityPlayerMP) player, -1);
+            if (leave != HitGate.Leave.LOGOUT) {
+                send((EntityPlayerMP) player, new TargetMessage(TargetMessage.CANCEL, 0, 0, false, -1));
+            }
         }
     }
 
     private static void send(EntityPlayerMP player, TargetMessage message) {
         WeakSpotMod.network.sendTo(message, player);
     }
+
+    /** 近く（OTHERS_RANGE 以内、同じディメンション）のほかのプレイヤーに、的当てのヒット数を知らせる（負なら終わった）。 */
+    private static void tellOthers(EntityPlayerMP player, int hits) {
+        OtherTargetMessage message = new OtherTargetMessage(player.getEntityId(), hits);
+        for (EntityPlayerMP other : player.getServerWorld().getPlayers(EntityPlayerMP.class,
+                p -> p != player && p.getDistanceSq(player) <= OTHERS_RANGE * OTHERS_RANGE)) {
+            WeakSpotMod.network.sendTo(message, other);
+        }
+    }
+
+    /** ほかの人の的当て中の表示を送る範囲（ブロック。頭の上のコンボと同じ）。 */
+    private static final double OTHERS_RANGE = 32;
 }

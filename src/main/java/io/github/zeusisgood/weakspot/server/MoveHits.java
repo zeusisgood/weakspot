@@ -1,7 +1,9 @@
 package io.github.zeusisgood.weakspot.server;
 
+import io.github.zeusisgood.weakspot.FallDamage;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.ComboFactor;
+import io.github.zeusisgood.weakspot.common.FallMath;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.TimedBoostMath;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -39,6 +41,8 @@ public final class MoveHits {
         long sprintTick = Long.MIN_VALUE / 2;
         long swimTick = Long.MIN_VALUE / 2;
         long fallTick = Long.MIN_VALUE / 2;
+        /** この落下で、死ぬ見込みのときに落下の弱点に当てたか（進捗「九死に一生」。1.11.0）。 */
+        boolean closeCall;
         final Map<HitKind, Long> lastHit = new HashMap<>();
         /** 走りの加速の残り tick（0 以下なら、かけていない）。 */
         int sprintRemaining;
@@ -84,6 +88,15 @@ public final class MoveHits {
         if (fall) {
             state.fallTick = now;
         }
+        if (state.closeCall && (player.isInWater() || player.isRiding() || player.isElytraFlying())) {
+            state.closeCall = false;
+        } else if (state.closeCall && player.onGround) {
+            // 着地して生きていたら、九死に一生
+            state.closeCall = false;
+            if (player.isEntityAlive() && player instanceof EntityPlayerMP) {
+                WeakSpotAdvancements.grantCloseCall((EntityPlayerMP) player);
+            }
+        }
         if (state.sprintRemaining > 0 && --state.sprintRemaining <= 0) {
             SPRINT_SPEED.clear(player);
         }
@@ -119,6 +132,9 @@ public final class MoveHits {
                     WeakSpotConfig.server.sprint.sprintBoostMaxMultiplier, combo));
             state.sprintRemaining = WeakSpotConfig.server.sprint.sprintBoostDurationTicks;
         } else if (kind == HitKind.FALL) {
+            if (FallDamage.outlook(player, player.fallDistance) == FallMath.Outlook.LETHAL) {
+                state.closeCall = true;
+            }
             // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める。1.11.0）
             player.fallDistance = (float) Math.max(0, player.fallDistance
                     - WeakSpotConfig.server.fall.fallReduceBlocks * ComboFactor.factor(combo));
@@ -149,6 +165,7 @@ public final class MoveHits {
             State state = STATES.get(player.getUniqueID());
             if (state != null) {
                 state.sprintRemaining = 0;
+                state.closeCall = false;
             }
             SPRINT_SPEED.clear(player);
         }

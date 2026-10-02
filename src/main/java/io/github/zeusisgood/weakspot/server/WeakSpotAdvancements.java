@@ -38,6 +38,11 @@ public final class WeakSpotAdvancements {
         }
     }
 
+    /** 死ぬ見込みだった落下を、落下の弱点に当てて生き延びた（MoveHits。1.11.0）。 */
+    static void grantCloseCall(EntityPlayerMP player) {
+        grant(player, "close_call");
+    }
+
     /** 的当ての自己ベストが変わったかもしれない（TargetRounds の終わり）。 */
     static void onTargetBest(EntityPlayerMP player, long best) {
         TargetRules.Tier tier = TargetRules.Tier.of(best);
