@@ -28,7 +28,7 @@ public final class SettingGroups {
         g.put("general", list("spotSize", "heldItemsCountAsEmptyHand", "heldItemExcludes", "giveGuideBook",
                 "showUpdateNotes", "checkForUpdates", "skippedUpdateVersion"));
         g.put("sound", list("myHitSound", "myHitVolume", "hitChordEnabled", "hitScaleDirection", "hitScaleType",
-                "hitScaleOctaves", "othersHitSound", "othersHitVolume"));
+                "hitScaleOctaves", "soundPresets", "othersHitSound", "othersHitVolume"));
         g.put("markers", list("weakSpotsEnabled", "disabledKinds", "myMarkerColors", "myMarkerShapes",
                 "goldHitParticles", "weakSpotTrailEnabled", "otherMarkerEnabled", "otherMarkerColor", "otherMarkerAlpha", "otherMarkerShape",
                 "markerShareRange", "markerSendMinIntervalTicks"));
