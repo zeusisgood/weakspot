@@ -64,10 +64,16 @@ final class AimSpots {
         for (AimSpotKind k : KINDS) {
             if (event.phase == TickEvent.Phase.START) {
                 k.beforeTick(mc);
-                if (!k.eligible(mc)) {
+                if (!k.allowed(mc)) {
                     k.spot.clear();
-                } else {
+                    k.missedTicks = 0;
+                } else if (k.wanted(mc.player, ClientSettings.get())) {
+                    k.missedTicks = 0;
                     k.spot.ensure(mc.player, k.placement(mc.player));
+                } else if (!k.spot.has() || ++k.missedTicks > k.keepTicks()) {
+                    // 種類ごとの条件から外れた。keepTicks の間は残す（1.11.1。当たりは eligible で止まる）
+                    k.spot.clear();
+                    k.missedTicks = 0;
                 }
                 k.afterTick(mc);
             } else {

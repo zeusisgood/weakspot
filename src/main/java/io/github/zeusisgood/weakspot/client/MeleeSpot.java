@@ -25,7 +25,6 @@ final class MeleeSpot extends AimSpotKind {
 
     /** 近くに敵がいるか（tick ごとに探し直す）。 */
     private boolean enemyNear;
-    private String extra;
 
     MeleeSpot() {
         super(HitKind.MELEE, new HudSpot(HitKind.MELEE));
@@ -70,11 +69,11 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.MELEE));
+        ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.MELEE));
     }
 
     @Override
     void drawAfterOverlay(Minecraft mc, float partialTicks) {
-        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.MELEE), extra);
+        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.MELEE));
     }
 }

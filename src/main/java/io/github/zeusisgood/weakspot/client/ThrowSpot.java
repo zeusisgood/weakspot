@@ -21,7 +21,6 @@ final class ThrowSpot extends AimSpotKind {
     private static final double CHARGE_PER_BAR = 2.0;
 
     /** このフレームのゲージの、本数を越えた分の文字（drawGauge から drawAfterOverlay へ渡す）。 */
-    private String extra;
 
     ThrowSpot() {
         super(HitKind.THROW, new HudSpot(HitKind.THROW));
@@ -55,11 +54,11 @@ final class ThrowSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        extra = ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.THROW));
+        ChargeGauge.drawBars(mc, charge(mc), CHARGE_PER_BAR, MarkerLook.color(HitKind.THROW));
     }
 
     @Override
     void drawAfterOverlay(Minecraft mc, float partialTicks) {
-        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.THROW), extra);
+        ChargeGauge.drawLabels(mc, charge(mc), MarkerLook.color(HitKind.THROW));
     }
 }

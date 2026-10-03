@@ -55,6 +55,11 @@ final class SwimSpot extends AimSpotKind {
     }
 
     @Override
+    int keepTicks() {
+        return MOVING_KEEP_TICKS;
+    }
+
+    @Override
     int placement(EntityPlayerSP player) {
         // 上下だけ（ダッシュ・はしごと同じ。1.10.2。それまではどこにでも）
         return HudSpot.VERTICAL;

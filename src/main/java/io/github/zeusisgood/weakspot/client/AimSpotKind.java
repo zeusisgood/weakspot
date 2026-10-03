@@ -17,6 +17,11 @@ abstract class AimSpotKind {
 
     final HitKind kind;
     final HudSpot spot;
+    /** 種類ごとの条件（wanted）から外れて続いている tick 数（keepTicks の間は弱点を残す。1.11.1）。 */
+    int missedTicks;
+
+    /** 動いている間に出す種類が、条件から一瞬外れても弱点を残す長さ（tick。サーバーの受け付け MoveHits.RECENT_TICKS と同じ）。 */
+    static final int MOVING_KEEP_TICKS = 10;
 
     AimSpotKind(HitKind kind, HudSpot spot) {
         this.kind = kind;
@@ -25,6 +30,15 @@ abstract class AimSpotKind {
 
     /** 共通の条件（ワールドにいる・種類がオン（自分とサーバーの設定）・PlayerRules・手を使っていない）のあとの、種類ごとの出す条件。 */
     abstract boolean wanted(EntityPlayerSP player, SyncedSettings settings);
+
+    /**
+     * 種類ごとの条件（wanted）から外れても、弱点を消さずに残す tick 数（1.11.1）。走りは壁にこすれた瞬間にバニラが
+     * 一度切る、段差・着地の瞬間は 1 tick の移動が小さい、など一瞬外れることがあるので、動いている間に出す種類は
+     * MOVING_KEEP_TICKS 残す（その間に戻れば同じ位置のまま。残している間は当たらない）。0 ならすぐ消す。
+     */
+    int keepTicks() {
+        return 0;
+    }
 
     /** 手を使っている（弓を引く・食べる）間は出さないか。弓・食事は false。 */
     boolean blockedByUsingHand() {
@@ -84,15 +98,23 @@ abstract class AimSpotKind {
     /** 弱点の一時オフ・ワールドを出たとき。種類ごとの記憶も消すときは、継いだクラスで足す。 */
     void clear() {
         spot.clear();
+        missedTicks = 0;
     }
 
     final boolean eligible(Minecraft mc) {
+        return allowed(mc) && wanted(mc.player, ClientSettings.get());
+    }
+
+    /**
+     * 種類ごとの条件の前の、共通の条件（ワールドにいる・種類がオン（自分とサーバーの設定）・PlayerRules・手を使っていない）。
+     * これが外れたとき（一時オフ・種類のオフ・的当てなど）は、keepTicks に関係なくすぐ消す。
+     */
+    final boolean allowed(Minecraft mc) {
         EntityPlayerSP player = mc.player;
         if (player == null || mc.world == null || !KindSwitches.isEnabled(kind) || !PlayerRules.canUse(player)
                 || (blockedByUsingHand() && player.isHandActive())) {
             return false;
         }
-        SyncedSettings settings = ClientSettings.get();
-        return settings.enabled(kind) && wanted(player, settings);
+        return ClientSettings.get().enabled(kind);
     }
 }

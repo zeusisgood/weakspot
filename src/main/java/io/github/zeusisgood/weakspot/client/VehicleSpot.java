@@ -68,6 +68,11 @@ final class VehicleSpot extends AimSpotKind {
     }
 
     @Override
+    int keepTicks() {
+        return MOVING_KEEP_TICKS;
+    }
+
+    @Override
     int placement(EntityPlayerSP player) {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
