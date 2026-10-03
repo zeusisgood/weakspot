@@ -58,7 +58,7 @@ public final class ClientConfig {
         @Config.RangeInt(min = HitScale.MIN_OCTAVES, max = HitScale.MAX_OCTAVES)
         public int hitScaleOctaves = 1;
 
-        @Config.Comment({"[クライアント] 音のマイプリセット 1〜3（統計画面（K キー）のサウンドの「今の設定を保存」で書かれる）",
+        @Config.Comment({"[クライアント] 音のマイプリセット 1〜3（統計画面（K キー）のサウンドの「マイプリセットに保存」で書かれる）",
                 "1 行に「番号=楽器,音階の種類,動き,音域,和音」（例 1=CHIME,PENTATONIC,UP_DOWN,2,true）。手で書き換えなくてよい"})
         public String[] soundPresets = {};
 

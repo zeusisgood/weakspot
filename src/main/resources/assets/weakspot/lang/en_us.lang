@@ -112,7 +112,6 @@ weakspot.sound.scaleType.MAJOR=Major
 weakspot.sound.scaleType.PENTATONIC=Pentatonic
 weakspot.sound.scaleType.MINOR=Minor
 weakspot.sound.scaleOctaves=Range: %s octave(s)
-weakspot.sound.preset=Preset: %s
 weakspot.sound.preset.custom=Custom
 weakspot.sound.preset.standard=Standard
 weakspot.sound.preset.sparkle=Sparkle
@@ -122,10 +121,9 @@ weakspot.sound.preset.bells=Bells
 weakspot.sound.preset.quiet=Quiet
 weakspot.sound.preset.my=My preset %s
 weakspot.sound.preset.empty=%s (empty)
-weakspot.sound.preset.saveCurrent=Save current
-weakspot.sound.preset.save=Save
-weakspot.sound.preset.overwrite=Overwrite
-weakspot.sound.preset.cancel=Cancel
+weakspot.sound.preset.overwrite=Overwrite?
+weakspot.sound.preset.saveTo=Save to My preset:
+weakspot.sound.preset.saved=Saved to %s
 weakspot.sound.chordShort=Chords: %s
 
 weakspot.combo.hit=%s HIT
@@ -747,6 +745,8 @@ weakspot.server.general.helditemexcludes=Held item exclusions
 weakspot.server.general.helditemexcludes.tooltip=In multiplayer, the server's setting takes priority.\nItems that never count as an empty hand (registry names, one per line, e.g. modid:wrench)\nFor mod items that do something on right click but are not detected\nFile: server.general.heldItemExcludes
 weakspot.server.general.giveguidebook=Give the guide book
 weakspot.server.general.giveguidebook.tooltip=In multiplayer, the server's setting takes priority.\nGive players a guide book on their first login (once per player)\nIt can also be read with the Guide button on the stats screen (K key). Server only (not sent to clients)\nFile: server.general.giveGuideBook
+weakspot.server.general.updategifttargets=Targets given on update
+weakspot.server.general.updategifttargets.tooltip=In multiplayer, the server's setting takes priority.\nHow many Weak Spot Targets to give each player when the mod is updated (once per new version; 0 = none)\nNot given when giveGuideBook is off. Used by the server only (not sent to clients)\nFile: server.general.updateGiftTargets
 weakspot.server.general.markersharerange=Marker share range
 weakspot.server.general.markersharerange.tooltip=In multiplayer, the server's setting takes priority.\nRange for relaying other players' weak spot markers (blocks). Only players within this distance of a marker see it\n0 stops relaying (other players' markers are not shown)\nFile: server.general.markerShareRange
 weakspot.server.general.markersendminintervalticks=Marker send interval
@@ -764,7 +764,7 @@ weakspot.client.sound.hitscaletype.tooltip=The scale of the hit sound. MAJOR, PE
 weakspot.client.sound.hitscaleoctaves=Range (octaves)
 weakspot.client.sound.hitscaleoctaves.tooltip=The range of the hit sound. 1: one octave. 2: two octaves, starting one octave lower\nFile: client.sound.hitScaleOctaves
 weakspot.client.sound.soundpresets=My presets
-weakspot.client.sound.soundpresets.tooltip=Sound My presets 1–3, written by "Save current" on the Sound tab of the stats screen (K key). No need to edit them by hand\nOne line each: slot=instrument,scale type,direction,octaves,chord (e.g. 1=CHIME,PENTATONIC,UP_DOWN,2,true)\nFile: client.sound.soundPresets
+weakspot.client.sound.soundpresets.tooltip=Sound My presets 1–3, written by "Save to My preset" on the Sound tab of the stats screen (K key). No need to edit them by hand\nOne line each: slot=instrument,scale type,direction,octaves,chord (e.g. 1=CHIME,PENTATONIC,UP_DOWN,2,true)\nFile: client.sound.soundPresets
 weakspot.client.sound.othershitvolume=Others' hit volume
 weakspot.client.sound.othershitvolume.tooltip=Volume of other players' hit sounds (0 is silent)\nThe vanilla Players volume also applies\nFile: client.sound.othersHitVolume
 weakspot.client.sound.othershitsound=Others' hit sound
@@ -874,3 +874,4 @@ weakspot.welcome.targets=You received %s Weak Spot Targets. Right-click one to p
 weakspot.welcome.rewards=Your target practice records earn you rewards
 weakspot.welcome.keys=Press K for stats and settings, and HOME to turn weak spots on or off
 weakspot.welcome.guide=For details, please read the guide book
+weakspot.target.updateGift=[WeakSpot] Weak Spot Mining has been updated to %s. Here are %s Weak Spot Target(s) to celebrate

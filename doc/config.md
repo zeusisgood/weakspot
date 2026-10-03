@@ -22,6 +22,7 @@
 | 持ち物も素手と同じに | `server.general.heldItemsCountAsEmptyHand` | true | 右クリックで何もしないアイテム（ツルハシ・棒・インゴットなど）を持っていても、成長・収穫・機械・動物の弱点を出すか（自動判定。動物の餌などは除外） |
 | 素手と同じに扱わない物 | `server.general.heldItemExcludes` | （空） | 素手と同じに扱わないアイテムの登録名（1 行に 1 つ。例 `modid:wrench`）。右クリックで何かするのに自動判定で漏れる Mod のアイテム用 |
 | ガイドの本を渡す | `server.general.giveGuideBook` | true | 初回ログインのプレイヤーにガイドの本を渡すか（1 人 1 回）。**サーバー専用** |
+| 更新のときに配る的の数 | `server.general.updateGiftTargets` | 1 | Mod を更新したとき、プレイヤーに配る弱点の的の数（版が変わるたびに 1 回。0 で配らない。`giveGuideBook` がオフなら配らない）。**サーバー専用** |
 | 更新のお知らせ | `client.updates.showUpdateNotes` | true | バージョン更新後、初めてワールドに入った時にチャットで更新のお知らせを表示するか |
 | 新しい版の通知 | `client.updates.checkForUpdates` | true | 新しいバージョンが公開されていたら、ワールドに入った時にチャットで通知するか（Forge の `versionCheck` が false の時は通知なし） |
 | 通知しない版 | `client.updates.skippedUpdateVersion` | （空） | チャットの [この版は通知しない] を押したバージョン。このバージョンの通知は表示しない。空にすると再び通知 |
@@ -36,7 +37,7 @@
 | 音階の動き | `client.sound.hitScaleDirection` | UP | `UP`（上がりきったら最低音に戻る）／`UP_DOWN`（上がったら下がる往復）。他プレイヤーのヒット音にも使う |
 | 音階の種類 | `client.sound.hitScaleType` | MAJOR | `MAJOR`（長音階）／`PENTATONIC`（ペンタトニック）／`MINOR`（短調）。節目の駆け上がりと途切れの音にも使う |
 | 音域 | `client.sound.hitScaleOctaves` | 1 | 1〜2 オクターブ。2 なら 1 つ下のオクターブ（ピッチ 0.5）から |
-| マイプリセット | `client.sound.soundPresets` | （空） | 音のマイプリセット 1〜3。K キーの「サウンド」タブの「今の設定を保存」で書かれる（1 行に「番号=楽器,音階の種類,動き,音域,和音」）。手で書き換えなくてよい |
+| マイプリセット | `client.sound.soundPresets` | （空） | 音のマイプリセット 1〜3。K キーの「サウンド」タブの「マイプリセットに保存」で書かれる（1 行に「番号=楽器,音階の種類,動き,音域,和音」）。手で書き換えなくてよい |
 | ほかの人のヒット音 | `client.sound.othersHitSound` | XYLOPHONE | 他プレイヤーのヒット音の楽器（選択肢は `myHitSound` と同じ） |
 | ほかの人の音量 | `client.sound.othersHitVolume` | 0.4 | 他プレイヤーのヒット音の音量（0〜1）。0 で無音 |
 
