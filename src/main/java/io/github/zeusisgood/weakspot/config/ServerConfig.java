@@ -271,7 +271,8 @@ public final class ServerConfig {
         public double growthMinRadius = 0.08;
 
         @Config.Comment({"[サーバー] 成長の弱点を出さないブロックの登録名（サトウキビ・サボテン・ネザーウォートにも効く）",
-                "IGrowable を持つブロックのうち、作物・苗木ではないもの（草ブロック、草など）を初期値で外している"})
+                "IGrowable を持つブロックのうち、作物・苗木ではないもの（草ブロック、草など）を初期値で外している",
+                "しゃがんで右クリックで自動で対象になるブロック（ランダム tick を受け取るもの）も、ここに書けば外せる"})
         public String[] growthExcludedBlocks = {
                 "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant"};
 
@@ -279,7 +280,8 @@ public final class ServerConfig {
                 "1行に「登録名」か「登録名[プロパティ=条件,...]」。条件は 0-6（数の範囲）、dry_*（* は任意の文字列）、完全一致",
                 "例: somemod:crop[age=0-6]。条件を書かないと、いつでも出す（ネザーウォートは age=0-2、ic2:rubber_wood は state=dry_* が初期の条件。",
                 "サトウキビ・サボテンは柱の高さをコードで判定する）。葉・草ブロック・耕地・氷など、成長以外に randomTick を使うブロックは書かない",
-                "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる"})
+                "growthExcludedBlocks に入っているブロックは、ここにあっても対象外になる",
+                "書かなくても、ランダム tick を受け取るブロックは、しゃがんで右クリックすれば対象になる（書くと、しゃがまなくても出て、状態の条件を付けられる）"})
         public String[] growthExtraBlocks = {"minecraft:reeds", "minecraft:cactus", "minecraft:nether_wart",
                 "ic2:rubber_wood"};
 
