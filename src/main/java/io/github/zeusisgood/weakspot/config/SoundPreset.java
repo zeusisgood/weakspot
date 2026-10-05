@@ -1,10 +1,12 @@
 package io.github.zeusisgood.weakspot.config;
 
 import io.github.zeusisgood.weakspot.common.HitScale;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 /**
  * 音のプリセット（1.11.1）: 自分のヒット音の鳴らし方（楽器・和音・音階の動き・種類・音域）。音量とほかの人の音は入れない。
@@ -27,6 +29,32 @@ public final class SoundPreset {
             new SoundPreset("bells", HitSound.BELL, false, HitScale.Direction.UP, HitScale.Type.PENTATONIC, 1),
             new SoundPreset("quiet", HitSound.FLUTE, false, HitScale.Direction.UP_DOWN, HitScale.Type.PENTATONIC,
                     1)));
+
+    /**
+     * [ランダム] で選ぶ楽器（1.11.1）。音の高さが分かりにくい打楽器（ハイハット・スネア・バスドラム）は、音階が
+     * 聞き取れないので外す（ベースは音階が分かるので入れる）。
+     */
+    public static final List<HitSound> RANDOM_SOUNDS = Collections.unmodifiableList(randomSounds());
+
+    private static List<HitSound> randomSounds() {
+        List<HitSound> list = new ArrayList<>(Arrays.asList(HitSound.values()));
+        list.removeAll(Arrays.asList(HitSound.HAT, HitSound.SNARE, HitSound.BASEDRUM));
+        return list;
+    }
+
+    /** ランダムな鳴らし方（[ランダム]）。current と同じ組み合わせは引き直す。 */
+    public static SoundPreset random(SoundPreset current, Random random) {
+        HitScale.Type[] types = HitScale.Type.values();
+        HitScale.Direction[] directions = HitScale.Direction.values();
+        SoundPreset preset;
+        do {
+            preset = new SoundPreset(null, RANDOM_SOUNDS.get(random.nextInt(RANDOM_SOUNDS.size())),
+                    random.nextBoolean(), directions[random.nextInt(directions.length)],
+                    types[random.nextInt(types.length)],
+                    HitScale.MIN_OCTAVES + random.nextInt(HitScale.MAX_OCTAVES - HitScale.MIN_OCTAVES + 1));
+        } while (preset.sameSound(current));
+        return preset;
+    }
 
     /** 最初から入っているものの名前のキー（マイプリセットは null）。 */
     public final String key;

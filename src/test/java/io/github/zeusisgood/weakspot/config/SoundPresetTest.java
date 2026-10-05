@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import io.github.zeusisgood.weakspot.common.HitScale;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 import org.junit.Test;
 
@@ -73,5 +74,27 @@ public class SoundPresetTest {
         assertFalse(sound.hitChordEnabled);
         assertEquals(0.7, sound.myHitVolume, 0);
         assertEquals(HitSound.BASS, sound.othersHitSound);
+    }
+
+    /** ランダム: 打楽器は出ない。今と同じ組み合わせは出ない。音域は 1〜2。 */
+    @Test
+    public void randomSkipsDrumsAndTheCurrentSound() {
+        assertFalse(SoundPreset.RANDOM_SOUNDS.contains(HitSound.HAT));
+        assertFalse(SoundPreset.RANDOM_SOUNDS.contains(HitSound.SNARE));
+        assertFalse(SoundPreset.RANDOM_SOUNDS.contains(HitSound.BASEDRUM));
+        assertTrue(SoundPreset.RANDOM_SOUNDS.contains(HitSound.BASS));
+        assertEquals(8, SoundPreset.RANDOM_SOUNDS.size());
+        Random random = new Random(5);
+        SoundPreset current = SoundPreset.BUILT_IN.get(0);
+        Set<HitSound> seen = new HashSet<>();
+        for (int i = 0; i < 500; i++) {
+            SoundPreset next = SoundPreset.random(current, random);
+            assertFalse(next.sameSound(current));
+            assertTrue(SoundPreset.RANDOM_SOUNDS.contains(next.sound));
+            assertTrue(next.octaves >= HitScale.MIN_OCTAVES && next.octaves <= HitScale.MAX_OCTAVES);
+            seen.add(next.sound);
+            current = next;
+        }
+        assertEquals(8, seen.size());
     }
 }

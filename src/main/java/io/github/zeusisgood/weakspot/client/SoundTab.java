@@ -7,6 +7,7 @@ import io.github.zeusisgood.weakspot.config.SoundPreset;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.DoubleConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.PositionedSoundRecord;
@@ -41,6 +42,9 @@ final class SoundTab extends StatsScreenTab {
     /** プリセット（1.11.1）と、マイプリセットの画面を開く。 */
     private static final int BUTTON_PRESET = 50;
     private static final int BUTTON_MY_PRESETS = 51;
+    /** 細かい設定をランダムに（1.11.1）。 */
+    private static final int BUTTON_RANDOM = 52;
+    private static final int RANDOM_WIDTH = 60;
     /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
     /** 音階の設定を切り替えたときの短い試聴（音の数と間隔 tick）。往復なら上がって 1 つ下がるまで分かる数。 */
@@ -55,11 +59,13 @@ final class SoundTab extends StatsScreenTab {
     /** マイプリセットの画面を開くボタンの幅。 */
     private static final int MY_PRESETS_WIDTH = 96;
     /** 下の説明を出すのに要る、上から下のボタンまでの高さ（小さい画面では出さない）。 */
-    private static final int NOTE_NEEDS_HEIGHT = 206;
+    private static final int NOTE_NEEDS_HEIGHT = 217;
 
     private final List<GuiButton> buttons = new ArrayList<>();
     private GuiButton preset;
     private GuiButton myPresets;
+    private GuiButton random;
+    private final Random rng = new Random();
     private GuiButton mySound;
     private GuiButton othersSound;
     private GuiButton chord;
@@ -84,8 +90,11 @@ final class SoundTab extends StatsScreenTab {
         myPresets = add(new GuiButton(BUTTON_MY_PRESETS, right - MY_PRESETS_WIDTH, y, MY_PRESETS_WIDTH, 20,
                 I18n.format("weakspot.sound.myPresets")));
 
-        // 「細かい設定」の見出し（draw で描く）の下
-        y += 33;
+        // 「細かい設定」の見出し（draw で描く）と、その右端の [ランダム]
+        y += 22;
+        random = add(new GuiButton(BUTTON_RANDOM, right - RANDOM_WIDTH, y, RANDOM_WIDTH, 20,
+                I18n.format("weakspot.sound.random")));
+        y += 22;
         mySound = add(new GuiButton(BUTTON_MY_SOUND, left, y, 110, 20, ""));
         add(new VolumeSlider(BUTTON_MY_VOLUME, left + 114, y, WeakSpotConfig.client.sound.myHitVolume, v -> {
             WeakSpotConfig.client.sound.myHitVolume = v;
@@ -104,7 +113,7 @@ final class SoundTab extends StatsScreenTab {
         chord = add(new GuiButton(BUTTON_CHORD, right - half, y, half, 20, ""));
 
         // ほかの人のヒット音
-        y = top + 167;
+        y = top + 178;
         othersSound = add(new GuiButton(BUTTON_OTHERS_SOUND, left, y, 110, 20, ""));
         add(new VolumeSlider(BUTTON_OTHERS_VOLUME, left + 114, y, WeakSpotConfig.client.sound.othersHitVolume, v -> {
             WeakSpotConfig.client.sound.othersHitVolume = v;
@@ -135,6 +144,12 @@ final class SoundTab extends StatsScreenTab {
         switch (id) {
             case BUTTON_PRESET:
                 choosePreset(GuiScreen.isShiftKeyDown() ? -1 : 1);
+                return true;
+            case BUTTON_RANDOM:
+                SoundPreset.random(SoundPreset.of(sound), rng).applyTo(sound);
+                WeakSpotConfig.save();
+                playSwitchPreview();
+                updateLabels();
                 return true;
             case BUTTON_MY_PRESETS:
                 Minecraft.getMinecraft().displayGuiScreen(new MyPresetsScreen(screen));
@@ -289,24 +304,26 @@ final class SoundTab extends StatsScreenTab {
         int right = center + HALF - 4;
         int top = screen.top();
         // 自分の音とほかの人の音の枠（ボタンより先に描くので、ボタンの後ろになる）
-        box(center - HALF, top + 37, center + HALF, top + 152);
-        box(center - HALF, top + 156, center + HALF, top + 191);
+        box(center - HALF, top + 37, center + HALF, top + 163);
+        box(center - HALF, top + 167, center + HALF, top + 202);
         screen.drawString(screen.font(), I18n.format("weakspot.sound.mine"), left, top + 39, 0xFFFFFF);
-        screen.drawString(screen.font(), I18n.format("weakspot.sound.others"), left, top + 158, 0xFFFFFF);
+        screen.drawString(screen.font(), I18n.format("weakspot.sound.others"), left, top + 169, 0xFFFFFF);
         // 「細かい設定」の見出しと細い線
         String fine = I18n.format("weakspot.sound.fineSettings");
-        int textY = top + 72;
+        int textY = top + 77;
         screen.drawString(screen.font(), fine, left, textY, SUBTLE_RGB);
         int lineX = left + screen.font().getStringWidth(fine) + 4;
-        Gui.drawRect(lineX, textY + 4, right, textY + 5, BOX_LINE);
+        Gui.drawRect(lineX, textY + 4, right - RANDOM_WIDTH - 4, textY + 5, BOX_LINE);
 
         if (screen.bottom() - top >= NOTE_NEEDS_HEIGHT) {
-            screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.note"), center, top + 195, SUBTLE_RGB);
+            screen.drawCenteredString(screen.font(), I18n.format("weakspot.sound.note"), center, top + 206, SUBTLE_RGB);
         }
         int mx = screen.mouseX();
         int my = screen.mouseY();
         if (over(preset, mx, my)) {
             screen.setTooltip(I18n.format("weakspot.sound.preset.tooltip"));
+        } else if (over(random, mx, my)) {
+            screen.setTooltip(I18n.format("weakspot.sound.random.tooltip"));
         } else if (over(myPresets, mx, my)) {
             screen.setTooltip(I18n.format("weakspot.sound.myPresets.tooltip"));
         } else if (over(chord, mx, my)) {
