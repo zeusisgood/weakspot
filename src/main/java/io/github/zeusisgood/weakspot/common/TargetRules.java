@@ -89,7 +89,6 @@ public final class TargetRules {
         return decoy ? Math.max(0, hits - MISS_PENALTY) : hits + 1;
     }
 
-    /** ご褒美の段階（自己ベストで決まる）。 */
     /** ご褒美の段階（1.11.1 で 15・30・45・60 から 25・50・75・100 に上げた。1.11.0 で取った段階は進捗で残す）。 */
     public enum Tier {
         NONE(0, 0xFFFFFF),

@@ -171,18 +171,4 @@ public final class HitScale {
         }
         return 0;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof HitScale)) {
-            return false;
-        }
-        HitScale other = (HitScale) o;
-        return type == other.type && direction == other.direction && octaves == other.octaves;
-    }
-
-    @Override
-    public int hashCode() {
-        return (type.ordinal() * 31 + direction.ordinal()) * 31 + octaves;
-    }
 }

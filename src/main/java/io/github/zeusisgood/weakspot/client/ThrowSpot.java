@@ -20,8 +20,6 @@ final class ThrowSpot extends AimSpotKind {
     /** ゲージ 1 本分の溜め（倍率 ×3）。越えた分は、1 本分ごとに赤い目盛りを 1 つ足す。 */
     private static final double CHARGE_PER_BAR = 2.0;
 
-    /** このフレームのゲージの、本数を越えた分の文字（drawGauge から drawAfterOverlay へ渡す）。 */
-
     ThrowSpot() {
         super(HitKind.THROW, new HudSpot(HitKind.THROW));
     }
