@@ -86,10 +86,14 @@ public final class RightClickHits {
             IBlockState before = world.getBlockState(pos);
             BlockPos target = RightClickTargets.growthTarget(world, pos, before);
             IBlockState targetBefore = world.getBlockState(target);
+            // 自動の対象（1.11.2）は、変わらないことも多いので「育たない」の知らせを出さない
+            boolean auto = !RightClickTargets.isGrowable(world, pos, before, settings);
             grow(world, pos, settings);
             // 柱が伸びると一番上の節が変わるので、前の一番上の節と、叩いたブロックの両方を比べる
             boolean changed = world.getBlockState(pos) != before || world.getBlockState(target) != targetBefore;
-            GrowthWarnings.onGrowthHit(player, world, pos, changed);
+            if (!auto) {
+                GrowthWarnings.onGrowthHit(player, world, pos, changed);
+            }
         } else if (kind == HitKind.MACHINE) {
             MachineAccelerator.hit(world, pos, combo);
         }
@@ -116,9 +120,15 @@ public final class RightClickHits {
             }
             return;
         }
+        if (!RightClickTargets.isGrowable(world, pos, first, settings)
+                && world.getGameRules().getInt("randomTickSpeed") <= 0) {
+            // 自動の対象（1.11.2）は、ランダム tick を止めたワールドでは早めない（IC2 のフォームは、そのとき
+            // ランダム tick を受けると例外を投げる）
+            return;
+        }
         for (int i = 0; i < WeakSpotConfig.server.growth.growthTicksPerHit; i++) {
             IBlockState state = world.getBlockState(pos);
-            if (!RightClickTargets.isGrowable(world, pos, state, settings)) {
+            if (!RightClickTargets.isGrowthTarget(world, pos, state, settings)) {
                 return;
             }
             BlockPos target = RightClickTargets.growthTarget(world, pos, state);

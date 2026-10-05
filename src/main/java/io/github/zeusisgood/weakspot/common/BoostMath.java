@@ -10,6 +10,10 @@ package io.github.zeusisgood.weakspot.common;
  */
 public final class BoostMath {
 
+    /** 掘る前のヒット（1.11.2）を、掘り始めるまで残す tick 数（クライアントとサーバーで同じ）。 */
+    public static final int PRE_DIG_TICKS = 20;
+
+
     private BoostMath() {
     }
 

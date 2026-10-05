@@ -34,7 +34,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 版は `build.gradle` の `version` と `WeakSpotMod.VERSION` の 2 か所。必ず揃える。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.11.1**、範囲は `"[1.11,1.12)"`。
+- 現行は **1.11.2**、範囲は `"[1.11,1.12)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -60,6 +60,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。
 - **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)`**（翻訳キーで送り、キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品（`HitGate`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
+- **採掘のヒットは、掘る前のものは予約にして、掘り始めた瞬間に確定する**（1.11.2。予約の時点でコンボ・統計を数えない。`ServerBoostTracker`）。
 - **サーバー側の採掘のブーストは時間枠ではない**（破壊完了の瞬間に「今の速さ × (経過 tick + 1) ≥ 0.7」で判定するため、追加進捗を貯めて速さに換算する。`BoostMath`）。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる。
 
 ### 設定の約束事
@@ -88,4 +89,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-1.11.0（的当てとご褒美・落下の弱点・持ち物も素手と同じに・弱点の大きさ・コンボの段階を 300 までに・`/weakspot top`・進捗）をリリースした。1.11.1（ヒット音の音階とプリセット・的当てのしきい値を 25・50・75・100 に・不具合の修正）。このあとは機能を止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。1.10.2（設定画面のまとめ直し・コンボのゲージ）。候補と保留中の相談は `doc/roadmap.md`。
+1.11.0（的当てとご褒美・落下の弱点・持ち物も素手と同じに・弱点の大きさ・コンボの段階を 300 までに・`/weakspot top`・進捗）をリリースした。1.11.1（ヒット音の音階とプリセット・的当てのしきい値を 25・50・75・100 に・不具合の修正）。1.11.2（掘る前から出る採掘の弱点と、当てて壊したら次を掘るまでの待ちを 0 に・しゃがんで右クリックでランダム tick のブロックを自動で成長の対象に）。このあとは機能を止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。1.10.2（設定画面のまとめ直し・コンボのゲージ）。候補と保留中の相談は `doc/roadmap.md`。

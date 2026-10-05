@@ -32,8 +32,8 @@ You can change the keys under Options → Controls → Weak Spot Mining.
 
 | Kind | How | Effect |
 |---|---|---|
-| Mining | Hold left click on a block | Digs faster (even faster with a combo); repairs your tool a little when the block breaks |
-| Growth | Hold right click with an empty hand on a growing crop or sapling | Grows it faster |
+| Mining | Aim at a block (the spot shows before you dig), then hold left click | Digs faster (even faster with a combo); break a block you hit to start the next one at once; repairs your tool a little when the block breaks |
+| Growth | Hold right click with an empty hand on a growing crop or sapling (sneak to use it on any block that changes over time) | Grows it faster |
 | Harvest | Hold right click with an empty hand on a ripe crop | Harvests and replants it |
 | Machine | Sneak and hold right click with an empty hand on a furnace or other machine | Speeds the machine up |
 | Animal | Hold right click with an empty hand on an animal (sneak for horses, villagers, etc.) | Speeds up growing up, breeding cooldown, wool, eggs and villager trade restocking |

@@ -86,8 +86,9 @@ public final class ClientWeakSpotHandler {
         if (!WeakSpotConfig.client.markers.weakSpotsEnabled) {
             stopOwnWeakSpots();
         }
+        // 掘る前の採掘の弱点は、照準が外れたらすぐ消す（1.11.2。いつも出るので、残すと見回すたびに邪魔になる）
         if (spot != null && (isGone(mc.world, spot)
-                || clientTick - spot.lastActiveTick > ClientSettings.get().lingerTicks)) {
+                || clientTick - spot.lastActiveTick > (spot.preview ? 1 : ClientSettings.get().lingerTicks))) {
             spot = null;
         }
         WeakSpotRenderer.expireFlashes(clientTick);
@@ -104,7 +105,7 @@ public final class ClientWeakSpotHandler {
         IBlockState state = world.getBlockState(spot.pos);
         switch (spot.kind) {
             case GROWTH:
-                return !RightClickTargets.isGrowable(world, spot.pos, state, ClientSettings.get());
+                return !RightClickTargets.isGrowthTarget(world, spot.pos, state, ClientSettings.get());
             case HARVEST:
                 return !RightClickTargets.isHarvestable(state, ClientSettings.get());
             case MACHINE:
@@ -181,6 +182,9 @@ public final class ClientWeakSpotHandler {
             }
         } else if (isHoldingUse(mc)) {
             aimRightClick(mc, target);
+        } else if (KindSwitches.isEnabled(HitKind.MINING) && ClientSettings.get().enabled(HitKind.MINING)
+                && ServerFeatures.since("1.11.2")) {
+            aimPreDig(mc, target);
         }
     }
 
@@ -202,8 +206,38 @@ public final class ClientWeakSpotHandler {
         if (spot == null) {
             return;
         }
+        spot.preview = false;
         spot.lastActiveTick = clientTick;
+        MiningBoost.onDigging(pos);
         if (spot.isHitBy(target.hitVec) && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
+            onHit(mc);
+        }
+    }
+
+    /**
+     * 掘る前の採掘の弱点（1.11.2）。照準が合ったブロックに薄く出し、掘る前に 1 回だけ当てられる。
+     * 当たるのは左クリックを押している間だけ（照準を合わせるだけで当たると、ブロックを交互に見るだけで
+     * ヒット音とコンボの表示が増え続けるため）。当てたら弱点は動き、掘り始めるまで当たらない。
+     * ヒットはサーバーで予約され、掘り始めた瞬間に確定する。
+     */
+    private static void aimPreDig(Minecraft mc, RayTraceResult target) {
+        BlockPos pos = target.getBlockPos();
+        IBlockState state = mc.world.getBlockState(pos);
+        if (!MiningBoost.isPreDigEligible(mc.world, mc.player, pos, state)) {
+            return;
+        }
+        SyncedSettings settings = ClientSettings.get();
+        if (spot == null || !spot.matches(HitKind.MINING, pos, target.sideHit)) {
+            spot = WeakSpot.spawn(HitKind.MINING, mc.world, pos, state, target.sideHit, target.hitVec, settings, RANDOM);
+        }
+        if (spot == null) {
+            return;
+        }
+        spot.preview = true;
+        spot.lastActiveTick = clientTick;
+        if (mc.currentScreen == null && mc.gameSettings.keyBindAttack.isKeyDown() && !MiningBoost.hasPreHit(pos)
+                && spot.isHitBy(target.hitVec)
+                && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
             onHit(mc);
         }
     }
@@ -318,7 +352,9 @@ public final class ClientWeakSpotHandler {
             // ヒットで進んだ分を、すぐに見に行く
             MachineBars.query(spot.pos, clientTick, true);
         }
-        if (kind == HitKind.MINING) {
+        if (kind == HitKind.MINING && spot.preview) {
+            MiningBoost.onPreHit(spot.pos, hitStreak);
+        } else if (kind == HitKind.MINING) {
             MiningBoost.onHit(spot.pos, hitStreak);
         }
         if (kind == HitKind.ANIMAL) {

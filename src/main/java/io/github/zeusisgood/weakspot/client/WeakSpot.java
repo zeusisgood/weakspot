@@ -48,6 +48,8 @@ final class WeakSpot {
     double u;
     double v;
     long lastActiveTick;
+    /** 掘る前の採掘の弱点（1.11.2）。薄く描き、ほかのプレイヤーには送らない。掘り始めたら false。 */
+    boolean preview;
     /** マーカーの表示位置と残像。 */
     final MarkerMotion motion = new MarkerMotion(0, 0);
 

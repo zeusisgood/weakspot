@@ -4,6 +4,7 @@ import io.github.zeusisgood.weakspot.common.GrowthFilters;
 import io.github.zeusisgood.weakspot.common.GrowthRoom;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
+import io.github.zeusisgood.weakspot.server.PlayerText;
 import io.github.zeusisgood.weakspot.server.RightClickHits;
 import io.github.zeusisgood.weakspot.server.ServerSwitches;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -35,7 +37,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 /**
  * 右クリックの弱点（作物・苗木などの植物、機械）の対象の判定。クライアントとサーバーで同じ条件を使う。
  * しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木（しゃがんでいても、機械でなければ作物・苗木）。
- * 実った作物は収穫（1.7.0）。
+ * 実った作物は収穫（1.7.0）。しゃがんでいれば、ランダム tick を受け取るブロックも成長の対象（1.11.2。isAutoGrowable）。
  * 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -68,7 +70,36 @@ public final class RightClickTargets {
         if (isHarvestable(state, settings)) {
             return HitKind.HARVEST;
         }
+        if (settings.enabled(HitKind.GROWTH) && player.isSneaking() && isAutoGrowable(state, settings)
+                && autoGrowthSupported(world, player)) {
+            return HitKind.GROWTH;
+        }
         return null;
+    }
+
+    /**
+     * しゃがんで右クリックで自動で拾う成長の対象か（1.11.2。Random Things の Time in a Bottle と同じ考え方）。
+     * ランダム tick を受け取り、対象外リストにも追加リストにもなく（追加リストのブロックは書いた条件だけで決める）、
+     * IGrowable でない（IGrowable は canGrow で決める）ブロック。
+     */
+    public static boolean isAutoGrowable(IBlockState state, SyncedSettings settings) {
+        Block block = state.getBlock();
+        String name = String.valueOf(block.getRegistryName());
+        return block.getTickRandomly() && !(block instanceof IGrowable)
+                && !settings.growthExcludedBlocks.contains(name) && !settings.growthFilters().contains(name);
+    }
+
+    /** 成長の弱点を出し続けてよいか（今の判定か、自動の対象）。出す条件（しゃがみ）は classify で見る。 */
+    public static boolean isGrowthTarget(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
+        return isGrowable(world, pos, state, settings) || isAutoGrowable(state, settings);
+    }
+
+    /** 自動の対象は、サーバーとクライアントの両方が 1.11.2 以上のときだけ（古い側が右クリックを止めないので）。 */
+    private static boolean autoGrowthSupported(World world, EntityPlayer player) {
+        if (world.isRemote) {
+            return WeakSpotMod.proxy.serverSince("1.11.2");
+        }
+        return player instanceof EntityPlayerMP && PlayerText.clientSince((EntityPlayerMP) player, "1.11.2");
     }
 
     /**
