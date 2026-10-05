@@ -120,6 +120,12 @@ public final class RightClickHits {
             }
             return;
         }
+        if (!RightClickTargets.isGrowable(world, pos, first, settings)
+                && world.getGameRules().getInt("randomTickSpeed") <= 0) {
+            // 自動の対象（1.11.2）は、ランダム tick を止めたワールドでは早めない（IC2 のフォームは、そのとき
+            // ランダム tick を受けると例外を投げる）
+            return;
+        }
         for (int i = 0; i < WeakSpotConfig.server.growth.growthTicksPerHit; i++) {
             IBlockState state = world.getBlockState(pos);
             if (!RightClickTargets.isGrowthTarget(world, pos, state, settings)) {
