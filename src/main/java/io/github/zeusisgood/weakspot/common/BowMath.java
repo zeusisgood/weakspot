@@ -247,6 +247,37 @@ public final class BowMath {
         return best;
     }
 
+    /**
+     * 左右だけの弱点（近接）の pitch が視線についてくる範囲（度。1.11.1）。真上・真下では yaw をずらしても同じ点に
+     * なり、弱点が照準の中央に出てしまうので、これより深く向いても弱点の pitch はここで止める。
+     */
+    public static final double HORIZONTAL_PITCH_LIMIT = 60.0;
+
+    /** 左右だけの弱点を出す pitch（視線の pitch を ±HORIZONTAL_PITCH_LIMIT に収めたもの。1.11.1）。 */
+    public static double horizontalPitch(double lookPitch) {
+        return Math.max(-HORIZONTAL_PITCH_LIMIT, Math.min(HORIZONTAL_PITCH_LIMIT, lookPitch));
+    }
+
+    /**
+     * 左右だけの弱点の yaw のずれを広げる倍率（1.11.1）。上下を向くほど画面の上で左右の幅が cos(pitch) 倍に縮むので、
+     * 1 / cos(horizontalPitch) 倍に広げて、画面の上で照準から 10〜20 度離れたままにする（60 度で 2 倍）。
+     */
+    public static double horizontalYawScale(double lookPitch) {
+        return 1 / Math.cos(Math.toRadians(horizontalPitch(lookPitch)));
+    }
+
+    /** 左右だけの弱点の次の yaw を、今の視線の pitch に合わせて広げたもの（1.11.1）。 */
+    public static double nextWideHorizontalYaw(double lookYaw, double lookPitch, double prevYaw, int yawSign,
+                                               double fovDegrees, Random random) {
+        double yaw = nextHorizontalYaw(lookYaw, prevYaw, yawSign, fovDegrees, random);
+        return lookYaw + wrapDegrees(yaw - lookYaw) * horizontalYawScale(lookPitch);
+    }
+
+    /** 左右だけの弱点が照準から離れすぎたか（広げた分を戻して、画面の上の角度で測る。1.11.1）。 */
+    public static boolean isTooFarHorizontal(double spotYaw, double lookYaw, double lookPitch) {
+        return Math.abs(wrapDegrees(spotYaw - lookYaw)) / horizontalYawScale(lookPitch) > RELOCATE_DEGREES;
+    }
+
     /** 1ヒットで実際に進める tick 数。引いた時間 used に足して、引き切り（FULL_DRAW_TICKS）を超えない。 */
     public static int addedTicks(int used, int hitTicks) {
         return Math.max(0, Math.min(hitTicks, FULL_DRAW_TICKS - used));

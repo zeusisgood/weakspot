@@ -89,14 +89,14 @@ public final class TargetRules {
         return decoy ? Math.max(0, hits - MISS_PENALTY) : hits + 1;
     }
 
-    /** ご褒美の段階（自己ベストで決まる）。 */
+    /** ご褒美の段階（1.11.1 で 15・30・45・60 から 25・50・75・100 に上げた。1.11.0 で取った段階は進捗で残す）。 */
     public enum Tier {
         NONE(0, 0xFFFFFF),
-        BRONZE(15, 0xCD7F32),
-        SILVER(30, 0xC0C0C0),
-        GOLD(45, 0xFFD700),
+        BRONZE(25, 0xCD7F32),
+        SILVER(50, 0xC0C0C0),
+        GOLD(75, 0xFFD700),
         /** 色は巡る（描く側で時間から決める）。 */
-        RAINBOW(60, 0xFFFFFF);
+        RAINBOW(100, 0xFFFFFF);
 
         /** この段階になる自己ベスト。 */
         public final int from;

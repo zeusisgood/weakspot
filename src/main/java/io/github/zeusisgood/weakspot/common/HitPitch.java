@@ -2,7 +2,7 @@ package io.github.zeusisgood.weakspot.common;
 
 /**
  * 連続ヒット数（HitStreak。戻らずに上がり続ける）に応じたヒット音のピッチ。
- * 長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す。
+ * 長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す（初期値。1.11.1 から各自の音階は HitScale）。
  */
 public final class HitPitch {
 
@@ -10,20 +10,15 @@ public final class HitPitch {
     private static final int[] MAJOR_SCALE = {0, 2, 4, 5, 7, 9, 11, 12};
     /** 音階の1オクターブの音の数。この数のヒットで最高音になる。 */
     public static final int SCALE_LENGTH = MAJOR_SCALE.length;
-    /** Minecraft の音のピッチは 0.5〜2.0。1.0 から始めて最高の 2.0 で1オクターブになる。 */
-    private static final double BASE_PITCH = 1.0;
 
     private HitPitch() {
     }
 
-    /** streak は 1 始まり（1回目のヒットが最低音、9回目で再び最低音）。 */
+    /** streak は 1 始まり（1回目のヒットが最低音、9回目で再び最低音）。初期値の音階（HitScale.DEFAULT）で数える。 */
     public static float forStreak(int streak) {
-        int index = (Math.max(streak, 1) - 1) % MAJOR_SCALE.length;
-        return (float) (BASE_PITCH * Math.pow(2, MAJOR_SCALE[index] / 12.0));
+        return HitScale.DEFAULT.melody(streak);
     }
 
-    /** 長音階の 1 オクターブの 7 音（上のドを除く）。音階の何度下かを数えるのに使う。 */
-    private static final int[] SEVEN = {0, 2, 4, 5, 7, 9, 11};
     /** このコンボ以上で途切れたとき、下がる 2 音を鳴らす（1.9.5）。 */
     public static final int BREAK_SOUND_FROM = 10;
 
@@ -37,12 +32,10 @@ public final class HitPitch {
     private static final int[] SUS4 = {-3, -4};
     /** 400 から 100 ごとに巡る形。 */
     private static final int[][] CYCLE = {SIXTH, SEVENTH, NINTH, SUS4};
-    /** sus4 の解決の音（少し遅れて鳴らす）。 */
-    private static final int RESOLVE = -2;
     /** このコンボから、旋律にベルを重ねる。 */
     public static final int BELL_FROM = 300;
 
-    /** そのコンボで旋律の下に重ねる度数（1.11.0）。 */
+    /** そのコンボで旋律の下に重ねる度数（1.11.0。長音階で数える。ほかの音階では HitScale が数え直す）。 */
     static int[] chordOffsets(int streak) {
         if (streak >= 400) {
             return CYCLE[(streak / 100 - 4) % CYCLE.length];
@@ -74,29 +67,23 @@ public final class HitPitch {
         return new int[0];
     }
 
+    /** sus4 の形か（解決の音を鳴らす。1.11.0）。 */
+    static boolean isSus4(int streak) {
+        return chordOffsets(streak) == SUS4;
+    }
+
     /**
      * 1 回のヒットで鳴らすピッチ（1.9.5）。先頭が旋律（forStreak）、続けて重ねる音（旋律より下。ピッチの上限 2.0 のため）。
      * 1.11.0 から、重ねる形はコンボの段階ごと（chordOffsets）。下のドより低くなる音は 1 オクターブ上げる（下限 0.5 のため）。
-     * chords が false なら旋律だけ。
+     * chords が false なら旋律だけ。初期値の音階で数える（各自の音階は HitScale.forHit。1.11.1）。
      */
     public static float[] forHit(int streak, boolean chords) {
-        int degree = (Math.max(streak, 1) - 1) % MAJOR_SCALE.length;
-        int[] offsets = chords ? chordOffsets(streak) : new int[0];
-        float[] pitches = new float[1 + offsets.length];
-        pitches[0] = pitchOfDegree(degree);
-        for (int i = 0; i < offsets.length; i++) {
-            pitches[i + 1] = pitchOfDegree(lowest(degree + offsets[i]));
-        }
-        return pitches;
+        return HitScale.DEFAULT.forHit(streak, chords);
     }
 
     /** sus4 の形のとき、少し遅れて鳴らす解決の音（なければ 0）。 */
     public static float resolveFor(int streak, boolean chords) {
-        if (!chords || chordOffsets(streak) != SUS4) {
-            return 0;
-        }
-        int degree = (Math.max(streak, 1) - 1) % MAJOR_SCALE.length;
-        return pitchOfDegree(lowest(degree + RESOLVE));
+        return HitScale.DEFAULT.resolveFor(streak, chords);
     }
 
     /** 旋律にベルを重ねるか（300 から）。 */
@@ -104,21 +91,9 @@ public final class HitPitch {
         return chords && streak >= BELL_FROM;
     }
 
-    /** 下のド（-7）より低い度数を 1 オクターブ上げる。 */
-    private static int lowest(int degree) {
-        return degree < -SEVEN.length ? degree + SEVEN.length : degree;
-    }
-
     /** コンボが途切れたときの下がる 2 音（下のソ → 下のド。1.9.5）。 */
     public static float[] breakNotes() {
-        return new float[] {pitchOfDegree(-3), pitchOfDegree(-7)};
-    }
-
-    /** 1.0 のドを 0 とした音階の度数（負なら下のオクターブ）のピッチ。 */
-    static float pitchOfDegree(int degree) {
-        int octave = Math.floorDiv(degree, SEVEN.length);
-        int semitones = SEVEN[Math.floorMod(degree, SEVEN.length)] + 12 * octave;
-        return (float) (BASE_PITCH * Math.pow(2, semitones / 12.0));
+        return HitScale.DEFAULT.breakNotes();
     }
 
     /** 2 オクターブの駆け上がり（ピッチ 0.5 の低いドから 2.0 の高いドまで）の音の数。 */
@@ -126,8 +101,6 @@ public final class HitPitch {
 
     /** 2 オクターブの駆け上がりの index 番目（0 始まり）の音のピッチ。 */
     public static float twoOctave(int index) {
-        int i = Math.max(0, Math.min(index, TWO_OCTAVE_LENGTH - 1));
-        int semitones = i < MAJOR_SCALE.length ? MAJOR_SCALE[i] : 12 + MAJOR_SCALE[i - MAJOR_SCALE.length + 1];
-        return (float) (BASE_PITCH / 2 * Math.pow(2, semitones / 12.0));
+        return HitScale.DEFAULT.twoOctave(index);
     }
 }

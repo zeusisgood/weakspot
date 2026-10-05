@@ -31,7 +31,7 @@ final class HudSpot {
     private final Random random = new Random();
 
     /**
-     * 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0）、
+     * 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0。1.11.1 から ±60 度までで止め、yaw のずれを広げる）、
      * 上下だけで yaw は出した時点のまま（弓を馬・豚の上で引いたとき。弓を引く短い間なので、向きを追いかけない。1.8.6 で
      * BowSpot から移した）、足元の方向の枠（FEET_WINDOW。落下）。
      */
@@ -106,8 +106,10 @@ final class HudSpot {
                 return;
             }
             // 照準から離れすぎた弱点は、今の照準の近くに出し直す（1.8.2。ヒットには数えない。その場で切り替える）
-            if (BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL,
-                    mode != HORIZONTAL)) {
+            boolean tooFar = mode == HORIZONTAL
+                    ? BowMath.isTooFarHorizontal(yaw, player.rotationYaw, player.rotationPitch)
+                    : BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL, true);
+            if (tooFar) {
                 next(player, yaw, pitch);
                 motion.jumpTo(yaw, pitch);
             }
@@ -155,7 +157,9 @@ final class HudSpot {
                     random);
         } else if (mode == HORIZONTAL) {
             yawSide = BowMath.nextYawSign(yawSide, random);
-            yaw = BowMath.nextHorizontalYaw(player.rotationYaw, prevYaw, yawSide, screen.fovDegrees(), random);
+            // 1.11.1: 上下を向くほど左右を広げる（真上・真下で照準の中央に出ないように。pitch は描く時に止める）
+            yaw = BowMath.nextWideHorizontalYaw(player.rotationYaw, player.rotationPitch, prevYaw, yawSide,
+                    screen.fovDegrees(), random);
             pitch = player.rotationPitch;
         } else {
             pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
@@ -197,7 +201,7 @@ final class HudSpot {
 
     /** 弱点の向き (u = yaw, v = pitch) を、出し方に合わせて視線で置き換えてから、画面に写す。 */
     private double[] projectAt(double u, double v) {
-        return project(mode == VERTICAL ? viewYaw : u, mode == HORIZONTAL ? viewPitch : v);
+        return project(mode == VERTICAL ? viewYaw : u, mode == HORIZONTAL ? BowMath.horizontalPitch(viewPitch) : v);
     }
 
     private double[] project(double y, double p) {

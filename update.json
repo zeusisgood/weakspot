@@ -1,10 +1,11 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.11.0",
-    "1.12.2-recommended": "1.11.0"
+    "1.12.2-latest": "1.11.1",
+    "1.12.2-recommended": "1.11.1"
   },
   "1.12.2": {
+    "1.11.1": "Sound presets and hit sound scales; a free Weak Spot Target on each update; higher target practice thresholds; fixes",
     "1.11.0": "Target practice item with marker rewards; fall weak spot; spot size; combo steps up to 300; /weakspot top",
     "1.10.2": "Settings screen grouped by kind with names; combo multiplier gauge; fishing fix",
     "1.10.1": "Sleep and fishing spots are hit by just aiming at them",

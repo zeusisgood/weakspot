@@ -1,5 +1,7 @@
 package io.github.zeusisgood.weakspot.config;
 
+import io.github.zeusisgood.weakspot.common.HitScale;
+
 import io.github.zeusisgood.weakspot.common.MarkerShape;
 import net.minecraftforge.common.config.Config;
 
@@ -40,6 +42,25 @@ public final class ClientConfig {
         @Config.Comment({"[クライアント] 自分のヒット音に、コンボで音を重ねるか",
                 "オンなら、コンボ 25 から 2 音、100 から 3 音の和音になる。オフなら 1 音のまま"})
         public boolean hitChordEnabled = true;
+
+        @Config.Comment({"[クライアント] ヒット音の音階の動き",
+                "UP: 上がりきったら最低音に戻る　UP_DOWN: 上がったら下がる往復",
+                "他のプレイヤーのヒット音にも、この設定を使う"})
+        public HitScale.Direction hitScaleDirection = HitScale.Direction.UP;
+
+        @Config.Comment({"[クライアント] ヒット音の音階の種類",
+                "MAJOR: 長音階　PENTATONIC: ペンタトニック（ド レ ミ ソ ラ）　MINOR: 短調",
+                "コンボの節目の駆け上がりと、途切れたときの音にも使う"})
+        public HitScale.Type hitScaleType = HitScale.Type.MAJOR;
+
+        @Config.Comment({"[クライアント] ヒット音の音域（オクターブ）",
+                "1: ピッチ 1.0〜2.0　2: 1 つ下のオクターブ（0.5）から 2.0 まで"})
+        @Config.RangeInt(min = HitScale.MIN_OCTAVES, max = HitScale.MAX_OCTAVES)
+        public int hitScaleOctaves = 1;
+
+        @Config.Comment({"[クライアント] 音のマイプリセット 1〜3（統計画面（K キー）のサウンドの [保存・読み込み…] で書かれる）",
+                "1 行に「番号=楽器,音階の種類,動き,音域,和音」（例 1=CHIME,PENTATONIC,UP_DOWN,2,true）。手で書き換えなくてよい"})
+        public String[] soundPresets = {};
 
         @Config.Comment({"[クライアント] 他のプレイヤーのヒット音に使うノートブロックの楽器",
                 "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING"})

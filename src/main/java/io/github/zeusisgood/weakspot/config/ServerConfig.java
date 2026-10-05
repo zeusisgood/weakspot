@@ -83,6 +83,11 @@ public final class ServerConfig {
                 "統計画面（K キー）の「ガイド」ボタンでも読める。サーバーだけが使う（クライアントには送らない）"})
         public boolean giveGuideBook = true;
 
+        @Config.Comment({"[サーバー] Mod を更新したとき、プレイヤーに配る弱点の的の数（版が変わるたびに 1 回。0 で配らない）",
+                "giveGuideBook がオフなら配らない。サーバーだけが使う（クライアントには送らない）"})
+        @Config.RangeInt(min = 0, max = 64)
+        public int updateGiftTargets = 1;
+
         @Config.Comment({"[サーバー] 弱点の大きさの倍率（すべての種類。見た目と当たり判定の両方）",
                 "釣りはこの値にさらに 0.75 を掛ける。的当てには掛けない"})
         @Config.RangeDouble(min = 0.5, max = 2.0)

@@ -21,13 +21,20 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
  * guideGiven に記録する（死亡・ディメンション移動で消えない。古い版は、このキーを無視する）。持ち物がいっぱいなら足元に落とす。
  * （1.8.5〜1.8.9 にあった、古い形の本の差し替えは 1.9.0 でやめた。）
  * 1.11.0 から、弱点の的も 3 つ渡す（本とは別に targetsGiven に記録するので、前の版から遊んでいる人にも 1 回届く）。
- * 渡したら、ようこそのメッセージを出す（sendWelcome）。的のレシピは、渡したときと初めて弱点に当てたとき（WeakSpotAdvancements）に、レシピ本に出す。
+ * 渡したら、ようこそのメッセージを出す（sendWelcome）。1.11.1 から、Mod を更新したときも的を渡す（giveUpdateGift。設定 updateGiftTargets）。
+ *的のレシピは、渡したときと初めて弱点に当てたとき（WeakSpotAdvancements）に、レシピ本に出す。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class GuideBookGiver {
 
     private static final String TAG_GIVEN = "guideGiven";
     private static final String TAG_TARGETS_GIVEN = "targetsGiven";
+    /** アップデートの的を前に渡したときの版（1.11.1）。ないのは、1.11.0 で遊んでいた人か、まだ的をもらっていない人。 */
+    private static final String TAG_GIFT_VERSION = "targetGiftVersion";
+    /** targetGiftVersion がない、的をもらったことのある人は、この版から更新したとみなす。 */
+    private static final String FIRST_GIFT_FROM = "1.11.0";
+    /** アップデートの知らせのキーを足した版。 */
+    private static final String GIFT_SINCE = "1.11.1";
     /** 最初に渡す弱点の的の数。 */
     private static final int STARTER_TARGETS = 3;
     /** 弱点の的のレシピ（assets/weakspot/recipes/target.json）。 */
@@ -56,7 +63,29 @@ public final class GuideBookGiver {
             give(player, new ItemStack(ItemTarget.INSTANCE, STARTER_TARGETS));
             unlockTargetRecipe(mp);
             sendWelcome(mp, true);
+            // 初めての人には、ようこその分だけ（アップデートの分を重ねて渡さない）
+            data.setString(TAG_GIFT_VERSION, WeakSpotMod.VERSION);
+        } else if (player instanceof EntityPlayerMP) {
+            giveUpdateGift((EntityPlayerMP) player, data);
         }
+    }
+
+    /**
+     * アップデートの的（1.11.1）: そのプレイヤーが前に受け取ったときから Mod の版が変わっていたら、updateGiftTargets 個渡す
+     * （パッチも含めて版が変わるたびに 1 回。いくつ版を飛ばしても 1 回分）。0 なら配らず、版も記録しない。
+     */
+    private static void giveUpdateGift(EntityPlayerMP player, NBTTagCompound data) {
+        int count = WeakSpotConfig.server.general.updateGiftTargets;
+        String last = data.hasKey(TAG_GIFT_VERSION) ? data.getString(TAG_GIFT_VERSION) : FIRST_GIFT_FROM;
+        if (count <= 0 || WeakSpotMod.VERSION.equals(last)) {
+            return;
+        }
+        data.setString(TAG_GIFT_VERSION, WeakSpotMod.VERSION);
+        give(player, new ItemStack(ItemTarget.INSTANCE, count));
+        ITextComponent text = PlayerText.of(player, GIFT_SINCE, "weakspot.target.updateGift", WeakSpotMod.VERSION,
+                count);
+        text.getStyle().setColor(TextFormatting.GOLD);
+        player.sendMessage(text);
     }
 
     /**

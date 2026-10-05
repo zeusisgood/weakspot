@@ -225,4 +225,26 @@ public class BowMathTest {
         assertFalse(BowMath.isTooFar(170, 50, -170, 0, true, false));
         assertTrue(BowMath.isTooFar(130, 0, -170, 0, true, false));
     }
+
+    /** 左右だけの弱点: 真下・真上を向いても pitch は ±60 度で止まり、yaw のずれは画面の上で 10〜20 度のまま（1.11.1）。 */
+    @Test
+    public void horizontalSpotAvoidsThePoles() {
+        assertEquals(60, BowMath.horizontalPitch(90), 1e-9);
+        assertEquals(-60, BowMath.horizontalPitch(-90), 1e-9);
+        assertEquals(30, BowMath.horizontalPitch(30), 1e-9);
+        assertEquals(1, BowMath.horizontalYawScale(0), 1e-9);
+        assertEquals(2, BowMath.horizontalYawScale(90), 1e-9);
+        Random random = new Random(3);
+        for (int i = 0; i < 200; i++) {
+            double yaw = BowMath.nextWideHorizontalYaw(0, 90, 100, 0, 70, random);
+            // 画面の上の角度（cos(60) 倍）で 10〜20 度
+            double onScreen = Math.abs(BowMath.wrapDegrees(yaw)) * Math.cos(Math.toRadians(60));
+            assertTrue(onScreen >= BowMath.MIN_OFFSET_DEGREES - 1e-6 && onScreen <= BowMath.MAX_OFFSET_DEGREES + 1e-6);
+            // 広げた位置を、離れすぎと見なさない
+            assertFalse(BowMath.isTooFarHorizontal(yaw, 0, 90));
+        }
+        assertTrue(BowMath.isTooFarHorizontal(75, 0, 90));
+        assertFalse(BowMath.isTooFarHorizontal(30, 0, 0));
+        assertTrue(BowMath.isTooFarHorizontal(40, 0, 0));
+    }
 }

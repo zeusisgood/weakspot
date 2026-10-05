@@ -6,7 +6,8 @@ import net.minecraft.client.gui.ScaledResolution;
 
 /**
  * 照準の下の、次の 1 回の強化の溜めのゲージ（1.7.0 の投げる物、1.8.0 の近接で共通）。ゲージ 1 本分 = perBar の溜め。
- * 越えた分は、1 本分ごとに赤い目盛りを 1 つ足す（弓の過剰チャージと同じ形。MAX_MARKS を越えたら「×n」の数字）。
+ * 越えた分は、1 本分ごとに赤い目盛りを 1 つ足す（弓の過剰チャージと同じ形。MAX_MARKS を越えたら全部点けたまま。
+ * 1.11.0 まではここで「×n」の数字を照準の下の中央に出していたが、コンボの表示に重なるのでやめた）。
  * ゲージの右に今の倍率（1 + 溜め）を出す。
  */
 final class ChargeGauge {
@@ -21,13 +22,10 @@ final class ChargeGauge {
     private ChargeGauge() {
     }
 
-    /** ゲージと目盛りを描く（HudSpot.beginOverlay と endOverlay の間）。数字が要るときは、その文字を返す（なければ null）。 */
-    static String drawBars(Minecraft mc, double charge, double perBar, int rgb) {
+    /** ゲージと目盛りを描く（HudSpot.beginOverlay と endOverlay の間）。 */
+    static void drawBars(Minecraft mc, double charge, double perBar, int rgb) {
         HudSpot.gauge(mc, charge / perBar, rgb, false);
-        int marks = (int) Math.floor(charge / perBar) - 1;
-        if (marks > MAX_MARKS) {
-            return "×" + marks;
-        }
+        int marks = Math.min(MAX_MARKS, (int) Math.floor(charge / perBar) - 1);
         if (marks > 0) {
             ScaledResolution res = new ScaledResolution(mc);
             double x0 = res.getScaledWidth() / 2.0 - HudSpot.GAUGE_WIDTH / 2.0;
@@ -38,18 +36,13 @@ final class ChargeGauge {
                 ScreenProjection.rect(left, top, left + width, top + MARK_HEIGHT, i < marks ? MARK : BACK);
             }
         }
-        return null;
     }
 
-    /** ゲージの右に今の倍率「×3.0」、目盛りが多すぎるときは、ゲージの下に「×n」を出す（endOverlay のあと）。 */
-    static void drawLabels(Minecraft mc, double charge, int rgb, String extra) {
+    /** ゲージの右に今の倍率「×3.0」を出す（endOverlay のあと）。溜めの大きさは、これで分かる。 */
+    static void drawLabels(Minecraft mc, double charge, int rgb) {
         ScaledResolution res = new ScaledResolution(mc);
         int right = res.getScaledWidth() / 2 + HudSpot.GAUGE_WIDTH / 2 + 3;
         int y = res.getScaledHeight() / 2 + HudSpot.GAUGE_OFFSET - 4;
         mc.fontRenderer.drawStringWithShadow(String.format(Locale.ROOT, "×%.1f", 1 + charge), right, y, rgb);
-        if (extra != null) {
-            int width = mc.fontRenderer.getStringWidth(extra);
-            mc.fontRenderer.drawStringWithShadow(extra, res.getScaledWidth() / 2 - width / 2, y + 9, 0xFF4D4D);
-        }
     }
 }
