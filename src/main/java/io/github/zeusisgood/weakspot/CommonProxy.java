@@ -56,6 +56,11 @@ public class CommonProxy {
         return false;
     }
 
+    /** 接続中のサーバーの版が version 以上か（1.11.2。ServerFeatures.since）。物理サーバーでは呼ばれない。 */
+    public boolean serverSince(String version) {
+        return true;
+    }
+
     /** 自分のその種類の弱点がオンか（1.7.0。一時オフと、種類ごとのオフ）。物理サーバーでは呼ばれない。 */
     public boolean isKindEnabled(HitKind kind) {
         return true;
