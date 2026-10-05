@@ -131,7 +131,7 @@ final class WeakSpotRenderer {
             }
         }
         if (spot != null) {
-            float alpha = spotAlpha(spot, tick, partialTicks);
+            float alpha = spotAlpha(spot, tick, partialTicks) * (spot.preview ? PREVIEW_ALPHA : 1);
             if (alpha > 0) {
                 // 自分の弱点の色と形は、種類ごとの設定（1.7.0。統計画面の「弱点マーカー」タブ）
                 float[][] look = MarkerLook.palette(spot.kind, OWN_DISK, OWN_RING, OWN_CENTER);
@@ -332,6 +332,9 @@ final class WeakSpotRenderer {
     }
 
     /** 長押しをやめた後、残り FADE_TICKS で薄くする。 */
+    /** 掘る前の採掘の弱点の濃さ（1.11.2。いつも出ているので控えめに）。 */
+    private static final float PREVIEW_ALPHA = 0.4F;
+
     private static float spotAlpha(WeakSpot spot, long tick, float partialTicks) {
         float idle = tick - spot.lastActiveTick + partialTicks;
         float remaining = ClientSettings.get().lingerTicks - idle;

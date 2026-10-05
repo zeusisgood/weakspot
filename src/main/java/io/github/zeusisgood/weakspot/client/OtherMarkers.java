@@ -144,7 +144,8 @@ final class OtherMarkers {
         SyncedSettings settings = ClientSettings.get();
         WeakSpot spot = ClientWeakSpotHandler.spot;
         MarkerData current = null;
-        if (spot != null && (spot.kind == HitKind.MINING || spot.kind == HitKind.MACHINE
+        // 掘る前の採掘の弱点は送らない（1.11.2。よそ見のたびに、ほかの人の画面に出ないように）
+        if (spot != null && !spot.preview && (spot.kind == HitKind.MINING || spot.kind == HitKind.MACHINE
                 || spot.kind == HitKind.GROWTH || spot.kind == HitKind.HARVEST)) {
             current = new MarkerData(spot.pos, spot.face, spot.u, spot.v);
         } else if (spot != null && spot.kind == HitKind.ANIMAL) {
