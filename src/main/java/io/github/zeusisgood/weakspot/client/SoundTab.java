@@ -59,6 +59,7 @@ final class SoundTab extends StatsScreenTab {
 
     private final List<GuiButton> buttons = new ArrayList<>();
     private GuiButton preset;
+    private GuiButton myPresets;
     private GuiButton mySound;
     private GuiButton othersSound;
     private GuiButton chord;
@@ -80,7 +81,7 @@ final class SoundTab extends StatsScreenTab {
         // 自分のヒット音: 1 行目はプリセットと、マイプリセットの画面
         int y = top + 49;
         preset = add(new GuiButton(BUTTON_PRESET, left, y, right - left - MY_PRESETS_WIDTH - 4, 20, ""));
-        add(new GuiButton(BUTTON_MY_PRESETS, right - MY_PRESETS_WIDTH, y, MY_PRESETS_WIDTH, 20,
+        myPresets = add(new GuiButton(BUTTON_MY_PRESETS, right - MY_PRESETS_WIDTH, y, MY_PRESETS_WIDTH, 20,
                 I18n.format("weakspot.sound.myPresets")));
 
         // 「細かい設定」の見出し（draw で描く）の下
@@ -306,6 +307,8 @@ final class SoundTab extends StatsScreenTab {
         int my = screen.mouseY();
         if (over(preset, mx, my)) {
             screen.setTooltip(I18n.format("weakspot.sound.preset.tooltip"));
+        } else if (over(myPresets, mx, my)) {
+            screen.setTooltip(I18n.format("weakspot.sound.myPresets.tooltip"));
         } else if (over(chord, mx, my)) {
             // コンボの和音の説明は、和音のボタンにマウスを乗せたとき
             screen.setTooltip(I18n.format("weakspot.sound.comboNote"));
