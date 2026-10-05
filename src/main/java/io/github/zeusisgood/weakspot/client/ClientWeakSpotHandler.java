@@ -216,7 +216,9 @@ public final class ClientWeakSpotHandler {
 
     /**
      * 掘る前の採掘の弱点（1.11.2）。照準が合ったブロックに薄く出し、掘る前に 1 回だけ当てられる。
-     * 当てたら弱点は動き、掘り始めるまで当たらない。ヒットはサーバーで予約され、掘り始めた瞬間に確定する。
+     * 当たるのは左クリックを押している間だけ（照準を合わせるだけで当たると、ブロックを交互に見るだけで
+     * ヒット音とコンボの表示が増え続けるため）。当てたら弱点は動き、掘り始めるまで当たらない。
+     * ヒットはサーバーで予約され、掘り始めた瞬間に確定する。
      */
     private static void aimPreDig(Minecraft mc, RayTraceResult target) {
         BlockPos pos = target.getBlockPos();
@@ -233,7 +235,8 @@ public final class ClientWeakSpotHandler {
         }
         spot.preview = true;
         spot.lastActiveTick = clientTick;
-        if (!MiningBoost.hasPreHit(pos) && spot.isHitBy(target.hitVec)
+        if (mc.currentScreen == null && mc.gameSettings.keyBindAttack.isKeyDown() && !MiningBoost.hasPreHit(pos)
+                && spot.isHitBy(target.hitVec)
                 && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
             onHit(mc);
         }
