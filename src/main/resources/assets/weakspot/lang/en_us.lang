@@ -120,10 +120,21 @@ weakspot.sound.preset.night=Night cave
 weakspot.sound.preset.bells=Bells
 weakspot.sound.preset.quiet=Quiet
 weakspot.sound.preset.my=My preset %s
-weakspot.sound.preset.empty=%s (empty)
 weakspot.sound.preset.overwrite=Overwrite?
-weakspot.sound.preset.saveTo=Save to My preset:
-weakspot.sound.preset.saved=Saved to %s
+weakspot.sound.preset=Preset: %s
+weakspot.sound.preset.tooltip=Left click for the next preset, right click (or Shift + left click) for the previous one
+weakspot.sound.myPresets=My presets...
+weakspot.sound.myPresets.title=My presets
+weakspot.sound.fineSettings=Details
+weakspot.sound.preset.load=Load
+weakspot.sound.preset.save=Save
+weakspot.sound.preset.saved=Saved
+weakspot.sound.preset.loaded=Loaded
+weakspot.sound.preset.none=(empty)
+weakspot.sound.preset.current=Current: %s
+weakspot.sound.preset.describe=%s, %s, %s, %s
+weakspot.sound.preset.noChord=%s, no chords
+weakspot.sound.preset.octaves=%s oct.
 weakspot.sound.chordShort=Chords: %s
 
 weakspot.combo.hit=%s HIT
@@ -764,7 +775,7 @@ weakspot.client.sound.hitscaletype.tooltip=The scale of the hit sound. MAJOR, PE
 weakspot.client.sound.hitscaleoctaves=Range (octaves)
 weakspot.client.sound.hitscaleoctaves.tooltip=The range of the hit sound. 1: one octave. 2: two octaves, starting one octave lower\nFile: client.sound.hitScaleOctaves
 weakspot.client.sound.soundpresets=My presets
-weakspot.client.sound.soundpresets.tooltip=Sound My presets 1–3, written by "Save to My preset" on the Sound tab of the stats screen (K key). No need to edit them by hand\nOne line each: slot=instrument,scale type,direction,octaves,chord (e.g. 1=CHIME,PENTATONIC,UP_DOWN,2,true)\nFile: client.sound.soundPresets
+weakspot.client.sound.soundpresets.tooltip=Sound My presets 1–3, written by the "My presets..." screen of the Sound tab of the stats screen (K key). No need to edit them by hand\nOne line each: slot=instrument,scale type,direction,octaves,chord (e.g. 1=CHIME,PENTATONIC,UP_DOWN,2,true)\nFile: client.sound.soundPresets
 weakspot.client.sound.othershitvolume=Others' hit volume
 weakspot.client.sound.othershitvolume.tooltip=Volume of other players' hit sounds (0 is silent)\nThe vanilla Players volume also applies\nFile: client.sound.othersHitVolume
 weakspot.client.sound.othershitsound=Others' hit sound

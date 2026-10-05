@@ -120,10 +120,21 @@ weakspot.sound.preset.night=夜の洞窟
 weakspot.sound.preset.bells=鐘
 weakspot.sound.preset.quiet=控えめ
 weakspot.sound.preset.my=マイプリセット %s
-weakspot.sound.preset.empty=%s（空き）
 weakspot.sound.preset.overwrite=上書き？
-weakspot.sound.preset.saveTo=マイプリセットに保存:
-weakspot.sound.preset.saved=%s に保存しました
+weakspot.sound.preset=プリセット: %s
+weakspot.sound.preset.tooltip=左クリックで次のプリセット、右クリック（または Shift + 左クリック）で前のプリセット
+weakspot.sound.myPresets=マイプリセット…
+weakspot.sound.myPresets.title=マイプリセット
+weakspot.sound.fineSettings=細かい設定
+weakspot.sound.preset.load=読み込む
+weakspot.sound.preset.save=保存
+weakspot.sound.preset.saved=保存しました
+weakspot.sound.preset.loaded=読み込みました
+weakspot.sound.preset.none=（空き）
+weakspot.sound.preset.current=今の設定: %s
+weakspot.sound.preset.describe=%s・%s・%s・%s
+weakspot.sound.preset.noChord=%s・和音オフ
+weakspot.sound.preset.octaves=%sオクターブ
 weakspot.sound.chordShort=和音: %s
 
 weakspot.combo.hit=%s HIT
@@ -764,7 +775,7 @@ weakspot.client.sound.hitscaletype.tooltip=ヒット音の音階の種類。MAJO
 weakspot.client.sound.hitscaleoctaves=音域（オクターブ）
 weakspot.client.sound.hitscaleoctaves.tooltip=ヒット音の音域。1: 1 オクターブ、2: 1 つ下のオクターブから 2 オクターブ\nファイル: client.sound.hitScaleOctaves
 weakspot.client.sound.soundpresets=マイプリセット
-weakspot.client.sound.soundpresets.tooltip=音のマイプリセット 1〜3。統計画面（K キー）のサウンドの「マイプリセットに保存」で書かれるので、手で書き換えなくてよい\n1 行に「番号=楽器,音階の種類,動き,音域,和音」（例 1=CHIME,PENTATONIC,UP_DOWN,2,true）\nファイル: client.sound.soundPresets
+weakspot.client.sound.soundpresets.tooltip=音のマイプリセット 1〜3。統計画面（K キー）のサウンドの [マイプリセット…] の画面で書かれるので、手で書き換えなくてよい\n1 行に「番号=楽器,音階の種類,動き,音域,和音」（例 1=CHIME,PENTATONIC,UP_DOWN,2,true）\nファイル: client.sound.soundPresets
 weakspot.client.sound.othershitvolume=ほかの人の音量
 weakspot.client.sound.othershitvolume.tooltip=他のプレイヤーのヒット音の音量（0 で聞こえなくなる）\nバニラの「プレイヤー」音量も掛かる\nファイル: client.sound.othersHitVolume
 weakspot.client.sound.othershitsound=ほかの人のヒット音

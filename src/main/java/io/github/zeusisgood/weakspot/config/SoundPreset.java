@@ -16,7 +16,7 @@ public final class SoundPreset {
     /** マイプリセットの枠の数。 */
     public static final int MY_SLOTS = 3;
 
-    /** 最初から入っているプリセット（並びは「サウンド」タブの ◀ ▶ の順）。 */
+    /** 最初から入っているプリセット（並びは「サウンド」タブのプリセットのボタンで巡る順）。 */
     public static final List<SoundPreset> BUILT_IN = Collections.unmodifiableList(Arrays.asList(
             new SoundPreset("standard", HitSound.PLING, true, HitScale.Direction.UP, HitScale.Type.MAJOR, 1),
             new SoundPreset("sparkle", HitSound.CHIME, true, HitScale.Direction.UP_DOWN, HitScale.Type.PENTATONIC,
