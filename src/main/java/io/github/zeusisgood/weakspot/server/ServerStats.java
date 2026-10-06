@@ -42,8 +42,7 @@ public final class ServerStats {
         SESSIONS.put(event.player.getUniqueID(), new MiningStats());
     }
 
-    /** クライアントのコンボと同じく、死亡（リスポーン）とディメンション移動で連続ヒットを最初に戻す。 */
-    /** ログアウトで今回の統計と連続ヒットを、死亡・ディメンション移動で連続ヒットを消す（クライアントのコンボと同じ）。 */
+    /** ログアウトで今回の統計と連続ヒットを、リスポーン・ディメンション移動で連続ヒットを消す（クライアントのコンボと同じ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             SESSIONS.remove(player.getUniqueID());
