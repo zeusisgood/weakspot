@@ -83,7 +83,7 @@ stateDiagram-v2
 
 ## 3b コンボ
 
-連続ヒット数（`common/HitStreak`）。**クライアント**（`OwnHits.STREAK`。音・表示）と**サーバー**（`ServerStats` の `HitStreak`。効果の掛け数・統計・知らせ・頭の上のコンボ）で、別々に数えます。
+連続ヒット数（`common/HitStreak`）。**クライアント**（`OwnHits.STREAK`。音・表示）と**サーバー**（`ServerStats` の `HitStreak`。効果の掛け数・統計・知らせ・頭の上のコンボ）で、別々に数えます。1.11.3 から、ずれたらサーバーの数でクライアントを直します（`common/ComboSync`）。
 
 ```mermaid
 stateDiagram-v2

@@ -62,7 +62,7 @@ sequenceDiagram
 
 ### 注記
 
-- コンボは**両側で別々に数える**。クライアントは `OwnHits.STREAK`（音・表示）、サーバーは `ServerStats` の `HitStreak`（効果の掛け数・統計・知らせ・進捗）。`HitMessage` の `streak` は、ほかの人の音の高さにだけ使う。
+- コンボは**両側で別々に数える**。クライアントは `OwnHits.STREAK`（音・表示）、サーバーは `ServerStats` の `HitStreak`（効果の掛け数・統計・知らせ・進捗）。`HitMessage` の `streak` は、ほかの人の音の高さと、ずれの確認（1.11.3）に使う。ずれていたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で今の数を送り、クライアントは表示を直す（`ComboRelay.checkOwn`・`OwnHits.correctStreak`。片道だけで、サーバーはクライアントの数に合わせない）。
 - サーバーがヒットを受け付けなかったときも、クライアントの音・コンボの表示・弱点の移動は戻らない（返事のパケットがない）。
 - `accept` の中の順序は「`mark` → 種類ごとの数と節目 → コンボ → 進捗 → `OtherHitMessage`」。効果はそのあと。
 - 節目の知らせのチャットは、本人以外の全員に送る。`MilestoneMessage` は本人だけに送る（`MilestoneEffects.show`）。
