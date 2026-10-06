@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 連続ヒット数（コンボ）。種類（採掘・成長・機械）やブロックをまたいで続き、RESET_TICKS より長くヒットがないと 0 に戻る。
+ * 連続ヒット数（コンボ）。種類やブロックをまたいで続き、RESET_TICKS より長くヒットがないと 0 に戻る。
  * 数は戻らずに上がり続ける。ヒット音の音階は、この数から求める（HitPitch。1オクターブで最初の音に戻る）。
  */
 public final class HitStreak {
