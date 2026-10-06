@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
+import io.github.zeusisgood.weakspot.common.ComboSync;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.HitStreak;
 import io.github.zeusisgood.weakspot.common.TargetRules;
@@ -67,6 +68,19 @@ final class OwnHits {
     /** ワールドを出たとき。 */
     static void clearIntervals() {
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
+    }
+
+    /**
+     * サーバーの数で連続ヒットを直す（1.11.3。ComboSync）。当て続けている間（最後のヒットから IDLE_TICKS まで）と、
+     * もう途切れているときは何もしない。数字は黙って書き換える（音・弾み・段階の演出は出さない）。
+     */
+    static void correctStreak(int serverCount) {
+        long now = ClientWeakSpotHandler.clientTick;
+        if (!ComboSync.canCorrect(now, STREAK.lastHitTick(), STREAK.count(now)) || serverCount == STREAK.count(now)) {
+            return;
+        }
+        STREAK.correct(serverCount);
+        ComboHud.correct(serverCount);
     }
 
     /** 連続ヒットを最初に戻す（死亡・リスポーン・ディメンション移動・ワールドを出たとき）。 */

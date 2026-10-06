@@ -55,6 +55,8 @@ public final class HitHandlers {
         Handler handler = HANDLERS.get(kind);
         if (handler != null) {
             handler.onHit(player, kind, pos, entityId, streak);
+            // 受け付けなかったヒットで、クライアントのコンボだけが増えていないか（1.11.3）
+            ComboRelay.checkOwn(player, streak);
         }
     }
 }

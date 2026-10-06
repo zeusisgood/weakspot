@@ -118,10 +118,10 @@ public final class HitGate {
         ThrowHits.forget(player, leave);
         MarkerRelay.forget(player, leave);
         TargetRounds.forget(player, leave);
+        ComboRelay.forget(player, leave);
         if (leave == Leave.LOGOUT) {
             ServerSwitches.forgetOnLogout(player);
             MiningRewards.forgetOnLogout(player);
-            ComboRelay.forgetOnLogout(player);
             VersionCheck.forgetOnLogout(player);
             if (player instanceof EntityPlayerMP) {
                 VillagerBreedHints.onLogout((EntityPlayerMP) player);
