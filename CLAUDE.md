@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
 
-- 仕様書は `doc/spec/`（一覧と版ごとの 1 行の要約は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。正本は `SPEC_v1.0.md`（MVP）と版ごとの差分。仕様書に書かれていないことは、その前の版と現行実装のまま。
+- 仕様書は `doc/spec/`（一覧と版ごとの 1 行の要約は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。正本は `SPEC_v1.0.md`（MVP）と版ごとの差分。仕様書に書かれていないことは、その前の版と現行実装のまま。過去の仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。
 - **この節以外の詳しいことは `doc/` にある**（必要なときに読む）:
 
 | 内容 | 文書 |
@@ -24,7 +24,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - **JDK 8**、ForgeGradle 3 + Gradle 4.9（Gradle 5 以降の構文は使えない。依存は `compile` / `testCompile`）。
 - ビルド + テスト: `./gradlew build` → `build/libs/weakspot-<version>.jar`（reobf 済み）。テストのみ: `./gradlew test`。
-- クラウドでは JDK 8 を `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q`（Maven Central が 429 なら少し待って再実行）。
+- クラウドでは JDK 8 を `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q`（Maven Central が 429 なら、30 秒ずつ間をあけて 5 回まで再実行）。クラウドの環境のネットワーク設定で `maven.minecraftforge.net` を許可しておく（拒否されると 403。許可のしかたと、Gradle が使えないときに `common/` のテストだけ流す方法は `doc/development.md`）。
 - `runServer` の確認は devcontainer でだけ行う（クラウドでは FML の NPE で落ちるので、しなくてよい。止まる条件にも当たらない）。やり方とノイズのログは `doc/development.md`。
 - クライアントの描画・ヒット判定・体感速度は Claude が検証できない。jar をユーザーのホスト側 Minecraft で試してもらう。
 - 非公開のフィールドは、アクセストランスフォーマーではなくリフレクションで、MCP 名 → SRG 名の順に試す（`Reflect`）。3 引数の `ReflectionHelper.findField` は使わない。SRG 名の調べ方と両環境での確かめ方は `doc/development.md`。
@@ -33,6 +33,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - 版は `build.gradle` の `version` と `WeakSpotMod.VERSION` の 2 か所。必ず揃える。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
+- 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
+- 文書だけの変更（コードのコメントだけの修正を含む）は版を上げない。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - 現行は **1.11.2**、範囲は `"[1.11,1.12)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
@@ -41,6 +43,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - **手順のチェックリストは `doc/development.md` の「リリースの手順」**（版・CHANGELOG・README の日英のリンクと「最近の更新」・`doc/spec/README.md`・`weakspot.news.<版>`・`update.json`・説明文・コミットの形・`build/release/`）。直し忘れは `ReleaseFilesTest` で CI が赤くなる。
 - 仕様書にもとづく作業は、ユーザーの承認を待たずに実装から push と PR まで進める。ただし**止まる条件**（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。Merge はユーザーが行う。
+- 環境のせいでビルドできない（ネットワークの拒否・429 が続く）ときも、push と PR はしない。コードの誤りとは分けて、拒否されたホストと直し方を報告し、ビルドできない間は `common/` のテストだけでも流しておく。
 - マイナーを上げる仕様書に書かれた互換性の変更（通信内容、`SyncedSettings`・`StatsMessage` の項目の追加など）は、止まる条件に当たらない。仕様書にない互換性の変更（特に古いワールドの保存データが読めなくなる変更。項目の追加で古いデータを読めるならよい）は当たる。
 - `doc/store/description.md` を直した PR では、本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
 - **遊び方（`doc/play.md`）を変えたら、ガイドの本の文章**（`en_us.lang` / `ja_jp.lang` の `weakspot.guide.<ページ>.title` / `.<小見出し>`）も直す。技術的なこと（設定の名前・値、通信、バージョン）は書かない。1 ページは 14 行・幅 116 ピクセル（日本語で 1 行 12 字くらい、英語で 20 字くらい。題・小見出し・「↩ 目次」を含む）。ページは `GuideBook.CONTENT` に足す（目次は `CONTENTS_PAGES` の章から自動。目次の 1 ページも 14 行まで）。
@@ -55,7 +58,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - `common/` は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない）。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
 - ヒット判定は `RenderWorldLastEvent` で**毎フレーム**（tick 単位だと素早い照準移動を取りこぼす）。
-- **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。
+- **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。
+- **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。
 - 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。
 - **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)`**（翻訳キーで送り、キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
@@ -82,7 +86,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - 長く残すブランチは `main` だけ。作業は `claude/…` のブランチで。`main` への直接の push は禁止（Claude は push しない）。
   - `main` に渡せる状態になったら（リリースのあと。文書だけの変更でも）、Claude が `main` への PR を作ってよい。本文は、変えたこと・試してほしいこと。
   - CI（`ci.yml` の `build`）の成功が Merge に必須。**自分が作った PR の CI が赤くなったら、原因を直して push する**。
-  - ユーザーが「Create a merge commit」で取り込み、取り込んだブランチは GitHub が自動で消す（想定どおり）。**作業ごとに、始めるときに `main` から新しい名前のブランチ（`claude/…`）を切る**。取り込まれたブランチを同じ名前で作り直したり、取り込み済みの PR を使い回したりしない。
+  - ユーザーが「Create a merge commit」で取り込み、取り込んだブランチは GitHub が自動で消す（想定どおり）。**作業ごとに、始めるときに `main` から新しい名前のブランチを切る**（名前は `claude/<内容が分かる英語>`。例 `claude/combo-sync-1.11.3`・`claude/docs-match-code`。セッションに割り当てられた名前は使わない）。取り込まれたブランチを同じ名前で作り直したり、取り込み済みの PR を使い回したりしない。
   - Dependabot の更新 PR は、CI が緑ならユーザーが Merge してよい。赤なら Claude が原因を調べる。
   - ブランチを消すのはユーザー。Claude は候補の一覧と削除のコマンドを渡す（判定の仕方は `doc/development.md` の「ブランチの片付け」）。
 - リリースしたら、jar を `build/release/` にコピーしてユーザーに添付し、PR のリンクと「試してほしいこと」の箇条書きを渡す。
