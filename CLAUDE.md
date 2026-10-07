@@ -49,6 +49,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 **コードに触る前に `doc/architecture.md` の関係する所を読む。仕組みを変えたら、そちらを直す。**
 
+**コードを変えたら、関係する文書を同じ PR で直す**（`doc/architecture.md`・`doc/diagrams/` の図（Mermaid の中身も）と注記・`doc/play.md`・`doc/config.md`・ガイドの本・`doc/roadmap.md`）。文章の注記だけでなく、図の矢印・状態も変える。直す必要がない文書は、PR の本文に「直さなかった文書と理由」を書く。
+
 - クライアントとサーバーの**両方に Mod が必要**。パッケージは `io.github.zeusisgood.weakspot`。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。**種類を足すときに直す所の一覧は `doc/architecture.md`**。的当て（1.11.0）は種類ではなく別の仕組み（`TargetRounds` / `TargetPlay`。種類別の統計・設定・節目に入らない）。
 - 成長・収穫・機械・動物の「手が空いている」は、空か、右クリックで何もしないアイテム（`HeldItems`。1.11.0）。**移植のときは、版ごとに右クリックで動くアイテムを調べ直す**。

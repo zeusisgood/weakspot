@@ -18,6 +18,7 @@ sequenceDiagram
     participant HH as HitHandlers
     participant KH as 種類の処理<br/>各 *Hits
     participant HG as HitGate
+    participant CR as ComboRelay
     participant ST as ServerStats
     participant MR as MiningRewards<br/>WeakSpotAdvancements
     participant ME as 自分のクライアント<br/>受け取り
@@ -35,7 +36,7 @@ sequenceDiagram
     KH->>HG: allowed（サーバーの設定・プレイヤーのオン・オフ・PlayerRules）
     KH->>KH: 種類ごとの条件と間隔（ready または intervalOk。設定の間隔 − 2 tick）
     alt 受け付けない
-        Note over KH: 何もしない。クライアントに返事は送らない<br/>（自分の音・コンボの表示はそのまま）
+        Note over KH: 何もしない。クライアントにすぐの返事は送らない<br/>（自分の音・コンボの表示はいったん増えたまま。2b の直しで戻る）
     else 受け付ける
         KH->>HG: accept（player・kind・音の位置・streak）
         HG->>HG: mark（次の間隔の起点）
@@ -58,6 +59,8 @@ sequenceDiagram
         HG-->>KH: サーバーのコンボ数
         KH->>KH: 効果（掛け数は ComboFactor.factor(コンボ数)）
     end
+    HH->>CR: checkOwn（クライアントの streak とサーバーの数を比べる）
+    Note over CR: サーバーの数 + 掘る前の予約（あれば 1）と違えば<br/>「直しが要る」印（送るのは 2b）
 ```
 
 ### 注記
@@ -78,6 +81,7 @@ sequenceDiagram
     participant CR as ComboRelay
     participant ST as ServerStats
     participant OC as ほかのクライアント<br/>OtherMarkers・OtherCombos
+    participant ME as 自分のクライアント<br/>OwnHits・ComboHud
 
     rect rgb(235, 245, 255)
         Note over OM,OC: 弱点のマーク（採掘・成長・収穫・機械・動物）
@@ -101,6 +105,16 @@ sequenceDiagram
             CR->>OC: 数が変わったら OtherComboMessage（32 ブロック以内・1 人 4 tick に 1 回まで）
         end
         Note over OC: OtherCombos が 10 以上なら名前の上に「n HIT」。0 で消す
+    end
+
+    rect rgb(240, 255, 240)
+        Note over CR,ME: 本人のコンボの直し（クライアントとサーバーを揃える）
+        loop サーバーの tick ごと（END）
+            CR->>CR: 印があり、最後のヒットから 3 tick たち、<br/>前に送ってから 4 tick あいている
+            CR->>ST: streak(player).count(今) + 掘る前の予約
+            CR->>ME: OtherComboMessage（自分の ID・今の数）<br/>1.11.3 以降のクライアントだけ
+        end
+        Note over ME: 自分の ID なら OwnHits.correctStreak。<br/>最後のヒットから 3 tick たち、途切れていなければ<br/>数字だけ書き換える（音・弾み・MAX なし）。<br/>当て続けている間に届いたものは捨てる
     end
 ```
 

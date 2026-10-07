@@ -42,11 +42,12 @@ flowchart LR
     SSES --> PNBT
     PNBT -->|"ログイン・ログアウト・的当ての終わり・順位を見る前"| LB
     SSES -->|"コンボ 100・300・的当ての段階など"| ADV
+    SSES -->|"OtherComboMessage（ずれたとき・本人へ）"| CSTR
 
     classDef truth fill:#FFE082,stroke:#FF8F00,color:#000000
     classDef copy fill:#E0E0E0,stroke:#616161,color:#000000
     class SCFG,CCFG,PNBT,ADV truth
-    class CS,CTR,CSTAT,SSW,LB copy
+    class CS,CTR,CSTAT,SSW,LB,CSTR copy
 ```
 
 ## 凡例
