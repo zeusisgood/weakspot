@@ -47,6 +47,19 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - ビルドは公式 MDK ベースの ForgeGradle 3 + Gradle 4.9（1.0 の仕様書にある FG 2.3 ではない）。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
 - テストを 1 クラスだけ: `./gradlew test --tests io.github.zeusisgood.weakspot.common.WeakSpotPlacerTest`
 - JDK 8 がない環境（クラウドのセッションなど）: `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす（Maven Central が 429 を返したら、少し待って再実行）。
+- クラウドのネットワーク: ForgeGradle と Forge は `maven.minecraftforge.net` から取るので、環境のネットワーク設定（セッションのタイトルバーのクラウド環境のメニュー → Edit → Network access）で Custom にし、Allowed domains にこのホストを足す（パッケージマネージャーの既定の一覧は残す。手順は https://code.claude.com/docs/en/cloud-environments#network-access ）。拒否されると `Received status code 403` で止まる。
+- Maven Central の 429（混雑）: 30 秒ずつ間をあけて 5 回まで再実行する。
+  ```
+  for i in 1 2 3 4 5; do JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q > build.log 2>&1 && break; grep -q 429 build.log || break; sleep $((i*30)); done
+  ```
+- Gradle が使えない間（ネットワークの拒否など）でも、`common/` は MC に依存しないので `javac` だけでテストできる（junit は Gradle 4.9 の配布物の `lib/plugins/` にある）。
+  ```
+  L=$(echo ~/.gradle/wrapper/dists/gradle-4.9-bin/*/gradle-4.9/lib/plugins); CP=$L/junit-4.12.jar:$L/hamcrest-core-1.3.jar; O=$(mktemp -d)
+  javac -encoding UTF-8 -d $O -cp $CP src/main/java/io/github/zeusisgood/weakspot/common/*.java src/test/java/io/github/zeusisgood/weakspot/common/*.java
+  java -cp $O:$CP org.junit.runner.JUnitCore $(cd src/test/java && ls io/github/zeusisgood/weakspot/common/*Test.java | sed 's/\.java//;s#/#.#g')
+  ```
+  `ReleaseFilesTest` も同じ形で流せる（`resources/ReleaseFilesTest.java` と `ResourceFiles.java` を足す）。MC に依存するコードのコンパイルはできないので、そのままでは push しない（CLAUDE.md の「リリース」）。
+- 図（`doc/diagrams/` の Mermaid）が描けるかの確かめ方: クラウドの Chromium を使う設定ファイル（`{"executablePath":"/opt/pw-browsers/chromium","args":["--no-sandbox"]}`）を作り、`npx -y @mermaid-js/mermaid-cli -p その設定.json -i doc/diagrams/02-hit-flow.md -o 出力先/02-hit-flow.md`。図ごとに `✅` が出ればよい（出力の svg はリポジトリに入れない）。
 - `runServer`: 作業ディレクトリは `run/`、`nogui` 付き。`run/eula.txt` は同意済み。止めるときはコンソールで `stop`。
   - パイプで `stop` を流しても Gradle 経由では届かない。起動の確認は `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を見る。
   - devcontainer が使えない環境（クラウドのセッションなど）では、FML の `NetworkRegistry.newChannel` の NPE で落ちる。そこでは `runServer` での確認はしない（ビルドとテストは通す。jar はユーザーが試す）。
