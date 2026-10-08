@@ -56,7 +56,7 @@ doc/ CHANGELOG.md update.json   共通（update.json は promos の「1.12.2-lat
 
 - **音まわりの残り**（1.11.1 の相談で見送り）: 種類ごとの楽器（採掘はプリング、成長はチャイムなど）、演出の音（節目のベル・途切れの音・的当ての ✕）の音量を別に、的当ての間だけ別の音階、途切れの音のオン・オフ。
 - **プレイ動画**（1.9.4 のあとの相談）: 30〜60 秒（採掘のコンボと音階・節目の花火・ほかの種類を少しずつ・K キーのメニュー。BGM なし）を YouTube に上げ、`doc/store/description.md` の冒頭に埋め込む（Modrinth は自動、CurseForge は貼り替え）。README には 10 秒ほどの MP4 を余裕があれば。撮影はスクショと同じ設定（チャット非表示・チュートリアルの案内なし・ほかの Mod の表示なし）。
-
+- Boothに無料、支援版を置く 内容は同一 curceforge,githubへのリンクのみ 更新漏れを防ぐ
 ## 配布サイト
 
 - Modrinth・CurseForge とも、自動公開の仕組みはできた。CurseForge は、ユーザーがプロジェクトを作り、`CURSEFORGE_TOKEN` と `CURSEFORGE_PROJECT_ID` を登録したら動く（1.9.4 は「CurseForge publish」を手動で 1 回流す）。
