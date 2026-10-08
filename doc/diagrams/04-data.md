@@ -42,11 +42,12 @@ flowchart LR
     SSES --> PNBT
     PNBT -->|"ログイン・ログアウト・的当ての終わり・順位を見る前"| LB
     SSES -->|"コンボ 100・300・的当ての段階など"| ADV
+    SSES -->|"OtherComboMessage（ずれたとき・本人へ）"| CSTR
 
     classDef truth fill:#FFE082,stroke:#FF8F00,color:#000000
     classDef copy fill:#E0E0E0,stroke:#616161,color:#000000
     class SCFG,CCFG,PNBT,ADV truth
-    class CS,CTR,CSTAT,SSW,LB copy
+    class CS,CTR,CSTAT,SSW,LB,CSTR copy
 ```
 
 ## 凡例
@@ -68,7 +69,7 @@ flowchart LR
 | 弱点のオン・オフ・オフにした種類・機械の粒子 | クライアントの cfg | クライアント | `SwitchMessage` → `ServerSwitches`（メモリ）。届く前はオン |
 | 統計の累計（種類ごとの数・`maxStreak`・`hitsOnBrokenBlocks`・`targetBest`・`targetRounds` など） | プレイヤーのデータの `PlayerPersisted` → `weakspot` → `total`（死亡・ディメンション移動で引き継がれる） | サーバー | `StatsRequestMessage` → `StatsMessage`。リセットは `targetBest`・`targetRounds` を残して消す |
 | 今回の統計 | サーバーのメモリ（`ServerStats.SESSIONS`） | サーバー | 同じ。ログアウトで消える |
-| コンボ | クライアント `OwnHits.STREAK`・サーバー `ServerStats.STREAKS`（どちらもメモリ） | それぞれ（[図 3b](03-states.md#3b-コンボ)） | サーバーの数だけ `OtherComboMessage` でほかの人へ |
+| コンボ | クライアント `OwnHits.STREAK`・サーバー `ServerStats.STREAKS`（どちらもメモリ） | それぞれ（[図 3b](03-states.md#3b-コンボ)） | サーバーの数だけ `OtherComboMessage` でほかの人へ（1.11.3 から、ずれたときは本人にも） |
 | 配った物の記録 | プレイヤーのデータの `weakspot` の `guideGiven`・`targetsGiven`・`targetGiftVersion` | サーバー | 送らない |
 | 順位 | オーバーワールドの `data/weakspot_leaderboard.dat`（UUID ごとの名前・採掘ヒット数・最大コンボ・的当ての自己ベスト・合計） | プレイヤーの累計（ここは写し） | ログイン・ログアウト・的当ての終わり・順位を見る直前（オンラインの全員）に累計から写す。オフラインの人の分はここにだけ残る |
 | 進捗 | バニラの進捗（プレイヤーごと） | サーバー | 条件はどれも `minecraft:impossible`。ログインで累計から判定し直す |

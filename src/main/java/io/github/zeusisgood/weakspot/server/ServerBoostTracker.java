@@ -229,6 +229,12 @@ public final class ServerBoostTracker {
     }
 
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
+    /** まだ使える掘る前のヒットの予約があるか（1.11.3。コンボを揃えるとき、クライアントはもう数えている 1 つ）。 */
+    static boolean hasReservation(EntityPlayer player) {
+        Reserved reserved = RESERVED.get(player.getUniqueID());
+        return reserved != null && player.world.getTotalWorldTime() - reserved.tick <= BoostMath.PRE_DIG_TICKS;
+    }
+
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave != HitGate.Leave.RESPAWN) {
             MINING.remove(player.getUniqueID());

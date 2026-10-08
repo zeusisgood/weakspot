@@ -104,6 +104,11 @@ final class ComboHud {
         }
     }
 
+    /** サーバーの数で直した（1.11.3）。数字だけを書き換え、弾み・光・音は出さない。0 なら「MAX n」を残さずに消す。 */
+    static void correct(int newCombo) {
+        combo = Math.max(0, newCombo);
+    }
+
     /** 40 tick ヒットがなく途切れた。 */
     static void onBreak(int broken, long tick) {
         combo = 0;

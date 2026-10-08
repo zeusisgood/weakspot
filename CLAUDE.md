@@ -36,7 +36,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
 - 文書だけの変更（コードのコメントだけの修正を含む）は版を上げない。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.11.2**、範囲は `"[1.11,1.12)"`。
+- 現行は **1.11.3**、範囲は `"[1.11,1.12)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -52,6 +52,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 **コードに触る前に `doc/architecture.md` の関係する所を読む。仕組みを変えたら、そちらを直す。**
 
+**コードを変えたら、関係する文書を同じ PR で直す**（`doc/architecture.md`・`doc/diagrams/` の図（Mermaid の中身も）と注記・`doc/play.md`・`doc/config.md`・ガイドの本・`doc/roadmap.md`）。文章の注記だけでなく、図の矢印・状態も変える。直す必要がない文書は、PR の本文に「直さなかった文書と理由」を書く。
+
 - クライアントとサーバーの**両方に Mod が必要**。パッケージは `io.github.zeusisgood.weakspot`。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。**種類を足すときに直す所の一覧は `doc/architecture.md`**。的当て（1.11.0）は種類ではなく別の仕組み（`TargetRounds` / `TargetPlay`。種類別の統計・設定・節目に入らない）。
 - 成長・収穫・機械・動物の「手が空いている」は、空か、右クリックで何もしないアイテム（`HeldItems`。1.11.0）。**移植のときは、版ごとに右クリックで動くアイテムを調べ直す**。
@@ -65,6 +67,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)`**（翻訳キーで送り、キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品（`HitGate`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **採掘のヒットは、掘る前のものは予約にして、掘り始めた瞬間に確定する**（1.11.2。予約の時点でコンボ・統計を数えない。`ServerBoostTracker`）。
+- **コンボはサーバーの数が正**。クライアントの数がずれたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で直す（1.11.3、`ComboSync`。片道だけで、サーバーはクライアントの数に合わせない）。
 - **サーバー側の採掘のブーストは時間枠ではない**（破壊完了の瞬間に「今の速さ × (経過 tick + 1) ≥ 0.7」で判定するため、追加進捗を貯めて速さに換算する。`BoostMath`）。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる。
 
 ### 設定の約束事
@@ -94,4 +97,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-1.11.0（的当てとご褒美・落下の弱点・持ち物も素手と同じに・弱点の大きさ・コンボの段階を 300 までに・`/weakspot top`・進捗）をリリースした。1.11.1（ヒット音の音階とプリセット・的当てのしきい値を 25・50・75・100 に・不具合の修正）。1.11.2（掘る前から出る採掘の弱点と、当てて壊したら次を掘るまでの待ちを 0 に・しゃがんで右クリックでランダム tick のブロックを自動で成長の対象に）。このあとは機能を止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。1.10.2（設定画面のまとめ直し・コンボのゲージ）。候補と保留中の相談は `doc/roadmap.md`。
+1.11.0（的当てとご褒美・落下の弱点・持ち物も素手と同じに・弱点の大きさ・コンボの段階を 300 までに・`/weakspot top`・進捗）をリリースした。1.11.1（ヒット音の音階とプリセット・的当てのしきい値を 25・50・75・100 に・不具合の修正）。1.11.2（掘る前から出る採掘の弱点と、当てて壊したら次を掘るまでの待ちを 0 に・しゃがんで右クリックでランダム tick のブロックを自動で成長の対象に）。1.11.3（クライアントとサーバーのコンボを揃える）。このあとは機能を止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。1.10.2（設定画面のまとめ直し・コンボのゲージ）。候補と保留中の相談は `doc/roadmap.md`。

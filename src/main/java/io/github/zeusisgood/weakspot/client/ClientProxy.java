@@ -61,7 +61,17 @@ public class ClientProxy extends CommonProxy {
 
     @Override
     public void onOtherCombo(int entityId, int count) {
-        Minecraft.getMinecraft().addScheduledTask(() -> OtherCombos.receive(entityId, count));
+        Minecraft.getMinecraft().addScheduledTask(() -> {
+            Minecraft mc = Minecraft.getMinecraft();
+            if (mc.player != null && entityId == mc.player.getEntityId()) {
+                // 自分の ID はサーバーの数での直し（1.11.3。古いサーバーは本人には送らない）
+                if (ServerFeatures.since("1.11.3")) {
+                    OwnHits.correctStreak(count);
+                }
+                return;
+            }
+            OtherCombos.receive(entityId, count);
+        });
     }
 
     @Override

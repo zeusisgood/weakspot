@@ -44,6 +44,14 @@ public final class HitStreak {
         return lastHitTick;
     }
 
+    /**
+     * サーバーの数で直す（1.11.3。ComboSync）。最後のヒットの tick は変えない（途切れるまでの残り時間はそのまま）。
+     * 0 以下なら 0 に戻す（途切れたときと違い、expire は途切れた数を返さない）。
+     */
+    public void correct(int newCount) {
+        count = Math.max(0, newCount);
+    }
+
     /** ワールドを出た、死亡した、ディメンションを移動したときなど。 */
     public void reset() {
         count = 0;
