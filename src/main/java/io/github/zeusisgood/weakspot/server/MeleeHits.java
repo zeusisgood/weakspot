@@ -33,14 +33,14 @@ public final class MeleeHits {
     /** クライアントからのヒット通知（サーバースレッド）。 */
     public static void onHit(EntityPlayerMP player, int streak) {
         if (!HitGate.allowed(player, HitKind.MELEE)
-                || !MeleeCharge.isHoldingWeapon(player) || !MeleeTargets.hasEnemyNear(player, ENEMY_RANGE)) {
+                || !MeleeCharge.CHARGES.isHolding(player) || !MeleeTargets.hasEnemyNear(player, ENEMY_RANGE)) {
             return;
         }
         if (!HitGate.ready(player, HitKind.MELEE)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.MELEE, new BlockPos(player), streak);
-        MeleeCharge.add(player, WeakSpotConfig.server.melee.meleeChargePerHit * ComboFactor.factor(combo),
+        MeleeCharge.CHARGES.add(player, WeakSpotConfig.server.melee.meleeChargePerHit * ComboFactor.factor(combo),
                 WeakSpotConfig.server.melee.meleeChargeMax);
     }
 
@@ -63,9 +63,9 @@ public final class MeleeHits {
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             REPAIR_CARRY.remove(player.getUniqueID());
-            MeleeCharge.clear(player);
+            MeleeCharge.CHARGES.clear(player);
         } else if (leave == HitGate.Leave.DIMENSION) {
-            MeleeCharge.clear(player);
+            MeleeCharge.CHARGES.clear(player);
         }
     }
 }

@@ -22,14 +22,15 @@ public final class ThrowHits {
 
     public static void onHit(EntityPlayerMP player, int streak) {
         if (!HitGate.allowed(player, HitKind.THROW)
-                || !ThrowCharge.isHoldingThrowable(player) || player.isHandActive()) {
+                || !ThrowCharge.CHARGES.isHolding(player) || player.isHandActive()) {
             return;
         }
         if (!HitGate.ready(player, HitKind.THROW)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.THROW, new BlockPos(player), streak);
-        ThrowCharge.add(player, WeakSpotConfig.server.throwing.throwChargePerHit * ComboFactor.factor(combo));
+        ThrowCharge.CHARGES.add(player, WeakSpotConfig.server.throwing.throwChargePerHit * ComboFactor.factor(combo),
+                0);
         VehicleHits.boostFromRider(player, combo);
     }
 
@@ -37,7 +38,7 @@ public final class ThrowHits {
     /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave != HitGate.Leave.RESPAWN) {
-            ThrowCharge.clear(player);
+            ThrowCharge.CHARGES.clear(player);
         }
     }
 }

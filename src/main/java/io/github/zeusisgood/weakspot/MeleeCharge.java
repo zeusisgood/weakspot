@@ -31,7 +31,8 @@ public final class MeleeCharge {
     /** ジャンプ攻撃のクリティカルと同じ倍率。これに (1 + 溜め) を掛ける。 */
     public static final float CRIT_MULTIPLIER = 1.5F;
 
-    private static final HeldCharge CHARGES = new HeldCharge(MeleeCharge::isWeapon);
+    /** 剣・斧の溜め（ヒットで溜めるときは、上限 meleeChargeMax を渡す）。 */
+    public static final HeldCharge CHARGES = new HeldCharge(MeleeCharge::isWeapon);
 
     private MeleeCharge() {
     }
@@ -39,23 +40,6 @@ public final class MeleeCharge {
     /** 剣か斧（と、それを継承した Mod の武器）か。 */
     public static boolean isWeapon(ItemStack stack) {
         return stack.getItem() instanceof ItemSword || stack.getItem() instanceof ItemAxe;
-    }
-
-    public static boolean isHoldingWeapon(EntityPlayer player) {
-        return CHARGES.isHolding(player);
-    }
-
-    /** ヒットで溜める。max が 0 より大きければ、そこで止める。 */
-    public static void add(EntityPlayer player, double amount, double max) {
-        CHARGES.add(player, amount, max);
-    }
-
-    public static double amount(EntityPlayer player) {
-        return CHARGES.amount(player);
-    }
-
-    public static void clear(EntityPlayer player) {
-        CHARGES.clear(player);
     }
 
     @SubscribeEvent

@@ -26,7 +26,7 @@ final class ThrowSpot extends AimSpotKind {
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return ThrowCharge.isHoldingThrowable(player);
+        return ThrowCharge.CHARGES.isHolding(player);
     }
 
     @Override
@@ -37,12 +37,12 @@ final class ThrowSpot extends AimSpotKind {
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
-        ThrowCharge.add(player, settings.throwChargePerHit * ComboFactor.factor(streak));
+        ThrowCharge.CHARGES.add(player, settings.throwChargePerHit * ComboFactor.factor(streak), 0);
         VehicleSpot.onRiderHit(streak);
     }
 
     private static double charge(Minecraft mc) {
-        return ThrowCharge.isHoldingThrowable(mc.player) ? ThrowCharge.amount(mc.player) : 0;
+        return ThrowCharge.CHARGES.isHolding(mc.player) ? ThrowCharge.CHARGES.amount(mc.player) : 0;
     }
 
     @Override

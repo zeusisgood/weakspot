@@ -38,12 +38,12 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     void beforeTick(Minecraft mc) {
-        enemyNear = MeleeCharge.isHoldingWeapon(mc.player) && MeleeTargets.hasEnemyNear(mc.player, ENEMY_RANGE);
+        enemyNear = MeleeCharge.CHARGES.isHolding(mc.player) && MeleeTargets.hasEnemyNear(mc.player, ENEMY_RANGE);
     }
 
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
-        return MeleeCharge.isHoldingWeapon(player) && enemyNear
+        return MeleeCharge.CHARGES.isHolding(player) && enemyNear
                 && !VehicleTargets.isSteeredByLook(player);
     }
 
@@ -55,11 +55,12 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
-        MeleeCharge.add(player, settings.meleeChargePerHit * ComboFactor.factor(streak), settings.meleeChargeMax);
+        MeleeCharge.CHARGES.add(player, settings.meleeChargePerHit * ComboFactor.factor(streak),
+                settings.meleeChargeMax);
     }
 
     private static double charge(Minecraft mc) {
-        return MeleeCharge.isHoldingWeapon(mc.player) ? MeleeCharge.amount(mc.player) : 0;
+        return MeleeCharge.CHARGES.isHolding(mc.player) ? MeleeCharge.CHARGES.amount(mc.player) : 0;
     }
 
     @Override

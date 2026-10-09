@@ -43,7 +43,8 @@ public final class ThrowCharge {
         }
     }
 
-    private static final HeldCharge CHARGES = new HeldCharge(ThrowCharge::isThrowable);
+    /** 投げる物の溜め（上限なし。ヒットで溜めるときは max に 0 を渡す）。 */
+    public static final HeldCharge CHARGES = new HeldCharge(ThrowCharge::isThrowable);
     private static final Map<EntityLivingBase, Thrown> THROWN = Collections.synchronizedMap(new WeakHashMap<>());
 
     private ThrowCharge() {
@@ -55,25 +56,6 @@ public final class ThrowCharge {
         return !stack.isEmpty() && (item instanceof ItemEnderPearl || item instanceof ItemSnowball
                 || item instanceof ItemEgg || item instanceof ItemSplashPotion || item instanceof ItemLingeringPotion
                 || item instanceof ItemExpBottle);
-    }
-
-    /** メインハンドに投げる物を持っているか。 */
-    public static boolean isHoldingThrowable(EntityPlayer player) {
-        return CHARGES.isHolding(player);
-    }
-
-    /** ヒットで溜める（メインハンドに投げる物を持っているときだけ。上限なし）。 */
-    public static void add(EntityPlayer player, double amount) {
-        CHARGES.add(player, amount, 0);
-    }
-
-    /** 今の溜め（持ち替えていたら 0）。 */
-    public static double amount(EntityPlayer player) {
-        return CHARGES.amount(player);
-    }
-
-    public static void clear(EntityPlayer player) {
-        CHARGES.clear(player);
     }
 
     /** 持ち替えたら、溜めを消す（両側。毎 tick）。 */
