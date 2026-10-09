@@ -3,6 +3,7 @@ package io.github.zeusisgood.weakspot.client;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEnchantment;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
@@ -11,19 +12,18 @@ import net.minecraft.inventory.ContainerEnchantment;
 /**
  * エンチャントの弱点（1.7.0）。エンチャント台の画面で、候補が出ている間、画面の枠の外に紫のマーカーを出し、クリックで
  * 当てる（寝ている間の弱点と同じ。描く・当てる流れは ScreenSpots。1.8.8）。当てると、サーバーが 3 つの候補を引き直す
- * （EnchantHits。何も減らない）。枠の上に、引き直せることと回数の注釈を出す。
+ * （EnchantHits。何も減らない）。枠の上に、引き直せることの注釈を出す。
  */
 final class EnchantSpot extends ScreenSpotKind {
 
     /** エンチャント台の画面の枠の大きさ（GuiEnchantment の xSize / ySize）。 */
     private static final int PANEL_WIDTH = 176;
     private static final int PANEL_HEIGHT = 166;
+    /** 案内の後ろの帯（黒・不透明度 50%。1.11.4）。 */
+    private static final int HINT_BACKGROUND = 0x80000000;
     /** 枠から離す距離と、画面の端から内側に入れる距離（GUI ピクセル）。 */
     private static final int PANEL_GAP = 8;
     private static final int EDGE = 16;
-
-    /** この画面を開いてから引き直した回数（注釈に出す）。 */
-    private int rerolls;
 
     EnchantSpot() {
         super(HitKind.ENCHANT);
@@ -43,11 +43,10 @@ final class EnchantSpot extends ScreenSpotKind {
 
     /** 台に物が置いてあり、候補が 1 つ以上出ているか。 */
     private static boolean hasOffers(GuiEnchantment gui) {
-        ContainerEnchantment container = (ContainerEnchantment) gui.inventorySlots;
-        if (container.tableInventory.getStackInSlot(0).isEmpty()) {
+        if (!hasItem(gui)) {
             return false;
         }
-        for (int level : container.enchantLevels) {
+        for (int level : ((ContainerEnchantment) gui.inventorySlots).enchantLevels) {
             if (level > 0) {
                 return true;
             }
@@ -57,16 +56,6 @@ final class EnchantSpot extends ScreenSpotKind {
 
     private static boolean hasItem(GuiEnchantment gui) {
         return !((ContainerEnchantment) gui.inventorySlots).tableInventory.getStackInSlot(0).isEmpty();
-    }
-
-    @Override
-    void onShown() {
-        rerolls = 0;
-    }
-
-    @Override
-    void onHit() {
-        rerolls++;
     }
 
     /**
@@ -127,19 +116,15 @@ final class EnchantSpot extends ScreenSpotKind {
         return 0.9F;
     }
 
-    /** 枠の上の注釈（台が空・まだ引き直していない・引き直した回数）。 */
+    /** 枠の上の注釈（台が空か、引き直せるか）。 */
     @Override
     void drawExtra(Minecraft mc, GuiScreen gui) {
-        String hint;
-        if (!hasItem((GuiEnchantment) gui)) {
-            hint = I18n.format("weakspot.enchant.hintEmpty");
-        } else if (rerolls > 0) {
-            hint = I18n.format("weakspot.enchant.hintCount", rerolls);
-        } else {
-            hint = I18n.format("weakspot.enchant.hint");
-        }
-        int top = (gui.height - PANEL_HEIGHT) / 2;
-        mc.fontRenderer.drawStringWithShadow(hint, (gui.width - mc.fontRenderer.getStringWidth(hint)) / 2.0F,
-                top - 11, MarkerLook.color(HitKind.ENCHANT));
+        String hint = I18n.format(hasItem((GuiEnchantment) gui) ? "weakspot.enchant.hint" : "weakspot.enchant.hintEmpty");
+        int width = mc.fontRenderer.getStringWidth(hint);
+        int x = (gui.width - width) / 2;
+        int y = (gui.height - PANEL_HEIGHT) / 2 - 11;
+        // どの背景でも読めるように、黒の半透明の帯の上に描く（1.11.4）
+        Gui.drawRect(x - 2, y - 1, x + width + 2, y + mc.fontRenderer.FONT_HEIGHT, HINT_BACKGROUND);
+        mc.fontRenderer.drawStringWithShadow(hint, x, y, MarkerLook.color(HitKind.ENCHANT));
     }
 }
