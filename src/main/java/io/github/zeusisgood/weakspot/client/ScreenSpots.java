@@ -7,11 +7,13 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import io.github.zeusisgood.weakspot.network.HitMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 /**
  * 画面の上のマーカー（ScreenSpotKind）を、まとめて回す（1.8.8。それまでは睡眠・エンチャントが、それぞれにイベントを
@@ -35,6 +37,12 @@ final class ScreenSpots {
     public static void onDrawScreen(GuiScreenEvent.DrawScreenEvent.Post event) {
         Minecraft mc = Minecraft.getMinecraft();
         GuiScreen gui = event.getGui();
+        // コンテナ画面（エンチャント台など）は、アイテム用のライティングを有効にしたまま Post を出すので、
+        // 切ってから描く（1.11.4。弱点の円・文字が暗くなっていた）。ほかの Mod のために、描き終えたら戻す
+        boolean lit = GL11.glIsEnabled(GL11.GL_LIGHTING);
+        if (lit) {
+            GlStateManager.disableLighting();
+        }
         for (ScreenSpotKind k : KINDS) {
             if (!k.eligible(mc, gui)) {
                 k.shownOn = null;
@@ -48,6 +56,9 @@ final class ScreenSpots {
                 draw(k);
             }
             k.drawExtra(mc, gui);
+        }
+        if (lit) {
+            GlStateManager.enableLighting();
         }
     }
 
