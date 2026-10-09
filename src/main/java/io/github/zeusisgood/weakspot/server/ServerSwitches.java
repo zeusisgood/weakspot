@@ -1,6 +1,5 @@
 package io.github.zeusisgood.weakspot.server;
 
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.KindMask;
 import io.github.zeusisgood.weakspot.common.PlayerSwitches;
@@ -9,14 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * プレイヤーごとの弱点のオン・オフ（クライアントの HOME キー）。ログインのたびにクライアントから届く。メモリだけ。
  * 届く前はオン。オフのプレイヤーについて、サーバーは右クリック・左クリックの抑止、ヒットの受け付け、ブースト、
  * マークの転送を止める。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ServerSwitches {
 
     private static final PlayerSwitches<UUID> SWITCHES = new PlayerSwitches<>();

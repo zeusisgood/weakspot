@@ -2,7 +2,6 @@ package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.MeleeCharge;
 import io.github.zeusisgood.weakspot.MeleeTargets;
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.ComboFactor;
 import io.github.zeusisgood.weakspot.common.RepairSettlement;
@@ -14,14 +13,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * 近接の弱点（論理サーバー。1.8.0 で溜めの形に置き換えた）。剣か斧を持ち、近くに敵がいる間に、照準の左右の弱点に
  * 当てたヒットを受け付け、溜める（MeleeCharge。meleeChargePerHit × コンボの掛け数、上限 meleeChargeMax）。
  * 溜めた攻撃が生き物に当たったら（MeleeCharge.onCriticalHit）、耐久回復を数える。照準の角度は確かめない。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MeleeHits {
 
     /** クライアントは 16 ブロック以内の敵で出す。サーバーは位置のずれを見込んで少し甘くする。 */

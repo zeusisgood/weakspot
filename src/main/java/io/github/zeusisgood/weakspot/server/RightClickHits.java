@@ -1,7 +1,6 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.RightClickTargets;
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -15,10 +14,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Mod;
 
 /** 右クリックの弱点（作物・苗木、機械、1.7.0 から収穫）のヒット通知の検証と効果（論理サーバー）。 */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class RightClickHits {
 
     /**

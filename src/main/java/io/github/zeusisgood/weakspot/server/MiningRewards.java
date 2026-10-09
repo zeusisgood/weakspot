@@ -18,10 +18,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.Mod;
 
 /** 採掘ヒットの報酬（耐久回復と節目）と、1.7.0 からの種類ごと・合計の節目。耐久回復は採掘だけ。 */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MiningRewards {
 
     /** 耐久回復の数え方の余り（次の破壊へ持ち越す分）。メモリにだけ持ち、再ログインで0に戻る。 */

@@ -17,13 +17,11 @@ import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * 動物の弱点（子どもの成長、繁殖の待ち時間、羊毛、卵、村人の取引上限）の、状態の問い合わせへの返事と、
  * ヒット通知の検証と効果（論理サーバー）。動物のタイマーはサーバーだけが持つので、弱点が出る条件もここで決める。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class AnimalHits {
 
     /** バニラが動物への右クリックを受け付ける距離（NetHandlerPlayServer#processUseEntity。見えていれば 6 ブロック）。 */

@@ -2,18 +2,15 @@ package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.BowDraw;
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.BowMath;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * 弓の弱点のヒット通知の検証と効果（論理サーバー）。弓を引いている最中に受け付け、引き切る前は弓の引きを
  * bowHitTicks 進め、引き切ったあとは過剰チャージ（矢のダメージ +10%、上限 5 回）を 1 増やす（BowDraw）。照準の角度は確かめない（クライアントを信用する。釣りと同じ程度の確認）。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class BowHits {
 
     private BowHits() {
