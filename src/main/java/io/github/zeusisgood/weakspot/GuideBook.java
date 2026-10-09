@@ -120,9 +120,6 @@ public final class GuideBook {
     /** 本文の最初のページ（1 から数える）。表紙と目次のあと。 */
     private static final int CONTENT_FIRST_PAGE = CONTENTS_FIRST_PAGE + CONTENTS_PAGES.length;
 
-    /** ページ数。表紙・目次・本文。 */
-    public static final int PAGES = CONTENT_FIRST_PAGE - 1 + CONTENT.length;
-
     private GuideBook() {
     }
 

@@ -1,27 +1,26 @@
 package io.github.zeusisgood.weakspot.server;
 
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.KindMask;
-import io.github.zeusisgood.weakspot.common.PlayerSwitches;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * プレイヤーごとの弱点のオン・オフ（クライアントの HOME キー）。ログインのたびにクライアントから届く。メモリだけ。
  * 届く前はオン。オフのプレイヤーについて、サーバーは右クリック・左クリックの抑止、ヒットの受け付け、ブースト、
  * マークの転送を止める。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ServerSwitches {
 
-    private static final PlayerSwitches<UUID> SWITCHES = new PlayerSwitches<>();
-    /** 機械の粒子を見るか（1.6.0。クライアントの machineParticlesVisible。届く前は見る）。 */
-    private static final PlayerSwitches<UUID> PARTICLES = new PlayerSwitches<>();
+    /** オフにしたプレイヤー（オフだけを覚えるので、届く前のプレイヤーはオン）。 */
+    private static final Set<UUID> OFF = new HashSet<>();
+    /** 機械の粒子を見ないプレイヤー（1.6.0。クライアントの machineParticlesVisible。届く前は見る）。 */
+    private static final Set<UUID> PARTICLES_OFF = new HashSet<>();
 
     /** 自分でオフにした種類（1.7.0。KindMask のビット。届く前は 0 = どれもオン）。 */
     private static final Map<UUID, Integer> DISABLED_KINDS = new HashMap<>();
@@ -30,7 +29,7 @@ public final class ServerSwitches {
     }
 
     public static boolean isEnabled(EntityPlayer player) {
-        return SWITCHES.isEnabled(player.getUniqueID());
+        return !OFF.contains(player.getUniqueID());
     }
 
     /** オンで、その種類も自分でオフにしていないか（1.7.0。統計画面の「弱点マーカー」タブ）。 */
@@ -47,25 +46,33 @@ public final class ServerSwitches {
     }
 
     public static boolean isParticlesVisible(EntityPlayer player) {
-        return PARTICLES.isEnabled(player.getUniqueID());
+        return !PARTICLES_OFF.contains(player.getUniqueID());
     }
 
     public static void setParticlesVisible(EntityPlayerMP player, boolean visible) {
-        PARTICLES.set(player.getUniqueID(), visible);
+        set(PARTICLES_OFF, player, visible);
     }
 
     /** クライアントからオン・オフが届いた（サーバースレッド）。オフにした瞬間に、出ていたマークを消す。 */
     public static void set(EntityPlayerMP player, boolean enabled) {
-        SWITCHES.set(player.getUniqueID(), enabled);
+        set(OFF, player, enabled);
         if (!enabled) {
             MarkerRelay.onMarker(player, null);
         }
     }
 
+    private static void set(Set<UUID> off, EntityPlayer player, boolean on) {
+        if (on) {
+            off.remove(player.getUniqueID());
+        } else {
+            off.add(player.getUniqueID());
+        }
+    }
+
     /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
     static void forgetOnLogout(EntityPlayer player) {
-        SWITCHES.forget(player.getUniqueID());
-        PARTICLES.forget(player.getUniqueID());
+        OFF.remove(player.getUniqueID());
+        PARTICLES_OFF.remove(player.getUniqueID());
         DISABLED_KINDS.remove(player.getUniqueID());
     }
 }

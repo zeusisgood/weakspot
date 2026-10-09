@@ -14,11 +14,6 @@ public final class MachineComboBoost {
         return Math.min(base * ComboFactor.factor(combo), max);
     }
 
-    /** 表示用の掛け数（2.0 → "2.0"、2.5 → "2.5"、1.25 → "1.25"）。 */
-    public static String label(double factor) {
-        return String.valueOf(factor);
-    }
-
     /** 表示用の速さ（1.6.0。整数なら整数で「4」、そうでなければ小数 1 桁で「7.5」）。 */
     public static String speedLabel(double speed) {
         long rounded = Math.round(speed);

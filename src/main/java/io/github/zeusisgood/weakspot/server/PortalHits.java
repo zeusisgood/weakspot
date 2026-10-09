@@ -1,21 +1,18 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.Reflect;
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.ComboFactor;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * ネザーゲートの弱点のヒット通知の検証と効果（論理サーバー。1.8.0）。ゲートの中にいる間（非公開の portalCounter が
  * 0 より大きい。ゲートの中で毎 tick 1 増え、出ると 4 ずつ減る）に受け付け、portalCounter に
  * portalHitTicks × コンボの掛け数を足す。getMaxInPortalTime()（サバイバル 80）に達すると、バニラが次の tick に移動する。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class PortalHits {
 
     /** Entity の非公開の portalCounter（SRG field_82153_h）。読めなければ、ゲートの弱点を出さない。 */

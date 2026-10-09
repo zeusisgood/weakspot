@@ -10,6 +10,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -21,15 +22,13 @@ import org.apache.logging.log4j.LogManager;
 /**
  * サーバーとクライアントの Mod の版が違うときに、本人・OP 権限を持つほかのプレイヤー・サーバーのログに知らせる（1.5.1）。
  * クライアントの版は、接続のときに Forge が受け取った Mod の一覧（NetworkDispatcher#getModList）から読む（通信は増やさない）。
- * ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。文は 1.9.6 から翻訳キーで送り、プレイヤーの言語で表示する
- * （PlayerText）。
+ * ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。文は翻訳キーで送り、プレイヤーの言語で表示する
+ * （キーは 1.5.1 から。接続できるクライアントは必ず持っている）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VersionCheck {
 
     static final int DELAY_TICKS = 40;
-    /** 知らせの翻訳キーを足した版。 */
-    private static final String KEYS_SINCE = "1.5.1";
 
     /** 知らせを待っているプレイヤーと、残りの tick。 */
     private static final Map<UUID, Integer> PENDING = new HashMap<>();
@@ -83,15 +82,15 @@ public final class VersionCheck {
         LogManager.getLogger(WeakSpotMod.MODID).warn("Player {} joined with weakspot {} (server {})",
                 name, clientVersion, serverVersion);
         if (diff < 0) {
-            send(player, PlayerText.of(player, KEYS_SINCE,
+            send(player, new TextComponentTranslation(
                     "weakspot.version.clientOlder", clientVersion, serverVersion));
         } else {
-            send(player, PlayerText.of(player, KEYS_SINCE,
+            send(player, new TextComponentTranslation(
                     "weakspot.version.serverOlder", serverVersion, clientVersion));
         }
         for (EntityPlayerMP other : server.getPlayerList().getPlayers()) {
             if (other != player && server.getPlayerList().canSendCommands(other.getGameProfile())) {
-                send(other, PlayerText.of(other, KEYS_SINCE,
+                send(other, new TextComponentTranslation(
                     "weakspot.version.op", name, clientVersion, serverVersion));
             }
         }

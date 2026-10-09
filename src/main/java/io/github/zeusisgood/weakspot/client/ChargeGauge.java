@@ -27,14 +27,19 @@ final class ChargeGauge {
         HudSpot.gauge(mc, charge / perBar, rgb, false);
         int marks = Math.min(MAX_MARKS, (int) Math.floor(charge / perBar) - 1);
         if (marks > 0) {
-            ScaledResolution res = new ScaledResolution(mc);
-            double x0 = res.getScaledWidth() / 2.0 - HudSpot.GAUGE_WIDTH / 2.0;
-            double top = res.getScaledHeight() / 2.0 + HudSpot.GAUGE_OFFSET + HudSpot.GAUGE_HEIGHT / 2.0 + MARK_GAP;
-            double width = (HudSpot.GAUGE_WIDTH - MARK_GAP * (MAX_MARKS - 1)) / (double) MAX_MARKS;
-            for (int i = 0; i < MAX_MARKS; i++) {
-                double left = x0 + i * (width + MARK_GAP);
-                ScreenProjection.rect(left, top, left + width, top + MARK_HEIGHT, i < marks ? MARK : BACK);
-            }
+            drawMarks(mc, marks, MAX_MARKS);
+        }
+    }
+
+    /** 照準の下のゲージのすぐ下に、目盛りを count 個並べ、左から lit 個を赤く描く（弓の過剰チャージも。1.11.5）。 */
+    static void drawMarks(Minecraft mc, int lit, int count) {
+        ScaledResolution res = new ScaledResolution(mc);
+        double x0 = res.getScaledWidth() / 2.0 - HudSpot.GAUGE_WIDTH / 2.0;
+        double top = res.getScaledHeight() / 2.0 + HudSpot.GAUGE_OFFSET + HudSpot.GAUGE_HEIGHT / 2.0 + MARK_GAP;
+        double width = (HudSpot.GAUGE_WIDTH - MARK_GAP * (count - 1)) / (double) count;
+        for (int i = 0; i < count; i++) {
+            double left = x0 + i * (width + MARK_GAP);
+            ScreenProjection.rect(left, top, left + width, top + MARK_HEIGHT, i < lit ? MARK : BACK);
         }
     }
 

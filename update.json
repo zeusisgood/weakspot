@@ -1,10 +1,11 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.11.4",
-    "1.12.2-recommended": "1.11.4"
+    "1.12.2-latest": "1.11.5",
+    "1.12.2-recommended": "1.11.5"
   },
   "1.12.2": {
+    "1.11.5": "Internal cleanup (no gameplay changes)",
     "1.11.4": "The enchanting screen hint and weak spot are no longer drawn too dark",
     "1.11.3": "Your combo counter now stays in sync with the server after rejected hits",
     "1.11.2": "Mining spots show before you dig and skip the wait after a break; sneak to speed up any block that changes over time",

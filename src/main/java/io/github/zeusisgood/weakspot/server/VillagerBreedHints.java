@@ -27,16 +27,13 @@ import net.minecraft.village.Village;
 
 /**
  * 村人が繁殖できない理由を、アクションバーに出す（1.8.4）。大人の村人への動物の状態の問い合わせ（しゃがんで素手で
- * 右クリックを押しっぱなし）のたびに調べる。文は 1.9.6 から翻訳キーで送り、プレイヤーの言語で表示する（PlayerText。
- * キーを持っていない古いクライアントには、ServerLang で作った文章）。
+ * 右クリックを押しっぱなし）のたびに調べる。文は翻訳キーで送り、プレイヤーの言語で表示する（キーは 1.8.4 から。
+ * 接続できるクライアントは必ず持っている）。
  */
 final class VillagerBreedHints {
 
     /** 同じ文章を送り直す間隔（アクションバーは 3 秒ほどで消える）。 */
     private static final long RESEND_TICKS = 20;
-
-    /** 案内の翻訳キーを足した版。 */
-    private static final String KEYS_SINCE = "1.8.4";
 
     /** 前に送った案内（翻訳キーと値を並べた文字列）。同じものを続けて送らないため。 */
     private static final Map<UUID, String> LAST_TEXT = new HashMap<>();
@@ -60,8 +57,7 @@ final class VillagerBreedHints {
         }
         LAST_TEXT.put(id, text);
         LAST_TICK.put(id, now);
-        ITextComponent message = PlayerText.understands(player, KEYS_SINCE) ? component(lines)
-                : new TextComponentString(serverText(player, lines));
+        ITextComponent message = component(lines);
         message.getStyle().setColor(reasons.isEmpty() ? TextFormatting.GREEN : TextFormatting.GOLD);
         player.sendStatusMessage(message, true);
     }
@@ -167,20 +163,5 @@ final class VillagerBreedHints {
             joined.appendSibling(new TextComponentTranslation(lines.get(i).key, lines.get(i).args));
         }
         return new TextComponentTranslation("weakspot.breed.line", joined);
-    }
-
-    /** キーを持っていない古いクライアント向けに、サーバーで作る文章（ServerLang）。 */
-    private static String serverText(EntityPlayerMP player, List<Line> lines) {
-        if (lines.size() == 1 && lines.get(0).key.equals("weakspot.breed.ready")) {
-            return ServerLang.format(player, "weakspot.breed.ready");
-        }
-        StringBuilder joined = new StringBuilder();
-        for (Line line : lines) {
-            if (joined.length() > 0) {
-                joined.append(ServerLang.format(player, "weakspot.breed.separator"));
-            }
-            joined.append(ServerLang.format(player, line.key, line.args));
-        }
-        return ServerLang.format(player, "weakspot.breed.line", joined);
     }
 }

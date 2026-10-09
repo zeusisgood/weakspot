@@ -1,14 +1,12 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.Reflect;
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerEnchantment;
 import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * エンチャントの弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。エンチャント台の画面を開いて物を置いている間に
@@ -16,7 +14,6 @@ import net.minecraftforge.fml.common.Mod;
  * するたびにバニラが引き直す）と本棚の数で決まるので、種を新しい乱数にして、開いている画面の候補を計算し直す
  * （バニラの送信でクライアントの画面にも届く）。何も減らさない。種は保存されるので、画面を閉じても引き直したまま。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class EnchantHits {
 
     /** EntityPlayer の非公開の xpSeed（SRG field_175152_f）。読めなければ、エンチャントの弱点を出さない。 */

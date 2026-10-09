@@ -13,6 +13,8 @@ import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
  * サーバーからプレイヤーに送る文（1.9.6）。翻訳キーと値（TextComponentTranslation）で送り、クライアントが自分の今の言語で
  * 文にする。ただし相手のクライアントがそのキーを持っていない（キーを足した版 since より古い）ときは、今までどおり
  * サーバーで文にして送る（ServerLang。持っていないキーはキーのまま表示されてしまうため）。
+ * 接続できる一番古い版（WeakSpotMod.ACCEPTED_VERSIONS の下限）までに足したキーは、どのクライアントも持っているので、
+ * これを通さずに TextComponentTranslation で送る（1.11.5）。ここを通すのは、パッチで足したキーだけ。
  * 翻訳の値には %s（と %1$s の形）だけを使う（クライアントの翻訳では %d などが使えない）。
  */
 public final class PlayerText {

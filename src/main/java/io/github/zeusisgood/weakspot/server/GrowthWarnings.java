@@ -1,6 +1,5 @@
 package io.github.zeusisgood.weakspot.server;
 
-import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.GrowthStuck;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.HashMap;
@@ -16,14 +15,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Mod;
 
 /**
  * 成長の弱点に当てても育たないときに、チャットで知らせる（1.4.3）。
  * 暗い（作物・茎・苗木で、すぐ上の明るさが 9 未満）ときは最初のヒットで、原因が分からないときは
  * growthStuckHits 回続けて状態が変わらなかったときに知らせる。判定と回数の制限は GrowthStuck。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class GrowthWarnings {
 
     /** バニラの作物・茎・苗木が育つのに必要な、すぐ上の明るさ。 */

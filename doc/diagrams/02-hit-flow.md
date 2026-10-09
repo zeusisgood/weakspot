@@ -45,7 +45,7 @@ sequenceDiagram
             ST->>MR: onKindHit（種類ごとの節目・合計の節目）
             opt 節目に届いた
                 MR->>ME: MilestoneMessage（KIND・TOTAL）と経験値
-                MR->>OC: 知らせのチャット（PlayerText）
+                MR->>OC: 知らせのチャット（翻訳キー）
             end
         end
         HG->>ST: countStreak

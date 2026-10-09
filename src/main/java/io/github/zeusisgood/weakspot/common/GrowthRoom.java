@@ -23,11 +23,6 @@ public final class GrowthRoom {
         return height < MAX_COLUMN_HEIGHT && airAbove && (height != 1 || baseHolds);
     }
 
-    /** 成長段階の植物に育てる余地があるか（最後の段階でない）。 */
-    public static boolean hasStageRoom(int stage, int lastStage) {
-        return stage < lastStage;
-    }
-
     /**
      * offset 1, 2, ... の順に sameAt が true の間数えた数（limit まで）。
      * 柱で、あるブロックの上（または下）に同じブロックがいくつ続くかを数えるのに使う。

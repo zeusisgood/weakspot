@@ -16,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
@@ -32,9 +33,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class TargetRounds {
-
-    /** 翻訳キー weakspot.target.* と weakspot.milestone.broadcast.target を足した版。 */
-    static final String SINCE = "1.11.0";
 
     private static final class Round {
         long start;
@@ -70,7 +68,7 @@ public final class TargetRounds {
         ROUNDS.put(player.getUniqueID(), round);
         if (ServerStats.total(player).targetRounds == 0) {
             // 初めてのときは、始まる前にルールを伝える（ハズレのことを先に知らせる）
-            ITextComponent rules = PlayerText.of(player, SINCE, "weakspot.target.rules");
+            ITextComponent rules = new TextComponentTranslation("weakspot.target.rules");
             rules.getStyle().setColor(TextFormatting.GOLD);
             player.sendMessage(rules);
         }
@@ -153,7 +151,7 @@ public final class TargetRounds {
         WeakSpotAdvancements.onTargetBest(player, best);
         if (hits > previousTop) {
             for (EntityPlayerMP other : server.getPlayerList().getPlayers()) {
-                ITextComponent text = PlayerText.of(other, SINCE, "weakspot.milestone.broadcast.target",
+                ITextComponent text = new TextComponentTranslation("weakspot.milestone.broadcast.target",
                         player.getName(), hits);
                 text.getStyle().setColor(TextFormatting.GOLD);
                 other.sendMessage(text);
