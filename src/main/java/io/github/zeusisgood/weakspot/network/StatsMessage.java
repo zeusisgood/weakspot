@@ -3,6 +3,10 @@ package io.github.zeusisgood.weakspot.network;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.buffer.ByteBufOutputStream;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
@@ -57,31 +61,19 @@ public class StatsMessage implements IMessage {
 
     /** 並びは MiningStats#writeTo（1.8.5 までと同じ並び）。 */
     private static MiningStats read(ByteBuf buf) {
-        return MiningStats.readFrom(new MiningStats.Reader() {
-            @Override
-            public long readLong() {
-                return buf.readLong();
-            }
-
-            @Override
-            public double readDouble() {
-                return buf.readDouble();
-            }
-        });
+        try {
+            return MiningStats.readFrom(new ByteBufInputStream(buf));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private static void write(ByteBuf buf, MiningStats stats) {
-        stats.writeTo(new MiningStats.Writer() {
-            @Override
-            public void writeLong(long value) {
-                buf.writeLong(value);
-            }
-
-            @Override
-            public void writeDouble(double value) {
-                buf.writeDouble(value);
-            }
-        });
+        try {
+            stats.writeTo(new ByteBufOutputStream(buf));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public static class Handler implements IMessageHandler<StatsMessage, IMessage> {

@@ -3,6 +3,11 @@ package io.github.zeusisgood.weakspot.common;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import org.junit.Test;
 
 public class MiningStatsTest {
@@ -144,7 +149,7 @@ public class MiningStatsTest {
     }
 
     @Test
-    public void writeAndReadRoundTrip() {
+    public void writeAndReadRoundTrip() throws IOException {
         MiningStats stats = new MiningStats();
         stats.recordHit(3);
         stats.recordBlockBroken(4);
@@ -154,30 +159,11 @@ public class MiningStatsTest {
                 stats.recordKindHit(kind);
             }
         }
-        java.util.ArrayDeque<Object> values = new java.util.ArrayDeque<>();
-        stats.writeTo(new MiningStats.Writer() {
-            @Override
-            public void writeLong(long value) {
-                values.add(value);
-            }
-
-            @Override
-            public void writeDouble(double value) {
-                values.add(value);
-            }
-        });
-        MiningStats back = MiningStats.readFrom(new MiningStats.Reader() {
-            @Override
-            public long readLong() {
-                return (Long) values.poll();
-            }
-
-            @Override
-            public double readDouble() {
-                return (Double) values.poll();
-            }
-        });
-        assertTrue(values.isEmpty());
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        stats.writeTo(new DataOutputStream(bytes));
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes.toByteArray()));
+        MiningStats back = MiningStats.readFrom(in);
+        assertEquals(0, in.available());
         assertEquals(stats.maxStreak, back.maxStreak);
         assertEquals(stats.savedTicks, back.savedTicks, 0);
         for (HitKind kind : HitKind.values()) {

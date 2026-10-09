@@ -1,5 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 /**
  * 弱点の統計（プレイヤー1人分）。Minecraft に依存しない集計だけを持ち、保存と通信は呼び出し側が行う。
  */
@@ -125,22 +129,8 @@ public final class MiningStats {
         return kind == HitKind.MELEE ? "critHits" : null;
     }
 
-    /** 送るときの書き先（StatsMessage が ByteBuf につなぐ）。 */
-    public interface Writer {
-        void writeLong(long value);
-
-        void writeDouble(double value);
-    }
-
-    /** 受け取るときの読み元。 */
-    public interface Reader {
-        long readLong();
-
-        double readDouble();
-    }
-
-    /** 送る並び（1.9.0 から、全体の数のあとに種類の順。1.11.0 から最後に的当て）。種類や項目を足すと通信が変わる（マイナー）。 */
-    public void writeTo(Writer out) {
+    /** 送る並び（StatsMessage が ByteBuf につなぐ。1.9.0 から、全体の数のあとに種類の順。1.11.0 から最後に的当て）。種類や項目を足すと通信が変わる（マイナー）。 */
+    public void writeTo(DataOutput out) throws IOException {
         out.writeLong(hits);
         out.writeLong(blocksBroken);
         out.writeLong(blocksBrokenWithHit);
@@ -157,7 +147,7 @@ public final class MiningStats {
         out.writeLong(targetRounds);
     }
 
-    public static MiningStats readFrom(Reader in) {
+    public static MiningStats readFrom(DataInput in) throws IOException {
         MiningStats stats = new MiningStats();
         stats.hits = in.readLong();
         stats.blocksBroken = in.readLong();
