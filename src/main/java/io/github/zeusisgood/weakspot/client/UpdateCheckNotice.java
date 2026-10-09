@@ -11,16 +11,12 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 新しい版の通知（1.9.2）。Forge の更新確認（@Mod の updateJSON）の結果を見て、新しい版があれば、
  * ワールドに入ったときに起動ごとに 1 回、チャットに出す。[この版は通知しない]（/weakspot skipupdate）を押した版は出さない。
+ * ワールドに入ってからの tick は UpdateNotes が数えて、tick に渡す（1.11.5）。
  */
-@Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class UpdateCheckNotice {
 
     /** ワールドに入ってから出すまでの tick（更新のお知らせ UpdateNotes の 40 tick より後）。 */
@@ -29,23 +25,14 @@ final class UpdateCheckNotice {
     private static final int PENDING_TICKS = 200;
 
     /** この起動で、もう確かめ終えたか。 */
-    private static boolean done;
-    private static int waitTicks;
+    static boolean done;
 
     private UpdateCheckNotice() {
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || done) {
-            return;
-        }
-        Minecraft mc = Minecraft.getMinecraft();
-        if (mc.player == null || mc.world == null) {
-            waitTicks = 0;
-            return;
-        }
-        if (++waitTicks < DELAY_TICKS) {
+    /** ワールドの中で毎 tick 呼ぶ。waitTicks はワールドに入ってからの tick（UpdateNotes が数える）。 */
+    static void tick(Minecraft mc, int waitTicks) {
+        if (done || waitTicks < DELAY_TICKS) {
             return;
         }
         if (!WeakSpotConfig.client.updates.checkForUpdates) {

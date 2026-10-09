@@ -29,6 +29,7 @@ final class UpdateNotes {
 
     /** この起動で、もう確かめたか。 */
     private static boolean checked;
+    /** ワールドに入ってからの tick（ワールドを出たら 0 に戻す。新しい版の通知 UpdateCheckNotice もこれで数える）。 */
     private static int waitTicks;
 
     private UpdateNotes() {
@@ -36,7 +37,7 @@ final class UpdateNotes {
 
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
-        if (event.phase != TickEvent.Phase.END || checked) {
+        if (event.phase != TickEvent.Phase.END || checked && UpdateCheckNotice.done) {
             return;
         }
         Minecraft mc = Minecraft.getMinecraft();
@@ -44,7 +45,8 @@ final class UpdateNotes {
             waitTicks = 0;
             return;
         }
-        if (++waitTicks < DELAY_TICKS) {
+        UpdateCheckNotice.tick(mc, ++waitTicks);
+        if (checked || waitTicks < DELAY_TICKS) {
             return;
         }
         checked = true;
