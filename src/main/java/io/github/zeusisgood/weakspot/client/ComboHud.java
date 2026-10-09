@@ -236,7 +236,7 @@ final class ComboHud {
             double factor = labelValue(kind, combo);
             if (factor > 1) {
                 return drawKindLabel(mc, top, I18n.format("weakspot.combo.kind",
-                        I18n.format("weakspot.kind." + kind.key()), MachineComboBoost.label(factor)), rgb,
+                        I18n.format("weakspot.kind." + kind.key()), String.valueOf(factor)), rgb,
                         ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
             }
         }

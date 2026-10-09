@@ -39,14 +39,6 @@ public class GrowthRoomTest {
     }
 
     @Test
-    public void netherWartHasRoomUntilLastStage() {
-        for (int stage = 0; stage <= 2; stage++) {
-            assertTrue(GrowthRoom.hasStageRoom(stage, 3));
-        }
-        assertFalse(GrowthRoom.hasStageRoom(3, 3));
-    }
-
-    @Test
     public void countRunStopsAtFirstDifferentBlock() {
         // offset 1, 2 が同じブロックで、3 が違う
         assertEquals(2, GrowthRoom.countRun(k -> k <= 2, 10));

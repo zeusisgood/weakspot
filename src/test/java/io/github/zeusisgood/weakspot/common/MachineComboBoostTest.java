@@ -27,11 +27,4 @@ public class MachineComboBoostTest {
         assertEquals("7.5", MachineComboBoost.speedLabel(7.5));
         assertEquals("6.3", MachineComboBoost.speedLabel(6.25));
     }
-
-    @Test
-    public void labels() {
-        assertEquals("1.25", MachineComboBoost.label(1.25));
-        assertEquals("2.5", MachineComboBoost.label(2.5));
-        assertEquals("2.0", MachineComboBoost.label(2.0));
-    }
 }

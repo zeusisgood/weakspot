@@ -29,9 +29,4 @@ public final class ScheduledBoost {
         }
         return (int) Math.max(1, Math.min(MAX_DISPENSES, Math.floor(1 + multiplier / baseMultiplier)));
     }
-
-    /** コンボの掛け数からの発射の回数（HUD の「発射 ×n」。サーバーの上限の設定は考えない）。 */
-    public static int dispenseCountForFactor(double comboFactor) {
-        return dispenseCount(comboFactor, 1);
-    }
 }

@@ -1,7 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
-import io.github.zeusisgood.weakspot.common.WeakSpotSwitch;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import io.github.zeusisgood.weakspot.network.SwitchMessage;
 import net.minecraft.client.Minecraft;
@@ -50,7 +49,7 @@ public final class ToggleKeyHandler {
         if (!TOGGLE.isPressed() || mc.currentScreen != null || mc.player == null) {
             return;
         }
-        WeakSpotConfig.client.markers.weakSpotsEnabled = WeakSpotSwitch.toggled(WeakSpotConfig.client.markers.weakSpotsEnabled);
+        WeakSpotConfig.client.markers.weakSpotsEnabled = !WeakSpotConfig.client.markers.weakSpotsEnabled;
         WeakSpotConfig.save();
         boolean on = WeakSpotConfig.client.markers.weakSpotsEnabled;
         if (!on) {
