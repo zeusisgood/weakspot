@@ -8,7 +8,6 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import io.github.zeusisgood.weakspot.network.HitMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityBoat;
@@ -28,20 +27,14 @@ final class VehicleSpot extends AimSpotKind {
     /** ボートに足す 1 tick の移動の上限（ブロック。サーバーの「動きが速すぎる」の判定に引っかからないように）。 */
     private static final double MAX_BOAT_STEP = 8.0;
 
-    private static final int BAR_WIDTH = 40;
-    private static final int BAR_HEIGHT = 3;
     /**
-     * 照準の中心から、ゲージの中心までの上向きの距離（GUI ピクセル）。照準の下はコンボの表示と重なるので、上に出す
-     * （1.6.4。弓の引きゲージ（下に 12）と上下対称）。
+     * 加速のゲージの色 #55CCFF（弱点の色を変えても変わらない）。照準の下はコンボの表示と重なるので、上に出す
+     * （1.6.4。弓の引きゲージ（下）と上下対称）。
      */
-    private static final int BAR_OFFSET = 12;
-    private static final float[] BAR_FILL = {0x55 / 255F, 0xCC / 255F, 0xFF / 255F, 1.0F};
-    private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
+    private static final int BAR_COLOR = 0x55CCFF;
 
     /** 自分の側で覚えている加速（ボートの速さと、ゲージのため。弓・食事・投げる物からも onRiderHit で続ける）。 */
-    private static double multiplier = 1;
-    private static long boostUntil = Long.MIN_VALUE / 2;
-    private static int boostDuration = 1;
+    private static final TimedBoost BOOST = new TimedBoost();
 
     /** 前の tick のボートと、その yaw（1.8.2。曲がった分だけ弱点を回す）。 */
     private Entity lastBoat;
@@ -54,7 +47,7 @@ final class VehicleSpot extends AimSpotKind {
     @Override
     void clear() {
         super.clear();
-        boostUntil = Long.MIN_VALUE / 2;
+        BOOST.clear();
     }
 
     /** 乗り物の弱点を出すか（乗り物が動いているとき）。 */
@@ -110,10 +103,10 @@ final class VehicleSpot extends AimSpotKind {
         EntityPlayerSP player = mc.player;
         Entity vehicle = player.getRidingEntity();
         if (!(vehicle instanceof EntityBoat) || vehicle.getControllingPassenger() != player
-                || ClientWeakSpotHandler.clientTick >= boostUntil) {
+                || !BOOST.isActive(ClientWeakSpotHandler.clientTick)) {
             return;
         }
-        double extra = TimedBoostMath.extra(multiplier);
+        double extra = TimedBoostMath.extra(BOOST.multiplier());
         double dx = vehicle.motionX * extra;
         double dz = vehicle.motionZ * extra;
         double step = Math.hypot(dx, dz);
@@ -133,14 +126,12 @@ final class VehicleSpot extends AimSpotKind {
         if (mc.player == null || !settings.enabled(HitKind.VEHICLE) || VehicleTargets.kind(mc.player) == null) {
             return;
         }
-        multiplier = TimedBoostMath.multiplier(settings.vehicleBoostMultiplier, settings.vehicleBoostMaxMultiplier,
-                combo);
-        boostDuration = Math.max(1, settings.vehicleBoostDurationTicks);
-        boostUntil = ClientWeakSpotHandler.clientTick + boostDuration;
+        BOOST.start(TimedBoostMath.multiplier(settings.vehicleBoostMultiplier, settings.vehicleBoostMaxMultiplier,
+                combo), settings.vehicleBoostDurationTicks, ClientWeakSpotHandler.clientTick);
     }
 
     private static double remaining(float partialTicks) {
-        return (boostUntil - ClientWeakSpotHandler.clientTick - partialTicks) / boostDuration;
+        return BOOST.remaining(ClientWeakSpotHandler.clientTick, partialTicks);
     }
 
     @Override
@@ -150,11 +141,6 @@ final class VehicleSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        ScaledResolution res = new ScaledResolution(mc);
-        double x0 = res.getScaledWidth() / 2.0 - BAR_WIDTH / 2.0;
-        double y0 = res.getScaledHeight() / 2.0 - BAR_OFFSET - BAR_HEIGHT / 2.0;
-        ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
-        ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * Math.min(1, remaining(partialTicks)), y0 + BAR_HEIGHT,
-                BAR_FILL);
+        HudSpot.gauge(mc, remaining(partialTicks), BAR_COLOR, true);
     }
 }

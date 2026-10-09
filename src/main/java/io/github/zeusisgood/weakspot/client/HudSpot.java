@@ -262,7 +262,7 @@ final class HudSpot {
     }
 
     /**
-     * 照準の上（above）か下に、残り時間・溜めのゲージを描く（1.7.0。乗り物・はしご・走りは上、投げる物は下）。
+     * 照準の上（above）か下に、残り時間・溜めのゲージを描く（1.7.0。乗り物・はしご・走りは上、投げる物・近接・弓は下）。
      * fraction は 0〜1。beginOverlay と endOverlay の間で呼ぶ。
      */
     static void gauge(Minecraft mc, double fraction, int rgb, boolean above) {
@@ -276,7 +276,7 @@ final class HudSpot {
                 new float[] {fill[0], fill[1], fill[2], 1});
     }
 
-    /** ゲージの大きさと、照準の中心からの距離（乗り物のゲージ、弓の引きゲージと同じ）。背景は #1E1E1E 半透明。 */
+    /** ゲージの大きさと、照準の中心からの距離（1.11.5 から乗り物の加速・弓の引きもこれで描く）。背景は #1E1E1E 半透明。 */
     static final int GAUGE_WIDTH = 40;
     static final int GAUGE_HEIGHT = 3;
     static final int GAUGE_OFFSET = 12;

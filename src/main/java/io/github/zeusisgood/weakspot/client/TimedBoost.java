@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 /**
- * 自分の側で覚えている、時間で続く加速（1.7.0。はしご・走り。乗り物の VehicleSpot と同じ考え方）。
+ * 自分の側で覚えている、時間で続く加速（1.7.0。はしご・走り・泳ぎ。1.11.5 から乗り物も）。
  * 時間は ClientWeakSpotHandler.clientTick で数える（一時停止中は止まる）。
  */
 final class TimedBoost {

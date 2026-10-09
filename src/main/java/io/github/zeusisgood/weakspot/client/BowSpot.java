@@ -8,7 +8,6 @@ import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.gui.ScaledResolution;
 
 /**
  * 弓の弱点（自分だけ。他のプレイヤーには見せない）と、引きゲージ。弓を引いている間、照準の近く（視線から 10〜20 度。
@@ -20,23 +19,13 @@ import net.minecraft.client.gui.ScaledResolution;
  */
 final class BowSpot extends AimSpotKind {
 
-    private static final int BAR_WIDTH = 40;
-    private static final int BAR_HEIGHT = 3;
-    /** 照準の中心から、ゲージの中心までの下向きの距離（GUI ピクセル）。 */
-    private static final int BAR_OFFSET = 12;
-
     /** 弱点の色（円 #FF5926・輪・中心）。色を書き換えていなければ、この色のまま。 */
     private static final float[] DISK = {1.0F, 0.35F, 0.15F};
     private static final float[] RING = {1.0F, 0.9F, 0.4F};
     private static final float[] CENTER = {1.0F, 0.95F, 0.7F};
-    /** 引いている途中 #FF8C42、引き切った #FFD23F、背景 #1E1E1E 半透明。 */
-    private static final float[] BAR_DRAWING = {0xFF / 255F, 0x8C / 255F, 0x42 / 255F, 1.0F};
-    private static final float[] BAR_FULL = {0xFF / 255F, 0xD2 / 255F, 0x3F / 255F, 1.0F};
-    private static final float[] BAR_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
-    /** 過剰チャージの目盛り #FF4D4D。ゲージのすぐ下に、上限の数だけ並べる。 */
-    private static final float[] OVERCHARGE = {0xFF / 255F, 0x4D / 255F, 0x4D / 255F, 1.0F};
-    private static final int OVERCHARGE_HEIGHT = 2;
-    private static final int OVERCHARGE_GAP = 1;
+    /** 引きゲージの、引いている途中 #FF8C42 と、引き切った #FFD23F。 */
+    private static final int BAR_DRAWING = 0xFF8C42;
+    private static final int BAR_FULL = 0xFFD23F;
 
     BowSpot() {
         super(HitKind.BOW, new HudSpot(HitKind.BOW, 0xFF5926).withPalette(DISK, RING, CENTER));
@@ -96,27 +85,13 @@ final class BowSpot extends AimSpotKind {
     /** 照準の下の、引き具合のゲージ。左から伸び、引き切ったら色が変わる。引き切ったあとは、過剰チャージの目盛りも出す。 */
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        ScaledResolution res = new ScaledResolution(mc);
         int used = mc.player.getItemInUseMaxCount();
         boolean full = BowMath.isFull(used);
-        double value = full ? 1.0 : BowMath.barValue(used + partialTicks);
-        double x0 = res.getScaledWidth() / 2.0 - BAR_WIDTH / 2.0;
-        double y0 = res.getScaledHeight() / 2.0 + BAR_OFFSET - BAR_HEIGHT / 2.0;
-        ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH, y0 + BAR_HEIGHT, BAR_BACK);
-        if (value > 0) {
-            ScreenProjection.rect(x0, y0, x0 + BAR_WIDTH * value, y0 + BAR_HEIGHT, full ? BAR_FULL : BAR_DRAWING);
-        }
+        HudSpot.gauge(mc, full ? 1.0 : BowMath.barValue(used + partialTicks), full ? BAR_FULL : BAR_DRAWING, false);
         int overcharge = BowDraw.overcharge(mc.player);
         if (full && (overcharge > 0 || spot.has())) {
             // 過剰チャージの目盛り。達した分を赤く
-            int count = BowMath.MAX_OVERCHARGE_HITS;
-            double width = (BAR_WIDTH - OVERCHARGE_GAP * (count - 1)) / (double) count;
-            double top = y0 + BAR_HEIGHT + OVERCHARGE_GAP;
-            for (int i = 0; i < count; i++) {
-                double left = x0 + i * (width + OVERCHARGE_GAP);
-                ScreenProjection.rect(left, top, left + width, top + OVERCHARGE_HEIGHT,
-                        i < overcharge ? OVERCHARGE : BAR_BACK);
-            }
+            ChargeGauge.drawMarks(mc, overcharge, BowMath.MAX_OVERCHARGE_HITS);
         }
     }
 }
