@@ -76,7 +76,7 @@
 ## 15. `CLAUDE.md` に書くこと
 
 - 現行の版を 1.11.5 に。「次の作業」に 1.11.5（内部の整理）
-- サーバーからプレイヤーに送る文の約束事: 接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）より前に足したキーは `TextComponentTranslation` で送り、パッチで足したキーだけ `PlayerText.of`
+- サーバーからプレイヤーに送る文の約束事: 接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation` で送り、パッチで足したキーだけ `PlayerText.of`
 
 ## 16. ユーザーに確認してもらうこと
 

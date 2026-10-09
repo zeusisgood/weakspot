@@ -36,7 +36,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
 - 文書だけの変更（コードのコメントだけの修正を含む）は版を上げない。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.11.4**、範囲は `"[1.11,1.12)"`。
+- 現行は **1.11.5**、範囲は `"[1.11,1.12)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -64,7 +64,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。
 - 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。
-- **サーバーからプレイヤーに送る文は `server/PlayerText.of(player, since, key, args)`**（翻訳キーで送り、キーを持たない古いクライアントにだけ `ServerLang` の文章）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
+- **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品（`HitGate`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **採掘のヒットは、掘る前のものは予約にして、掘り始めた瞬間に確定する**（1.11.2。予約の時点でコンボ・統計を数えない。`ServerBoostTracker`）。
 - **コンボはサーバーの数が正**。クライアントの数がずれたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で直す（1.11.3、`ComboSync`。片道だけで、サーバーはクライアントの数に合わせない）。
@@ -97,4 +97,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-1.11.0（的当てとご褒美・落下の弱点・持ち物も素手と同じに・弱点の大きさ・コンボの段階を 300 までに・`/weakspot top`・進捗）をリリースした。1.11.1（ヒット音の音階とプリセット・的当てのしきい値を 25・50・75・100 に・不具合の修正）。1.11.2（掘る前から出る採掘の弱点と、当てて壊したら次を掘るまでの待ちを 0 に・しゃがんで右クリックでランダム tick のブロックを自動で成長の対象に）。1.11.3（クライアントとサーバーのコンボを揃える）。1.11.4（エンチャント画面の案内と弱点の円が暗く見える不具合）。このあとは機能を止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。1.10.2（設定画面のまとめ直し・コンボのゲージ）。候補と保留中の相談は `doc/roadmap.md`。
+1.11.0（的当てとご褒美・落下の弱点・持ち物も素手と同じに・弱点の大きさ・コンボの段階を 300 までに・`/weakspot top`・進捗）をリリースした。1.11.1（ヒット音の音階とプリセット・的当てのしきい値を 25・50・75・100 に・不具合の修正）。1.11.2（掘る前から出る採掘の弱点と、当てて壊したら次を掘るまでの待ちを 0 に・しゃがんで右クリックでランダム tick のブロックを自動で成長の対象に）。1.11.3（クライアントとサーバーのコンボを揃える）。1.11.4（エンチャント画面の案内と弱点の円が暗く見える不具合）。1.11.5（内部の整理。遊び方は変更なし）。このあとは機能を止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。1.10.2（設定画面のまとめ直し・コンボのゲージ）。候補と保留中の相談は `doc/roadmap.md`。
