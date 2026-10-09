@@ -65,14 +65,6 @@ abstract class ScreenSpotKind {
     /** 輪と中心の点の濃さ。 */
     abstract float outlineAlpha();
 
-    /** 新しい画面に出した（エンチャントは引き直した回数を 0 に）。 */
-    void onShown() {
-    }
-
-    /** 当てた（音・コンボの数え・通知は済んでいる）。 */
-    void onHit() {
-    }
-
     /** マーカーのあとに、画面に描くもの（エンチャントの枠の上の注釈）。 */
     void drawExtra(Minecraft mc, GuiScreen gui) {
     }

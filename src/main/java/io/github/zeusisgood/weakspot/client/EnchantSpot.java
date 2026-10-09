@@ -12,7 +12,7 @@ import net.minecraft.inventory.ContainerEnchantment;
 /**
  * エンチャントの弱点（1.7.0）。エンチャント台の画面で、候補が出ている間、画面の枠の外に紫のマーカーを出し、クリックで
  * 当てる（寝ている間の弱点と同じ。描く・当てる流れは ScreenSpots。1.8.8）。当てると、サーバーが 3 つの候補を引き直す
- * （EnchantHits。何も減らない）。枠の上に、引き直せることと回数の注釈を出す。
+ * （EnchantHits。何も減らない）。枠の上に、引き直せることの注釈を出す。
  */
 final class EnchantSpot extends ScreenSpotKind {
 
@@ -43,11 +43,10 @@ final class EnchantSpot extends ScreenSpotKind {
 
     /** 台に物が置いてあり、候補が 1 つ以上出ているか。 */
     private static boolean hasOffers(GuiEnchantment gui) {
-        ContainerEnchantment container = (ContainerEnchantment) gui.inventorySlots;
-        if (container.tableInventory.getStackInSlot(0).isEmpty()) {
+        if (!hasItem(gui)) {
             return false;
         }
-        for (int level : container.enchantLevels) {
+        for (int level : ((ContainerEnchantment) gui.inventorySlots).enchantLevels) {
             if (level > 0) {
                 return true;
             }
@@ -117,7 +116,7 @@ final class EnchantSpot extends ScreenSpotKind {
         return 0.9F;
     }
 
-    /** 枠の上の注釈（台が空か、引き直せるか。1.11.4 で引き直した回数はやめた: 当てるたびに引き直すので意味がない）。 */
+    /** 枠の上の注釈（台が空か、引き直せるか）。 */
     @Override
     void drawExtra(Minecraft mc, GuiScreen gui) {
         String hint = I18n.format(hasItem((GuiEnchantment) gui) ? "weakspot.enchant.hint" : "weakspot.enchant.hintEmpty");

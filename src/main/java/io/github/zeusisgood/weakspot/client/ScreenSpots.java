@@ -66,7 +66,6 @@ final class ScreenSpots {
             return;
         }
         k.shownOn = gui;
-        k.onShown();
         k.has = k.place(gui, gui.width / 2.0, gui.height / 2.0);
         k.motion.jumpTo(k.x, k.y);
     }
@@ -122,7 +121,6 @@ final class ScreenSpots {
         }
         int streak = OwnHits.register(k.kind);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(k.kind, streak));
-        k.onHit();
         if (k.place(gui, k.x, k.y)) {
             if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
                 k.motion.moveTo(k.x, k.y, Minecraft.getSystemTime());
