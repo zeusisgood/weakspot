@@ -11,6 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -105,7 +106,7 @@ public final class GuideBookGiver {
     }
 
     private static void line(EntityPlayerMP player, String key, TextFormatting color, boolean bullet, Object... args) {
-        ITextComponent body = PlayerText.of(player, TargetRounds.SINCE, key, args);
+        ITextComponent body = new TextComponentTranslation(key, args);
         body.getStyle().setColor(color);
         ITextComponent text = new TextComponentString(bullet ? " ・" : " ");
         text.getStyle().setColor(TextFormatting.YELLOW);

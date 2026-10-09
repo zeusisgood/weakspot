@@ -16,7 +16,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.common.Mod;
@@ -80,9 +79,6 @@ public final class MiningRewards {
         }
     }
 
-    /** 節目の知らせの翻訳キー weakspot.milestone.broadcast.* を足した版。 */
-    static final String BROADCAST_SINCE = "1.10.0";
-
     /**
      * 本人以外の全員のチャットに、節目に届いたことを知らせる（1.10.0）。type は mining / kind / total。
      * 色は金、7 だけが並ぶ数はピンク。受け取った側は showOthersMilestones で消せる（OthersMilestoneFilter）。
@@ -98,23 +94,14 @@ public final class MiningRewards {
             if (other == player) {
                 continue;
             }
-            ITextComponent text;
-            if (kind == null) {
-                text = PlayerText.of(other, BROADCAST_SINCE, key, player.getName(), milestone);
-            } else if (PlayerText.understands(other, BROADCAST_SINCE)) {
-                text = new TextComponentTranslation(key, player.getName(),
-                        new TextComponentTranslation("weakspot.kind." + kind.key()), milestone);
-            } else {
-                text = new TextComponentString(ServerLang.format(other, key, player.getName(),
-                        ServerLang.format(other, "weakspot.kind." + kind.key()), milestone));
-            }
+            ITextComponent text = kind == null
+                    ? new TextComponentTranslation(key, player.getName(), milestone)
+                    : new TextComponentTranslation(key, player.getName(),
+                            new TextComponentTranslation("weakspot.kind." + kind.key()), milestone);
             text.getStyle().setColor(color);
             other.sendMessage(text);
         }
     }
-
-    /** コンボの段階の知らせの翻訳キー weakspot.milestone.broadcast.combo を足した版。 */
-    static final String COMBO_BROADCAST_SINCE = "1.11.0";
 
     /**
      * 本人以外の全員のチャットに、そのプレイヤーが初めてコンボの段階に届いたことを知らせる（1.11.0。最大コンボを超えたときだけ。
@@ -130,7 +117,7 @@ public final class MiningRewards {
             if (other == player) {
                 continue;
             }
-            ITextComponent text = PlayerText.of(other, COMBO_BROADCAST_SINCE, "weakspot.milestone.broadcast.combo",
+            ITextComponent text = new TextComponentTranslation("weakspot.milestone.broadcast.combo",
                     player.getName(), combo);
             text.getStyle().setColor(color);
             other.sendMessage(text);
