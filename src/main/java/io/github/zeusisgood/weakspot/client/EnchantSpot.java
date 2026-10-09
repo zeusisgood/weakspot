@@ -25,9 +25,6 @@ final class EnchantSpot extends ScreenSpotKind {
     private static final int PANEL_GAP = 8;
     private static final int EDGE = 16;
 
-    /** この画面を開いてから引き直した回数（注釈に出す）。 */
-    private int rerolls;
-
     EnchantSpot() {
         super(HitKind.ENCHANT);
     }
@@ -60,16 +57,6 @@ final class EnchantSpot extends ScreenSpotKind {
 
     private static boolean hasItem(GuiEnchantment gui) {
         return !((ContainerEnchantment) gui.inventorySlots).tableInventory.getStackInSlot(0).isEmpty();
-    }
-
-    @Override
-    void onShown() {
-        rerolls = 0;
-    }
-
-    @Override
-    void onHit() {
-        rerolls++;
     }
 
     /**
@@ -130,17 +117,10 @@ final class EnchantSpot extends ScreenSpotKind {
         return 0.9F;
     }
 
-    /** 枠の上の注釈（台が空・まだ引き直していない・引き直した回数）。 */
+    /** 枠の上の注釈（台が空か、引き直せるか。1.11.4 で引き直した回数はやめた: 当てるたびに引き直すので意味がない）。 */
     @Override
     void drawExtra(Minecraft mc, GuiScreen gui) {
-        String hint;
-        if (!hasItem((GuiEnchantment) gui)) {
-            hint = I18n.format("weakspot.enchant.hintEmpty");
-        } else if (rerolls > 0) {
-            hint = I18n.format("weakspot.enchant.hintCount", rerolls);
-        } else {
-            hint = I18n.format("weakspot.enchant.hint");
-        }
+        String hint = I18n.format(hasItem((GuiEnchantment) gui) ? "weakspot.enchant.hint" : "weakspot.enchant.hintEmpty");
         int width = mc.fontRenderer.getStringWidth(hint);
         int x = (gui.width - width) / 2;
         int y = (gui.height - PANEL_HEIGHT) / 2 - 11;

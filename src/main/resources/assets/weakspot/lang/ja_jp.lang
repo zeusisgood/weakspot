@@ -435,7 +435,6 @@ weakspot.milestone.broadcast.kind=[WeakSpot] %s さんの %s の弱点ヒット�
 weakspot.milestone.broadcast.total=[WeakSpot] %s さんのすべての弱点ヒットの合計が %s 回に達しました！
 weakspot.milestone.broadcast.combo=[WeakSpot] %s さんが初めてコンボ %s に達しました！
 weakspot.enchant.hint=マーカーに当てると、候補を引き直せます
-weakspot.enchant.hintCount=マーカーに当てると、候補を引き直せます（%s 回）
 weakspot.enchant.hintEmpty=物を置くと、弱点で候補を引き直せます
 weakspot.client.hud.ladderboostbarenabled=加速のゲージ
 weakspot.client.hud.ladderboostbarenabled.tooltip=はしごを加速している間、照準の上に残り時間のゲージ（茶色）を表示するか\nファイル: client.hud.ladderBoostBarEnabled

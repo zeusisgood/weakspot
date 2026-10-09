@@ -435,7 +435,6 @@ weakspot.milestone.broadcast.kind=[WeakSpot] %1$s reached %3$s %2$s weak spot hi
 weakspot.milestone.broadcast.total=[WeakSpot] %s reached %s weak spot hits in total!
 weakspot.milestone.broadcast.combo=[WeakSpot] %s reached a %s combo for the first time!
 weakspot.enchant.hint=Hit the marker to reroll the offers
-weakspot.enchant.hintCount=Hit the marker to reroll the offers (%s)
 weakspot.enchant.hintEmpty=Put an item in to reroll the offers with weak spots
 weakspot.client.hud.ladderboostbarenabled=Boost gauge
 weakspot.client.hud.ladderboostbarenabled.tooltip=Show the remaining time gauge (brown) above the crosshair while your climbing is boosted.\nFile: client.hud.ladderBoostBarEnabled
