@@ -40,9 +40,7 @@ final class ScreenSpots {
         // コンテナ画面（エンチャント台など）は、アイテム用のライティングを有効にしたまま Post を出すので、
         // 切ってから描く（1.11.4。弱点の円・文字が暗くなっていた）。ほかの Mod のために、描き終えたら戻す
         boolean lit = GL11.glIsEnabled(GL11.GL_LIGHTING);
-        if (lit) {
-            GlStateManager.disableLighting();
-        }
+        GlStateManager.disableLighting();
         for (ScreenSpotKind k : KINDS) {
             if (!k.eligible(mc, gui)) {
                 k.shownOn = null;
