@@ -5,6 +5,7 @@ import io.github.zeusisgood.weakspot.common.HitBudget;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -33,13 +34,7 @@ public final class RightClickHits {
     private static final class Clicking {
         BlockPos pos;
         long clickTick;
-        final HitBudget[] budgets = new HitBudget[HitKind.values().length];
-
-        Clicking() {
-            for (int i = 0; i < budgets.length; i++) {
-                budgets[i] = new HitBudget();
-            }
-        }
+        final Map<HitKind, HitBudget> budgets = new EnumMap<>(HitKind.class);
     }
 
     /** 対象のブロックを右クリックした（RightClickTargets から、サーバー側でだけ呼ばれる）。 */
@@ -67,7 +62,7 @@ public final class RightClickHits {
         if (RightClickTargets.classify(world, player, pos, settings) != kind) {
             return;
         }
-        if (!HitGate.take(clicking.budgets[kind.ordinal()], now, kind)) {
+        if (!HitGate.take(clicking.budgets.computeIfAbsent(kind, k -> new HitBudget()), now, kind)) {
             return;
         }
 
