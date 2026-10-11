@@ -22,10 +22,7 @@ public final class SleepHits {
         World world = player.world;
         if (!HitGate.allowed(player, HitKind.SLEEP)
                 || !player.isPlayerSleeping() || !world.getGameRules().getBoolean("doDaylightCycle")
-                || !SleepTime.isNight(world.getWorldTime())) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.SLEEP)) {
+                || !SleepTime.isNight(world.getWorldTime()) || !HitGate.ready(player, HitKind.SLEEP)) {
             return;
         }
         world.setWorldTime(SleepTime.advance(world.getWorldTime(), WeakSpotConfig.server.sleep.sleepHitTicks));

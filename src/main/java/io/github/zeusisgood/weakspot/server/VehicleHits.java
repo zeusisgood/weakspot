@@ -48,10 +48,7 @@ public final class VehicleHits {
             return;
         }
         Entity vehicle = player.getRidingEntity();
-        if (vehicle == null || vehicle.getEntityId() != entityId) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.VEHICLE)) {
+        if (vehicle == null || vehicle.getEntityId() != entityId || !HitGate.ready(player, HitKind.VEHICLE)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.VEHICLE, new BlockPos(vehicle), streak);

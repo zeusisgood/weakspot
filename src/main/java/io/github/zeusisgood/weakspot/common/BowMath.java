@@ -219,14 +219,10 @@ public final class BowMath {
 
     /**
      * 照準の左右だけに出す弱点の次の yaw（度。1.8.0。近接の弱点）。pitch は使う側が視線に合わせる。
-     * 視線から offsetRange の角度だけ左か右（ランダム）にずらす。前の yaw から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
+     * 視線から offsetRange の角度だけ左か右（yawSign）にずらす。前の yaw から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
      * 前の yaw との差は、一周（360 度）をまたいでも正しく測る。
+     * yawSign（1.8.1）は yaw が増える側 +1 か減る側 -1。0 ならランダム。
      */
-    public static double nextHorizontalYaw(double lookYaw, double prevYaw, double fovDegrees, Random random) {
-        return nextHorizontalYaw(lookYaw, prevYaw, 0, fovDegrees, random);
-    }
-
-    /** 左右を決めた版（1.8.1。yawSign は yaw が増える側 +1 か減る側 -1。0 ならランダム）。 */
     public static double nextHorizontalYaw(double lookYaw, double prevYaw, int yawSign, double fovDegrees,
                                            Random random) {
         double[] range = offsetRange(fovDegrees);

@@ -135,7 +135,7 @@ public class BowMathTest {
         java.util.Random random = new java.util.Random(3);
         double prev = 0;
         for (int i = 0; i < 200; i++) {
-            double yaw = BowMath.nextHorizontalYaw(170, prev, 70, random);
+            double yaw = BowMath.nextHorizontalYaw(170, prev, 0, 70, random);
             double offset = Math.abs(BowMath.wrapDegrees(yaw - 170));
             double[] range = BowMath.offsetRange(70);
             assertTrue(offset >= range[0] - 1e-9 && offset <= range[1] + 1e-9);
