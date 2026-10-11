@@ -4,6 +4,7 @@ import io.github.zeusisgood.weakspot.FallDamage;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.ComboFactor;
 import io.github.zeusisgood.weakspot.common.FallMath;
+import io.github.zeusisgood.weakspot.common.HitBudget;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.TimedBoostMath;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -46,7 +47,7 @@ public final class MoveHits {
         boolean closeCall;
         /** 死ぬ見込みのあと着地した tick（そのあと生きていたら進捗を与える。負ならなし）。 */
         long landedTick = -1;
-        final Map<HitKind, Long> lastHit = new HashMap<>();
+        final Map<HitKind, HitBudget> budgets = new HashMap<>();
         /** 走りの加速の残り tick（0 以下なら、かけていない）。 */
         int sprintRemaining;
     }
@@ -145,11 +146,9 @@ public final class MoveHits {
         if (kind != HitKind.ELYTRA && player.isRiding()) {
             return;
         }
-        Long last = state.lastHit.get(kind);
-        if (last != null && !HitGate.intervalOk(now, last, kind)) {
+        if (!HitGate.take(state.budgets.computeIfAbsent(kind, k -> new HitBudget()), now, kind)) {
             return;
         }
-        state.lastHit.put(kind, now);
         int combo = HitGate.accept(player, kind, new BlockPos(player), streak);
         if (kind == HitKind.SPRINT) {
             SPRINT_SPEED.set(player, TimedBoostMath.multiplier(WeakSpotConfig.server.sprint.sprintBoostMultiplier,

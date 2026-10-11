@@ -3,6 +3,7 @@ package io.github.zeusisgood.weakspot.server;
 import io.github.zeusisgood.weakspot.Reflect;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.FishingMath;
+import io.github.zeusisgood.weakspot.common.HitBudget;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -52,12 +53,12 @@ public final class FishingHits {
     private FishingHits() {
     }
 
-    /** プレイヤーの浮きごとの、待ち時間の始まりの長さと、最後のヒット。 */
+    /** プレイヤーの浮きごとの、待ち時間の始まりの長さと、ヒットの間隔。 */
     private static final class Track {
         EntityFishHook hook;
         int initialWait;
         int lastWait;
-        long lastHitTick = Long.MIN_VALUE / 2;
+        final HitBudget budget = new HitBudget();
     }
 
     private static boolean available() {
@@ -176,10 +177,9 @@ public final class FishingHits {
         }
         Track track = TRACKS.computeIfAbsent(player.getUniqueID(), id -> new Track());
         long now = player.world.getTotalWorldTime();
-        if (!HitGate.intervalOk(now, track.lastHitTick, HitKind.FISHING)) {
+        if (!HitGate.take(track.budget, now, HitKind.FISHING)) {
             return;
         }
-        track.lastHitTick = now;
         try {
             int wait = read(WAIT, hook);
             WAIT.setInt(hook, FishingMath.waitAfterHit(wait, FishingMath.ticksPerHit(settings.fishingHits)));

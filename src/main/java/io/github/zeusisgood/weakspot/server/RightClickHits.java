@@ -1,10 +1,11 @@
 package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.RightClickTargets;
+import io.github.zeusisgood.weakspot.common.HitBudget;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
-import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -29,15 +30,11 @@ public final class RightClickHits {
     private RightClickHits() {
     }
 
-    /** プレイヤーが最後に右クリックしたブロックと、種類ごとの最後のヒット。 */
+    /** プレイヤーが最後に右クリックしたブロックと、種類ごとのヒットの間隔。 */
     private static final class Clicking {
         BlockPos pos;
         long clickTick;
-        final long[] lastHitTick = new long[HitKind.values().length];
-
-        Clicking() {
-            Arrays.fill(lastHitTick, Long.MIN_VALUE / 2);
-        }
+        final Map<HitKind, HitBudget> budgets = new EnumMap<>(HitKind.class);
     }
 
     /** 対象のブロックを右クリックした（RightClickTargets から、サーバー側でだけ呼ばれる）。 */
@@ -65,10 +62,9 @@ public final class RightClickHits {
         if (RightClickTargets.classify(world, player, pos, settings) != kind) {
             return;
         }
-        if (!HitGate.intervalOk(now, clicking.lastHitTick[kind.ordinal()], kind)) {
+        if (!HitGate.take(clicking.budgets.computeIfAbsent(kind, k -> new HitBudget()), now, kind)) {
             return;
         }
-        clicking.lastHitTick[kind.ordinal()] = now;
 
         // 機械の倍率・収穫のおまけはこのヒットを数えたあとのコンボで決めるので、先に数える
         if (kind == HitKind.HARVEST) {

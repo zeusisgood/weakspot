@@ -14,6 +14,7 @@ import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -27,6 +28,9 @@ import net.minecraftforge.fml.relauncher.Side;
  *
  * 1.11.2: 掘る前のヒットを覚えておき、同じブロックを掘り始めたらブーストをかける。当てたブロックを壊したら、
  * 次を掘り始めるまでの待ち（PlayerControllerMP の非公開の blockHitDelay、5 tick）を 0 にする。
+ *
+ * 1.11.6: ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
+ * クリックし直したブロックがクライアントだけでその場で壊れ、ゴーストブロックになる。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class MiningBoost {
@@ -113,6 +117,20 @@ final class MiningBoost {
         } catch (IllegalAccessException e) {
             // 読めなければ、バニラの待ちのまま
         }
+    }
+
+    /**
+     * ブロックをクリックした（PlayerControllerMP.clickBlock。その場で壊れるかの判定より先に来る）。サーバーと同じく、
+     * ブーストを捨てる（1.11.6）。掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。
+     */
+    @SubscribeEvent
+    public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
+        if (!event.getWorld().isRemote || event.getEntityPlayer() != Minecraft.getMinecraft().player) {
+            return;
+        }
+        boostPos = null;
+        boostHitTick = Long.MIN_VALUE / 2;
+        boostFactor = 1;
     }
 
     /** 一時オフ・ワールドを出たとき。 */

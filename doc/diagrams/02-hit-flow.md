@@ -34,12 +34,12 @@ sequenceDiagram
     TH->>HH: サーバーのスレッドで onHit
     HH->>KH: 種類の表から処理を選ぶ（登録がなければ無視）
     KH->>HG: allowed（サーバーの設定・プレイヤーのオン・オフ・PlayerRules）
-    KH->>KH: 種類ごとの条件と間隔（ready または intervalOk。設定の間隔 − 2 tick）
+    KH->>KH: 種類ごとの条件と間隔（ready または take。HitBudget：設定の間隔ごとに 1 回分戻り、4 回分まで貯められる）
     alt 受け付けない
         Note over KH: 何もしない。クライアントにすぐの返事は送らない<br/>（自分の音・コンボの表示はいったん増えたまま。2b の直しで戻る）
     else 受け付ける
         KH->>HG: accept（player・kind・音の位置・streak）
-        HG->>HG: mark（次の間隔の起点）
+        HG->>HG: mark（間隔を 1 回分使う）
         opt 採掘以外
             HG->>ST: recordKindHit（今回と累計に +1）
             ST->>MR: onKindHit（種類ごとの節目・合計の節目）
@@ -67,6 +67,7 @@ sequenceDiagram
 
 - コンボは**両側で別々に数える**。クライアントは `OwnHits.STREAK`（音・表示）、サーバーは `ServerStats` の `HitStreak`（効果の掛け数・統計・知らせ・進捗）。`HitMessage` の `streak` は、ほかの人の音の高さと、ずれの確認（1.11.3）に使う。ずれていたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で今の数を送り、クライアントは表示を直す（`ComboRelay.checkOwn`・`OwnHits.correctStreak`。片道だけで、サーバーはクライアントの数に合わせない）。
 - サーバーがヒットを受け付けなかったときも、クライアントの音・コンボの表示・弱点の移動は戻らない（返事のパケットがない）。
+- 間隔は `HitBudget`（`HitGate.ready` / `mark`、自分で持つ種類は `HitGate.take`）。ラグでまとめて届いても 4 回分までは受け付ける。
 - `accept` の中の順序は「`mark` → 種類ごとの数と節目 → コンボ → 進捗 → `OtherHitMessage`」。効果はそのあと。
 - 節目の知らせのチャットは、本人以外の全員に送る。`MilestoneMessage` は本人だけに送る（`MilestoneEffects.show`）。
 - クライアント行きのメッセージは、`WeakSpotMod.proxy`（`ClientProxy`）経由でクライアントのスレッドに渡す。
@@ -134,7 +135,10 @@ sequenceDiagram
 | 採掘 | 掘っていないとき（`Mining` がない・位置が違う・`isDestroyingBlock` が false）のヒットは、`ServerBoostTracker.RESERVED` に予約する（プレイヤーごとに 1 つ。`accept`・統計は呼ばない）。同じブロックを `PRE_DIG_TICKS`（20 tick）のうちに掘り始めたら（`LeftClickBlock`）、`apply` で確定する。クライアントは、掘る前に当てられるのは 1 回だけ（`MiningBoost.hasPreHit`）で、左クリックを押している間だけ当たる |
 | 採掘 | `accept` は種類ごとの数を数えない。代わりに `accept` のあとで `ServerStats.record(recordHit)` と `MiningRewards.onMiningHit`（採掘の節目・合計の節目。経験値と道具の耐久回復）。耐久回復は `BreakEvent`（LOWEST）で精算する（`onBlockBroken`）。効果は `Mining.extraTicks` に貯めて `BreakSpeed` に掛ける（`BoostMath`） |
 | 採掘 | クリエイティブのヒットは受け付けない |
-| 成長・機械・収穫 | `RightClickHits`: 直前 10 tick にそのブロックを右クリックした記録・届く距離・`classify` が同じ種類か、を確かめる。間隔の起点は効果の成否の前に記録する（収穫が失敗しても間隔を待つ。クライアントが先に同じ間隔を守って送るので実害なし） |
+| 採掘 | 間隔はプレイヤーごとの `HitBudget`（`ServerBoostTracker.BUDGETS`。ブロックが変わっても引き継ぐ。予約の確定は予約した tick で使う） |
+| 採掘 | クリック（`LeftClickBlock`）のたびに、ブーストを両側で捨てる（クライアントは `MiningBoost.onLeftClickBlock`、サーバーは `Mining` を作り直す）。サーバーは、クリックした座標と前の `Mining` の座標を、その tick の終わりに `SPacketBlockChange` で本人に送り直す（`queueResend` / `onServerTick`。クリエイティブ・採掘を受け付けないプレイヤーは除く） |
+| 採掘 | バニラが保留にした破壊（`receivedFinishDiggingPacket` / `delayedDestroyPos`。1 枠）と同じ位置の前の `Mining` は `DELAYED` に残し、別のブロックへ移ったあとも `BreakSpeed` に追加進捗を掛ける。保留のあとに壊れたら（`BreakEvent`）、統計・耐久回復に数える。保留が読めなければ前の `Mining` をいつも残す |
+| 成長・機械・収穫 | `RightClickHits`: 直前 10 tick にそのブロックを右クリックした記録・届く距離・`classify` が同じ種類か、を確かめる。間隔は効果の成否の前に 1 回分使う（収穫が失敗しても使う。クライアントが先に同じ間隔を守って送るので実害なし） |
 | 収穫 | 効果（`HarvestHits.harvest`、コンボは `peekStreak` で先に見る）が成功してから `accept` |
 | エンチャント | 効果（乱数の引き直し）が成功してから `accept` |
 | 機械 | 効果は `MachineAccelerator.hit`（`accept` が返したコンボ数で倍率を決める） |
