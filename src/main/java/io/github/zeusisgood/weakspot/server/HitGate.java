@@ -53,7 +53,7 @@ public final class HitGate {
     }
 
     /**
-     * ヒットを受け付けると決めたあとの共通の処理（1.8.7）: 間隔の起点（mark）→ 種類ごとの数と節目 → 連続ヒット →
+     * ヒットを受け付けると決めたあとの共通の処理（1.8.7）: 間隔を 1 回分使う（mark）→ 種類ごとの数と節目 → 連続ヒット →
      * 近くの他のプレイヤーのヒット音（soundPos から）。このヒットを数えたあとのコンボ数を返す（コンボの掛け数は
      * ComboFactor.factor(accept(...))）。採掘は、短縮した時間と一緒に ServerStats.record で数え、節目も
      * MiningRewards.onMiningHit で見るので、種類ごとの数は数えない。

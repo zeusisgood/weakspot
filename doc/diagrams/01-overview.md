@@ -22,7 +22,7 @@ flowchart TB
 
     subgraph PURE["Minecraft・Forge に依存しない"]
         CFGP["config/（純粋）<br/>ComboPosition・HitSound・SettingGroups・SoundPreset"]
-        CM["common/<br/>HitKind・HitStreak・ComboFactor・ComboTier・ComboMilestones<br/>MiningStats・Milestones・BoostMath・TargetRules<br/>MarkerMotion・WeakSpotPlacer・KindMask など"]
+        CM["common/<br/>HitKind・HitStreak・ComboFactor・ComboTier・ComboMilestones<br/>MiningStats・Milestones・BoostMath・HitBudget・TargetRules<br/>MarkerMotion・WeakSpotPlacer・KindMask など"]
     end
 
     C --> R

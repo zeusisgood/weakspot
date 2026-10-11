@@ -74,7 +74,7 @@ flowchart LR
 | 順位 | オーバーワールドの `data/weakspot_leaderboard.dat`（UUID ごとの名前・採掘ヒット数・最大コンボ・的当ての自己ベスト・合計） | プレイヤーの累計（ここは写し） | ログイン・ログアウト・的当ての終わり・順位を見る直前（オンラインの全員）に累計から写す。オフラインの人の分はここにだけ残る |
 | 進捗 | バニラの進捗（プレイヤーごと） | サーバー | 条件はどれも `minecraft:impossible`。ログインで累計から判定し直す |
 | 自己ベストとご褒美の段階（クライアント側） | クライアントのメモリ `TargetRecords` | サーバー | ログインの RECORD、的当ての END、`StatsMessage` で受け取る |
-| 掘る前の予約・間隔・ブースト・溜めなど | サーバーのメモリ（`ServerBoostTracker`・`HitGate`・各 `*Hits`） | サーバー | 送らない。`HitGate.forgetAll` で消す |
+| 掘る前の予約・間隔（`HitBudget`）・ブースト・保留中の破壊・送り直すブロックなど | サーバーのメモリ（`ServerBoostTracker`・`HitGate`・各 `*Hits`） | サーバー | 送らない。`HitGate.forgetAll` で消す |
 | 弱点のマーク | クライアントのメモリ（`OtherMarkers`）・サーバーのメモリ（`MarkerRelay`） | 出したクライアント | [図 2b](02-hit-flow.md#2b-ヒットとは別の時刻に動く配信) |
 | ガイドの本 | アイテムの NBT（`weakspotGuide`） | — | 本の中身は翻訳キーで、読む人の言語で出る |
 
