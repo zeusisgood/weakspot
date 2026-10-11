@@ -2,6 +2,7 @@ package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.PlayerRules;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
+import io.github.zeusisgood.weakspot.common.HitBudget;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import java.util.EnumMap;
@@ -16,17 +17,14 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * ヒット通知の共通の前置き（1.8.6。論理サーバー）: 受け付けるプレイヤーか、前のヒットからの間隔、ログアウトの後片付け。
+ * ヒット通知の共通の前置き（1.8.6。論理サーバー）: 受け付けるプレイヤーか、ヒットの間隔（HitBudget）、ログアウトの後片付け。
  * 種類ごとの条件（弓を引いているか、など）は、各 *Hits に残す。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class HitGate {
 
-    /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
-    static final int INTERVAL_JITTER_TICKS = 2;
-
-    /** 種類ごと・プレイヤーごとの最後に受け付けたヒットの tick（ready / mark を使う種類だけ）。 */
-    private static final Map<HitKind, Map<UUID, Long>> LAST_HIT = new EnumMap<>(HitKind.class);
+    /** 種類ごと・プレイヤーごとのヒットの間隔（ready / mark を使う種類だけ。1.11.6 から HitBudget）。 */
+    private static final Map<HitKind, Map<UUID, HitBudget>> BUDGETS = new EnumMap<>(HitKind.class);
 
     private HitGate() {
     }
@@ -40,16 +38,18 @@ public final class HitGate {
                 && PlayerRules.canUse(player);
     }
 
-    /** 前に受け付けたヒットから、設定の間隔（− 2 tick）がたっているか（記録はしない。受け付けたら mark）。 */
+    /** 間隔が空いているか（記録はしない。受け付けたら mark）。まとめて届いても HitBudget.BURST 回分までは受け付ける（1.11.6）。 */
     static boolean ready(EntityPlayerMP player, HitKind kind) {
-        Map<UUID, Long> last = LAST_HIT.get(kind);
-        Long previous = last == null ? null : last.get(player.getUniqueID());
-        return previous == null || intervalOk(player.world.getTotalWorldTime(), previous, kind);
+        Map<UUID, HitBudget> budgets = BUDGETS.get(kind);
+        HitBudget budget = budgets == null ? null : budgets.get(player.getUniqueID());
+        return budget == null || budget.ok(player.world.getTotalWorldTime(), interval(kind));
     }
 
-    /** このヒットを受け付けた（次の ready の起点）。 */
+    /** このヒットを受け付けた（間隔を 1 回分使う）。 */
     static void mark(EntityPlayerMP player, HitKind kind) {
-        LAST_HIT.computeIfAbsent(kind, k -> new HashMap<>()).put(player.getUniqueID(), player.world.getTotalWorldTime());
+        BUDGETS.computeIfAbsent(kind, k -> new HashMap<>())
+                .computeIfAbsent(player.getUniqueID(), id -> new HitBudget())
+                .use(player.world.getTotalWorldTime(), interval(kind));
     }
 
     /**
@@ -68,9 +68,16 @@ public final class HitGate {
         return combo;
     }
 
-    /** 自分で最後の tick を持つ種類（採掘・右クリック・釣り・移動）向けの判定。間隔は設定の表から（1.8.9）。 */
-    static boolean intervalOk(long now, long last, HitKind kind) {
-        return now - last >= Math.max(0, SyncedSettings.server().minHitInterval(kind) - INTERVAL_JITTER_TICKS);
+    /**
+     * 自分で HitBudget を持つ種類（採掘・右クリック・釣り・移動。ブロックや浮きごとなど持ち主が違う）向け: 間隔が空いていれば
+     * 1 回分使って true（1.11.6）。間隔は設定の表から（1.8.9）。
+     */
+    static boolean take(HitBudget budget, long now, HitKind kind) {
+        return budget.tryUse(now, interval(kind));
+    }
+
+    private static int interval(HitKind kind) {
+        return SyncedSettings.server().minHitInterval(kind);
     }
 
     /** 後片付けの理由（1.8.9）。消すものは理由ごとに違うので、各 *Hits の forget が分ける。 */
@@ -104,8 +111,8 @@ public final class HitGate {
      */
     private static void forgetAll(EntityPlayer player, Leave leave) {
         if (leave == Leave.LOGOUT) {
-            for (Map<UUID, Long> last : LAST_HIT.values()) {
-                last.remove(player.getUniqueID());
+            for (Map<UUID, HitBudget> budgets : BUDGETS.values()) {
+                budgets.remove(player.getUniqueID());
             }
         }
         ServerStats.forget(player, leave);
