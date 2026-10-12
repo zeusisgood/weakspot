@@ -25,10 +25,7 @@ public final class BowHits {
         }
         // 引き切ったあとは、過剰チャージ（上限まで）
         boolean full = BowMath.isFull(BowDraw.usedTicks(player));
-        if (full && !BowMath.canOvercharge(BowDraw.overcharge(player))) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.BOW)) {
+        if ((full && !BowMath.canOvercharge(BowDraw.overcharge(player))) || !HitGate.ready(player, HitKind.BOW)) {
             return;
         }
         if (full) {

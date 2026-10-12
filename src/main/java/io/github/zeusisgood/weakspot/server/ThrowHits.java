@@ -22,10 +22,8 @@ public final class ThrowHits {
 
     public static void onHit(EntityPlayerMP player, int streak) {
         if (!HitGate.allowed(player, HitKind.THROW)
-                || !ThrowCharge.CHARGES.isHolding(player) || player.isHandActive()) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.THROW)) {
+                || !ThrowCharge.CHARGES.isHolding(player) || player.isHandActive()
+                || !HitGate.ready(player, HitKind.THROW)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.THROW, new BlockPos(player), streak);

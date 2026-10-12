@@ -38,10 +38,7 @@ public final class PortalHits {
         } catch (IllegalAccessException | RuntimeException e) {
             return;
         }
-        if (counter <= 0) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.PORTAL)) {
+        if (counter <= 0 || !HitGate.ready(player, HitKind.PORTAL)) {
             return;
         }
         int combo = HitGate.accept(player, HitKind.PORTAL, new BlockPos(player), streak);

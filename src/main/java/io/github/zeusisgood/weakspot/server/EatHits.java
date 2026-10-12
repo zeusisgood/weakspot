@@ -17,10 +17,7 @@ public final class EatHits {
 
     public static void onHit(EntityPlayerMP player, int streak) {
         if (!HitGate.allowed(player, HitKind.EAT) || WeakSpotConfig.server.eat.eatHitTicks <= 0
-                || !EatDraw.isEating(player)) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.EAT)) {
+                || !EatDraw.isEating(player) || !HitGate.ready(player, HitKind.EAT)) {
             return;
         }
         EatDraw.add(player, WeakSpotConfig.server.eat.eatHitTicks);

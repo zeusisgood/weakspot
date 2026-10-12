@@ -34,10 +34,7 @@ public final class EnchantHits {
             return;
         }
         ContainerEnchantment container = (ContainerEnchantment) player.openContainer;
-        if (container.tableInventory.getStackInSlot(0).isEmpty()) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.ENCHANT)) {
+        if (container.tableInventory.getStackInSlot(0).isEmpty() || !HitGate.ready(player, HitKind.ENCHANT)) {
             return;
         }
         if (!reroll(player, container)) {

@@ -121,10 +121,7 @@ public final class AnimalHits {
             return;
         }
         SyncedSettings settings = SyncedSettings.server();
-        if (!AnimalTargets.isTarget(player, entity, settings)) {
-            return;
-        }
-        if (!HitGate.ready(player, HitKind.ANIMAL)) {
+        if (!AnimalTargets.isTarget(player, entity, settings) || !HitGate.ready(player, HitKind.ANIMAL)) {
             return;
         }
         State state = state(entity, settings);
