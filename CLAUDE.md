@@ -34,7 +34,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 版は `build.gradle` の `version` と `WeakSpotMod.VERSION` の 2 か所。必ず揃える。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
 - 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
-- 文書だけの変更（コードのコメントだけの修正を含む）は版を上げない。
+- 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - 現行は **1.11.8**、範囲は `"[1.11,1.12)"`。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
@@ -65,12 +65,13 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。
 - 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
 - **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
-- 共通の部品（`HitGate`・`HitBudget`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
+- 共通の部品があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
-- **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
+- **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
 - **採掘のヒットは、掘る前のものは予約にして、掘り始めた瞬間に確定する**（1.11.2。予約の時点でコンボ・統計を数えない。`ServerBoostTracker`）。
 - **コンボはサーバーの数が正**。クライアントの数がずれたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で直す（1.11.3、`ComboSync`。片道だけで、サーバーはクライアントの数に合わせない）。
-- **サーバー側の採掘のブーストは時間枠ではない**（破壊完了の瞬間に「今の速さ × (経過 tick + 1) ≥ 0.7」で判定するため、追加進捗を貯めて速さに換算する。`BoostMath`）。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる。
+- **サーバー側の採掘のブーストは時間枠ではない**。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる（仕組みは `doc/architecture.md` の「重要」の節）。
+- **コードのコメントには、Why / Why not と、型で分からない約束（単位・範囲・どちらの側か）だけを書く**。How の言い直し・版の注記・前の形の説明は書かない（経緯はコミットログ・`CHANGELOG.md`・仕様書にある）。ただし `ServerFeatures.since` などで動作に関わる版は書く。`doc/architecture.md` も同じ。
 
 ### 設定の約束事
 
