@@ -37,7 +37,7 @@ public final class WeakSpotPlacer {
     }
 
     /**
-     * 面に合わせた配置の数値（SPEC_v1.2 §1.3）。ふつうの1×1の面では、設定値のまま（半径 = 短い辺 × radiusRatio）。
+     * 面に合わせた配置の数値（1.2.0）。ふつうの1×1の面では、設定値のまま（半径 = 短い辺 × radiusRatio）。
      * 1. 半径は minRadius 以上、短い辺 × maxRadiusRatio 以下（両立しないときは上限を優先する）
      * 2. 縁の余白は min(edgeMargin, 短い辺 × 0.12)
      * 3. 最小移動距離は min(minMoveDistance, 動ける範囲の対角線 × 0.6)

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 成長の弱点の追加リスト（growthExtraBlocks）を読んだもの（SPEC_v1.4 §1）。Minecraft に依存しない。
+ * 成長の弱点の追加リスト（growthExtraBlocks）を読んだもの（1.4.0）。Minecraft に依存しない。
  * 同じブロックの複数行は、どれかを満たせばよい。条件を書かない行には、初期の条件（DEFAULT_CONDITIONS）を付ける。
  */
 public final class GrowthFilters {

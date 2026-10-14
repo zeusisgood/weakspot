@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
 
-- 仕様書は `doc/spec/`（一覧と版ごとの 1 行の要約は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。正本は `SPEC_v1.0.md`（MVP）と版ごとの差分。仕様書に書かれていないことは、その前の版と現行実装のまま。過去の仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。
+- 仕様書は `doc/spec/`（一覧は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。置いてあるのは 1.11.0 以降の版ごとの差分だけ（1.10.2 までは、タグ `v1.10.2` の `doc/spec/`）。今の挙動の正本は `doc/play.md`・`doc/config.md`・`doc/architecture.md` と 1.11.0 以降の仕様書。仕様書に書かれていないことは、その前の版と現行実装のまま。置いてある仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。
 - **この節以外の詳しいことは `doc/` にある**（必要なときに読む）:
 
 | 内容 | 文書 |
@@ -16,7 +16,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 | 今後の予定・保留中の相談（1.11.0・別の版への対応・TODO） | `doc/roadmap.md` |
 | 遊び方 / 設定の一覧 / 導入 / 更新履歴 | `doc/play.md` / `doc/config.md` / `doc/install.md` / `CHANGELOG.md` |
 
-- `README.md` は入門だけ（ダウンロード・対応する版・操作・種類の一覧・最近の更新 3 件・文書へのリンク）。`README.en.md` は英語の入口（ダウンロード・対応する版・操作・種類の一覧だけ。ほかの文書は日本語のみ）。対応する版は「1.12.2 + Forge（開発・動作確認は 14.23.5.2860）」と書く。
+- `README.md` は入門だけ（ダウンロード・対応する版・操作・種類の一覧・最近の更新 3 件・文書へのリンク）。`README.en.md` は英語の入口（ダウンロード・対応する版・操作と、種類の名前の列挙だけ。種類ごとの説明は CurseForge のページ＝`doc/store/description.md` に任せる。ほかの文書は日本語のみ）。対応する版は「1.12.2 + Forge（開発・動作確認は 14.23.5.2860）」と書く。
 - `doc/play.md` には版の注記（「（1.7.0）」など）を書かない（更新履歴に書く）。
 - README・`CHANGELOG.md`・`doc/` の文章は、ひらがなに開きすぎず漢字を適度に使う（例「当てると速くなる」→「当てると各動作が加速」、「変わっていない」→「変更なし」。更新履歴は体言止めでよい）。
 
@@ -52,7 +52,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 **コードに触る前に `doc/architecture.md` の関係する所を読む。仕組みを変えたら、そちらを直す。**
 
-**コードを変えたら、関係する文書を同じ PR で直す**（`doc/architecture.md`・`doc/diagrams/` の図（Mermaid の中身も）と注記・`doc/play.md`・`doc/config.md`・ガイドの本・`doc/roadmap.md`）。文章の注記だけでなく、図の矢印・状態も変える。直す必要がない文書は、PR の本文に「直さなかった文書と理由」を書く。
+**コードを変えたら、関係する文書を同じ PR で直す**（`doc/architecture.md`・`doc/play.md`・`doc/config.md`・ガイドの本・`doc/roadmap.md`）。直す必要がない文書は、PR の本文に「直さなかった文書と理由」を書く。
 
 - クライアントとサーバーの**両方に Mod が必要**。パッケージは `io.github.zeusisgood.weakspot`。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。**種類を足すときに直す所の一覧は `doc/architecture.md`**。的当て（1.11.0）は種類ではなく別の仕組み（`TargetRounds` / `TargetPlay`。種類別の統計・設定・節目に入らない）。

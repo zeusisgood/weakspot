@@ -30,35 +30,13 @@ You can change the keys under Options → Controls → Weak Spot Mining.
 
 ## Kinds of weak spots
 
-| Kind | How | Effect |
-|---|---|---|
-| Mining | Aim at a block (the spot shows before you dig), then hold left click | Digs faster (even faster with a combo); break a block you hit to start the next one at once; repairs your tool a little when the block breaks |
-| Growth | Hold right click with an empty hand on a growing crop or sapling (sneak to use it on any block that changes over time) | Grows it faster |
-| Harvest | Hold right click with an empty hand on a ripe crop | Harvests and replants it |
-| Machine | Sneak and hold right click with an empty hand on a furnace or other machine | Speeds the machine up |
-| Animal | Hold right click with an empty hand on an animal (sneak for horses, villagers, etc.) | Speeds up growing up, breeding cooldown, wool, eggs and villager trade restocking |
-| Fishing | Hold a fishing rod and aim at the spot near the bobber | Fish bite sooner |
-| Bow | Aim at the spot while drawing a bow | Draws faster; after a full draw, arrows hit harder |
-| Melee | Hold a sword or axe near enemies and aim at the spot | Charges up your next attack into a strong critical hit |
-| Throwing | Hold ender pearls, snowballs, etc. and aim at the spot | Your next throw flies faster and farther |
-| Eating | Aim at the spot while eating or drinking | Finishes sooner |
-| Vehicle | Aim at the spot while riding a horse, pig, minecart or boat | Moves faster |
-| Ladder | Aim at the spot while climbing a ladder or vines | Climbs faster |
-| Sprint | Aim at the spot while sprinting | Runs faster |
-| Elytra | Aim at the spot while flying | Launches you where you look |
-| Portal | Aim at the spot while standing in a nether portal | Travels sooner |
-| Swim | Aim at the spot while swimming | A short dash, then faster swimming |
-| Fall | Aim at the spot while falling from a height | Takes less fall damage |
-| Sleeping | Move the cursor over the marker on the sleep screen at night | Morning comes sooner |
-| Enchanting | Click the marker on the enchanting table screen | Rerolls the three offers (costs nothing) |
-
-Growth, harvest, machine and animal spots also appear while you hold an item that does nothing on right click (pickaxes, sticks, ingots...). Hitting spots in a row builds a **combo**, and the hit sound climbs the scale. The in-game guide book (the Guide button in the K menu) explains every kind in English.
+There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, melee, throwing, eating, vehicle, ladder, sprint, elytra, portal, swim, fall, sleeping and enchanting. See the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) for how each one works, or the in-game guide book (the Guide button in the K menu). Hitting spots in a row builds a **combo**, and the hit sound climbs the scale.
 
 ## More
 
 - Settings: the Mods menu or `config/weakspot.cfg` (every setting has an English description).
 - Bugs: type `/weakspot bug` in chat to get a link to a prefilled [issue](https://github.com/zeusisgood/weakspot/issues) with your environment.
-- Other documents (changelog, detailed guide, settings list) are in Japanese: [CHANGELOG.md](CHANGELOG.md), [doc/](doc/README.md).
+- Other documents (changelog, detailed guide, settings list) are in Japanese: [CHANGELOG.md](CHANGELOG.md), [doc/](doc/).
 
 ## License
 

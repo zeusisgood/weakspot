@@ -16,7 +16,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 
 ソースは `io.github.zeusisgood.weakspot` 以下にあります。パッケージごとの中身は [architecture.md](architecture.md) の「全体」を参照してください。
 
-仕様書（バージョンごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
+仕様書（1.11.0 以降の版ごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
 
 ## ブランチとリリース
 
@@ -24,17 +24,15 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 - テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）の確認も含まれます。配布サイトへ上げるスクリプトは、CI で `shellcheck` にかけます。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
 - `main` に取り込まれた時、`build.gradle` の `version` がまだ Release のない版なら、同じワークフローがタグ `vX.Y.Z` と GitHub Release（本文は `CHANGELOG.md` のその版の節、jar を添付）を自動で作成します。版を上げない変更（文書だけなど）では作成しません。
-- 続けて、Release の jar を Modrinth と CurseForge にも上げます（[`.github/scripts/`](../.github/scripts/) の `publish-modrinth.sh`・`publish-curseforge.sh`。更新内容は英語のお知らせの 1 行と Release へのリンク）。Modrinth はその版がすでにあれば何もしません。CurseForge は上げ済みか確かめられないため、Release を作った時だけ上げます。失敗した時は、Actions の「Modrinth publish」「CurseForge publish」を手動で実行します（CurseForge は、Files に無いことを先に確かめる）。Modrinth の説明文は `doc/store/description.md` を変えると自動で反映されます（「Modrinth description」）。
+- 続けて、Release の jar を Modrinth と CurseForge にも上げます（下の「配布サイト」）。
 
 ## バージョンの方針
 
-- **パッチ**（1.8.5 → 1.8.6）: 機能追加・不具合修正。通信内容や保存データの形式は変えないため、同じマイナー内であれば、サーバーとクライアントのパッチが違っても接続できます。
-- **マイナー**（1.7.x → 1.8.0）: 互換性が壊れる変更（通信内容の変更、旧バージョンで読めない保存データの変更、設定キーの削除・意味の変更）。マイナーが違うと接続できないため、サーバーと全員のクライアントを同じマイナーに更新してください。
-- 判断に迷う場合は、マイナーを上げます。
+機能追加・不具合修正は**パッチ**、互換性が壊れる変更（通信内容・保存データの形式・設定キーの削除や意味の変更）は**マイナー**（迷ったらマイナー）。同じマイナー同士なら、サーバーとクライアントのパッチが違っても接続できます。細かい決まりは [CLAUDE.md](../CLAUDE.md) の「バージョン」。
 
 ## 開発環境の細かいこと
 
-- ビルドは公式 MDK ベースの ForgeGradle 3 + Gradle 4.9（1.0 の仕様書にある FG 2.3 ではない）。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
+- ビルドは公式 MDK ベースの ForgeGradle 3 + Gradle 4.9。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
 - テストを 1 クラスだけ: `./gradlew test --tests io.github.zeusisgood.weakspot.common.WeakSpotPlacerTest`
 - JDK 8 がない環境（クラウドのセッションなど）: `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす。
 - クラウドのネットワーク: ForgeGradle と Forge は `maven.minecraftforge.net` から取るので、環境のネットワーク設定（セッションのタイトルバーのクラウド環境のメニュー → Edit → Network access）で Custom にし、Allowed domains にこのホストを足す（パッケージマネージャーの既定の一覧は残す。手順は https://code.claude.com/docs/en/cloud-environments#network-access ）。拒否されると `Received status code 403` で止まる。
@@ -49,7 +47,6 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
   java -cp $O:$CP org.junit.runner.JUnitCore $(cd src/test/java && ls io/github/zeusisgood/weakspot/common/*Test.java | sed 's/\.java//;s#/#.#g')
   ```
   `ReleaseFilesTest` も同じ形で流せる（`resources/ReleaseFilesTest.java` と `ResourceFiles.java` を足す）。MC に依存するコードのコンパイルはできないので、そのままでは push しない（CLAUDE.md の「リリース」）。
-- 図（`doc/diagrams/` の Mermaid）が描けるかの確かめ方: クラウドの Chromium を使う設定ファイル（`{"executablePath":"/opt/pw-browsers/chromium","args":["--no-sandbox"]}`）を作り、`npx -y @mermaid-js/mermaid-cli -p その設定.json -i doc/diagrams/02-hit-flow.md -o 出力先/02-hit-flow.md`。図ごとに `✅` が出ればよい（出力の svg はリポジトリに入れない）。
 - `runServer`: 作業ディレクトリは `run/`、`nogui` 付き。`run/eula.txt` は同意済み。止めるときはコンソールで `stop`。
   - パイプで `stop` を流しても Gradle 経由では届かない。起動の確認は `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を見る。
   - devcontainer が使えない環境（クラウドのセッションなど）では、FML の `NetworkRegistry.newChannel` の NPE で落ちる。そこでは `runServer` での確認はしない（ビルドとテストは通す。jar はユーザーが試す）。
@@ -66,7 +63,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 2. `build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
 4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
-5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`en_us.lang` / `ja_jp.lang` の `weakspot.guide.*`）を直す。種類・操作が変わったら `README.en.md` の表も。
+5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`en_us.lang` / `ja_jp.lang` の `weakspot.guide.*`）を直す。操作が変わったら `README.en.md` の操作の表も（種類の説明は `doc/store/description.md` にだけ書く）。
 6. 更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで）。
 7. 直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
 8. 種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md` を直す（下の「配布サイト」）。
@@ -79,16 +76,16 @@ Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge 
 
 - **Modrinth**: Release の jar を `.github/scripts/publish-modrinth.sh` で上げる（更新内容は `changelog.sh` が作る、英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク）。その版がもうあれば何もしない。失敗したら Actions の「Modrinth publish」を手動で流す。
 - **CurseForge**: `publish-curseforge.sh`（更新内容は同じ `changelog.sh`）。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる）。
-- **説明文**（1.9.1 のあと）: 正本は `doc/store/description.md`（英語の Markdown。版の番号は書かない。リンクは `https://…` の完全な形）。
+- **説明文**: 正本は `doc/store/description.md`（英語の Markdown。版の番号は書かない。リンクは `https://…` の完全な形）。
   - Modrinth は、`main` でこのファイルが変わると `.github/workflows/modrinth-description.yml` が API（`PATCH /v2/project/<ID>`）で反映する。Secrets の `MODRINTH_TOKEN`（スコープ「プロジェクトを書く」）と Variables の `MODRINTH_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる。Actions の画面から手動でも流せる）。
   - CurseForge は API で説明を変えられないので手動。このファイルを直した PR では、本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
-- **画像**（1.9.3 のあと）: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`。1.9.4）用）。AI 生成なので、Modrinth の開示の「資産」に入れてある。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
-- 配布サイトのページ（1.10.0 のあと）: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（自動化の起点のため）。ゲーム内の [変更点を見る]・[ダウンロード] は 1.11.0 から CurseForge のファイルの一覧を指す。Modrinth は審査が済んだら、ダウンロードの CurseForge の下に 1 行足す。
+- **画像**: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`）用）。AI 生成なので、Modrinth の開示の「資産」に入れてある。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
+- **配布サイトのページ**: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（自動化の起点のため）。ゲーム内の [変更点を見る]・[ダウンロード] は CurseForge のファイルの一覧を指す。
 
 ## ライセンスと issue
 
-- ライセンスは MIT（1.9.1 のあと。`LICENSE`、`Copyright (c) 2026 zeusisgood`）。Modpack 歓迎。再配布は止めず、README で CurseForge のページへのリンクを「助かります」とお願いするだけ（Modpack 歓迎の行とぶつからないように、「再アップロードしないで」とは書かない）。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
-- issue の雛形は、不具合報告 `bug_report.md`（ラベル `bug`）・要望 `feature_request.md`（`enhancement`）・Modpack の報告 `modpack.md`（`modpack`）の Markdown と、記入欄の形式（issue forms）の別の版への対応 `version_request.yml`（`version-request`）・ほかの Mod との相性 `compatibility.yml`（`compatibility`）。不具合報告は `/weakspot bug` の本文と見出しを揃えているので Markdown のまま。白紙の issue は許可したまま（ゲームからのリンクの本文が消えないように）。`config.yml` に遊び方への案内のリンク。ラベルはリポジトリに先に作っておく（無いと付かない）。README のライセンスの節で、Modpack に入れたら issue で「教えてもらえると励みになります」（任意）と書く。
+- ライセンスは MIT（`LICENSE`、`Copyright (c) 2026 zeusisgood`）。Modpack 歓迎。再配布は止めず、README で CurseForge のページへのリンクを「助かります」とお願いするだけ（Modpack 歓迎の行とぶつからないように、「再アップロードしないで」とは書かない）。jar にも `LICENSE_weakspot` として入れる（`build.gradle` の `jar`）。
+- issue の雛形は [`.github/ISSUE_TEMPLATE/`](../.github/ISSUE_TEMPLATE/)。不具合報告は `/weakspot bug` の本文と見出しを揃えているので Markdown のまま。白紙の issue は許可したまま（ゲームからのリンクの本文が消えないように）。雛形のラベルはリポジトリに先に作っておく（無いと付かない）。
 
 ## ブランチの片付け
 
