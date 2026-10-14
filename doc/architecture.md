@@ -7,11 +7,9 @@
 
 ## 全体
 
-サーバーとクライアントは、同じマイナー同士なら接続できる（`@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`）。パッケージは `io.github.zeusisgood.weakspot`。弱点の種類は `common/HitKind`（通信は番号。`key()` が設定・翻訳キーの小文字の名前）。
-
-- `common/`: Minecraft に依存しない純粋な計算。単体テストは主にここ（ほかに `compat/`・`config/` の golden テスト、`resources/` のファイルの揃い具合のテスト、ルートの `HeldItemsTest`）。
+- `common/`: Minecraft に依存しない純粋な計算。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
-- `client/`（`@EventBusSubscriber(value = Side.CLIENT)`。専用サーバーではロードされない）: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
+- `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
 - `network/`: パケット（下の「通信」）。
 - `config/`: 設定（下の「設定」）と、送る設定 `SyncedSettings`。
@@ -42,7 +40,7 @@
   - 照準が水平から大きく上下を向いていたら、水平に戻る側に出す（当て続けても真上・真下まで行かないように）。
   - 移動の加速: はしご・泳ぎ・ボートはクライアントが `move` で足す（泳ぎは 1.12.2 の移動速度の値が水中に効かないため、ボートは乗っている人のクライアントが動きを決めるため）。馬・豚・走りはサーバーの `server/SpeedModifier`。トロッコはサーバーで `onUpdate` を余分に呼ぶ（レールの最高速度は `BlockRailBase` が決めていて上げられないため）。
 - 画面の上のマーカー（睡眠・エンチャント）: 土台は `ScreenSpotKind` / `ScreenSpots`。`DrawScreenEvent.Post` は、コンテナ画面（エンチャント台）ではアイテム用のライティングが有効のまま来るので、入口で切る（切らないと円と文字が暗くなる）。
-- HUD の図形は、`ScreenProjection.fill` が画面の上で時計回りに頂点を並べ、GUI では裏向きの面になるので、`HudSpot.beginOverlay` / `endOverlay` でカリングを切る（切らないと塗りが消えて中空の丸に見える）。
+- HUD の図形: `HudSpot.beginOverlay` / `endOverlay`（`ScreenProjection.fill` の頂点の並びが、GUI では裏向きの面になるため）。
 - 釣り（`client/FishingSpot`・`server/FishingHits`）: 浮きの待ち時間は非公開のフィールド（`ticksCaughtDelay` など）。浮きのブロックが水で液体の高さ > 0 のときだけ待っているとみなす（浮きは一度水に入ると `BOBBING` のまま戻らないので、縁に引っかかると、減らしても魚が来ない）。
 - 弓（`BowSpot`・`BowHits`・`BowDraw`）: 残り時間は `LivingEntityUseItemEvent.Tick` の `setDuration` で減らす。放つときは Stop が ArrowLoose より先に来るので、Stop では消さない。過剰チャージは `ArrowLooseEvent` で倍率を覚え、同じ tick の `EntityJoinWorldEvent` の矢に掛ける。
 - 近接（`MeleeSpot`・`MeleeHits`・`MeleeCharge`）: 溜めを使う攻撃はクリティカルにしない（バニラの剣の薙ぎ払いは「クリティカルでない」ことが条件のため）。代わりに、その tick の同じプレイヤーのダメージ（正面と薙ぎ払いの周り）に `LivingHurtEvent` で倍率を掛ける。
@@ -61,7 +59,6 @@
 ### 表示と音（クライアント）
 
 - 描画: ブロック・生き物の弱点は `WeakSpotRenderer`（目との間に水・溶岩があれば深度テストを切る。1.12.2 では水面も深度を書くので、水の中のブロックの弱点が隠れていた。照準の先のブロックは液体のほかにさえぎる物がないので、壁が透けることはない）。配置は `common/WeakSpotPlacer`、動きと残像は `common/MarkerMotion`（表示位置と当たり判定の位置は別）。バーは `WorldBar`（`GrowthBar`・`AnimalBar`・`MachineBars`）と `OwnSpotBars`。
-- ヒット判定は `RenderWorldLastEvent` で毎フレーム（tick 単位だと素早い照準移動を取りこぼす）。
 - 音: `HitSounds`（音の高さは `common/HitStreak` の連続ヒット数から `HitPitch` / `HitScale`）。和音は旋律より下に重ねる（ピッチの上限 2.0 のため）。プリセットは `config/SoundPreset`、画面は `SoundTab`・`MyPresetsScreen`（バニラのボタンは右クリックを拾わないので、`SoundTab.mouseClicked` で受ける）。
 - コンボの表示: `ComboHud`（段階は `common/ComboTier`・`ComboMilestones`・`ComboFactor`）、節目の演出は `ComboEffects`・`MilestoneEffects`（累計の節目のタイトルを優先する）。
 - 自分の弱点の見た目と種類のオン・オフ: `MarkerLook`・`KindSwitches`・`common/KindMask`。オフの種類は `SwitchMessage` でサーバーにも送り、右クリックの抑止とヒットの受け付けを止める（バニラの動きに戻すため）。
@@ -84,18 +81,17 @@
 
 `src/test/.../compat/WireCompatTest` が、統計・設定の送る中身と保存のキーがパッチの間に 1 バイトも変わらないことを確かめる（通信・保存の形を変えるマイナーでは、期待値を作り直す）。
 
-- ヒットの受け付け: `server/HitHandlers`（種類 → 処理の表。`HitHandlersTest` が全種類の登録を確かめる）→ `server/HitGate`（`allowed` / `ready` / `mark` / `take` / `accept`。受け付けたあとの統計・節目・コンボ・ほかの人への音は `accept` にまとめる）。
-- ヒットの間隔: `common/HitBudget`（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる）。最後に受け付けた tick と比べる形だと、ラグでまとめて届いた正しいヒットを落とし、採掘ではロールバックの元になっていた（issue #38）。
+- ヒットの受け付け: `server/HitHandlers`（種類 → 処理の表。`HitHandlersTest` が全種類の登録を確かめる）→ `server/HitGate`（`allowed` / `ready` / `mark` / `take` / `accept`。間隔は `common/HitBudget`。受け付けたあとの統計・節目・コンボ・ほかの人への音は `accept` にまとめる）。
 - 後片付け: `HitGate.forgetAll`（ログアウト・リスポーン・ディメンション移動。プレイヤーごとの記憶を持つクラスはここに並ぶ）。
 - 種類の表: `HitKind`（初期の色・コンボの掛け数を使うか）、`SyncedSettings.enabled(kind)` / `minHitInterval(kind)`（フィールドの名前の規則 `<key>WeakSpotEnabled` / `<key>MinHitIntervalTicks` で表を作る）、`SyncedSettings.server()`（サーバーの自分の設定。`fromConfig()` はリフレクションで約 80 項目を集めるので、ヒットのたびに呼ばない）。
-- コンボ: `common/ComboFactor`（掛け数）、サーバーの数が正（`ServerStats.countStreak`）。クライアントの数がずれたら、手が止まったときに本人宛ての `OtherComboMessage` で直す（`server/ComboRelay.checkOwn`・`common/ComboSync`。片道だけ）。
+- コンボ: `common/ComboFactor`（掛け数）、`ServerStats.countStreak`、本人のコンボの直し `server/ComboRelay.checkOwn`・`common/ComboSync`。
 - 照準のまわり・画面の上: `AimSpotKind` / `AimSpots`、`ScreenSpotKind` / `ScreenSpots`（置き場所の選び方は `placeRandom`）、`HudSpot.gauge`・`ChargeGauge`、`ScreenProjection.drawMarker` / `edgeArrow`、`client/TimedBoost`・`common/TimedBoostMath`。
 - そのほか: `UseTimeCut`、`server/SpeedModifier`、`client/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`。
-- **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers` とその種類の `*Hits`、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上なら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。`<key>WeakSpotEnabled` / `<key>MinHitIntervalTicks` にすると種類の表に自動で入る）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・この文書、ガイドの本（`GuideBook.CONTENT`）。
+- **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers` とその種類の `*Hits`、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上なら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。名前の規則に合わせると種類の表に自動で入る。上の「種類の表」）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・この文書、ガイドの本（`GuideBook.CONTENT`）。
 
 ### 通信
 
-`network/`（`WeakSpotMod.preInit` で登録。番号は登録順）。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
+`network/`（`WeakSpotMod.preInit` で登録。番号は登録順）。
 
 | 番号 | メッセージ | 向き | 中身 |
 |---|---|---|---|
@@ -128,19 +124,19 @@
 
 - ヒット間隔の制限は、クライアントが `minHitIntervalTicks`（成長・機械はそれぞれの設定）、サーバーは `HitBudget`。サーバーがヒットを拒否してクライアントだけブーストされると、ブロックが一度戻って見える。
 - 採掘のコンボ倍率: クライアントは時間枠の中の速さに `BoostMath.clientMultiplier` を掛ける（掛け数は自分のコンボ数から）。サーバーは `HitGate.accept` が返すコンボ数から。境目で一瞬ずれても、サーバーは進み具合 70% で壊れたことを認めるので吸収される。
-- ブーストの目安: H tick ごとにヒットすると、速度は通常の `1 + (倍率-1)×継続×掛け数/H` 倍。初期値なら `1 + 12f/H` で、約 0.6 秒ごとのヒットで2倍、`minHitIntervalTicks=6` で最大3倍。
 
 ### 見えない壁（ゴーストブロック）の対策（issue #38）
 
 バニラ（`NetHandlerPlayServer.processPlayerDigging`）は、掘り終わり（STOP）と中断（ABORT）のあとはブロックが空気でなければ `SPacketBlockChange` を返すが、**掘り始め（START）には返さない**。クライアントの `PlayerControllerMP.clickBlock` は START を送ってから「1 tick で壊れるか」を判定し、壊れるならその場で壊す（STOP は送らない）。そのため、クライアントのブーストがクリックし直しても続くと、サーバーで戻ったブロックをクリックし直したとき、クライアントだけでその場で壊れ、サーバーには残る。対策は 3 つ:
 
-- クライアントもサーバーも、クリックのたびにブーストを捨てる（`MiningBoost.onLeftClickBlock`。`LeftClickBlock` は、その場で壊れるかの判定より先に来る。掘る前のヒットと、待ちを 0 にするための当てたブロックは残す）。
+- クリックのたびにブーストを捨てる（`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`。`LeftClickBlock` は、その場で壊れるかの判定より先に来る）。
 - サーバーは、クリックした座標と前の座標の今の状態を、その tick の終わりに本人にだけ `SPacketBlockChange` で送り直す（`ServerBoostTracker.queueResend`）。古いクライアントや、ほかの Mod で速さがずれたときも、同じ tick のうちに戻る。
 - 保留の破壊: バニラの `blockRemoving` は、進捗が 0.7 未満で掘り終わりが届くと破壊を保留にする（`receivedFinishDiggingPacket` / `delayedDestroyPos`）。**保留は 1 枠だけ**で、埋まっていると次の不足は捨てられて STOP の返事でブロックが戻る。保留中のブロックは「今の速さ × 経過 tick ≥ 1.0」で壊れる。違うブロックを掘り始めても、保留中のブロックには追加進捗を掛け続ける（`ServerBoostTracker.DELAYED`）。保留のあとに壊れたら、統計・耐久回復に数える。
 
 ## 設定
 
-`@Config`（`config/weakspot.cfg`）。カテゴリは 2 段: 上の段が `server`（`ServerConfig`）／`client`（`ClientConfig`）、その下が種類・用途（`ServerConfig.Mining` などの入れ子のクラス。Forge の決まりで、入れ子の項目は static ではないインスタンスのフィールド）。`throw` は Java の予約語なので、フィールドは `throwing`（`@Config.Name("throw")`）。根の `general` には `configVersion` だけを置く。項目の名前は、カテゴリを分ける前と同じ。名前から項目を探すときは `WeakSpotConfig.setting(名前)`。`[サーバー]` / `[クライアント]` の扱いと設定の足し方は [CLAUDE.md](../CLAUDE.md) の「設定の約束事」、項目の一覧は [config.md](config.md)。
+`[サーバー]` / `[クライアント]` の扱い・カテゴリ・設定の足し方は [CLAUDE.md](../CLAUDE.md) の「設定の約束事」、項目の一覧は [config.md](config.md)。
 
-- 設定ファイルの移行: `WeakSpotConfig.migrate` を `serverStarting` と `init`（クライアントだけで遊ぶときも移るように）で呼び、`configVersion` が古ければ 1 回だけ直して保存する。6 = 今の設定にない項目（1.7.x の `meleeWeakSpotScale` など）を消す（Forge は自分では消さない）。7 = `general` に並んでいた項目を、新しいカテゴリの同じ名前の項目へ移す（`moveToCategories`）。`preInit` の間の `ConfigManager.sync` は「読み込み」（ファイルの値でフィールドを上書きする）になるので、そこでは保存できない。値は `Property` に書いてから `sync` するので、`AVAILABLE` より前でも動く。移行は `ConfigMigrationTest` で確かめる。
-- 設定の読み直し: 起動後の `ConfigManager.sync` は、`Property#hasChanged` の項目だけファイル → フィールド、ほかはフィールド → ファイルの向きに動く。`reloadFromFile` は、`ConfigManager` の非公開の `CONFIGS` から `Configuration` を取り出して `load()` し、全項目を同じ値で `set` し直して（「変わった」の印）から `sync` する。
+- `throw` は Java の予約語なので、フィールドは `throwing`（`@Config.Name("throw")`）。根の `general` には `configVersion` だけを置く。
+- 移行（`WeakSpotConfig.migrate`）: `preInit` の間の `ConfigManager.sync` は「読み込み」（ファイルの値でフィールドを上書きする）になるので、そこでは保存できない。
+- 読み直し（`reloadFromFile`）: 起動後の `sync` は `hasChanged` の項目だけファイル → フィールドの向きになるので、読み込んだあと全項目に `set` をし直す。

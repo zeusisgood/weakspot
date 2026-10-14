@@ -87,7 +87,7 @@
 
 ## 5. README・doc
 
-- `doc/spec/README.md` の表の一番上に `| [1.11.10](SPEC_v1.11.10.md) | 文書のみ |`（PR 1）
+- `doc/spec/README.md` の表の一番上に `| [1.11.10](SPEC_v1.11.10.md) | 文書のみ |`（PR 1）（注: 実装では「パッチ」。版を上げることにしたため）
 - 直すのは、PR 1: `doc/architecture.md`・`CLAUDE.md`、PR 2: `src/main/java`・`src/test/java` のコメントと、リリースの手順どおりのファイル
 - PR 2 のリリース（`doc/development.md` の「リリースの手順」どおり）:
   - `CHANGELOG.md`: 「## 1.11.10」に「内部の整理（コードのコメント・開発者向けの文書）。遊び方・見た目に変更なし」「通信内容・設定・保存データに変更なし。1.11.x 同士はそのまま接続可能」「1.11.9 は欠番」
