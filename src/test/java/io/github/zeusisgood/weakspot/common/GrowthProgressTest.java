@@ -19,12 +19,4 @@ public class GrowthProgressTest {
         assertEquals(1.0, GrowthProgress.fraction(9, 7), 1e-9);
         assertEquals(0.0, GrowthProgress.fraction(3, 0), 1e-9);
     }
-
-    @Test
-    public void columnUsesAgeOutOfFifteen() {
-        assertEquals(0.0, GrowthProgress.column(0), 1e-9);
-        assertEquals(7.0 / 15, GrowthProgress.column(7), 1e-9);
-        assertEquals(1.0, GrowthProgress.column(15), 1e-9);
-        assertEquals(1.0, GrowthProgress.column(20), 1e-9);
-    }
 }

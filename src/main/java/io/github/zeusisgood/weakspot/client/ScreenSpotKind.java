@@ -59,6 +59,43 @@ abstract class ScreenSpotKind {
     /** 前の位置 (prevX, prevY) から離れたランダムな位置を x, y に入れる。置ける場所がなければ false。 */
     abstract boolean place(GuiScreen gui, double prevX, double prevY);
 
+    /**
+     * place の共通の形。範囲の中のランダムな点を tries 回試し、前の位置から minMove 以上離れた点があればそれ、なければ
+     * 一番離れた点を x, y に入れる。hole {左, 右, 上, 下} の中の点は使わない（null なら除かない）。使える点が 1 つも
+     * なければ、x, y を変えずに false。
+     */
+    final boolean placeRandom(double minX, double maxX, double minY, double maxY, double[] hole, int tries,
+            double minMove, double prevX, double prevY) {
+        boolean found = false;
+        double bestX = 0;
+        double bestY = 0;
+        double bestMove = -1;
+        for (int i = 0; i < tries; i++) {
+            double nx = minX + random.nextDouble() * (maxX - minX);
+            double ny = minY + random.nextDouble() * (maxY - minY);
+            if (hole != null && nx > hole[0] && nx < hole[1] && ny > hole[2] && ny < hole[3]) {
+                continue;
+            }
+            double move = Math.hypot(nx - prevX, ny - prevY);
+            if (move >= minMove) {
+                x = nx;
+                y = ny;
+                return true;
+            }
+            if (move > bestMove) {
+                found = true;
+                bestMove = move;
+                bestX = nx;
+                bestY = ny;
+            }
+        }
+        if (found) {
+            x = bestX;
+            y = bestY;
+        }
+        return found;
+    }
+
     /** 円・輪・中心の色 {disk, ring, center}。 */
     abstract float[][] look();
 

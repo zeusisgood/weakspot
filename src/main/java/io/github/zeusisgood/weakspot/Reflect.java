@@ -29,12 +29,7 @@ public final class Reflect {
         return null;
     }
 
-    /** 引数なしのメソッド。 */
-    public static Method method(Class<?> owner, String what, String... names) {
-        return method(owner, what, new Class<?>[0], names);
-    }
-
-    /** 引数の型を指定したメソッド。 */
+    /** 引数の型を指定したメソッド（引数なしは new Class<?>[0]）。 */
     public static Method method(Class<?> owner, String what, Class<?>[] parameterTypes, String... names) {
         for (String name : names) {
             try {

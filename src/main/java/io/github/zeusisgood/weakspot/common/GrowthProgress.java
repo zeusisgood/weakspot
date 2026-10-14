@@ -3,9 +3,6 @@ package io.github.zeusisgood.weakspot.common;
 /** 作物の成長バーに出す進み具合（0.0〜1.0）。Minecraft に依存しない。 */
 public final class GrowthProgress {
 
-    /** サトウキビ・サボテンの年齢の最大（次の節が伸びるまでの進み具合を、年齢 ÷ 15 で表す）。 */
-    public static final int COLUMN_MAX_AGE = 15;
-
     private GrowthProgress() {
     }
 
@@ -15,10 +12,5 @@ public final class GrowthProgress {
             return 0.0;
         }
         return Math.max(0.0, Math.min(1.0, (double) value / max));
-    }
-
-    /** サトウキビ・サボテンの、柱の一番上の節の年齢から。 */
-    public static double column(int age) {
-        return fraction(age, COLUMN_MAX_AGE);
     }
 }

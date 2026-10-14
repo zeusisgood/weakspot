@@ -64,10 +64,11 @@ final class EnchantSpot extends ScreenSpotKind {
      */
     @Override
     boolean place(GuiScreen gui, double prevX, double prevY) {
-        double left = (gui.width - PANEL_WIDTH) / 2.0 - PANEL_GAP - radius();
-        double right = (gui.width + PANEL_WIDTH) / 2.0 + PANEL_GAP + radius();
-        double top = (gui.height - PANEL_HEIGHT) / 2.0 - PANEL_GAP - radius();
-        double bottom = (gui.height + PANEL_HEIGHT) / 2.0 + PANEL_GAP + radius();
+        double[] panel = {
+                (gui.width - PANEL_WIDTH) / 2.0 - PANEL_GAP - radius(),
+                (gui.width + PANEL_WIDTH) / 2.0 + PANEL_GAP + radius(),
+                (gui.height - PANEL_HEIGHT) / 2.0 - PANEL_GAP - radius(),
+                (gui.height + PANEL_HEIGHT) / 2.0 + PANEL_GAP + radius()};
         double minX = EDGE + radius();
         double maxX = gui.width - EDGE - radius();
         double minY = EDGE + radius();
@@ -75,35 +76,7 @@ final class EnchantSpot extends ScreenSpotKind {
         if (maxX <= minX || maxY <= minY) {
             return false;
         }
-        double minMove = gui.height / 4.0;
-        boolean found = false;
-        double bestX = 0;
-        double bestY = 0;
-        double bestMove = -1;
-        for (int i = 0; i < 80; i++) {
-            double nx = minX + random.nextDouble() * (maxX - minX);
-            double ny = minY + random.nextDouble() * (maxY - minY);
-            if (nx > left && nx < right && ny > top && ny < bottom) {
-                continue;
-            }
-            double move = Math.hypot(nx - prevX, ny - prevY);
-            if (move >= minMove) {
-                x = nx;
-                y = ny;
-                return true;
-            }
-            if (move > bestMove) {
-                found = true;
-                bestMove = move;
-                bestX = nx;
-                bestY = ny;
-            }
-        }
-        if (found) {
-            x = bestX;
-            y = bestY;
-        }
-        return found;
+        return placeRandom(minX, maxX, minY, maxY, panel, 80, gui.height / 4.0, prevX, prevY);
     }
 
     @Override
