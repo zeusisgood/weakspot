@@ -67,7 +67,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
-- **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
+- **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
 - **採掘のヒットは、掘る前のものは予約にして、掘り始めた瞬間に確定する**（1.11.2。予約の時点でコンボ・統計を数えない。`ServerBoostTracker`）。
 - **コンボはサーバーの数が正**。クライアントの数がずれたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で直す（1.11.3、`ComboSync`。片道だけで、サーバーはクライアントの数に合わせない）。
 - **サーバー側の採掘のブーストは時間枠ではない**。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる（仕組みは `doc/architecture.md` の「重要」の節）。

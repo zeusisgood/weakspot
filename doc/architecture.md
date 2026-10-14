@@ -129,7 +129,7 @@
 
 バニラ（`NetHandlerPlayServer.processPlayerDigging`）は、掘り終わり（STOP）と中断（ABORT）のあとはブロックが空気でなければ `SPacketBlockChange` を返すが、**掘り始め（START）には返さない**。クライアントの `PlayerControllerMP.clickBlock` は START を送ってから「1 tick で壊れるか」を判定し、壊れるならその場で壊す（STOP は送らない）。そのため、クライアントのブーストがクリックし直しても続くと、サーバーで戻ったブロックをクリックし直したとき、クライアントだけでその場で壊れ、サーバーには残る。対策は 3 つ:
 
-- クリックのたびにブーストを捨てる（`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`。`LeftClickBlock` は、その場で壊れるかの判定より先に来る）。
+- クリックのたびにブーストを捨てる（`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`。`LeftClickBlock` は、その場で壊れるかの判定より先に来る。例外: 掘る前のヒットと、待ちを 0 にするための当てたブロックは残す）。
 - サーバーは、クリックした座標と前の座標の今の状態を、その tick の終わりに本人にだけ `SPacketBlockChange` で送り直す（`ServerBoostTracker.queueResend`）。古いクライアントや、ほかの Mod で速さがずれたときも、同じ tick のうちに戻る。
 - 保留の破壊: バニラの `blockRemoving` は、進捗が 0.7 未満で掘り終わりが届くと破壊を保留にする（`receivedFinishDiggingPacket` / `delayedDestroyPos`）。**保留は 1 枠だけ**で、埋まっていると次の不足は捨てられて STOP の返事でブロックが戻る。保留中のブロックは「今の速さ × 経過 tick ≥ 1.0」で壊れる。違うブロックを掘り始めても、保留中のブロックには追加進捗を掛け続ける（`ServerBoostTracker.DELAYED`）。保留のあとに壊れたら、統計・耐久回復に数える。
 
@@ -138,5 +138,5 @@
 `[サーバー]` / `[クライアント]` の扱い・カテゴリ・設定の足し方は [CLAUDE.md](../CLAUDE.md) の「設定の約束事」、項目の一覧は [config.md](config.md)。
 
 - `throw` は Java の予約語なので、フィールドは `throwing`（`@Config.Name("throw")`）。根の `general` には `configVersion` だけを置く。
-- 移行（`WeakSpotConfig.migrate`）: `preInit` の間の `ConfigManager.sync` は「読み込み」（ファイルの値でフィールドを上書きする）になるので、そこでは保存できない。
+- 移行（`WeakSpotConfig.migrate`）: `init` でも呼ぶ（クライアントだけで遊ぶときも移るように）。Forge は使われなくなった項目を自分では消さないので、6 で消す。`preInit` の間の `ConfigManager.sync` は「読み込み」になるので保存できない。値は `Property` に書いてから `sync` するので、`AVAILABLE` より前でも動く。
 - 読み直し（`reloadFromFile`）: 起動後の `sync` は `hasChanged` の項目だけファイル → フィールドの向きになるので、読み込んだあと全項目に `set` をし直す。
