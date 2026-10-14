@@ -78,7 +78,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 | [doc/play.md](doc/play.md) | 詳しい遊び方（種類別・ヒット音・コンボ・統計・弱点マーカー・節目・マルチプレイ） |
 | [doc/install.md](doc/install.md) | 導入（導入先・更新時の注意） |
 | [doc/config.md](doc/config.md) | 設定の一覧・管理コマンド |
-| [doc/development.md](doc/development.md) | 開発（ビルド・バージョン方針・リリースの手順） |
+| [doc/development.md](doc/development.md) | 開発（ビルド・リリースの手順） |
 | [doc/architecture.md](doc/architecture.md) | 仕組み（開発者向け） |
 | [doc/roadmap.md](doc/roadmap.md) | 今後の予定 |
 | [doc/spec/README.md](doc/spec/README.md) | 仕様書の一覧 |

@@ -28,15 +28,13 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 
 ## バージョンの方針
 
-機能追加・不具合修正は**パッチ**、互換性が壊れる変更（通信内容・保存データの形式・設定キーの削除や意味の変更）は**マイナー**（迷ったらマイナー）。同じマイナー同士なら、サーバーとクライアントのパッチが違っても接続できます。細かい決まりは [CLAUDE.md](../CLAUDE.md) の「バージョン」。
+[CLAUDE.md](../CLAUDE.md) の「バージョン」を参照してください。
 
 ## 開発環境の細かいこと
 
-- ビルドは公式 MDK ベースの ForgeGradle 3 + Gradle 4.9。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
 - テストを 1 クラスだけ: `./gradlew test --tests io.github.zeusisgood.weakspot.common.WeakSpotPlacerTest`
-- JDK 8 がない環境（クラウドのセッションなど）: `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす。
 - クラウドのネットワーク: ForgeGradle と Forge は `maven.minecraftforge.net` から取るので、環境のネットワーク設定（セッションのタイトルバーのクラウド環境のメニュー → Edit → Network access）で Custom にし、Allowed domains にこのホストを足す（パッケージマネージャーの既定の一覧は残す。手順は https://code.claude.com/docs/en/cloud-environments#network-access ）。拒否されると `Received status code 403` で止まる。
-- Maven Central の 429（混雑）: 30 秒ずつ間をあけて 5 回まで再実行する。
+- Maven Central の 429 の再実行（[CLAUDE.md](../CLAUDE.md) のとおり 30 秒ずつ 5 回）:
   ```
   for i in 1 2 3 4 5; do JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q > build.log 2>&1 && break; grep -q 429 build.log || break; sleep $((i*30)); done
   ```
@@ -60,7 +58,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 （直し忘れの多くは `ReleaseFilesTest` で CI が赤くなる。）
 
 1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
-2. `build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。
+2. `build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。あわせて、前のマイナーの仕様書を `doc/spec/` から消す（タグに残る。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移し、コードのコメントからの参照をタグのリンクに直し、`doc/spec/README.md` の表の行をタグへのリンクの 1 行にまとめる）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
 4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。`README.en.md` の「Recent updates」も同じ 3 件にし、各版は英語のお知らせ（6.）の 1 行をそのまま使う。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
 5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`en_us.lang` / `ja_jp.lang` の `weakspot.guide.*`）を直す。操作が変わったら `README.en.md` の操作の表も（種類の説明は `doc/store/description.md` にだけ書く）。
@@ -89,6 +87,5 @@ Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge 
 
 ## ブランチの片付け
 
-- 取り込んだブランチは GitHub の設定「Automatically delete head branches」で自動で消える。作業ごとに、始めるときに `main` から新しい名前のブランチを切る（取り込まれたブランチを同じ名前で作り直さない。ユーザーの判断）。
-- 自動で消えなかったブランチを消してよいのは、中身がすべて `main` に入っているものだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチと、作業中のセッションのブランチは残す。
+- 自動で消えなかったブランチ（取り込んだブランチは、GitHub の設定「Automatically delete head branches」で消える）を消してよいのは、中身がすべて `main` に入っているものだけ（`git merge-base --is-ancestor origin/<ブランチ> origin/main`）。クラウドの取得は履歴が浅いので、先に `git fetch --unshallow` をする（しないと判定を誤る）。`main` にないコミットがあるブランチと、作業中のセッションのブランチは残す。
 - タグはブランチと別なので、ブランチを消しても残る。

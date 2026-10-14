@@ -48,6 +48,17 @@ doc/ CHANGELOG.md update.json   共通（update.json は promos の「1.12.2-lat
 - **プレイ動画**（1.9.4 のあとの相談）: 30〜60 秒（採掘のコンボと音階・節目の花火・ほかの種類を少しずつ・K キーのメニュー。BGM なし）を YouTube に上げ、`doc/store/description.md` の冒頭に埋め込む（Modrinth は自動、CurseForge は貼り替え）。README には 10 秒ほどの MP4 を余裕があれば。撮影はスクショと同じ設定（チャット非表示・チュートリアルの案内なし・ほかの Mod の表示なし）。
 - Boothに無料、支援版を置く 内容は同一 curceforge,githubへのリンクのみ 更新漏れを防ぐ
 
+## 見送ったもの（ユーザーの判断。同じ案がまた出たときのために）
+
+- `server/QueryHandlers` を switch にしない: `HitHandlers` と同じ「種類 → 処理の表」の形で揃えておくと、移植のときに読みやすい（1.11.8）
+- 手動用の配布のワークフロー（`modrinth-publish.yml` / `curseforge-publish.yml`）を 1 本にしない: 失敗したときの非常用で、Actions の画面で名前から選べたほうが間違えにくい。CurseForge だけ「二重に上がる」の注意書きがある（1.11.8）
+- `CLAUDE.md` の JDK 8 を入れる手順と 429 の再実行を `doc/development.md` へのリンクにしない: クラウドのセッションで毎回使うので、開く文書を増やさない（1.11.8）
+- `TimedBoostMath.multiplier` と `MachineComboBoost.multiplier` を統合しない: 上限が 0 以下のときの扱いが違う（機械に、乗り物・はしご・走りの「上限 0 = なし」の意味が入り込む）（1.11.7・1.11.8）
+- `GrowthProgress.fraction` を `MachineProgress.ratio` にしない: 中身は同じだが、作物のクラスが「機械」のクラスに頼る形になる（1.11.7）
+- `PlayerRules.canUse` を呼び出し側に書き込まない: クライアントとサーバーで同じ条件を使うための置き場所がなくなる（1.11.7）
+- 0〜1 に収める `Math.max(0, Math.min(1, x))` をまとめない: どれも 1 行（1.11.7）
+- 成長バーを `age` / `stage` 以外の整数の状態にも出さない: IC2 のゴムの木は列挙の状態なので効かず、耕地の水分などを間違ってバーにする心配が大きい。既知の問題のまま（1.11.7）
+
 ## 配布サイト
 
 - Modrinth は審査中。済んだら README（日英）のダウンロードの CurseForge の下に 1 行足し、ゲーム内のリンク（今は CurseForge へ）に Modrinth も足す（[development.md](development.md) の「配布サイト」）。
