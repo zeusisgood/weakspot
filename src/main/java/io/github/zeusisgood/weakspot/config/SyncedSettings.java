@@ -238,18 +238,20 @@ public final class SyncedSettings {
 
     /**
      * 種類ごとのオン・オフと、ヒットの最小間隔の表（1.8.9）。フィールドの名前は、オン・オフが
-     * "<key>WeakSpotEnabled"（ない種類 = 採掘・成長・機械・動物は、いつでもオン）、間隔が "<key>MinHitIntervalTicks"
-     * （採掘だけ "minHitIntervalTicks"）。クライアントもサーバーも、この表から引く。
+     * "<key>WeakSpotEnabled"、間隔が "<key>MinHitIntervalTicks"
+     * （採掘だけ "minHitIntervalTicks"）。クライアントもサーバーも、この表から引く。どちらかがない種類があれば、
+     * このクラスを読み込んだ時点で例外にする（種類を足して項目を忘れたときに気づくため）。
      */
     private static final Map<HitKind, Field> ENABLED = new EnumMap<>(HitKind.class);
     private static final Map<HitKind, Field> INTERVAL = new EnumMap<>(HitKind.class);
 
     static {
         for (HitKind kind : HitKind.values()) {
+            String enabled = kind.key() + "WeakSpotEnabled";
             try {
-                ENABLED.put(kind, SyncedSettings.class.getField(kind.key() + "WeakSpotEnabled"));
+                ENABLED.put(kind, SyncedSettings.class.getField(enabled));
             } catch (NoSuchFieldException e) {
-                // この種類には、サーバーの全体のオン・オフがない
+                throw new IllegalStateException("no " + enabled, e);
             }
             String interval = kind == HitKind.MINING ? "minHitIntervalTicks" : kind.key() + "MinHitIntervalTicks";
             try {
@@ -264,7 +266,7 @@ public final class SyncedSettings {
     public boolean enabled(HitKind kind) {
         Field field = ENABLED.get(kind);
         try {
-            return field == null || field.getBoolean(this);
+            return field.getBoolean(this);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException(e);
         }

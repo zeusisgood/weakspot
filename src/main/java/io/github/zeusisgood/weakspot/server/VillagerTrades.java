@@ -21,7 +21,7 @@ final class VillagerTrades {
     private static final Field BUYING_LIST = Reflect.field(EntityVillager.class, "villager trade reset",
             "buyingList", "field_70963_i");
     private static final Method POPULATE = Reflect.method(EntityVillager.class, "unlocking new trade tiers",
-            "populateBuyingList", "func_175554_cu");
+            new Class<?>[0], "populateBuyingList", "func_175554_cu");
 
     private VillagerTrades() {
     }

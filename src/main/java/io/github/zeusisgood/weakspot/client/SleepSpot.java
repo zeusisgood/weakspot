@@ -51,27 +51,8 @@ final class SleepSpot extends ScreenSpotKind {
     boolean place(GuiScreen gui, double prevX, double prevY) {
         double[] area = SleepSpotArea.area(gui.width, gui.height, radius());
         double minMove = SleepSpotArea.minMove(gui.width, gui.height, radius());
-        double bestX = x;
-        double bestY = y;
-        double bestMove = -1;
-        for (int i = 0; i < 40; i++) {
-            double nx = area[0] + random.nextDouble() * (area[1] - area[0]);
-            double ny = area[2] + random.nextDouble() * (area[3] - area[2]);
-            double move = Math.hypot(nx - prevX, ny - prevY);
-            if (move >= minMove) {
-                x = nx;
-                y = ny;
-                return true;
-            }
-            if (move > bestMove) {
-                bestMove = move;
-                bestX = nx;
-                bestY = ny;
-            }
-        }
-        x = bestX;
-        y = bestY;
-        return true;
+        // 除く所がないので、必ず置ける（いつも true）
+        return placeRandom(area[0], area[1], area[2], area[3], null, 40, minMove, prevX, prevY);
     }
 
     @Override

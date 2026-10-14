@@ -72,7 +72,7 @@ public final class WeakSpotConfig {
         if (general.configVersion >= 7) {
             return;
         }
-        Configuration cfg = cachedConfiguration();
+        Configuration cfg = configuration();
         if (cfg == null) {
             return;
         }
@@ -202,7 +202,7 @@ public final class WeakSpotConfig {
      * すべての項目に「変わった」の印を付けてから sync する（Forge の設定画面と同じ流れ）。
      */
     public static boolean reloadFromFile() {
-        Configuration cfg = cachedConfiguration();
+        Configuration cfg = configuration();
         if (cfg == null) {
             return false;
         }
@@ -221,14 +221,12 @@ public final class WeakSpotConfig {
         return true;
     }
 
-    /** ConfigManager が持っている weakspot.cfg（設定画面を組むため。1.10.2）。取り出せなければ null。 */
-    public static Configuration configuration() {
-        return cachedConfiguration();
-    }
-
-    /** ConfigManager の非公開の CONFIGS（ファイルの絶対パス → Configuration）から weakspot.cfg を取り出す。Forge のクラスなので名前は1つ。 */
+    /**
+     * ConfigManager が持っている weakspot.cfg（設定画面を組むためと、ファイルを読み直すため）。非公開の CONFIGS（ファイルの
+     * 絶対パス → Configuration）から取り出す。Forge のクラスなので名前は1つ。取り出せなければ null。
+     */
     @SuppressWarnings("unchecked")
-    private static Configuration cachedConfiguration() {
+    public static Configuration configuration() {
         try {
             Field field = ConfigManager.class.getDeclaredField("CONFIGS");
             field.setAccessible(true);
