@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 設定に書く「ブロック名と、状態の条件」の1行（SPEC_v1.4 §1）。Minecraft に依存しない。
+ * 設定に書く「ブロック名と、状態の条件」の1行（1.4.0）。Minecraft に依存しない。
  * 書き方は {@code modid:block} か {@code modid:block[property=pattern,property=pattern]}。
  * pattern は、数の範囲 {@code a-b}、{@code *} を含む形（{@code *} は任意の文字列）、それ以外は完全一致。
  */

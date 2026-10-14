@@ -1,6 +1,6 @@
 # 仕組み（開発者向け）
 
-[← 文書の案内に戻る](README.md)
+[← README に戻る](../README.md)
 
 コードの構成と、各機能の仕組みの詳細です。約束事（守ること）は [../CLAUDE.md](../CLAUDE.md)、遊び方は [play.md](play.md)、設定の一覧は [config.md](config.md) を参照してください。仕組みを変えたら、ここも直します。
 
@@ -97,7 +97,7 @@
     - `server/SpeedModifier`: 固定の UUID の `MOVEMENT_SPEED` の一時的な修正（合計に掛ける、保存しない）。走り（`MoveHits.SPRINT_MODIFIER`）と馬・豚（`VehicleHits`）。残り時間の数え方はそれぞれ。
     - `client/ScreenSpotKind` / `client/ScreenSpots`: 画面の上のマーカー（睡眠・エンチャント）の土台。`ScreenSpots` が描く（色・形・残像）・左クリックで当てる（キャンセル、間隔、`registerHit`、`HitMessage`）・出し直す。種類ごとのクラスは、出す条件 `eligible`・当ててよいか `markerVisible`・置く範囲 `place`・色 `look` / `outlineAlpha`・`drawExtra`（エンチャントの注釈）だけを書く。`DrawScreenEvent.Post` では、コンテナ画面（エンチャント台）がアイテム用のライティングを有効にしたまま来るので、`onDrawScreen` の入口で切り、描き終えたら有効だったときだけ戻す（切らないと円・注釈が暗く描かれる）。
     - `client/QueryThrottle`: サーバーへの問い合わせの間隔（動物 5 tick・相手ごと、機械 4 tick・最後の相手、釣り 5 tick）。ヒットのときは force。
-  - **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers`（と、その種類の `*Hits`。前置きは `HitGate`）、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上のマーカーなら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。保存のキーは `saveKey` の規則。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。オン・オフは `<key>WeakSpotEnabled`、間隔は `<key>MinHitIntervalTicks` にすると、種類の表 `SyncedSettings.enabled` / `minHitInterval` に自動で入る）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ と、その `HitKind` の初期の色・コンボの掛け数を使うか（`HitKind` の引数）、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`doc/play.md`・`doc/config.md`・`doc/architecture.md`、ガイドの本（`GuideBook.CONTENT`）。
+  - **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers`（と、その種類の `*Hits`。前置きは `HitGate`）、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上のマーカーなら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。保存のキーは `saveKey` の規則。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。オン・オフは `<key>WeakSpotEnabled`、間隔は `<key>MinHitIntervalTicks` にすると、種類の表 `SyncedSettings.enabled` / `minHitInterval` に自動で入る）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ と、その `HitKind` の初期の色・コンボの掛け数を使うか（`HitKind` の引数）、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・`doc/architecture.md`、ガイドの本（`GuideBook.CONTENT`）。
 - `network/`（`WeakSpotMod.preInit` で登録。番号は登録順）: パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは、クライアントのクラスに `proxy.onXxx` 経由でアクセスする。
   - `HitMessage`（C→S）: ヒット通知（種類、BlockPos、連続ヒット数、動物・敵のエンティティ ID）。
   - `OtherHitMessage`（S→C）: 受け付けたヒット（すべての種類。`HitGate.accept` の中で `ServerBoostTracker.notifyNearbyPlayers` を呼ぶ。直接呼ぶのは `TargetRounds` だけ）を、鳴らす位置から 16 ブロック以内の他のプレイヤーに転送する（ヒット音用）。位置はブロックで、動物・近接は当てた生き物、釣りは浮き、弓は引いているプレイヤー。的当て（`TargetRounds.onAction`）も遊んでいる人の位置から送り、連続ヒット数はラウンドの中の数（✕ で 0）。`miss`は ✕ に当てたときで、受け取った側は低い音（`HitSounds.playOtherMiss`。本人と同じプリング、ピッチ `TargetPlay.MISS_PITCH`）。

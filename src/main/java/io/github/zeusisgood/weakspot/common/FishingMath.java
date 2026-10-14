@@ -3,7 +3,7 @@ package io.github.zeusisgood.weakspot.common;
 import java.util.Random;
 
 /**
- * 釣りの弱点の計算（SPEC_v1.2 §1.10）。Minecraft に依存しない。
+ * 釣りの弱点の計算（1.2.0）。Minecraft に依存しない。
  * 待ち時間の換算、弱点の次の位置（浮きのまわり）、許す角度（画面上の円の半径から）、進み具合。
  */
 public final class FishingMath {

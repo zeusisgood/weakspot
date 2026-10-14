@@ -3,7 +3,7 @@ package io.github.zeusisgood.weakspot.common;
 import java.util.Random;
 
 /**
- * 弓の弱点の計算（SPEC_v1.3 §1、過剰チャージは SPEC_v1.3.4 §2）。Minecraft に依存しない。
+ * 弓の弱点の計算（1.3.0、過剰チャージは 1.3.4）。Minecraft に依存しない。
  * 弱点の向き（yaw / pitch。Minecraft と同じ度の向き）、引きの進め方、引きゲージの値、過剰チャージの倍率。
  */
 public final class BowMath {

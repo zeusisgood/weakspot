@@ -40,6 +40,14 @@ public class ReleaseFilesTest {
                 ResourceFiles.read("README.md").contains("\n### " + VERSION + "\n"));
     }
 
+    /** 英語の README の「Recent updates」は、英語のお知らせ（weakspot.news.<版>）の 1 行をそのまま使う。 */
+    @Test
+    public void englishReadmeHasTheCurrentNewsInRecentUpdates() {
+        String news = ResourceFiles.lang(ResourceFiles.EN_US).get("weakspot.news." + VERSION);
+        assertTrue("README.en.md: Recent updates ### " + VERSION + " / - " + news,
+                ResourceFiles.read("README.en.md").contains("\n### " + VERSION + "\n\n- " + news + "\n"));
+    }
+
     @Test
     public void changelogHasTheCurrentVersion() {
         assertTrue("CHANGELOG.md: ## " + VERSION, ResourceFiles.read("CHANGELOG.md").contains("\n## " + VERSION + "\n"));
