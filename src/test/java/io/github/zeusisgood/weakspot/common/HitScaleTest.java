@@ -11,7 +11,7 @@ public class HitScaleTest {
     private static final HitScale UP_DOWN = new HitScale(HitScale.Type.MAJOR, HitScale.Direction.UP_DOWN, 1);
     private static final HitScale TWO = new HitScale(HitScale.Type.MAJOR, HitScale.Direction.UP, 2);
 
-    /** 初期値は 1.11.0 までと同じ鳴り方（HitPitch の静的な関数と同じ）。 */
+    /** 初期値は HitPitch の静的な関数と同じ鳴り方。 */
     @Test
     public void defaultMatchesHitPitch() {
         for (int streak = 1; streak <= 1000; streak++) {

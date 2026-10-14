@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-/** ほかのプレイヤーの節目の知らせ（サーバーの MiningRewards.broadcast。1.10.0）を、showOthersMilestones がオフなら出さない。 */
+/** ほかのプレイヤーの節目の知らせ（サーバーの MiningRewards.broadcast）を、showOthersMilestones がオフなら出さない。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class OthersMilestoneFilter {
 

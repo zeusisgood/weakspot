@@ -15,7 +15,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * 近接の弱点（論理サーバー。1.8.0 で溜めの形に置き換えた）。剣か斧を持ち、近くに敵がいる間に、照準の左右の弱点に
+ * 近接の弱点（論理サーバー）。剣か斧を持ち、近くに敵がいる間に、照準の左右の弱点に
  * 当てたヒットを受け付け、溜める（MeleeCharge。meleeChargePerHit × コンボの掛け数、上限 meleeChargeMax）。
  * 溜めた攻撃が生き物に当たったら（MeleeCharge.onCriticalHit）、耐久回復を数える。照準の角度は確かめない。
  */

@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * サーバー → クライアント: 近くの他のプレイヤーが弱点にヒットした（すべての種類。pos は鳴らす位置）。ヒット音を鳴らすためだけに使う。
- * miss は的当て（1.11.0）の ✕ に当てたとき（低い音を鳴らす）。
+ * miss は的当ての ✕ に当てたとき（低い音を鳴らす）。
  * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
  */
 public class OtherHitMessage implements IMessage {

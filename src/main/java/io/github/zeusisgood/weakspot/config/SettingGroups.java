@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 設定画面のまとめ（1.10.2）。ファイル（weakspot.cfg）の中は server / client のカテゴリのままで、設定画面だけを
+ * 設定画面のまとめ。ファイル（weakspot.cfg）の中は server / client のカテゴリのままで、設定画面だけを
  * 種類・用途でまとめ直す（サーバーの項目とクライアントの項目を混ぜる）。まとめの名前は翻訳キー weakspot.gui.&lt;まとめ&gt;。
  * 設定を足したら、ここにも入れる（入っていないと ConfigScreenTest が落ちる）。
  */

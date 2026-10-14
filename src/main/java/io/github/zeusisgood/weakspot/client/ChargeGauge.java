@@ -5,9 +5,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 
 /**
- * 照準の下の、次の 1 回の強化の溜めのゲージ（1.7.0 の投げる物、1.8.0 の近接で共通）。ゲージ 1 本分 = perBar の溜め。
+ * 照準の下の、次の 1 回の強化の溜めのゲージ（投げる物と近接で共通）。ゲージ 1 本分 = perBar の溜め。
  * 越えた分は、1 本分ごとに赤い目盛りを 1 つ足す（弓の過剰チャージと同じ形。MAX_MARKS を越えたら全部点けたまま。
- * 1.11.0 まではここで「×n」の数字を照準の下の中央に出していたが、コンボの表示に重なるのでやめた）。
+ * 「×n」の数字は出さない: 照準の下の中央はコンボの表示と重なるため）。
  * ゲージの右に今の倍率（1 + 溜め）を出す。
  */
 final class ChargeGauge {
@@ -31,7 +31,7 @@ final class ChargeGauge {
         }
     }
 
-    /** 照準の下のゲージのすぐ下に、目盛りを count 個並べ、左から lit 個を赤く描く（弓の過剰チャージも。1.11.5）。 */
+    /** 照準の下のゲージのすぐ下に、目盛りを count 個並べ、左から lit 個を赤く描く（弓の過剰チャージも）。 */
     static void drawMarks(Minecraft mc, int lit, int count) {
         ScaledResolution res = new ScaledResolution(mc);
         double x0 = res.getScaledWidth() / 2.0 - HudSpot.GAUGE_WIDTH / 2.0;

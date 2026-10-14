@@ -8,11 +8,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
  * サーバー → 達成したプレイヤーのクライアント: ヒットの累計が節目に達した。演出を出すためだけに使う。
- * 1.7.0 から、節目の種類（採掘・種類ごと・合計）と、種類ごとの節目の HitKind の番号も運ぶ。
+ * 節目の種類（採掘・種類ごと・合計）と、種類ごとの節目の HitKind の番号も運ぶ。
  */
 public class MilestoneMessage implements IMessage {
 
-    /** 採掘の節目（今までどおり）。 */
+    /** 採掘の節目。 */
     public static final int MINING = 0;
     /** 種類ごとの節目（kindId に HitKind の番号）。 */
     public static final int KIND = 1;

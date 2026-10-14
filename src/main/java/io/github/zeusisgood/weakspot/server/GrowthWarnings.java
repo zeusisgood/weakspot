@@ -17,7 +17,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 /**
- * 成長の弱点に当てても育たないときに、チャットで知らせる（1.4.3）。
+ * 成長の弱点に当てても育たないときに、チャットで知らせる。
  * 暗い（作物・茎・苗木で、すぐ上の明るさが 9 未満）ときは最初のヒットで、原因が分からないときは
  * growthStuckHits 回続けて状態が変わらなかったときに知らせる。判定と回数の制限は GrowthStuck。
  */

@@ -39,11 +39,11 @@ public class CommonProxy {
     public void onAnimalState(int entityId, int mask, float[] progress) {
     }
 
-    /** 近くのほかのプレイヤーのコンボが届いた（1.6.0。サーバー → クライアントのパケットから呼ばれる）。 */
+    /** 近くのほかのプレイヤーのコンボが届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onOtherCombo(int entityId, int count) {
     }
 
-    /** 機械の進み具合が届いた（1.6.0。サーバー → クライアントのパケットから呼ばれる）。fuel が負なら燃料なし。 */
+    /** 機械の進み具合が届いた（サーバー → クライアントのパケットから呼ばれる）。fuel が負なら燃料なし。 */
     public void onMachineState(BlockPos pos, float progress, float fuel) {
     }
 
@@ -56,12 +56,12 @@ public class CommonProxy {
         return false;
     }
 
-    /** 接続中のサーバーの版が version 以上か（1.11.2。ServerFeatures.since）。物理サーバーでは呼ばれない。 */
+    /** 接続中のサーバーの版が version 以上か（ServerFeatures.since）。物理サーバーでは呼ばれない。 */
     public boolean serverSince(String version) {
         return true;
     }
 
-    /** 自分のその種類の弱点がオンか（1.7.0。一時オフと、種類ごとのオフ）。物理サーバーでは呼ばれない。 */
+    /** 自分のその種類の弱点がオンか（一時オフと、種類ごとのオフ）。物理サーバーでは呼ばれない。 */
     public boolean isKindEnabled(HitKind kind) {
         return true;
     }
@@ -73,11 +73,11 @@ public class CommonProxy {
     public void onMilestone(int type, int kindId, long milestone) {
     }
 
-    /** 的当ての状態が届いた（1.11.0。サーバー → クライアントのパケットから呼ばれる。END には結果の板の中身も付く）。 */
+    /** 的当ての状態が届いた（サーバー → クライアントのパケットから呼ばれる。END には結果の板の中身も付く）。 */
     public void onTarget(TargetMessage message) {
     }
 
-    /** 近くのほかのプレイヤーの的当てのヒット数が届いた（1.11.0。負なら終わった）。 */
+    /** 近くのほかのプレイヤーの的当てのヒット数が届いた（負なら終わった）。 */
     public void onOtherTarget(int entityId, int hits) {
     }
 }

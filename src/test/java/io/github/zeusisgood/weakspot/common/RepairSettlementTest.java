@@ -85,7 +85,7 @@ public class RepairSettlementTest {
 
     @Test
     public void criticalHitsRepairOnceEveryFive() {
-        // 近接のクリティカル（1.3.4）: 1回ずつ精算し、5回ごとに 1 回復する
+        // 近接のクリティカル: 1回ずつ精算し、5回ごとに 1 回復する
         int carry = 0;
         int repaired = 0;
         for (int i = 0; i < 12; i++) {

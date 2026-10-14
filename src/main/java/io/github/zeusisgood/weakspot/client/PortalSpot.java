@@ -7,10 +7,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
- * ネザーゲートの弱点（自分だけ。1.8.0）。ゲートの中に立っている間（紫のゆらぎ timeInPortal が 0 より大きく、
+ * ネザーゲートの弱点（自分だけ）。ゲートの中に立っている間（紫のゆらぎ timeInPortal が 0 より大きく、
  * 減っていない）、照準から 10〜20 度の所に金の弱点を出し、照準を合わせるだけでヒットにする。当てると、サーバーが
  * 移動までの待ち時間を縮める（PortalHits）。紫のゆらぎも、同じだけ進める（1 tick に 0.0125 進むので、tick × 0.0125）。
- * 1.8.6 から AimSpotKind（AimSpots が回す）。
+ * AimSpotKind（AimSpots が回す）。
  */
 final class PortalSpot extends AimSpotKind {
 

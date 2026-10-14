@@ -23,7 +23,7 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 他のプレイヤーの弱点マーク（見えるだけで、当たり判定はない）と、自分のマークの状態の送信。
- * 対象は採掘・機械・成長の弱点（1.3.6 から機械・成長も。ブロックのマークとして送る）と動物の弱点（釣り・弓・近接は送らない）。
+ * 対象は採掘・機械・成長の弱点（ブロックのマークとして送る）と動物の弱点（釣り・弓・近接は送らない）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class OtherMarkers {
@@ -138,13 +138,13 @@ final class OtherMarkers {
 
     /**
      * 自分の採掘・機械・成長・動物の弱点が出た・動いた・消えたときに、送信頻度の上限を守って送る。
-     * 機械・成長（1.3.6 から）は採掘と同じブロックのマークとして送る（受け取る側は、ブロックの箱から形を決める）。
+     * 機械・成長は採掘と同じブロックのマークとして送る（受け取る側は、ブロックの箱から形を決める）。
      */
     private static void sendOwn() {
         SyncedSettings settings = ClientSettings.get();
         WeakSpot spot = ClientWeakSpotHandler.spot;
         MarkerData current = null;
-        // 掘る前の採掘の弱点は送らない（1.11.2。よそ見のたびに、ほかの人の画面に出ないように）
+        // 掘る前の採掘の弱点は送らない（よそ見のたびに、ほかの人の画面に出ないように）
         if (spot != null && !spot.preview && (spot.kind == HitKind.MINING || spot.kind == HitKind.MACHINE
                 || spot.kind == HitKind.GROWTH || spot.kind == HitKind.HARVEST)) {
             current = new MarkerData(spot.pos, spot.face, spot.u, spot.v);

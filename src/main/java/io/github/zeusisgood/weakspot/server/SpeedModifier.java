@@ -8,7 +8,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 
 /**
- * 移動速度の一時的な修正（論理サーバー。1.8.8 で MoveHits の走りと VehicleHits の馬・豚から切り出した）。
+ * 移動速度の一時的な修正（論理サーバー。MoveHits の走りと VehicleHits の馬・豚）。
  * 固定の UUID で、合計に (1 + 値) を掛ける修正を、かけ直すたびに外して付け直す。保存しない（加速中にワールドを保存・
  * ログアウトしても、速いまま残らない）。残り時間の数え方は、使う側がそれぞれに持つ。
  */

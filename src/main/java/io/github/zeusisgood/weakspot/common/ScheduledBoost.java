@@ -1,14 +1,14 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 予約された tick（スケジュール tick）で動くレッドストーンの部品の加速の計算（1.4.4）。
+ * 予約された tick（スケジュール tick）で動くレッドストーンの部品の加速の計算。
  * 信号の部品は予約の残り時間を前倒しし、ディスペンサー・ドロッパーは1回の予約で複数発にする。
  */
 public final class ScheduledBoost {
 
     /** ディスペンサー・ドロッパーの、1回の予約での発射の上限。 */
     public static final int MAX_DISPENSES = 5;
-    /** 余分の発射の間隔（tick）。まとめて出すと音と煙が重なって連射に見えないので、分けて出す（1.5.2）。 */
+    /** 余分の発射の間隔（tick）。まとめて出すと音と煙が重なって連射に見えないので、分けて出す。 */
     public static final int BURST_INTERVAL_TICKS = 2;
 
     private ScheduledBoost() {

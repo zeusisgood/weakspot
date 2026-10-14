@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-/** アイテムの見た目の登録（1.11.0。「弱点の的」。assets/weakspot/models/item/target.json）。 */
+/** アイテムの見た目の登録（「弱点の的」。assets/weakspot/models/item/target.json）。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ItemModels {
 

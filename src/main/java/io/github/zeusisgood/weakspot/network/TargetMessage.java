@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: 的当て（1.11.0）の状態。始まった（カウントダウンから）・ヒット数が変わった・終わった・やめた、
+ * サーバー → クライアント: 的当ての状態。始まった（カウントダウンから）・ヒット数が変わった・終わった・やめた、
  * と自己ベスト（ログインのとき。ご褒美の解放に使う）。終わり（END）には、結果の板のために、当てた数・✕ の数と
  * サーバーの 1 位（名前と記録）も付ける。ハンドラーは専用サーバーでもインスタンス化されるので proxy 経由。
  */

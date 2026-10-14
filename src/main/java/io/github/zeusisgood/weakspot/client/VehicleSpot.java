@@ -13,12 +13,12 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityBoat;
 
 /**
- * 乗り物の弱点（自分だけ。1.6.0）と、加速の残り時間のゲージ（照準の上）。馬・豚・トロッコ・ボートに乗って動いている間、
+ * 乗り物の弱点（自分だけ）と、加速の残り時間のゲージ（照準の上）。馬・豚・トロッコ・ボートに乗って動いている間、
  * 照準の近く（馬・豚は真上か真下だけ）に水色の弱点を出し、照準を合わせるだけでヒットにする。弓を引いている・
  * 何かを使っている（食べているなど）間は出さない（そちらの弱点を出す）。
  *
  * 加速はサーバーがかける（馬・豚・トロッコ）。ボートは動きをクライアントが決めるので、ここで速さを足す。
- * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。1.8.6 から AimSpotKind（AimSpots が回す）。
+ * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。AimSpotKind（AimSpots が回す）。
  */
 final class VehicleSpot extends AimSpotKind {
 
@@ -29,14 +29,14 @@ final class VehicleSpot extends AimSpotKind {
 
     /**
      * 加速のゲージの色 #55CCFF（弱点の色を変えても変わらない）。照準の下はコンボの表示と重なるので、上に出す
-     * （1.6.4。弓の引きゲージ（下）と上下対称）。
+     * （弓の引きゲージ（下）と上下対称）。
      */
     private static final int BAR_COLOR = 0x55CCFF;
 
     /** 自分の側で覚えている加速（ボートの速さと、ゲージのため。弓・食事・投げる物からも onRiderHit で続ける）。 */
     private static final TimedBoost BOOST = new TimedBoost();
 
-    /** 前の tick のボートと、その yaw（1.8.2。曲がった分だけ弱点を回す）。 */
+    /** 前の tick のボートと、その yaw（曲がった分だけ弱点を回す）。 */
     private Entity lastBoat;
     private float lastBoatYaw;
 

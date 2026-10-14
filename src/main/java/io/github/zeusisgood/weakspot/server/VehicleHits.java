@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 乗り物の弱点のヒット通知の検証と効果（論理サーバー。1.6.0）。倍率は TimedBoostMath（コンボの上乗せあり、上限は
+ * 乗り物の弱点のヒット通知の検証と効果（論理サーバー）。倍率は TimedBoostMath（コンボの上乗せあり、上限は
  * 初期値で無し）、続く時間は vehicleBoostDurationTicks（ヒットのたびに戻す）。
  * 馬系・豚は移動速度に一時的な修正（保存しない）をかけ、乗っている人のクライアントにも届いて効く。
  * トロッコは、ワールドの tick の最後に onUpdate を余分に呼ぶ（レールに沿って進むので、カーブでも脱線しない）。

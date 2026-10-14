@@ -22,7 +22,7 @@ import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 落下の弱点（自分だけ。1.11.0）。高い所から落ちている間（着地したときの落下距離が fallMinDistance を超える）、足元の方向の枠
+ * 落下の弱点（自分だけ）。高い所から落ちている間（着地したときの落下距離が fallMinDistance を超える）、足元の方向の枠
  * （下向き 40〜80 度・落ち始めの向きの ±25 度。HudSpot.FEET_WINDOW。画面にないときは矢印）に雲の白の弱点を出し、
  * 照準を合わせるだけでヒットにする。当てると、落ちた距離を fallReduceBlocks × コンボの掛け数だけ減らす
  * （ダメージはサーバーが着地のときに、サーバーの落ちた距離から決める。ここで減らすのは、見込みのダメージの表示のため）。
@@ -75,7 +75,7 @@ final class FallSpot extends AimSpotKind {
     }
 
     /**
-     * 落ち始めから出す（1.11.0 の試してもらったあと）: 下がっていて、このまま着地したときの落下距離（今までの落下 +
+     * 落ち始めから出す（落下距離を超えてから出すと、当てるのが間に合わない）: 下がっていて、このまま着地したときの落下距離（今までの落下 +
      * 地面までの高さ。FallDamage.landingFall）が fallMinDistance を超えるとき。当ててその見込みが下がれば消える。
      */
     @Override

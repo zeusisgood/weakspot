@@ -15,14 +15,14 @@ import org.lwjgl.input.Mouse;
 
 /**
  * 統計画面（K キー。題は「弱点破壊」）の共通の枠: 題、タブの切り替え、「ガイド」「設定画面を開く」「完了」、
- * ホイールの送り、説明の吹き出し。タブの中身は、それぞれのクラス（1.8.9 で分けた）:
- * 「統計」StatsTab、「サウンド」SoundTab、「弱点マーカー」KindsTab、「的当て」TargetTab（1.11.0）。
+ * ホイールの送り、説明の吹き出し。タブの中身は、それぞれのクラス:
+ * 「統計」StatsTab、「サウンド」SoundTab、「弱点マーカー」KindsTab、「的当て」TargetTab。
  */
 final class StatsScreen extends GuiScreen {
 
     private static final int BUTTON_DONE = 1;
     private static final int BUTTON_CONFIG = 2;
-    /** ガイドの本を開く（1.4.1）。どのタブでも出す。 */
+    /** ガイドの本を開く。どのタブでも出す。 */
     private static final int BUTTON_GUIDE = 3;
     private static final int BUTTON_TAB_STATS = 10;
     private static final int BUTTON_TAB_SOUND = 11;

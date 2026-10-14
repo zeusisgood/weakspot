@@ -8,14 +8,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
- * 画面（GUI）の上に出して、カーソルで当てるマーカーの 1 つの種類（1.8.8。共通の土台）。当て方は、重ねるだけ（睡眠。1.10.1）か、
+ * 画面（GUI）の上に出して、カーソルで当てるマーカーの 1 つの種類（共通の土台）。当て方は、重ねるだけ（睡眠）か、
  * クリック（エンチャント。重ねるだけだと、候補を選ぶ途中で引き直してしまうため）。描く・当てる流れは ScreenSpots が
  * 回し、種類ごとに違うこと（出す画面と条件、置ける範囲、色、当てたあと、画面の注釈）だけを、ここを継いだクラスが書く。
  * 使う種類: 睡眠（SleepSpot）・エンチャント（EnchantSpot）。
  */
 abstract class ScreenSpotKind {
 
-    /** 基本の半径（GUI の座標）。実際の半径は radius()（1.11.0 から設定 spotSize を掛ける）。 */
+    /** 基本の半径（GUI の座標）。実際の半径は radius()（設定 spotSize を掛ける）。 */
     private static final double RADIUS = 12;
 
     final HitKind kind;
@@ -46,12 +46,12 @@ abstract class ScreenSpotKind {
         return has;
     }
 
-    /** カーソルを重ねるだけで当たりか（1.10.1）。false ならクリックで当てる（当てたクリックはボタンなどに届かない）。 */
+    /** カーソルを重ねるだけで当たりか。false ならクリックで当てる（当てたクリックはボタンなどに届かない）。 */
     boolean hitsOnHover() {
         return false;
     }
 
-    /** ヒットの最小間隔（設定の表から。1.8.9）。 */
+    /** ヒットの最小間隔（設定の表から）。 */
     final int minHitInterval(SyncedSettings settings) {
         return settings.minHitInterval(kind);
     }

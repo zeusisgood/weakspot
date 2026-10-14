@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.Random;
 
 /**
- * 音のプリセット（1.11.1）: 自分のヒット音の鳴らし方（楽器・和音・音階の動き・種類・音域）。音量とほかの人の音は入れない。
+ * 音のプリセット: 自分のヒット音の鳴らし方（楽器・和音・音階の動き・種類・音域）。音量とほかの人の音は入れない。
  * 最初から入っているもの（BUILT_IN。名前は翻訳キー weakspot.sound.preset.<key>）と、各自が保存するマイプリセット 1〜3
  * （設定 client.sound.soundPresets に「番号=楽器,音階の種類,動き,音域,和音」で 1 行ずつ）。
  */
@@ -31,7 +31,7 @@ public final class SoundPreset {
                     1)));
 
     /**
-     * [ランダム] で選ぶ楽器（1.11.1）。音の高さが分かりにくい打楽器（ハイハット・スネア・バスドラム）は、音階が
+     * [ランダム] で選ぶ楽器。音の高さが分かりにくい打楽器（ハイハット・スネア・バスドラム）は、音階が
      * 聞き取れないので外す（ベースは音階が分かるので入れる）。
      */
     public static final List<HitSound> RANDOM_SOUNDS = Collections.unmodifiableList(randomSounds());

@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 時間で続く加速（乗り物・はしご・ダッシュ）の倍率（1.6.0。1.8.9 で VehicleBoostMath から改名）。
+ * 時間で続く加速（乗り物・はしご・ダッシュ）の倍率。
  * 基本の倍率（vehicleBoostMultiplier など）× コンボの掛け数（ComboFactor.factor）。
  * 上限 max は 0 以下なら無し（初期値。ユーザーの判断）。
  */

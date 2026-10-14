@@ -10,12 +10,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
- * 弓の弱点（自分だけ。他のプレイヤーには見せない）と、引きゲージ。弓を引いている間、照準の近く（視線から 10〜20 度。
- * 1.5.4）に弱点を出し、照準を合わせるだけでヒットにする（クリックは要らない）。ヒットすると、弓の引きが進む（BowDraw）。
- * 引き切ったあとは、過剰チャージ（矢のダメージ +10%、上限 5 回。1.3.4）が上限に届くまで弱点を出す。
+ * 弓の弱点（自分だけ。他のプレイヤーには見せない）と、引きゲージ。弓を引いている間、照準の近く（視線から 10〜20 度）に
+ * 弱点を出し、照準を合わせるだけでヒットにする（クリックは要らない）。ヒットすると、弓の引きが進む（BowDraw）。
+ * 引き切ったあとは、過剰チャージ（矢のダメージ +10%、上限 5 回）が上限に届くまで弱点を出す。
  * 馬・豚に乗っているときは照準の真上か真下だけで、yaw は出した時点の視線のまま（HudSpot.VERTICAL_FIXED）。
  * 引きゲージは、弓の弱点や一時オフに関係なく、bowDrawBarEnabled なら照準の下に出す。
- * 1.8.6 から AimSpotKind（AimSpots が回す。描き方・当たり判定は HudSpot。それまでは自前で持っていた）。
+ * AimSpotKind（AimSpots が回す。描き方・当たり判定は HudSpot）。
  */
 final class BowSpot extends AimSpotKind {
 
@@ -47,14 +47,14 @@ final class BowSpot extends AimSpotKind {
         return !BowMath.isFull(BowDraw.usedTicks(player)) || BowMath.canOvercharge(BowDraw.overcharge(player));
     }
 
-    /** 馬・豚に乗っているときは、照準の真上か真下だけ（1.6.0。狙うたびに進む向きがぶれないように）。 */
+    /** 馬・豚に乗っているときは、照準の真上か真下だけ（狙うたびに進む向きがぶれないように）。 */
     @Override
     int placement(EntityPlayerSP player) {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL_FIXED : HudSpot.FREE;
     }
 
 
-    /** F1 で画面を隠している間は当てない（今までどおり）。 */
+    /** F1 で画面を隠している間は当てない。 */
     @Override
     boolean canAim(Minecraft mc) {
         return !mc.gameSettings.hideGUI;
@@ -62,7 +62,7 @@ final class BowSpot extends AimSpotKind {
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
-        // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）
+        // 乗り物に乗っていれば、加速も続ける（騎射）
         VehicleSpot.onRiderHit(streak);
         // サーバーの返事を待たずに、自分の側でも引きを進める（弓の見た目とゲージのため）。引き切ったあとは過剰チャージ
         if (BowMath.isFull(BowDraw.usedTicks(player))) {

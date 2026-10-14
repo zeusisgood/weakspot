@@ -48,7 +48,7 @@ final class WeakSpot {
     double u;
     double v;
     long lastActiveTick;
-    /** 掘る前の採掘の弱点（1.11.2）。薄く描き、ほかのプレイヤーには送らない。掘り始めたら false。 */
+    /** 掘る前の採掘の弱点。薄く描き、ほかのプレイヤーには送らない。掘り始めたら false。 */
     boolean preview;
     /** マーカーの表示位置と残像。 */
     final MarkerMotion motion = new MarkerMotion(0, 0);
@@ -121,7 +121,7 @@ final class WeakSpot {
     }
 
     /**
-     * 動物の当たり判定の箱の、面 face に弱点を出す（kind は ANIMAL。1.7.x までは近接の MELEE も）。面が小さすぎるときは null。
+     * 動物の当たり判定の箱の、面 face に弱点を出す（kind は ANIMAL）。面が小さすぎるときは null。
      * 小さい動物（子どものニワトリなど）は、ブロックの小さい面と同じ配置のルールに従う。
      */
     static WeakSpot spawnOnEntity(HitKind kind, Entity entity, EnumFacing face, Vec3d aim, SyncedSettings settings,

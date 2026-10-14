@@ -5,7 +5,7 @@ import io.github.zeusisgood.weakspot.common.KindMask;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 
 /**
- * 自分の弱点の種類ごとのオン・オフ（1.7.0。統計画面の「弱点マーカー」タブ、設定 disabledKinds）。
+ * 自分の弱点の種類ごとのオン・オフ（統計画面の「弱点マーカー」タブ、設定 disabledKinds）。
  * HOME キーの一時オフ（weakSpotsEnabled）がオフなら、どの種類もオフ。
  */
 public final class KindSwitches {
@@ -19,7 +19,7 @@ public final class KindSwitches {
 
     /** その種類の弱点を出してよいか。 */
     public static boolean isEnabled(HitKind kind) {
-        // 的当て（1.11.0）の間は、ほかの種類の弱点を出さない
+        // 的当ての間は、ほかの種類の弱点を出さない
         return WeakSpotConfig.client.markers.weakSpotsEnabled && !KindMask.isDisabled(disabledMask(), kind)
                 && !TargetPlay.active();
     }

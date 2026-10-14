@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * 弓の弱点のヒットで、弓の引きを進める（両側）。サーバーは矢の威力のため、クライアントは弓の見た目（pull）と
  * 引きゲージのために、それぞれ自分の側のプレイヤーの「使用中のアイテムの残り時間」を減らす。
  *
- * ヒットの時点では残り時間を直接変えず、進める tick 数を覚えておき、次の tick で減らす（UseTimeCut。1.8.8）。同じ tick のうちに矢を放ったとき（サーバーはパケットを
+ * ヒットの時点では残り時間を直接変えず、進める tick 数を覚えておき、次の tick で減らす（UseTimeCut）。同じ tick のうちに矢を放ったとき（サーバーはパケットを
  * エンティティの tick より先に処理する）は、ArrowLooseEvent の charge に足す。どちらも引き切り（20 tick）を超えない。
  * 放つときは Stop イベントが ArrowLooseEvent より先に来るので、Stop では消さない（残った分は、次に引き始めたときに消す）。
  */

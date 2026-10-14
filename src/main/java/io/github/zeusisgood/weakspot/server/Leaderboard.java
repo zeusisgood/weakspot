@@ -22,7 +22,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * サーバー内の順位の元データ（1.11.0。/weakspot top と、統計画面の「的当て」タブの上位 10 人）。ワールドに保存し
+ * サーバー内の順位の元データ（/weakspot top と、統計画面の「的当て」タブの上位 10 人）。ワールドに保存し
  * （data/weakspot_leaderboard.dat）、オフラインの人も名前と数で並べられるようにする。プレイヤーの累計（ServerStats）から、
  * ログイン・ログアウト・的当ての終わり・順位を見る直前に写す。
  */

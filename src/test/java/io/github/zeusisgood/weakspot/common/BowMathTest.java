@@ -226,7 +226,7 @@ public class BowMathTest {
         assertTrue(BowMath.isTooFar(130, 0, -170, 0, true, false));
     }
 
-    /** 左右だけの弱点: 真下・真上を向いても pitch は ±60 度で止まり、yaw のずれは画面の上で 10〜20 度のまま（1.11.1）。 */
+    /** 左右だけの弱点: 真下・真上を向いても pitch は ±60 度で止まり、yaw のずれは画面の上で 10〜20 度のまま。 */
     @Test
     public void horizontalSpotAvoidsThePoles() {
         assertEquals(60, BowMath.horizontalPitch(90), 1e-9);

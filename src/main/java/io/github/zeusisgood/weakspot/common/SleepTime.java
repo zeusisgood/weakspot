@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 寝ている間の弱点で進める時刻の計算（1.6.0）。時刻は 1 日 24000 tick。夜（ベッドで寝られる時間）は
+ * 寝ている間の弱点で進める時刻の計算。時刻は 1 日 24000 tick。夜（ベッドで寝られる時間）は
  * NIGHT_START〜NIGHT_END。進めるのは、次の朝（次の日の 0 tick）まで。
  */
 public final class SleepTime {

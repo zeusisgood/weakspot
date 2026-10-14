@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 動物の弱点で進めるタイマーの計算（1.2.0）。Minecraft に依存しない。
+ * 動物の弱点で進めるタイマーの計算。Minecraft に依存しない。
  * 「1ヒット = 本来の時間 ÷ 目安のヒット数」に換算する（基準は 1ヒット = 600 tick）。
  */
 public final class AnimalTimers {

@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 的当て（1.11.0）の決まり。30 秒のラウンドの時間・難しさの段階・記録の数え方・ご褒美の段階。Minecraft に依存しない。
+ * 的当ての決まり。30 秒のラウンドの時間・難しさの段階・記録の数え方・ご褒美の段階。Minecraft に依存しない。
  * 大きさ・距離・動きの数字は、試してもらってから調整する（SPEC_v1.11.0.md の 1.4）。
  */
 public final class TargetRules {
@@ -89,7 +89,7 @@ public final class TargetRules {
         return decoy ? Math.max(0, hits - MISS_PENALTY) : hits + 1;
     }
 
-    /** ご褒美の段階（1.11.1 で 15・30・45・60 から 25・50・75・100 に上げた。1.11.0 で取った段階は進捗で残す）。 */
+    /** ご褒美の段階（しきい値を上げる前に取った段階は、進捗で残す）。 */
     public enum Tier {
         NONE(0, 0xFFFFFF),
         BRONZE(25, 0xCD7F32),

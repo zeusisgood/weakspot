@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * はしご・エリトラ・走り・泳ぎ（1.10.0）・落下（1.11.0）の弱点のヒット通知の検証と効果（論理サーバー。1.7.0）。
+ * はしご・エリトラ・走り・泳ぎ・落下の弱点のヒット通知の検証と効果（論理サーバー）。
  * 落下は、サーバーの落ちた距離（fallDistance）を減らす。
  * はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
  * 走りは、移動速度に一時的な修正（保存しない）をかける（乗り物の馬と同じ。自分のクライアントにも届いて効く）。
@@ -43,7 +43,7 @@ public final class MoveHits {
         long sprintTick = Long.MIN_VALUE / 2;
         long swimTick = Long.MIN_VALUE / 2;
         long fallTick = Long.MIN_VALUE / 2;
-        /** この落下で、死ぬ見込みのときに落下の弱点に当てたか（進捗「九死に一生」。1.11.0）。 */
+        /** この落下で、死ぬ見込みのときに落下の弱点に当てたか（進捗「九死に一生」）。 */
         boolean closeCall;
         /** 死ぬ見込みのあと着地した tick（そのあと生きていたら進捗を与える。負ならなし）。 */
         long landedTick = -1;
@@ -114,7 +114,7 @@ public final class MoveHits {
     private static final int CLOSE_CALL_CONFIRM_TICKS = 10;
 
     /**
-     * 落ちているか（1.11.0。落下の弱点を受け付ける条件）。下がっている最中か、落下距離が 0 でない（当てて負の「貯め」に
+     * 落ちているか（落下の弱点を受け付ける条件）。下がっている最中か、落下距離が 0 でない（当てて負の「貯め」に
      * なっているときも含む）。サーバーの位置はクライアントより遅れるので、直前 RECENT_TICKS のどこかでそうなら受け付ける。
      */
     private static boolean falling(EntityPlayer player) {
@@ -158,7 +158,7 @@ public final class MoveHits {
             if (FallDamage.landingOutlook(player) == FallMath.Outlook.LETHAL) {
                 state.closeCall = true;
             }
-            // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める。1.11.0）。落ち始めに当てた分は
+            // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める）。落ち始めに当てた分は
             // 負の「貯め」として着地まで残す（0 で止めると、早く当てた分が無駄になり、クライアントの見込みともずれる）
             player.fallDistance = (float) Math.max(FallDamage.MIN_FALL, player.fallDistance
                     - WeakSpotConfig.server.fall.fallReduceBlocks * ComboFactor.factor(combo));

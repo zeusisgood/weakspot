@@ -13,7 +13,7 @@ import java.lang.reflect.Field;
 import net.minecraft.util.math.BlockPos;
 import org.junit.Test;
 
-/** 1.9.0 でまとめた状態の問い合わせ（QueryMessage / StateMessage）。 */
+/** 状態の問い合わせ（QueryMessage / StateMessage）。 */
 public class QueryMessagesTest {
 
     @Test

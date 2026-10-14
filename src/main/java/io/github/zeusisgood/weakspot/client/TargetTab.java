@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
- * 統計画面の「的当て」タブ（1.11.0）。自己ベスト・回数・ご褒美の段階と次の段階まで・ご褒美の一覧（使えるか）・
+ * 統計画面の「的当て」タブ。自己ベスト・回数・ご褒美の段階と次の段階まで・ご褒美の一覧（使えるか）・
  * サーバー内の上位 10 人。金の粒（金の段階のご褒美）のオン・オフもここで切り替える。値はサーバーから届いたもの（TargetRecords）。
  */
 final class TargetTab extends StatsScreenTab {

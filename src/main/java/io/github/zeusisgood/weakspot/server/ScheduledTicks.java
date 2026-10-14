@@ -24,12 +24,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 予約された tick（スケジュール tick）で動くレッドストーンの部品の加速（1.4.4）。MachineAccelerator が、
+ * 予約された tick（スケジュール tick）で動くレッドストーンの部品の加速。MachineAccelerator が、
  * ワールドの tick の最後（バニラの予約の処理のあと）に、加速中のブロックごとに1回だけ呼ぶ。
  * 信号の部品（リピーター・コンパレーター・オブザーバー）は、予約の残り時間を余分の tick だけ前倒しし、0 以下なら今動かす。
  * ディスペンサー・ドロッパーは、予約があれば今動かし、1回の予約で複数発にする（ScheduledBoost.dispenseCount）。
  * どのブロックも、前倒しで動くのは 1 tick に1回まで（自分に信号を戻すクロックが、同じ tick の中で回り続けないように）。
- * 余分の発射は、まとめて出すと音と煙が重なって連射に見えないので、BURST_INTERVAL_TICKS ごとに1発ずつ出す（1.5.2）。
+ * 余分の発射は、まとめて出すと音と煙が重なって連射に見えないので、BURST_INTERVAL_TICKS ごとに1発ずつ出す。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ScheduledTicks {

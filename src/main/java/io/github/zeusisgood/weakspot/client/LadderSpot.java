@@ -9,10 +9,10 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.MoverType;
 
 /**
- * はしごの弱点（自分だけ。1.7.0）。はしご・ツタ（バニラの isOnLadder に当たるもの）を登り降りしている間、照準の
+ * はしごの弱点（自分だけ）。はしご・ツタ（バニラの isOnLadder に当たるもの）を登り降りしている間、照準の
  * 真上か真下に木の茶色の弱点を出し、照準を合わせるだけでヒットにする（左右に向きを変えると、はしごから外れるため）。
  * 速さはクライアントで足す（プレイヤーの動きはクライアントが決める。ボートと同じ方式）。サーバーは検証だけ（MoveHits）。
- * 1.8.6 から AimSpotKind（AimSpots が回す）。
+ * AimSpotKind（AimSpots が回す）。
  */
 final class LadderSpot extends AimSpotKind {
 

@@ -19,7 +19,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-/** 採掘ヒットの報酬（耐久回復と節目）と、1.7.0 からの種類ごと・合計の節目。耐久回復は採掘だけ。 */
+/** 採掘ヒットの報酬（耐久回復と節目）と、種類ごと・合計の節目。耐久回復は採掘だけ。 */
 public final class MiningRewards {
 
     /** 耐久回復の数え方の余り（次の破壊へ持ち越す分）。メモリにだけ持ち、再ログインで0に戻る。 */
@@ -30,7 +30,7 @@ public final class MiningRewards {
 
     /**
      * サーバーが採掘ヒットを受け付けて、統計に記録したあとに呼ぶ。節目だけを判定する（耐久回復は壊したときの onBlockBroken）。
-     * 節目は累計の採掘ヒット数で数える（1.6.1。統計をリセットすると、もう一度受け取れる）。1.7.0 から、先は繰り返し、
+     * 節目は累計の採掘ヒット数で数える（統計をリセットすると、もう一度受け取れる）。先は繰り返し、
      * 合計の節目も判定する。
      */
     static void onMiningHit(EntityPlayerMP player) {
@@ -47,7 +47,7 @@ public final class MiningRewards {
     }
 
     /**
-     * 採掘以外の種類のヒットを数えたあとに呼ぶ（1.7.0）。種類ごとの節目（採掘と同じ数字、ごほうびは経験値だけ）と、
+     * 採掘以外の種類のヒットを数えたあとに呼ぶ。種類ごとの節目（採掘と同じ数字、ごほうびは経験値だけ）と、
      * 合計の節目を判定する。
      */
     static void onKindHit(EntityPlayerMP player, HitKind kind) {
@@ -64,7 +64,7 @@ public final class MiningRewards {
         checkTotal(player, total);
     }
 
-    /** すべての種類のヒット数の合計の節目（1.7.0）。ごほうびは経験値だけ。 */
+    /** すべての種類のヒット数の合計の節目。ごほうびは経験値だけ。 */
     private static void checkTotal(EntityPlayerMP player, MiningStats total) {
         if (!WeakSpotConfig.server.milestones.totalMilestonesEnabled) {
             return;
@@ -78,7 +78,7 @@ public final class MiningRewards {
     }
 
     /**
-     * 本人以外の全員のチャットに、節目に届いたことを知らせる（1.10.0）。type は mining / kind / total。
+     * 本人以外の全員のチャットに、節目に届いたことを知らせる。type は mining / kind / total。
      * 色は金、7 だけが並ぶ数はピンク。受け取った側は showOthersMilestones で消せる（OthersMilestoneFilter）。
      */
     private static void broadcast(EntityPlayerMP player, String type, HitKind kind, long milestone) {
@@ -102,7 +102,7 @@ public final class MiningRewards {
     }
 
     /**
-     * 本人以外の全員のチャットに、そのプレイヤーが初めてコンボの段階に届いたことを知らせる（1.11.0。最大コンボを超えたときだけ。
+     * 本人以外の全員のチャットに、そのプレイヤーが初めてコンボの段階に届いたことを知らせる（最大コンボを超えたときだけ。
      * ServerStats.countStreak が呼ぶ）。色は段階の色に近いチャットの色。受け取った側は showOthersMilestones で消せる。
      */
     static void broadcastCombo(EntityPlayerMP player, int combo) {
@@ -174,7 +174,7 @@ public final class MiningRewards {
         stack.setItemDamage(Milestones.repairedDamage(stack.getItemDamage(), amount));
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forgetOnLogout(EntityPlayer player) {
         REPAIR_CARRY.remove(player.getUniqueID());
     }

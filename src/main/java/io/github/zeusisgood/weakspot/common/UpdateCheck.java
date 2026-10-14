@@ -3,7 +3,7 @@ package io.github.zeusisgood.weakspot.common;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/** 新しい版の通知（1.9.2）の判定。Forge の更新確認の結果を、Minecraft に依存しない形で受け取る。 */
+/** 新しい版の通知の判定。Forge の更新確認の結果を、Minecraft に依存しない形で受け取る。 */
 public final class UpdateCheck {
 
     /** 先頭の「メジャー.マイナー」。 */

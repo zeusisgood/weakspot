@@ -45,7 +45,7 @@ public final class Reflect {
         return null;
     }
 
-    /** 初めて使うときに 1 回だけ探すフィールド（1.8.9。ゲート・エンチャント。起動時に探さず、使わなければ警告も出さない）。 */
+    /** 初めて使うときに 1 回だけ探すフィールド（ゲート・エンチャント。起動時に探さず、使わなければ警告も出さない）。 */
     public static LazyField lazyField(Class<?> owner, String what, String... names) {
         return new LazyField(owner, what, names);
     }

@@ -13,7 +13,7 @@ import net.minecraft.util.text.TextFormatting;
 
 /**
  * 節目の演出（達成した本人の画面だけ）: 画面中央の大きな文字、チャット1行、花火、音階の駆け上がり。
- * 7 だけが並ぶ数は虹色で派手に、合計の節目は金で派手にする（1.7.0）。
+ * 7 だけが並ぶ数は虹色で派手に、合計の節目は金で派手にする。
  */
 final class MilestoneEffects {
 
@@ -32,7 +32,7 @@ final class MilestoneEffects {
     }
 
     /**
-     * type は MilestoneMessage の MINING / KIND / TOTAL（1.7.0）。7 だけが並ぶ数（777、7777 …）は虹色で派手にする。
+     * type は MilestoneMessage の MINING / KIND / TOTAL。7 だけが並ぶ数（777、7777 …）は虹色で派手にする。
      * 合計の節目は、金のタイトルと花火 3 発で、コンボの 1000 と同じくらい派手にする。
      */
     static void show(int type, int kindId, long milestone) {

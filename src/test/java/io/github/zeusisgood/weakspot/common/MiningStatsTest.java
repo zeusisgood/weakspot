@@ -40,7 +40,7 @@ public class MiningStatsTest {
         assertEquals(0, stats.savedTicks, 1e-9);
     }
 
-    /** 平均は、壊したブロックへのヒットだけで数える（壊しきらなかったブロックへのヒットは入れない。1.10.0）。 */
+    /** 平均は、壊したブロックへのヒットだけで数える（壊しきらなかったブロックへのヒットは入れない）。 */
     @Test
     public void averageCountsOnlyHitsOnBrokenBlocks() {
         MiningStats stats = new MiningStats();
@@ -141,7 +141,7 @@ public class MiningStatsTest {
     @Test
     public void saveKeysFollowTheKindNames() {
         assertEquals("hits", MiningStats.saveKey(HitKind.MINING));
-        // 1.9.0 で critHits から改名。1.8.x のワールドは legacySaveKey で読む
+        // 古いワールドのキー critHits は legacySaveKey で読む
         assertEquals("meleeHits", MiningStats.saveKey(HitKind.MELEE));
         assertEquals("critHits", MiningStats.legacySaveKey(HitKind.MELEE));
         assertEquals(null, MiningStats.legacySaveKey(HitKind.BOW));

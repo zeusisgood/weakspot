@@ -19,7 +19,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
- * 機械の進み具合のバーの問い合わせに答える（1.6.0）。かまど・醸造台は IInventory#getField、スポナーは非公開の
+ * 機械の進み具合のバーの問い合わせに答える。かまど・醸造台は IInventory#getField、スポナーは非公開の
  * spawnDelay（読めなければスポナーだけ答えない）。値の計算は MachineProgress。
  */
 public final class MachineStates {

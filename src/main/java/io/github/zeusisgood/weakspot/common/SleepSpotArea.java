@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 寝ている間の弱点のマーカーを出す範囲（1.6.2）。画面の中央の、幅・高さとも AREA_FRACTION の範囲。
+ * 寝ている間の弱点のマーカーを出す範囲。画面の中央の、幅・高さとも AREA_FRACTION の範囲。
  * 下のボタンとチャット欄（下から BOTTOM_AVOID）にはかからない。座標は GUI のピクセル。
  */
 public final class SleepSpotArea {

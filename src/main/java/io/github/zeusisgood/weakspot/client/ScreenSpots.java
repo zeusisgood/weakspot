@@ -16,8 +16,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 画面の上のマーカー（ScreenSpotKind）を、まとめて回す（1.8.8。それまでは睡眠・エンチャントが、それぞれにイベントを
- * 受けていた）。DrawScreenEvent.Post で描く。重ねたら当たりの種類（睡眠。1.10.1）は、そこでカーソルが円の中なら当てる。
+ * 画面の上のマーカー（ScreenSpotKind）を、まとめて回す。DrawScreenEvent.Post で描く。重ねたら当たりの種類（睡眠）は、そこでカーソルが円の中なら当てる。
  * クリックで当てる種類（エンチャント）は、MouseInputEvent.Pre で左クリックが円の中ならキャンセルして当てる
  * （当てたクリックは、ボタンやスロットに届かない）。
  */
@@ -38,7 +37,7 @@ final class ScreenSpots {
         Minecraft mc = Minecraft.getMinecraft();
         GuiScreen gui = event.getGui();
         // コンテナ画面（エンチャント台など）は、アイテム用のライティングを有効にしたまま Post を出すので、
-        // 切ってから描く（1.11.4。弱点の円・文字が暗くなっていた）。ほかの Mod のために、描き終えたら戻す
+        // 切ってから描く（弱点の円・文字が暗くなっていた）。ほかの Mod のために、描き終えたら戻す
         boolean lit = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GlStateManager.disableLighting();
         for (ScreenSpotKind k : KINDS) {

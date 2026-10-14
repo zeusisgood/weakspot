@@ -60,7 +60,7 @@ public final class ServerStats {
         long bestBefore = total(player).maxStreak;
         record(player, stats -> stats.recordStreak(count));
         if (count > bestBefore && ComboMilestones.isStep(count)) {
-            // 最大コンボを初めて超えて段階に届いたら、ほかの全員に知らせる（1.11.0）
+            // 最大コンボを初めて超えて段階に届いたら、ほかの全員に知らせる
             MiningRewards.broadcastCombo(player, count);
         }
         WeakSpotAdvancements.onHit(player, count);
@@ -68,7 +68,7 @@ public final class ServerStats {
     }
 
     /**
-     * このヒットを数えたら何になるか（数えない。1.7.0。収穫のおまけは、収穫できたときだけヒットに数えるので、先に見る）。
+     * このヒットを数えたら何になるか（数えない。収穫のおまけは、収穫できたときだけヒットに数えるので、先に見る）。
      */
     public static int peekStreak(EntityPlayerMP player) {
         HitStreak streak = STREAKS.get(player.getUniqueID());
@@ -98,7 +98,7 @@ public final class ServerStats {
     }
 
     /**
-     * 採掘以外の種類のヒットを、「今回」と累計に数え、種類ごと・合計の節目を判定する（1.7.0）。
+     * 採掘以外の種類のヒットを、「今回」と累計に数え、種類ごと・合計の節目を判定する。
      * 近接はクリティカルにしたときに呼ぶ。
      */
     public static void recordKindHit(EntityPlayerMP player, HitKind kind) {
@@ -107,12 +107,12 @@ public final class ServerStats {
     }
 
     /**
-     * 画面の「統計をリセット」と /weakspot reset。累計と今回の両方を消す（1.10.2。それまでは累計だけで、直後に今回のほうが
-     * 大きく見えた）。節目も累計で数えるので、節目をもう一度受け取れる（1.6.1）。
-     * ようこそのメッセージ（的の行を除く）も出す（1.11.0）。
+     * 画面の「統計をリセット」と /weakspot reset。累計と今回の両方を消す（累計だけだと、直後に今回のほうが
+     * 大きく見える）。節目も累計で数えるので、節目をもう一度受け取れる。
+     * ようこそのメッセージ（的の行を除く）も出す。
      */
     public static void resetTotal(EntityPlayer player) {
-        // 的当ての記録は消さない（ご褒美の解放が消えてしまうため。1.11.0）
+        // 的当ての記録は消さない（ご褒美の解放が消えてしまうため）
         MiningStats before = total(player);
         MiningStats fresh = new MiningStats();
         fresh.targetBest = before.targetBest;
@@ -125,7 +125,7 @@ public final class ServerStats {
         }
     }
 
-    /** 統計画面に送る中身（今回・累計と、的当てのサーバー内の上位 10 人。1.11.0）。 */
+    /** 統計画面に送る中身（今回・累計と、的当てのサーバー内の上位 10 人）。 */
     public static StatsMessage message(EntityPlayerMP player) {
         List<String> names = new ArrayList<>();
         List<Long> scores = new ArrayList<>();
@@ -151,23 +151,22 @@ public final class ServerStats {
         NBTTagCompound persisted = entityData.getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG);
         entityData.setTag(EntityPlayer.PERSISTED_NBT_TAG, persisted);
         NBTTagCompound mine = persisted.getCompoundTag(TAG);
-        // 1.6.1 でやめた節目の別の累計。1.9.0 から、読み込んだときに消す
+        // 古い版の、節目の別の累計（今は使わない）。読み込んだときに消す
         mine.removeTag("rewardHits");
         persisted.setTag(TAG, mine);
         return mine;
     }
 
-    /** 保存のキーは MiningStats#saveKey。1.8.x で保存した近接の数（critHits）は、meleeHits がなければ読む（1.9.0）。 */
+    /** 保存のキーは MiningStats#saveKey。古いワールドの近接の数（critHits）は、meleeHits がなければ読む。 */
     private static MiningStats read(NBTTagCompound tag) {
         MiningStats stats = new MiningStats();
         stats.blocksBroken = tag.getLong("blocksBroken");
         stats.blocksBrokenWithHit = tag.getLong("blocksBrokenWithHit");
-        // 1.10.0 から。1.9.x までのワールドにはないので 0 から数える
+        // 古いワールドにはないので 0 から数える
         stats.hitsOnBrokenBlocks = tag.getLong("hitsOnBrokenBlocks");
         stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
         stats.savedTicks = tag.getDouble("savedTicks");
         stats.maxStreak = tag.getLong("maxStreak");
-        // 1.11.0 から
         stats.targetBest = tag.getLong("targetBest");
         stats.targetRounds = tag.getLong("targetRounds");
         for (HitKind kind : HitKind.values()) {

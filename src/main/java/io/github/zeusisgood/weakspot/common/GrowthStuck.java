@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 成長の弱点に当てても育たないときの知らせを出すかの判定（1.4.3。プレイヤーごとに1つ）。
+ * 成長の弱点に当てても育たないときの知らせを出すかの判定（プレイヤーごとに1つ）。
  * 暗い（原因が分かる）ときは最初のヒットで、分からないときは stuckHits 回続けて状態が変わらなかったときに知らせる。
  * 同じブロックへは SAME_BLOCK_COOLDOWN tick、どのブロックでも ANY_COOLDOWN tick に1回まで。
  */

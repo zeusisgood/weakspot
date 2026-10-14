@@ -5,7 +5,7 @@ import io.github.zeusisgood.weakspot.network.QueryMessage;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * 機械（かまど・醸造台・スポナー）の進み具合と燃料のバー（1.6.0）。値はサーバーだけが持つので、機械の弱点に照準を
+ * 機械（かまど・醸造台・スポナー）の進み具合と燃料のバー。値はサーバーだけが持つので、機械の弱点に照準を
  * 合わせている間、QUERY_INTERVAL_TICKS ごとと、ヒットのたびに問い合わせる。届いた値は、前の値から
  * LERP_TICKS かけてなめらかに進める（加速中は一気に進むので）。描き方は WorldBar。
  */

@@ -13,10 +13,10 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 
 /**
- * 走りの弱点（自分だけ。1.7.0）。地面を走っている間、照準の真上か真下に赤の弱点を出し、照準を合わせるだけで
+ * 走りの弱点（自分だけ）。地面を走っている間、照準の真上か真下に赤の弱点を出し、照準を合わせるだけで
  * ヒットにする（左右に向きを変えると進む向きがぶれるため。馬と同じ）。速さはサーバーが移動速度の修正でかける
  * （MoveHits。自分のクライアントにも届いて効く）。ここでは残り時間のゲージと、視野の広がりの抑えだけを受け持つ。
- * 1.8.6 から AimSpotKind（AimSpots が回す）。
+ * AimSpotKind（AimSpots が回す）。
  */
 final class SprintSpot extends AimSpotKind {
 

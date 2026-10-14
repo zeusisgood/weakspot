@@ -15,8 +15,7 @@ import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
 /**
- * 統計画面の「弱点マーカー」タブ（1.7.0。1.8.3 で「弱点」から改名し、色と形に ◀ を足した。1.8.9 で StatsScreen から
- * 分けた）。種類ごとのオン・オフ（KindSwitches。サーバーにも伝わる）と、自分の弱点の色と形（MarkerLook）。
+ * 統計画面の「弱点マーカー」タブ。種類ごとのオン・オフ（KindSwitches。サーバーにも伝わる）と、自分の弱点の色と形（MarkerLook）。
  * 入りきらない行はホイールで送る。
  */
 final class KindsTab extends StatsScreenTab {
@@ -25,7 +24,7 @@ final class KindsTab extends StatsScreenTab {
     private static final int BUTTON_KIND_TOGGLE = 100;
     private static final int BUTTON_KIND_COLOR = 200;
     private static final int BUTTON_KIND_SHAPE = 300;
-    /** 色と形を 1 つ前に戻す ◀ と、形の ▶（1.8.3）。 */
+    /** 色と形を 1 つ前に戻す ◀ と、形の ▶。 */
     private static final int BUTTON_KIND_COLOR_PREV = 400;
     private static final int BUTTON_KIND_SHAPE_PREV = 500;
     private static final int BUTTON_KIND_SHAPE_NEXT = 600;
@@ -47,7 +46,7 @@ final class KindsTab extends StatsScreenTab {
         int center = screen.width / 2;
         for (HitKind kind : HitKind.values()) {
             int i = kind.ordinal();
-            // 1 行: [名前][オン/オフ][■][◀][入力欄][▶] [◀][形][▶]（1.8.3。幅は center ± 154 に収める）
+            // 1 行: [名前][オン/オフ][■][◀][入力欄][▶] [◀][形][▶]（幅は center ± 154 に収める）
             add(new GuiButton(BUTTON_KIND_TOGGLE + i, center - 64, 0, 36, 20, ""));
             add(new GuiButton(BUTTON_KIND_COLOR_PREV + i, center - 14, 0, 12, 20, "◀"));
             add(new GuiButton(BUTTON_KIND_COLOR + i, center + 50, 0, 12, 20, "▶"));
@@ -148,7 +147,7 @@ final class KindsTab extends StatsScreenTab {
 
     /**
      * ▶（direction = 1）で次、◀（-1）で前の色に切り替える。「初期値」→ 12 色 →（的当てのご褒美を解放していれば）
-     * 銀のきらめき・虹 →「初期値」の輪（1.8.3 で ◀ を足した。ご褒美は 1.11.0）。
+     * 銀のきらめき・虹 →「初期値」の輪。
      * 今の色が輪にないとき（打ち込んだ色）は、▶ で最初、◀ で最後の色にする。
      */
     private void stepColor(HitKind kind, int direction) {

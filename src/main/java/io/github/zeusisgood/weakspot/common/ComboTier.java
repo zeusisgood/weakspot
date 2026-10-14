@@ -1,6 +1,6 @@
 package io.github.zeusisgood.weakspot.common;
 
-/** コンボの数の色の段階（1.11.0 で 300 までに詰めた）。1 以下は表示しない。 */
+/** コンボの数の色の段階。1 以下は表示しない。 */
 public enum ComboTier {
     NONE(0, 0xFFFFFF),
     WHITE(2, 0xFFFFFF),

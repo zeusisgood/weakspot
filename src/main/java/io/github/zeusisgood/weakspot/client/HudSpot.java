@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
- * 画面上に一定の大きさで出す、向き（yaw / pitch）で持つ弱点（1.6.0。照準のまわりの弱点。1.8.6 から弓も。
+ * 画面上に一定の大きさで出す、向き（yaw / pitch）で持つ弱点（照準のまわりの弱点。
  * 種類ごとの処理は AimSpotKind）。描き方と当たり判定は ScreenProjection、FishingMath.allowedAngle で、照準を合わせるだけで当たる。
  * 「上下だけ」（馬・豚に乗っているとき）のときは pitch だけを持ち、yaw はいつも今の視線に合わせる（進む向きがぶれない）。
  */
@@ -31,26 +31,25 @@ final class HudSpot {
     private final Random random = new Random();
 
     /**
-     * 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせる。1.8.0。1.11.1 から ±60 度までで止め、yaw のずれを広げる）、
-     * 上下だけで yaw は出した時点のまま（弓を馬・豚の上で引いたとき。弓を引く短い間なので、向きを追いかけない。1.8.6 で
-     * BowSpot から移した）、足元の方向の枠（FEET_WINDOW。落下）。
+     * 出し方: どこでも（10〜20 度）、上下だけ（yaw は視線に合わせる）、左右だけ（pitch は視線に合わせ、±60 度までで止めて、yaw のずれを広げる）、
+     * 上下だけで yaw は出した時点のまま（弓を馬・豚の上で引いたとき。弓を引く短い間なので、向きを追いかけない）、足元の方向の枠（FEET_WINDOW。落下）。
      */
     static final int FREE = 0;
     static final int VERTICAL = 1;
     static final int HORIZONTAL = 2;
     static final int VERTICAL_FIXED = 3;
     /**
-     * 足元の方向の枠（1.11.0。落下）: 出した時点の向きを覚え、下向き 40〜80 度・左右 ±25 度の枠の中だけに出す
+     * 足元の方向の枠（落下）: 出した時点の向きを覚え、下向き 40〜80 度・左右 ±25 度の枠の中だけに出す
      * （FallMath.nextWindowSpot）。照準から離れても出し直さず、画面にないときは方向の矢印を出す。
      */
     static final int FEET_WINDOW = 4;
 
     private boolean has;
     private int mode;
-    /** 前の弱点を出した側（1.8.1。上下 -1 / +1、左右 -1 / +1、0 はまだない）。次は反対側に出す。 */
+    /** 前の弱点を出した側（上下 -1 / +1、左右 -1 / +1、0 はまだない）。次は反対側に出す。 */
     private int pitchSide;
     private int yawSide;
-    /** 照準が水平から離れすぎたら水平の側に出すか（1.8.1。エリトラだけ false）。 */
+    /** 照準が水平から離れすぎたら水平の側に出すか（エリトラだけ false）。 */
     private boolean keepNearHorizon = true;
     private double yaw;
     private double pitch;
@@ -63,7 +62,7 @@ final class HudSpot {
     private double anchorYaw;
 
     /**
-     * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。1.7.0 から、色と形は種類ごとの設定
+     * defaultRgb は円の初期値の色。輪と中心は、それを白に寄せた色。色と形は種類ごとの設定
      * （MarkerLook。統計画面の「弱点マーカー」タブ）で変えられる。
      */
     /** 色の初期値は、その種類の色（HitKind.defaultColor）。 */
@@ -76,7 +75,7 @@ final class HudSpot {
         this.defaultRgb = defaultRgb;
     }
 
-    /** 円・輪・中心の初期値の色を別に持つ（弓の橙。1.8.6 で BowSpot から移した）。色を書き換えたら、その色から作る。 */
+    /** 円・輪・中心の初期値の色を別に持つ（弓の橙）。色を書き換えたら、その色から作る。 */
     private float[][] palette;
 
     HudSpot withPalette(float[] disk, float[] ring, float[] center) {
@@ -84,7 +83,7 @@ final class HudSpot {
         return this;
     }
 
-    /** 上下も左右も交互だけにする（水平に戻す決まりを使わない。1.8.1。エリトラ）。 */
+    /** 上下も左右も交互だけにする（水平に戻す決まりを使わない。エリトラ）。 */
     HudSpot alternateOnly() {
         keepNearHorizon = false;
         return this;
@@ -105,7 +104,7 @@ final class HudSpot {
             if (mode == FEET_WINDOW) {
                 return;
             }
-            // 照準から離れすぎた弱点は、今の照準の近くに出し直す（1.8.2。ヒットには数えない。その場で切り替える）
+            // 照準から離れすぎた弱点は、今の照準の近くに出し直す（ヒットには数えない。その場で切り替える）
             boolean tooFar = mode == HORIZONTAL
                     ? BowMath.isTooFarHorizontal(yaw, player.rotationYaw, player.rotationPitch)
                     : BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL, true);
@@ -123,7 +122,7 @@ final class HudSpot {
     }
 
     /**
-     * 弱点の yaw を delta 度だけ回す（1.8.2。ボートが曲がると、乗っている人の視線も回るので、弱点も一緒に回す）。
+     * 弱点の yaw を delta 度だけ回す（ボートが曲がると、乗っている人の視線も回るので、弱点も一緒に回す）。
      * 表示の移動と残像も、同じだけずらす。
      */
     void rotateYaw(double delta) {
@@ -145,7 +144,7 @@ final class HudSpot {
     }
 
     private void next(EntityPlayer player, double prevYaw, double prevPitch) {
-        // 1.8.1: 交互に出し、照準が水平から離れすぎたら水平の側に出す（真上・真下まで行かないように）
+        // 交互に出し、照準が水平から離れすぎたら水平の側に出す（真上・真下まで行かないように）
         if (mode == FEET_WINDOW) {
             double[] n = FallMath.nextWindowSpot(anchorYaw, prevYaw, prevPitch, random);
             yaw = n[0];
@@ -157,7 +156,7 @@ final class HudSpot {
                     random);
         } else if (mode == HORIZONTAL) {
             yawSide = BowMath.nextYawSign(yawSide, random);
-            // 1.11.1: 上下を向くほど左右を広げる（真上・真下で照準の中央に出ないように。pitch は描く時に止める）
+            // 上下を向くほど左右を広げる（真上・真下で照準の中央に出ないように。pitch は描く時に止める）
             yaw = BowMath.nextWideHorizontalYaw(player.rotationYaw, player.rotationPitch, prevYaw, yawSide,
                     screen.fovDegrees(), random);
             pitch = player.rotationPitch;
@@ -209,7 +208,7 @@ final class HudSpot {
         return screen.project(eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE);
     }
 
-    /** 画面の上の半径（GUI の座標。1.11.0 から設定 spotSize と種類ごとの倍率を掛ける）。 */
+    /** 画面の上の半径（GUI の座標。設定 spotSize と種類ごとの倍率を掛ける）。 */
     private double radius() {
         return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(kind);
     }
@@ -262,7 +261,7 @@ final class HudSpot {
     }
 
     /**
-     * 照準の上（above）か下に、残り時間・溜めのゲージを描く（1.7.0。乗り物・はしご・走りは上、投げる物・近接・弓は下）。
+     * 照準の上（above）か下に、残り時間・溜めのゲージを描く（乗り物・はしご・走りは上、投げる物・近接・弓は下）。
      * fraction は 0〜1。beginOverlay と endOverlay の間で呼ぶ。
      */
     static void gauge(Minecraft mc, double fraction, int rgb, boolean above) {
@@ -276,7 +275,7 @@ final class HudSpot {
                 new float[] {fill[0], fill[1], fill[2], 1});
     }
 
-    /** ゲージの大きさと、照準の中心からの距離（1.11.5 から乗り物の加速・弓の引きもこれで描く）。背景は #1E1E1E 半透明。 */
+    /** ゲージの大きさと、照準の中心からの距離。背景は #1E1E1E 半透明。 */
     static final int GAUGE_WIDTH = 40;
     static final int GAUGE_HEIGHT = 3;
     static final int GAUGE_OFFSET = 12;
@@ -291,7 +290,7 @@ final class HudSpot {
                 GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
                 GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
         GlStateManager.disableDepth();
-        // HUD の図形は時計回りに頂点を並べるので、カリングを切らないと塗りが消える（1.7.1）
+        // HUD の図形は時計回りに頂点を並べるので、カリングを切らないと塗りが消える
         GlStateManager.disableCull();
         GlStateManager.glLineWidth(2.0F);
     }

@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 照準のまわりの弱点（AimSpotKind）を、まとめて回す（1.8.6。それまでは種類ごとのクラスが、それぞれにイベントを受けていた）。
+ * 照準のまわりの弱点（AimSpotKind）を、まとめて回す。
  * 毎 tick 出す・消す、毎フレーム当たりを見る（tick 単位だと素早い照準の動きを取りこぼす）、HUD に描く。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -38,7 +38,7 @@ final class AimSpots {
     private AimSpots() {
     }
 
-    /** その種類の照準のまわりの弱点が、今出ているか（コンボの種類の表示。1.8.7）。 */
+    /** その種類の照準のまわりの弱点が、今出ているか（コンボの種類の表示）。 */
     static boolean isShown(HitKind kind) {
         for (AimSpotKind k : KINDS) {
             if (k.kind == kind) {
@@ -71,7 +71,7 @@ final class AimSpots {
                     k.missedTicks = 0;
                     k.spot.ensure(mc.player, k.placement(mc.player));
                 } else if (!k.spot.has() || ++k.missedTicks > k.keepTicks()) {
-                    // 種類ごとの条件から外れた。keepTicks の間は残す（1.11.1。当たりは eligible で止まる）
+                    // 種類ごとの条件から外れた。keepTicks の間は残す（当たりは eligible で止まる）
                     k.spot.clear();
                     k.missedTicks = 0;
                 }

@@ -19,8 +19,8 @@ import net.minecraft.init.SoundEvents;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
 /**
- * 統計画面の「サウンド」タブ（1.8.9 で StatsScreen から分けた）。ヒット音の楽器と音量、音階（1.11.1）を変えて試聴する。
- * 1.11.1 から、自分の音とほかの人の音を枠で分け、1 行目に音のプリセットのボタン「プリセット: 標準」（OptiFine の
+ * 統計画面の「サウンド」タブ。ヒット音の楽器と音量、音階を変えて試聴する。
+ * 自分の音とほかの人の音を枠で分け、1 行目に音のプリセットのボタン「プリセット: 標準」（OptiFine の
  * シェーダーのプロファイルと同じ形。左クリックで次、右クリックか Shift + 左クリックで前）。プリセット名は今の設定から求め
  * （どれにも一致しなければ「カスタム」）、選んだものは保存しない。マイプリセットの読み込み・保存は MyPresetsScreen。
  * クライアントだけで完結し、値は weakspot.cfg にそのまま保存する（Forge の設定画面と同じ値になる）。
@@ -33,16 +33,16 @@ final class SoundTab extends StatsScreenTab {
     private static final int BUTTON_OTHERS_SOUND = 30;
     private static final int BUTTON_OTHERS_VOLUME = 31;
     private static final int BUTTON_OTHERS_PREVIEW = 32;
-    /** 自分のヒット音に、コンボで音を重ねるか（1.9.5）。 */
+    /** 自分のヒット音に、コンボで音を重ねるか。 */
     private static final int BUTTON_CHORD = 40;
-    /** 音階の動き・種類・音域（1.11.1）。 */
+    /** 音階の動き・種類・音域。 */
     private static final int BUTTON_SCALE_DIRECTION = 41;
     private static final int BUTTON_SCALE_TYPE = 42;
     private static final int BUTTON_SCALE_OCTAVES = 43;
-    /** プリセット（1.11.1）と、マイプリセットの画面を開く。 */
+    /** プリセットと、マイプリセットの画面を開く。 */
     private static final int BUTTON_PRESET = 50;
     private static final int BUTTON_MY_PRESETS = 51;
-    /** 細かい設定をランダムに（1.11.1）。 */
+    /** 細かい設定をランダムに。 */
     private static final int BUTTON_RANDOM = 52;
     private static final int RANDOM_WIDTH = 60;
     /** 試聴で音階を鳴らす間隔（tick）。 */
@@ -247,7 +247,7 @@ final class SoundTab extends StatsScreenTab {
         updateLabels();
     }
 
-    /** 音階の設定を切り替えた: 保存して、新しい設定の始めの数音を速めに鳴らす（1.11.1。続けて押したら前の試聴を止める）。 */
+    /** 音階の設定を切り替えた: 保存して、新しい設定の始めの数音を速めに鳴らす（続けて押したら前の試聴を止める）。 */
     private void onScaleChanged() {
         onSoundChanged();
         playSwitchPreview();

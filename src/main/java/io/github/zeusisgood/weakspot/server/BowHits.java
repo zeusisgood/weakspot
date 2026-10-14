@@ -34,7 +34,7 @@ public final class BowHits {
             BowDraw.add(player, WeakSpotConfig.server.bow.bowHitTicks);
         }
         int combo = HitGate.accept(player, HitKind.BOW, new BlockPos(player), streak);
-        // 乗り物に乗っていれば、加速も続ける（騎射。1.6.0）
+        // 乗り物に乗っていれば、加速も続ける（騎射）
         VehicleHits.boostFromRider(player, combo);
     }
 

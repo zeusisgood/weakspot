@@ -10,8 +10,8 @@ import net.minecraft.client.gui.GuiSleepMP;
 import net.minecraft.client.multiplayer.WorldClient;
 
 /**
- * 寝ている間の弱点（1.6.0）。夜にベッドで寝ている間は、寝ている画面（GuiSleepMP）が開いていて、マウスのカーソルが
- * 出ている。その画面の上に月の淡い黄のマーカーを出し、クリックで当てる（描く・当てる流れは ScreenSpots。1.8.8）。
+ * 寝ている間の弱点。夜にベッドで寝ている間は、寝ている画面（GuiSleepMP）が開いていて、マウスのカーソルが
+ * 出ている。その画面の上に月の淡い黄のマーカーを出し、クリックで当てる（描く・当てる流れは ScreenSpots）。
  * 当てると、サーバーがワールドの時刻を進める（SleepHits）。
  */
 final class SleepSpot extends ScreenSpotKind {
@@ -44,7 +44,7 @@ final class SleepSpot extends ScreenSpotKind {
 
 
     /**
-     * 画面の中央の範囲（1.6.2。SleepSpotArea。画面全体だと、次のマーカーが遠すぎるため）のランダムな位置。
+     * 画面の中央の範囲（SleepSpotArea。画面全体だと、次のマーカーが遠すぎるため）のランダムな位置。
      * 前の位置から SleepSpotArea.minMove 以上離す（取れなければ、一番離れた位置）。
      */
     @Override

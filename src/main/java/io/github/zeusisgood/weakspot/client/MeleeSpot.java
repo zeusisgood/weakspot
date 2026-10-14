@@ -11,10 +11,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
- * 近接の弱点（自分だけ。1.8.0 で、敵の体の弱点から置き換えた）。剣か斧を持ち、16 ブロック以内に敵がいる間、照準の
+ * 近接の弱点（自分だけ）。剣か斧を持ち、16 ブロック以内に敵がいる間、照準の
  * 左右だけに銀の弱点を出し（走りの弱点の上下と見分けるため）、照準を合わせるだけでヒットにする。当てるたびに
  * 次の攻撃の溜めが増え（MeleeCharge。クライアントもサーバーの返事を待たずに溜める）、照準の下にゲージを出す。
- * 馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。1.8.6 から AimSpotKind（AimSpots が回す）。
+ * 馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。AimSpotKind（AimSpots が回す）。
  */
 final class MeleeSpot extends AimSpotKind {
 

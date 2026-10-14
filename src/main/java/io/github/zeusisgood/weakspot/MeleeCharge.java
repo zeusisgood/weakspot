@@ -21,8 +21,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 近接の溜め（両側。1.8.0）。剣か斧に、近接の弱点に当てるたびに溜め、次に生き物を殴った攻撃のダメージの倍率を
- * 1.5 × (1 + 溜め) にする（1.11.0 から、クリティカルにはせず LivingHurtEvent で掛ける。剣の薙ぎ払いの周りにも）。溜めは持ち替えるまで残り、生き物への攻撃で使い切る
+ * 近接の溜め（両側）。剣か斧に、近接の弱点に当てるたびに溜め、次に生き物を殴った攻撃のダメージの倍率を
+ * 1.5 × (1 + 溜め) にする（クリティカルにはせず LivingHurtEvent で掛ける。剣の薙ぎ払いの周りにも）。溜めは持ち替えるまで残り、生き物への攻撃で使い切る
  * （空振り・ブロックでは残る）。クライアントも同じ溜めを持つ（ゲージのため）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -50,7 +50,7 @@ public final class MeleeCharge {
     }
 
     /**
-     * 溜めを使った攻撃（サーバー。1.11.0）: 倍率と、その攻撃の tick・正面の相手。同じ tick に、同じプレイヤーの近接の
+     * 溜めを使った攻撃（サーバー）: 倍率と、その攻撃の tick・正面の相手。同じ tick に、同じプレイヤーの近接の
      * ダメージ（正面の相手と、剣の薙ぎ払いで当たった周り）に倍率を掛ける。
      */
     private static final class Charged {
@@ -68,10 +68,10 @@ public final class MeleeCharge {
     private static final Map<UUID, Charged> CHARGED = new HashMap<>();
 
     /**
-     * 溜めがあれば使い切り、この攻撃のダメージの倍率を 1.5 × (1 + 溜め) にする（両側）。1.11.0 から、クリティカルには
+     * 溜めがあれば使い切り、この攻撃のダメージの倍率を 1.5 × (1 + 溜め) にする（両側）。クリティカルには
      * しない（バニラの剣の薙ぎ払いは「クリティカルでない」ことが条件なので、溜めた攻撃でも薙ぎ払えるように）。倍率は
      * サーバーの LivingHurtEvent で、正面の相手と薙ぎ払いで当たった周りに掛ける。ジャンプ中などバニラでもクリティカルの
-     * ときは、今までどおりクリティカルの倍率を 1.5 × (1 + 溜め) にする（薙ぎ払いはバニラと同じく出ない）。
+     * ときは、クリティカルの倍率を 1.5 × (1 + 溜め) にする（薙ぎ払いはバニラと同じく出ない）。
      */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onCriticalHit(CriticalHitEvent event) {
@@ -117,7 +117,7 @@ public final class MeleeCharge {
         event.setAmount(event.getAmount() * charged.multiplier);
         EntityLivingBase target = event.getEntityLiving();
         if (target.getEntityId() == charged.targetId) {
-            // クリティカルにはしないが、見た目と音は今までどおり（バニラのクリティカルと同じ出し方）
+            // クリティカルにはしないが、見た目と音は出す（バニラのクリティカルと同じ出し方）
             player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT,
                     player.getSoundCategory(), 1.0F, 1.0F);
             player.onCriticalHit(target);

@@ -45,16 +45,16 @@ public class WeakSpotMod {
 
     public static final String MODID = "weakspot";
     public static final String NAME = "Weak Spot Mining";
-    public static final String VERSION = "1.11.8";
+    public static final String VERSION = "1.11.10";
     /** 接続できる相手のバージョンの範囲（Maven の書式）。 */
     public static final String ACCEPTED_VERSIONS = "[1.11,1.12)";
-    /** Forge の更新確認が読む、最新の版の情報（1.9.2）。リリースのたびに update.json の版を書き換える。 */
+    /** Forge の更新確認が読む、最新の版の情報。リリースのたびに update.json の版を書き換える。 */
     public static final String UPDATE_JSON = "https://raw.githubusercontent.com/zeusisgood/weakspot/main/update.json";
 
     public static SimpleNetworkWrapper network;
 
     /**
-     * 起動した時点で config/weakspot.cfg がもうあったか（1.7.1。更新のお知らせで、初めて入れた人を見分ける）。
+     * 起動した時点で config/weakspot.cfg がもうあったか（更新のお知らせで、初めて入れた人を見分ける）。
      * Forge が設定ファイルを作るより前（Mod のクラスを作るとき）に確かめる。
      */
     public static boolean configExistedAtStart;
@@ -78,11 +78,11 @@ public class WeakSpotMod {
         network.registerMessage(MarkerMessage.Handler.class, MarkerMessage.class, 6, Side.SERVER);
         network.registerMessage(OtherMarkerMessage.Handler.class, OtherMarkerMessage.class, 7, Side.CLIENT);
         network.registerMessage(SwitchMessage.Handler.class, SwitchMessage.class, 8, Side.SERVER);
-        // 1.9.0 で、動物・釣り・機械の問い合わせと返事（9〜14）を QueryMessage / StateMessage にまとめ、番号を振り直した
+        // 動物・釣り・機械の問い合わせと返事
         network.registerMessage(QueryMessage.Handler.class, QueryMessage.class, 9, Side.SERVER);
         network.registerMessage(StateMessage.Handler.class, StateMessage.class, 10, Side.CLIENT);
         network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 11, Side.CLIENT);
-        // 1.11.0: 的当て
+        // 的当て
         network.registerMessage(TargetMessage.Handler.class, TargetMessage.class, 12, Side.CLIENT);
         network.registerMessage(TargetActionMessage.Handler.class, TargetActionMessage.class, 13, Side.SERVER);
         network.registerMessage(OtherTargetMessage.Handler.class, OtherTargetMessage.class, 14, Side.CLIENT);

@@ -10,11 +10,11 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 
 /**
- * サーバーからプレイヤーに送る文（1.9.6）。翻訳キーと値（TextComponentTranslation）で送り、クライアントが自分の今の言語で
- * 文にする。ただし相手のクライアントがそのキーを持っていない（キーを足した版 since より古い）ときは、今までどおり
+ * サーバーからプレイヤーに送る文。翻訳キーと値（TextComponentTranslation）で送り、クライアントが自分の今の言語で
+ * 文にする。ただし相手のクライアントがそのキーを持っていない（キーを足した版 since より古い）ときは、
  * サーバーで文にして送る（ServerLang。持っていないキーはキーのまま表示されてしまうため）。
  * 接続できる一番古い版（WeakSpotMod.ACCEPTED_VERSIONS の下限）までに足したキーは、どのクライアントも持っているので、
- * これを通さずに TextComponentTranslation で送る（1.11.5）。ここを通すのは、パッチで足したキーだけ。
+ * これを通さずに TextComponentTranslation で送る。ここを通すのは、パッチで足したキーだけ。
  * 翻訳の値には %s（と %1$s の形）だけを使う（クライアントの翻訳では %d などが使えない）。
  */
 public final class PlayerText {
@@ -34,7 +34,7 @@ public final class PlayerText {
     }
 
     /**
-     * クライアントの版が version 以上か（1.11.2。サーバーとクライアントの両方が要る機能を、古いクライアントに使わない）。
+     * クライアントの版が version 以上か（サーバーとクライアントの両方が要る機能を、古いクライアントに使わない）。
      * 版が分からない（同じ jar のシングルプレイなど。古い版のクライアントは必ず版を送る）ときは true。
      */
     public static boolean clientSince(EntityPlayerMP player, String version) {

@@ -15,14 +15,14 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
 /**
- * 遊び方のガイドの本（1.4.1。両側）。サーバーは初めてのログインで渡し、クライアントは統計画面の「ガイド」で開く。
+ * 遊び方のガイドの本（両側）。サーバーは初めてのログインで渡し、クライアントは統計画面の「ガイド」で開く。
  * ページは翻訳キーの文章なので、読む人のクライアントの言語で出る。キーの名前は、読む人の操作設定から出す。
- * 1.8.5 から、表紙・目次（クリックで飛ぶ）・章ごとのページで、各ページは小見出し（■）で分ける。
+ * 表紙・目次（クリックで飛ぶ）・章ごとのページで、各ページは小見出し（■）で分ける。
  * 遊び方（doc/play.md）を変えたら、lang の weakspot.guide.* も合わせて直す（CLAUDE.md）。
  */
 public final class GuideBook {
 
-    /** 本の形の版（NBT の TAG_FORMAT。1.8.5 で 2。1.8.x までは、これより古い本を差し替えていた。1.9.0 でやめた）。 */
+    /** 本の形の版（NBT の TAG_FORMAT）。 */
     public static final int FORMAT = 2;
     public static final String TAG_FORMAT = "weakspotGuide";
     private static final String TITLE = "Weak Spot Mining";

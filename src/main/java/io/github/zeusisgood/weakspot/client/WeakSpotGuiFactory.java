@@ -19,7 +19,7 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 
 /**
- * Mods メニューの「設定」。1.10.2 から、ファイルのカテゴリ（server / client）ではなく、種類・用途のまとめ（SettingGroups）で
+ * Mods メニューの「設定」。ファイルのカテゴリ（server / client）ではなく、種類・用途のまとめ（SettingGroups）で
  * 組む。項目そのもの（Property）は ConfigManager の Configuration のものを使うので、値の保存と反映は Forge の画面と同じ流れ
  * （OnConfigChangedEvent → WeakSpotConfig.Sync）。他人のサーバーに接続している間は、サーバーの値が優先される旨を2行目に出す。
  */

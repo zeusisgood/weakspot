@@ -25,7 +25,7 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 的当てのラウンド（1.11.0。サーバーが正）。「弱点の的」の右クリックで始め（カウントダウン 3 秒 + 30 秒）、ヒットは
+ * 的当てのラウンド（サーバーが正）。「弱点の的」の右クリックで始め（カウントダウン 3 秒 + 30 秒）、ヒットは
  * クライアントの知らせ（TargetActionMessage）を、ラウンド中か・間隔で確かめて数える（当たり +1、ハズレ −5、0 より下に
  * ならない）。終わったら記録（MiningStats の targetBest・targetRounds。「統計をリセット」では消さない）を残し、
  * サーバーの 1 位を上回ったら全員に知らせる。死亡・ディメンション移動・ログアウトでやめる（記録なし）。
@@ -130,7 +130,7 @@ public final class TargetRounds {
         tellOthers(player, -1);
         long previousTop = Leaderboard.best(server, Leaderboard.Category.TARGET);
         MiningStats before = ServerStats.total(player);
-        // 1.11.0 で取った段階（進捗）も、もう届いている段階として数える（1.11.1）
+        // しきい値を上げる前に取った段階（進捗）も、もう届いている段階として数える
         TargetRules.Tier earned = WeakSpotAdvancements.earnedTargetTier(player);
         TargetRules.Tier oldTier = TargetRules.Tier.of(before.targetBest);
         if (earned.atLeast(oldTier)) {
@@ -160,8 +160,8 @@ public final class TargetRounds {
     }
 
     /**
-     * ログイン: ご褒美の解放のため、自己ベストと、取った進捗のいちばん上の段階（1.11.1。RECORD では newTier の欄を
-     * これに使う。しきい値を上げても、1.11.0 で解放した段階を残すため。古いクライアントは RECORD の newTier を読まない）を送る。
+     * ログイン: ご褒美の解放のため、自己ベストと、取った進捗のいちばん上の段階（RECORD では newTier の欄を
+     * これに使う。しきい値を上げる前に解放した段階を残すため。古いクライアントは RECORD の newTier を読まない）を送る。
      */
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {

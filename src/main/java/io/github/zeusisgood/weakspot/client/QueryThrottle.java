@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * サーバーへの問い合わせの間隔（1.8.8 で AnimalStates・MachineBars・FishingSpot から切り出した）。相手ごとに最後に
+ * サーバーへの問い合わせの間隔（AnimalStates・MachineBars・FishingSpot）。相手ごとに最後に
  * 問い合わせた tick を覚え、間隔があいていれば問い合わせてよいと答えて記録する（ヒットのときは force ですぐに）。
  * 覚えるのは最後の相手だけ（perTarget が false）か、相手ごと（true。動物）。
  */

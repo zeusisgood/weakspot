@@ -54,7 +54,7 @@ public final class MarkerMotion {
     }
 
     /**
-     * 移動の途中も残像も含めて、全体を (du, dv) だけずらす（1.8.2。ボートが曲がったとき、弱点を一緒に回す）。
+     * 移動の途中も残像も含めて、全体を (du, dv) だけずらす（ボートが曲がったとき、弱点を一緒に回す）。
      */
     public void shift(double du, double dv) {
         fromU += du;

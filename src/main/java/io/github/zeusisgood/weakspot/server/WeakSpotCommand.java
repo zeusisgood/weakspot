@@ -20,7 +20,7 @@ import net.minecraft.util.text.TextFormatting;
 
 /**
  * 管理コマンド /weakspot（OP 以上）。オンラインのプレイヤーの統計を表示する・統計を消す・設定を読み直す。
- * /weakspot top（1.11.0）だけは、だれでも使える（サーバー内の上位 10 人。オフラインの人も。Leaderboard）。
+ * /weakspot topだけは、だれでも使える（サーバー内の上位 10 人。オフラインの人も。Leaderboard）。
  * 表示は翻訳キーで出す（クライアントにも Mod が入っている前提で、クライアントが翻訳する）。
  * 「統計を消す」は統計画面の「統計をリセット」と同じ処理（ServerStats.resetTotal。今回と累計の両方）。
  */
@@ -46,7 +46,7 @@ public final class WeakSpotCommand extends CommandBase {
 
     @Override
     public int getRequiredPermissionLevel() {
-        // top はだれでも使えるように 0 にし、管理のサブコマンドは execute で OP かを確かめる（1.11.0）
+        // top はだれでも使えるように 0 にし、管理のサブコマンドは execute で OP かを確かめる
         return 0;
     }
 

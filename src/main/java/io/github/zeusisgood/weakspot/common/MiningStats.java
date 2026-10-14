@@ -15,7 +15,7 @@ public final class MiningStats {
     public long blocksBroken;
     /** そのうち、弱点に1回以上当てて壊した数。 */
     public long blocksBrokenWithHit;
-    /** 壊したブロックに当てた採掘ヒットの合計（壊しきらなかったブロックへのヒットは数えない。1.10.0 から。平均に使う）。 */
+    /** 壊したブロックに当てた採掘ヒットの合計（壊しきらなかったブロックへのヒットは数えない。平均に使う）。 */
     public long hitsOnBrokenBlocks;
     /** 1つのブロックで当てた回数の最大。 */
     public long maxHitsOnBlock;
@@ -25,7 +25,7 @@ public final class MiningStats {
     /** 種類を問わない連続ヒット（コンボ）の最大。サーバーが HitStreak で数える。 */
     public long maxStreak;
 
-    /** 的当ての自己ベスト（ヒット数）と、最後まで遊んだ回数（1.11.0）。「統計をリセット」では消さない。 */
+    /** 的当ての自己ベスト（ヒット数）と、最後まで遊んだ回数。「統計をリセット」では消さない。 */
     public long targetBest;
     public long targetRounds;
 
@@ -45,19 +45,19 @@ public final class MiningStats {
     }
 
     /**
-     * 採掘以外の種類ごとの、弱点に当てた回数（HitKind の番号で引く。採掘の欄は使わず、hits を使う。1.8.6 で配列にした）。
-     * 近接は、1.8.0 から「近接の弱点に当てた回数」（1.7.x まではクリティカルにした回数。保存のキーは 1.9.0 から meleeHits）。
+     * 採掘以外の種類ごとの、弱点に当てた回数（HitKind の番号で引く。採掘の欄は使わず、hits を使う）。
+     * 近接は「近接の弱点に当てた回数」（保存のキーは meleeHits。古いワールドは critHits）。
      */
     private final long[] kindHits = new long[HitKind.values().length];
 
-    /** 採掘以外の種類のヒットを 1 つ数える（1.7.0）。採掘は recordHit で数える（短縮できた時間も足すため）。 */
+    /** 採掘以外の種類のヒットを 1 つ数える。採掘は recordHit で数える（短縮できた時間も足すため）。 */
     public void recordKindHit(HitKind kind) {
         if (kind != HitKind.MINING) {
             kindHits[kind.ordinal()]++;
         }
     }
 
-    /** その種類のヒット数（採掘は hits）。種類ごとの節目に使う（1.7.0）。 */
+    /** その種類のヒット数（採掘は hits）。種類ごとの節目に使う。 */
     public long count(HitKind kind) {
         return kind == HitKind.MINING ? hits : kindHits[kind.ordinal()];
     }
@@ -71,7 +71,7 @@ public final class MiningStats {
         }
     }
 
-    /** すべての種類のヒット数の合計。合計の節目に使う（1.7.0）。 */
+    /** すべての種類のヒット数の合計。合計の節目に使う。 */
     public long totalHits() {
         long sum = 0;
         for (HitKind kind : HitKind.values()) {
@@ -119,7 +119,7 @@ public final class MiningStats {
         java.util.Arrays.fill(kindHits, 0);
     }
 
-    /** 保存のキー（採掘は hits、ほかは "<key>Hits"。近接は 1.9.0 から meleeHits で、1.8.x までは critHits）。 */
+    /** 保存のキー（採掘は hits、ほかは "<key>Hits"。近接は meleeHits で、古いワールドは critHits）。 */
     public static String saveKey(HitKind kind) {
         return kind == HitKind.MINING ? "hits" : kind.key() + "Hits";
     }
@@ -129,7 +129,7 @@ public final class MiningStats {
         return kind == HitKind.MELEE ? "critHits" : null;
     }
 
-    /** 送る並び（StatsMessage が ByteBuf につなぐ。1.9.0 から、全体の数のあとに種類の順。1.11.0 から最後に的当て）。種類や項目を足すと通信が変わる（マイナー）。 */
+    /** 送る並び（StatsMessage が ByteBuf につなぐ。全体の数のあとに種類の順、最後に的当て）。種類や項目を足すと通信が変わる（マイナー）。 */
     public void writeTo(DataOutput out) throws IOException {
         out.writeLong(hits);
         out.writeLong(blocksBroken);

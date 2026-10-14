@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 弱点の種類ごとのオン・オフ（1.7.0）。オフの種類を HitKind の番号のビットで持つ（SwitchMessage で送る）。
+ * 弱点の種類ごとのオン・オフ。オフの種類を HitKind の番号のビットで持つ（SwitchMessage で送る）。
  * Minecraft に依存しない。
  */
 public final class KindMask {

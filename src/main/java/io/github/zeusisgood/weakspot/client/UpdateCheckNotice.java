@@ -13,9 +13,9 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
 /**
- * 新しい版の通知（1.9.2）。Forge の更新確認（@Mod の updateJSON）の結果を見て、新しい版があれば、
+ * 新しい版の通知。Forge の更新確認（@Mod の updateJSON）の結果を見て、新しい版があれば、
  * ワールドに入ったときに起動ごとに 1 回、チャットに出す。[この版は通知しない]（/weakspot skipupdate）を押した版は出さない。
- * ワールドに入ってからの tick は UpdateNotes が数えて、tick に渡す（1.11.5）。
+ * ワールドに入ってからの tick は UpdateNotes が数えて、tick に渡す。
  */
 final class UpdateCheckNotice {
 

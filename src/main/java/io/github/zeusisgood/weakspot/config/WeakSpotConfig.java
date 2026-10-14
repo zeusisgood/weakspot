@@ -27,7 +27,7 @@ import org.apache.logging.log4j.LogManager;
  * config/weakspot.cfg。
  * [サーバー] はサーバーの値が正で、ログイン時と変更時にクライアントへ送る（SyncedSettings）。
  * クライアントは接続中、自分の [サーバー] の値を使わない。[クライアント] は各プレイヤーの設定のまま使う。
- * カテゴリは 2 段（server / client → 種類・用途。1.10.0）。項目の名前は、カテゴリを分ける前（general）と同じ。
+ * カテゴリは 2 段（server / client → 種類・用途）。項目の名前は、カテゴリを分ける前（general）と同じ。
  * 項目は {@link #server}・{@link #client} の入れ子のオブジェクトにある（例: WeakSpotConfig.server.mining.boostMultiplier）。
  */
 @Config(modid = WeakSpotMod.MODID, category = "")
@@ -64,9 +64,9 @@ public final class WeakSpotConfig {
      * 古い版で作った weakspot.cfg を1回だけ移行する（init とサーバーの起動時に呼ぶ。何度呼んでもよい）。
      * 値は Configuration の Property に書いてから ConfigManager.sync でフィールドへ読み込む（preInit から init の間の sync は
      * ファイルの値でフィールドを上書きする「読み込み」なので、フィールドに書いてから保存することはできない）。
-     * 1.9.0 で、1〜5（1.2.x〜1.6.x の古い初期値の直し）は消した。
+     * 1〜5（古い初期値の直し）は消した。
      * 6: 今の設定にない項目（1.7.x の meleeWeakSpotScale など）を、ファイルから消す（Forge は自分では消さない）。
-     * 7: general に並んでいた項目を、server / client の下のカテゴリへ移す（1.10.0）。今の設定にない項目は消す（6 を含む）。
+     * 7: general に並んでいた項目を、server / client の下のカテゴリへ移す。今の設定にない項目は消す（6 を含む）。
      */
     public static void migrate() {
         if (general.configVersion >= 7) {
@@ -137,7 +137,7 @@ public final class WeakSpotConfig {
             }
         }
 
-        /** 設定画面の項目の名前の翻訳キー（Forge の決まり: weakspot.カテゴリ.小文字の名前。1.10.2 から翻訳を持つ）。 */
+        /** 設定画面の項目の名前の翻訳キー（Forge の決まり: weakspot.カテゴリ.小文字の名前）。 */
         public String nameKey() {
             return WeakSpotMod.MODID + "." + category + "." + name().toLowerCase(Locale.ENGLISH);
         }

@@ -22,14 +22,14 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 自分の採掘のブースト（クライアント。1.8.9 で ClientWeakSpotHandler から分けた）。PlayerControllerMP は tick ごとに
+ * 自分の採掘のブースト（クライアント）。PlayerControllerMP は tick ごとに
  * 進捗を積むので、ヒットの次の tick から boostDurationTicks の間だけ、破壊速度に倍率（コンボの掛け数つき）を掛ける。
  * サーバーは瞬間判定なので別の計算（server/ServerBoostTracker・BoostMath）。
  *
- * 1.11.2: 掘る前のヒットを覚えておき、同じブロックを掘り始めたらブーストをかける。当てたブロックを壊したら、
+ * 掘る前のヒットを覚えておき、同じブロックを掘り始めたらブーストをかける。当てたブロックを壊したら、
  * 次を掘り始めるまでの待ち（PlayerControllerMP の非公開の blockHitDelay、5 tick）を 0 にする。
  *
- * 1.11.6: ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
+ * ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
  * クリックし直したブロックがクライアントだけでその場で壊れ、ゴーストブロックになる。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -37,16 +37,16 @@ final class MiningBoost {
 
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
-    /** 最後の採掘ヒットのコンボの掛け数（1.8.7。サーバーが古ければ 1）。 */
+    /** 最後の採掘ヒットのコンボの掛け数（サーバーが古ければ 1）。 */
     private static double boostFactor = 1;
     /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
     private static boolean suppressBoost;
 
     private static final Field HIT_DELAY = Reflect.field(PlayerControllerMP.class,
             "skipping the wait after breaking a block that was hit", "blockHitDelay", "field_78781_i");
-    /** 当てたブロック（1.11.2）。壊したら、次を掘り始めるまでの待ちを 0 にする。 */
+    /** 当てたブロック。壊したら、次を掘り始めるまでの待ちを 0 にする。 */
     private static BlockPos hitBlock;
-    /** 掘る前のヒット（1.11.2）。掘り始めたらブーストをかける。 */
+    /** 掘る前のヒット。掘り始めたらブーストをかける。 */
     private static BlockPos preHitPos;
     private static long preHitTick;
     private static int preHitStreak;
@@ -62,7 +62,7 @@ final class MiningBoost {
         hitBlock = pos;
     }
 
-    /** 掘る前の採掘の弱点に当てた（1.11.2）。 */
+    /** 掘る前の採掘の弱点に当てた。 */
     static void onPreHit(BlockPos pos, int streak) {
         preHitPos = pos;
         preHitTick = ClientWeakSpotHandler.clientTick;
@@ -86,14 +86,14 @@ final class MiningBoost {
         preHitPos = null;
     }
 
-    /** 掘る前の弱点を出せるブロックか（1.11.2）。1 tick で壊れるブロックも出す。クリエイティブは一瞬で壊れるので出さない。 */
+    /** 掘る前の弱点を出せるブロックか。1 tick で壊れるブロックも出す。クリエイティブは一瞬で壊れるので出さない。 */
     static boolean isPreDigEligible(World world, EntityPlayerSP player, BlockPos pos, IBlockState state) {
         return !player.capabilities.isCreativeMode && !state.getBlock().isAir(state, world, pos)
                 && state.getBlockHardness(world, pos) >= 0;
     }
 
     /**
-     * 当てたブロックが壊れたら、次を掘り始めるまでの待ちを 0 にする（1.11.2）。バニラは壊した tick の進捗の計算の中で
+     * 当てたブロックが壊れたら、次を掘り始めるまでの待ちを 0 にする。バニラは壊した tick の進捗の計算の中で
      * 待ちを 5 にするので、その tick の END で戻す。
      */
     @SubscribeEvent
@@ -121,7 +121,7 @@ final class MiningBoost {
 
     /**
      * ブロックをクリックした（PlayerControllerMP.clickBlock。その場で壊れるかの判定より先に来る）。サーバーと同じく、
-     * ブーストを捨てる（1.11.6）。掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。
+     * ブーストを捨てる。掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。
      */
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
@@ -172,7 +172,7 @@ final class MiningBoost {
         }
     }
 
-    /** 採掘のコンボの掛け数（1.8.7。1.9.0 からサーバーの設定 miningComboBonus でオフにできる）。 */
+    /** 採掘のコンボの掛け数（サーバーの設定 miningComboBonus でオフにできる）。 */
     static double comboFactor(int combo) {
         return ClientSettings.get().miningComboBonus ? ComboFactor.factor(combo) : 1;
     }

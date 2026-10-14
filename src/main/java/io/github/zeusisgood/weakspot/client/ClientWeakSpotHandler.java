@@ -31,11 +31,11 @@ import net.minecraftforge.fml.relauncher.Side;
 /**
  * クライアント側の弱点処理。弱点の位置は自分のクライアントだけが持ち、他プレイヤーとは共有しない。
  * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械、動物、収穫）の弱点を扱う
- * （近接は 1.8.0 から MeleeSpot）。
+ * （近接は MeleeSpot）。
  * 弱点は一度に1つだけ。
  *
  * ヒット判定は毎フレーム行う（素早く照準を動かしたときに tick 単位だと取りこぼすため）。
- * 1.8.9 で、採掘のブーストを MiningBoost、共通のヒット処理（連続ヒット・間隔）を OwnHits、足元・面のバーを OwnSpotBars に分けた。
+ * 採掘のブーストは MiningBoost、共通のヒット処理（連続ヒット・間隔）は OwnHits、足元・面のバーは OwnSpotBars。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ClientWeakSpotHandler {
@@ -86,7 +86,7 @@ public final class ClientWeakSpotHandler {
         if (!WeakSpotConfig.client.markers.weakSpotsEnabled) {
             stopOwnWeakSpots();
         }
-        // 掘る前の採掘の弱点は、照準が外れたらすぐ消す（1.11.2。いつも出るので、残すと見回すたびに邪魔になる）
+        // 掘る前の採掘の弱点は、照準が外れたらすぐ消す（いつも出るので、残すと見回すたびに邪魔になる）
         if (spot != null && (isGone(mc.world, spot)
                 || clientTick - spot.lastActiveTick > (spot.preview ? 1 : ClientSettings.get().lingerTicks))) {
             spot = null;
@@ -215,7 +215,7 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 掘る前の採掘の弱点（1.11.2）。照準が合ったブロックに薄く出し、掘る前に 1 回だけ当てられる。
+     * 掘る前の採掘の弱点。照準が合ったブロックに薄く出し、掘る前に 1 回だけ当てられる。
      * 当たるのは左クリックを押している間だけ（照準を合わせるだけで当たると、ブロックを交互に見るだけで
      * ヒット音とコンボの表示が増え続けるため）。当てたら弱点は動き、掘り始めるまで当たらない。
      * ヒットはサーバーで予約され、掘り始めた瞬間に確定する。
@@ -256,7 +256,7 @@ public final class ClientWeakSpotHandler {
         }
         IBlockState state = mc.world.getBlockState(pos);
         AxisAlignedBB box = state.getSelectedBoundingBox(mc.world, pos);
-        // 1マス全体のブロック（IC2 のゴムの木の幹など）は、上面が隠れていることが多いので、照準の面に出す（1.4.0）
+        // 1マス全体のブロック（IC2 のゴムの木の幹など）は、上面が隠れていることが多いので、照準の面に出す
         boolean plant = kind == HitKind.GROWTH || kind == HitKind.HARVEST;
         EnumFacing face = plant && !isFullCube(box, pos) ? growthFace(mc, pos, box, target.sideHit)
                 : target.sideHit;
@@ -332,7 +332,7 @@ public final class ClientWeakSpotHandler {
         return blockSpotActive(HitKind.MACHINE);
     }
 
-    /** その種類（採掘・機械・収穫など）の弱点が出ていて、このフレームで照準が合っているか（コンボの種類の表示。1.8.7）。 */
+    /** その種類（採掘・機械・収穫など）の弱点が出ていて、このフレームで照準が合っているか（コンボの種類の表示）。 */
     static boolean blockSpotActive(HitKind kind) {
         return spot != null && spot.kind == kind && spot.lastActiveTick == clientTick;
     }

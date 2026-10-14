@@ -133,11 +133,11 @@ final class WeakSpotRenderer {
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks) * (spot.preview ? PREVIEW_ALPHA : 1);
             if (alpha > 0) {
-                // 自分の弱点の色と形は、種類ごとの設定（1.7.0。統計画面の「弱点マーカー」タブ）
+                // 自分の弱点の色と形は、種類ごとの設定（統計画面の「弱点マーカー」タブ）
                 float[][] look = MarkerLook.palette(spot.kind, OWN_DISK, OWN_RING, OWN_CENTER);
                 MarkerShape shape = MarkerLook.shape(spot.kind);
                 if (behindLiquid(mc, spot, partialTicks)) {
-                    // 目との間に水・溶岩がある（水の面も深度を書くので、そのままでは隠れる。1.11.0）
+                    // 目との間に水・溶岩がある（水の面も深度を書くので、そのままでは隠れる）
                     GlStateManager.disableDepth();
                     drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
                     GlStateManager.enableDepth();
@@ -232,7 +232,7 @@ final class WeakSpotRenderer {
     private static final double LIQUID_STEP = 0.2;
 
     /**
-     * 自分のブロックの弱点で、目から弱点の中心までの間に水・溶岩（流れているものも）のブロックがあるか（1.11.0）。
+     * 自分のブロックの弱点で、目から弱点の中心までの間に水・溶岩（流れているものも）のブロックがあるか。
      * 1.12.2 では水の面も深度を書くので、そのまま描くと水面の後ろの弱点が隠れる。照準の先のブロックは、液体のほかに
      * さえぎる物がないことがバニラの判定（objectMouseOver）で決まっているので、このときは深度テストを切って描いてよい。
      */
@@ -332,7 +332,7 @@ final class WeakSpotRenderer {
     }
 
     /** 長押しをやめた後、残り FADE_TICKS で薄くする。 */
-    /** 掘る前の採掘の弱点の濃さ（1.11.2。いつも出ているので控えめに）。 */
+    /** 掘る前の採掘の弱点の濃さ（いつも出ているので控えめに）。 */
     private static final float PREVIEW_ALPHA = 0.4F;
 
     private static float spotAlpha(WeakSpot spot, long tick, float partialTicks) {

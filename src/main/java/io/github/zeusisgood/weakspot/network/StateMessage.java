@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: QueryMessage の返事（1.9.0 で、動物・釣り・機械の 3 つの返事をまとめた）。
+ * サーバー → クライアント: QueryMessage の返事（動物・釣り・機械）。
  * 種類と相手と、整数 1 つ（flags）と小数の並び（values）。中身の意味は種類ごと:
  * <ul>
  * <li>動物: flags = 動いているタイマーの mask（0 なら弱点を出さない）、values = タイマーごとの進み具合（0〜1）</li>
