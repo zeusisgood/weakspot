@@ -62,7 +62,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
 2. `build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
-4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
+4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。`README.en.md` の「Recent updates」も同じ 3 件にし、各版は英語のお知らせ（6.）の 1 行をそのまま使う。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
 5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`en_us.lang` / `ja_jp.lang` の `weakspot.guide.*`）を直す。操作が変わったら `README.en.md` の操作の表も（種類の説明は `doc/store/description.md` にだけ書く）。
 6. 更新のお知らせの要約 `weakspot.news.<版>` を `ja_jp.lang` と `en_us.lang` に 1 行足す（日本語で 40 字くらいまで）。
 7. 直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。

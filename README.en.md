@@ -32,11 +32,35 @@ You can change the keys under Options → Controls → Weak Spot Mining.
 
 There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, melee, throwing, eating, vehicle, ladder, sprint, elytra, portal, swim, fall, sleeping and enchanting. See the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) for how each one works, or the in-game guide book (the Guide button in the K menu). Hitting spots in a row builds a **combo**, and the hit sound climbs the scale.
 
+## Recent updates
+
+### 1.11.7
+
+- Internal cleanup; the docs now explain how to stop elytra rubber-banding on servers
+
+### 1.11.6
+
+- Fixed blocks mined with weak spot hits staying as invisible walls in multiplayer
+
+### 1.11.5
+
+- Internal cleanup (no gameplay changes)
+
+The full changelog is in [CHANGELOG.md](CHANGELOG.md) (Japanese).
+
 ## More
 
 - Settings: the Mods menu or `config/weakspot.cfg` (every setting has an English description).
 - Bugs: type `/weakspot bug` in chat to get a link to a prefilled [issue](https://github.com/zeusisgood/weakspot/issues) with your environment.
-- Other documents (changelog, detailed guide, settings list) are in Japanese: [CHANGELOG.md](CHANGELOG.md), [doc/](doc/).
+- Other documents (detailed guide, settings list) are in Japanese: [doc/](doc/).
+
+## For developers
+
+- Requires JDK 8. Built with the official Forge MDK (Forge 14.23.5.2860, ForgeGradle 3 + Gradle 4.9).
+- `./gradlew build` builds and tests (jar in `build/libs/`). `./gradlew runServer` starts a dev server.
+- Both the server and the client need the mod. `common/` holds pure logic with no Minecraft classes (unit-tested); `client/` and `server/` hold the sides.
+- Design notes and the release checklist are in Japanese: [doc/development.md](doc/development.md), [doc/architecture.md](doc/architecture.md), [doc/roadmap.md](doc/roadmap.md).
+- Issues and pull requests are welcome (in English or Japanese).
 
 ## License
 
