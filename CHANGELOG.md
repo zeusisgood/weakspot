@@ -2,6 +2,11 @@
 
 [← README に戻る](README.md)。版の決め方は [doc/development.md](doc/development.md#バージョンの方針)。
 
+## 1.11.8
+
+- 内部の整理（使われていない部品の削除・重なった処理のまとめ）。遊び方・見た目に変更なし
+- 通信内容・設定・保存データに変更なし。1.11.x 同士はそのまま接続可能
+
 ## 1.11.7
 
 - マルチでエリトラの弱点を続けて当てると、速すぎるとしてサーバーに引き戻されることがある件の対処を[導入](doc/install.md#導入先)と[遊び方](doc/play.md)に追記: `/gamerule disableElytraMovementCheck true`（`server.properties` の `allow-flight=true` では止まらない）。Mod の動作は変更なし（速度の上限は付けない）
