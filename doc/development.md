@@ -14,15 +14,7 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 
 コンテナ内ではゲーム画面を表示できないため、クライアント側の動作は、ビルドした jar をホスト側の Minecraft の `mods` に入れて確認します。
 
-ソースは `io.github.zeusisgood.weakspot` 以下にあります。
-
-| パッケージ | 内容 |
-|---|---|
-| `common/` | Minecraft に依存しない計算（動物のタイマー換算、釣りの待ち時間と許容角度、照準周辺の弱点の向き、面の座標変換、弱点の配置、ブースト量、連続ヒット数、ヒット音の音階、コンボ表示、マーカーの移動と残像、耐久バーの形状、統計の集計、節目、耐久回復の精算、機械の加速量、マーク送信頻度、成長の進行度、マークの形状、弱点のオン／オフ）。単体テストの対象 |
-| `client/` | 弱点の状態管理、ヒット判定、描画（他プレイヤーのマーク・耐久バーを含む）、ヒット音、コンボ表示、統計画面（「弱点マーカー」タブを含む）、節目の演出 |
-| `network/` | パケット（ヒット通知、設定、統計、節目、弱点マーク、弱点のオン／オフ、動物・釣り・機械の状態の問い合わせと応答） |
-| `server/` | 管理コマンド、破壊速度ブースト、各種類のヒットの検証と効果、機械の加速、統計の記録、報酬、設定の送信、弱点マークの転送 |
-| `config/` | 設定 |
+ソースは `io.github.zeusisgood.weakspot` 以下にあります。パッケージごとの中身は [architecture.md](architecture.md) の「全体」を参照してください。
 
 仕様書（バージョンごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
 
@@ -42,11 +34,9 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
 
 ## 開発環境の細かいこと
 
-（1.9.6 のあとに `CLAUDE.md` から移した。）
-
 - ビルドは公式 MDK ベースの ForgeGradle 3 + Gradle 4.9（1.0 の仕様書にある FG 2.3 ではない）。Gradle 5 以降の構文は使えない（依存は `compile` / `testCompile`）。
 - テストを 1 クラスだけ: `./gradlew test --tests io.github.zeusisgood.weakspot.common.WeakSpotPlacerTest`
-- JDK 8 がない環境（クラウドのセッションなど）: `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす（Maven Central が 429 を返したら、少し待って再実行）。
+- JDK 8 がない環境（クラウドのセッションなど）: `apt-get install -y openjdk-8-jdk-headless` で入れ、`JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q` で動かす。
 - クラウドのネットワーク: ForgeGradle と Forge は `maven.minecraftforge.net` から取るので、環境のネットワーク設定（セッションのタイトルバーのクラウド環境のメニュー → Edit → Network access）で Custom にし、Allowed domains にこのホストを足す（パッケージマネージャーの既定の一覧は残す。手順は https://code.claude.com/docs/en/cloud-environments#network-access ）。拒否されると `Received status code 403` で止まる。
 - Maven Central の 429（混雑）: 30 秒ずつ間をあけて 5 回まで再実行する。
   ```
@@ -64,13 +54,13 @@ JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と
   - パイプで `stop` を流しても Gradle 経由では届かない。起動の確認は `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `run/config/weakspot.cfg` を見る。
   - devcontainer が使えない環境（クラウドのセッションなど）では、FML の `NetworkRegistry.newChannel` の NPE で落ちる。そこでは `runServer` での確認はしない（ビルドとテストは通す。jar はユーザーが試す）。
   - 起動ログの `module-info.class ... IllegalArgumentException`（`Unable to read a class file correctly`）は FG3 + 1.12 でいつも出るノイズ。`Missing English translation for weakspot: .../build/classes/java/main/assets/...` の WARN も、開発環境のリソースの置き場所によるノイズ。
-- 非公開のフィールドはリフレクションで読む（アクセストランスフォーマーは使わない）。開発環境は MCP 名、reobf 後は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（`Reflect`、`client/MiningProgress`）。Forge の 3 引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
+- 非公開のフィールドはリフレクションで読む（アクセストランスフォーマーは使わない）。開発環境は MCP 名、reobf 後は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（`Reflect`）。Forge の 3 引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
   - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/maven_downloader/de/oceanlabs/mcp/mcp_snapshot/20171003-1.12/mcp_snapshot-20171003-1.12.zip` の `fields.csv`（`methods.csv`）、または `~/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-srg.jar` を `javap -p` で見る。
   - 画面を出さずに両方の環境で確かめるには、自分のクラスを小さなプログラムからリフレクションで呼ぶ（インスタンスは `Unsafe.allocateInstance`）。開発環境は `sourceSets.main.runtimeClasspath`（Gradle の init スクリプトで書き出す）、実際の環境はその中の `build/classes` `build/resources` と `..._mapped_snapshot_...` の jar を、`build/libs` の reobf 済み jar と上の `-srg.jar` に差し替えたクラスパスで動かす。
 
 ## リリースの手順
 
-（1.9.6 のあとに `CLAUDE.md` から移した。直し忘れの多くは `ReleaseFilesTest` で CI が赤くなる。）
+（直し忘れの多くは `ReleaseFilesTest` で CI が赤くなる。）
 
 1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
 2. `build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。
