@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
 
-- 仕様書は `doc/spec/`（一覧は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。置いてあるのは 1.11.0 以降の版ごとの差分だけ（1.10.2 までは、タグ `v1.10.2` の `doc/spec/`）。今の挙動の正本は `doc/play.md`・`doc/config.md`・`doc/architecture.md` と 1.11.0 以降の仕様書。仕様書に書かれていないことは、その前の版と現行実装のまま。置いてある仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。
+- 仕様書は `doc/spec/`（一覧は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。置いてあるのは 1.11.0 以降の版ごとの差分だけ（1.10.2 までは、タグ `v1.10.2` の `doc/spec/`）。今の挙動の正本は `doc/play.md`・`doc/config.md`・`doc/architecture.md`（とコード）だけで、仕様書は今のマイナーの経緯と決定の記録。仕様書に書かれていないことは、その前の版と現行実装のまま。置いてある仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。**新しいマイナーを始めたら、前のマイナーの仕様書を消す**（タグに残る。同じマイナーの間は本数が増えても消さない。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移す。手順は `doc/development.md` の「リリースの手順」）。
 - **この節以外の詳しいことは `doc/` にある**（必要なときに読む）:
 
 | 内容 | 文書 |
@@ -63,7 +63,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。
-- 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。
+- 画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に足す。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
 - **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品（`HitGate`・`HitBudget`・`HitHandlers`・`AimSpotKind` / `AimSpots`・`ScreenSpotKind` / `ScreenSpots`・`UseTimeCut`・`SpeedModifier`・`QueryThrottle`・`ComboFactor`・`SyncedSettings.enabled` / `minHitInterval` / `server()`・`ScreenProjection.drawMarker`・`Reflect.lazyField`・`ServerThread` など）があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
