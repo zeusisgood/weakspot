@@ -1,10 +1,10 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * ヒット音の音階（1.11.1。各自の設定 hitScaleType / hitScaleDirection / hitScaleOctaves）。音階の種類（長音階・
+ * ヒット音の音階（各自の設定 hitScaleType / hitScaleDirection / hitScaleOctaves）。音階の種類（長音階・
  * ペンタトニック・短調）、動き（上がって戻る・往復）、音域（1〜2 オクターブ）から、連続ヒット数のピッチ・和音・
  * 節目の駆け上がり・途切れたときの音を決める。度数 0 がピッチ 1.0 のド（負なら下のオクターブ。ピッチの下限 0.5 は -n）。
- * DEFAULT（長音階・上がって戻る・1 オクターブ）は 1.11.0 までと同じ鳴り方（HitPitch の静的な関数はこれを使う）。
+ * DEFAULT（長音階・上がって戻る・1 オクターブ）は HitPitch の静的な関数と同じ鳴り方（HitPitch はこれを使う）。
  */
 public final class HitScale {
 
@@ -41,7 +41,7 @@ public final class HitScale {
 
     public static final int MIN_OCTAVES = 1;
     public static final int MAX_OCTAVES = 2;
-    /** 1.11.0 までと同じ鳴り方。 */
+    /** 初期値の鳴り方。 */
     public static final HitScale DEFAULT = new HitScale(Type.MAJOR, Direction.UP, 1);
 
     /** 長音階で数えた和音の度数のうち、1 オクターブ下（-7）以下のもの。ほかの音階では、その音階の 1 オクターブに合わせる。 */

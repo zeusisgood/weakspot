@@ -57,7 +57,7 @@ public class FaceMathTest {
 
     @Test
     public void growthFaceOfLowCropStaysTopWhateverTheAim() {
-        // 小麦など上面が一番大きい作物は、照準や今の面に関係なく上面（1.1.1 と同じ）
+        // 小麦など上面が一番大きい作物は、照準や今の面に関係なく上面
         assertEquals(FaceMath.AXIS_Y, FaceMath.growthFaceAxis(1, 0.125, 1, NONE, FaceMath.AXIS_X, 3, 0));
         assertEquals(FaceMath.AXIS_Y, FaceMath.growthFaceAxis(1, 0.875, 1, FaceMath.AXIS_Z, FaceMath.AXIS_Z, 0, 3));
     }

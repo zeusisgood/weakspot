@@ -9,7 +9,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * ネザーゲートの弱点のヒット通知の検証と効果（論理サーバー。1.8.0）。ゲートの中にいる間（非公開の portalCounter が
+ * ネザーゲートの弱点のヒット通知の検証と効果（論理サーバー）。ゲートの中にいる間（非公開の portalCounter が
  * 0 より大きい。ゲートの中で毎 tick 1 増え、出ると 4 ずつ減る）に受け付け、portalCounter に
  * portalHitTicks × コンボの掛け数を足す。getMaxInPortalTime()（サバイバル 80）に達すると、バニラが次の tick に移動する。
  */

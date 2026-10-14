@@ -56,7 +56,7 @@ public final class ComboDisplay {
         return Math.max(0, 1 - ticksSinceStep / GLOW_TICKS);
     }
 
-    /** 虹色（400 以上。1.11.0 までは 100 以上）が一周する時間（ミリ秒）。100 ごとに速く流れる（800 まで）。 */
+    /** 虹色（400 以上）が一周する時間（ミリ秒）。100 ごとに速く流れる（800 まで）。 */
     public static long rainbowPeriodMs(int combo) {
         int hundreds = Math.max(0, combo / 100 - 4);
         return Math.max(800, 3000 - 300L * hundreds);

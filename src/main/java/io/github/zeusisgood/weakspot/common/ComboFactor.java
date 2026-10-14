@@ -1,8 +1,8 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * コンボ（連続ヒット数）に応じた掛け数（1.4.2 で機械の加速に入れ、1.6.0 から乗り物・投げる物などでも使う）。
- * 1.8.6 で MachineComboBoost から切り出した。1.11.0 から段階を 300 までに詰め、その先は 100 ごとに 0.5 ずつ上がり続ける（上限なし）。
+ * コンボ（連続ヒット数）に応じた掛け数（機械・乗り物・投げる物などが使う）。
+ * 段階は 300 まで、その先は 100 ごとに 0.5 ずつ上がり続ける（上限なし）。
  */
 public final class ComboFactor {
 
@@ -33,7 +33,7 @@ public final class ComboFactor {
         return 1.0;
     }
 
-    /** 次に掛け数が上がるコンボ（1.10.2。1.11.0 から終わりはない）。 */
+    /** 次に掛け数が上がるコンボ（終わりはない）。 */
     public static int nextStep(int combo) {
         for (int step : STEPS) {
             if (combo < step) {
@@ -57,7 +57,7 @@ public final class ComboFactor {
         return from;
     }
 
-    /** 前の段階（最初は 0）から次の段階までの進み具合（0 以上 1 未満。1.10.2）。 */
+    /** 前の段階（最初は 0）から次の段階までの進み具合（0 以上 1 未満）。 */
     public static double progressToNext(int combo) {
         int from = previousStep(Math.max(0, combo));
         int to = nextStep(Math.max(0, combo));

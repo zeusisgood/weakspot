@@ -38,11 +38,11 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
  * 倍率を掛けても判定の瞬間に枠外なら効かない。そこで、ヒットごとの追加進捗を貯めておき、
  * そのブロックの破壊速度に BoostMath#serverSpeedFactor を掛けて積算と同じ結果にする。
  *
- * 掘る前のヒット（1.11.2）: 掘っていないときに届いたヒットは「予約」としてプレイヤーごとに 1 つだけ持ち、
+ * 掘る前のヒット: 掘っていないときに届いたヒットは「予約」としてプレイヤーごとに 1 つだけ持ち、
  * 同じブロックを掘り始めた瞬間（LeftClickBlock）に普通のヒットとして確定する。予約の時点ではコンボ・統計を数えない
  * （掘らずに当て続けてコンボを稼げないように）。
  *
- * ゴーストブロックの対策（1.11.6）: クリックのたびに、そのブロックと前に掘っていたブロックの状態を本人に送り直す
+ * ゴーストブロックの対策: クリックのたびに、そのブロックと前に掘っていたブロックの状態を本人に送り直す
  * （バニラは掘り始め（START）には何も返さないので、クライアントだけで壊れたブロックが残る）。また、バニラが保留にした破壊
  * （進捗が足りないまま掘り終わりが届いた。1 枠だけ）にも、別のブロックへ移ったあとまでブーストを効かせる。
  */
@@ -51,21 +51,21 @@ public final class ServerBoostTracker {
 
 
     private static final Map<UUID, Mining> MINING = new HashMap<>();
-    /** 掘る前のヒットの予約（1.11.2）。 */
+    /** 掘る前のヒットの予約。 */
     private static final Map<UUID, Reserved> RESERVED = new HashMap<>();
-    /** 採掘のヒットの間隔（1.11.6。ブロックが変わっても引き継ぐ）。 */
+    /** 採掘のヒットの間隔（ブロックが変わっても引き継ぐ）。 */
     private static final Map<UUID, HitBudget> BUDGETS = new HashMap<>();
-    /** バニラが保留にした破壊の、前に掘っていた Mining（1.11.6）。 */
+    /** バニラが保留にした破壊の、前に掘っていた Mining。 */
     private static final Map<UUID, Mining> DELAYED = new HashMap<>();
-    /** この tick の終わりに、状態を本人に送り直すブロック（1.11.6）。 */
+    /** この tick の終わりに、状態を本人に送り直すブロック。 */
     private static final Map<UUID, Set<BlockPos>> RESEND = new HashMap<>();
     /**
-     * PlayerInteractionManager の非公開の isDestroyingBlock（1.11.2）。長押しをやめた（ABORT）には Forge のイベントがないので、
+     * PlayerInteractionManager の非公開の isDestroyingBlock。長押しをやめた（ABORT）には Forge のイベントがないので、
      * 今掘っているかはこれで見る。読めなければ、掘っているブロックと違う位置のヒットだけを予約にする。
      */
     private static final Field DESTROYING = Reflect.field(PlayerInteractionManager.class,
             "pre-dig mining hits on a re-clicked block", "isDestroyingBlock", "field_73088_d");
-    /** PlayerInteractionManager の非公開の保留の破壊（1.11.6）。読めなければ、前に掘っていた Mining をいつも保留として残す。 */
+    /** PlayerInteractionManager の非公開の保留の破壊。読めなければ、前に掘っていた Mining をいつも保留として残す。 */
     private static final Field PENDING = Reflect.field(PlayerInteractionManager.class,
             "boosting a delayed block break", "receivedFinishDiggingPacket", "field_73097_j");
     private static final Field PENDING_POS = Reflect.field(PlayerInteractionManager.class,
@@ -93,7 +93,7 @@ public final class ServerBoostTracker {
         }
     }
 
-    /** 掘る前のヒット（1.11.2）。 */
+    /** 掘る前のヒット。 */
     private static final class Reserved {
         final BlockPos pos;
         final long tick;
@@ -128,7 +128,7 @@ public final class ServerBoostTracker {
                 && !state.getBlock().isAir(state, player.world, event.getPos())
                 && state.getBlockHardness(player.world, event.getPos()) >= 0
                 && state.getPlayerRelativeBlockHardness(player, player.world, event.getPos()) < 1.0F;
-        // 掘る前のヒットを確定する（1.11.2）。1 tick で壊れるブロックも、バニラはこのイベントのあとに壊すので間に合う。
+        // 掘る前のヒットを確定する。1 tick で壊れるブロックも、バニラはこのイベントのあとに壊すので間に合う。
         // 当てたブロックは、1 tick で壊れても統計・耐久回復に数える
         Reserved reserved = RESERVED.remove(player.getUniqueID());
         if (reserved != null && reserved.pos.equals(event.getPos())
@@ -154,7 +154,7 @@ public final class ServerBoostTracker {
         }
         Mining mining = MINING.get(player.getUniqueID());
         if (mining == null || !mining.pos.equals(event.getPos())) {
-            // 保留にされていた破壊（1.11.6）
+            // 保留にされていた破壊
             mining = DELAYED.get(player.getUniqueID());
             if (mining == null || !mining.pos.equals(event.getPos())) {
                 return;
@@ -187,7 +187,7 @@ public final class ServerBoostTracker {
         long now = player.world.getTotalWorldTime();
         Mining mining = MINING.get(player.getUniqueID());
         if (mining == null || !mining.pos.equals(pos) || !isDestroying(player)) {
-            // 掘っていないときのヒットは、掘る前のヒットとして予約する（1.11.2。新しい予約は古い予約を上書き）
+            // 掘っていないときのヒットは、掘る前のヒットとして予約する（新しい予約は古い予約を上書き）
             RESERVED.put(player.getUniqueID(), new Reserved(pos, now, streak));
             return;
         }
@@ -200,7 +200,7 @@ public final class ServerBoostTracker {
         if (!HitGate.take(budget, tick, HitKind.MINING)) {
             return false;
         }
-        // 1 回のヒットで進む量に、コンボの掛け数を掛ける（1.8.7）
+        // 1 回のヒットで進む量に、コンボの掛け数を掛ける
         int combo = HitGate.accept(player, HitKind.MINING, pos, streak);
         double factor = SyncedSettings.server().miningComboBonus ? ComboFactor.factor(combo) : 1;
         double extra = BoostMath.extraTicksPerHit(WeakSpotConfig.server.mining.boostMultiplier, WeakSpotConfig.server.mining.boostDurationTicks,
@@ -213,14 +213,14 @@ public final class ServerBoostTracker {
     }
 
     /**
-     * 違うブロックを掘り始めたとき、前の Mining を保留として残すか決める（1.11.6）。バニラの保留（1 枠）と同じ位置のものだけ
+     * 違うブロックを掘り始めたとき、前の Mining を保留として残すか決める。バニラの保留（1 枠）と同じ位置のものだけ
      * 残す。保留が読めなければ、前の Mining を残す（バニラが保留にしていなければ、そのブロックを誰も掘らない限り効かない）。
      */
     private static void keepDelayed(EntityPlayerMP player, Mining previous, BlockPos clicked) {
         UUID id = player.getUniqueID();
         Mining delayed = DELAYED.get(id);
         if (delayed != null && delayed.pos.equals(clicked)) {
-            // 保留中のブロックを叩き直した: 今までどおり、新しい Mining で数え直す
+            // 保留中のブロックを叩き直した: 新しい Mining で数え直す
             DELAYED.remove(id);
             delayed = null;
         }
@@ -250,7 +250,7 @@ public final class ServerBoostTracker {
         }
     }
 
-    /** クリックしたブロックと、前に掘っていたブロックを、この tick の終わりに本人に送り直す（1.11.6）。 */
+    /** クリックしたブロックと、前に掘っていたブロックを、この tick の終わりに本人に送り直す。 */
     private static void queueResend(EntityPlayerMP player, Mining previous, BlockPos clicked) {
         if (player.capabilities.isCreativeMode || !HitGate.allowed(player, HitKind.MINING)) {
             return;
@@ -263,7 +263,7 @@ public final class ServerBoostTracker {
     }
 
     /**
-     * 覚えたブロックの今の状態を送る（1.11.6）。バニラは掘り始め（START）には何も返さないので、クライアントだけでその場で壊れた
+     * 覚えたブロックの今の状態を送る。バニラは掘り始め（START）には何も返さないので、クライアントだけでその場で壊れた
      * ブロック（サーバーでは壊れていない）がゴーストとして残る。同じ状態を送るだけなので、掘っている最中に届いても何も変わらない。
      */
     @SubscribeEvent
@@ -286,7 +286,7 @@ public final class ServerBoostTracker {
         RESEND.clear();
     }
 
-    /** 今ブロックを掘っている（長押し中）か。読めなければ true（今までどおり、掘っているブロックへのヒットとして扱う）。 */
+    /** 今ブロックを掘っている（長押し中）か。読めなければ true（掘っているブロックへのヒットとして扱う）。 */
     private static boolean isDestroying(EntityPlayerMP player) {
         if (DESTROYING == null) {
             return true;
@@ -306,7 +306,7 @@ public final class ServerBoostTracker {
         notifyNearbyPlayers(hitter, pos, streak, false);
     }
 
-    /** miss: 的当て（1.11.0）の ✕ に当てた（近くの人には低い音）。 */
+    /** miss: 的当ての ✕ に当てた（近くの人には低い音）。 */
     static void notifyNearbyPlayers(EntityPlayerMP hitter, BlockPos pos, int streak, boolean miss) {
         OtherHitMessage message = new OtherHitMessage(pos, Math.max(1, streak), miss);
         double rangeSq = OTHERS_SOUND_RANGE * OTHERS_SOUND_RANGE;
@@ -326,7 +326,7 @@ public final class ServerBoostTracker {
         }
         Mining mining = MINING.get(player.getUniqueID());
         if (mining == null || !mining.pos.equals(event.getPos())) {
-            // 保留にされていた破壊（1.11.6）。バニラの保留も、そのブロックを掘り始めた tick から数える
+            // 保留にされていた破壊。バニラの保留も、そのブロックを掘り始めた tick から数える
             mining = DELAYED.get(player.getUniqueID());
         }
         if (mining == null || mining.extraTicks <= 0 || !mining.pos.equals(event.getPos())) {
@@ -336,7 +336,7 @@ public final class ServerBoostTracker {
         event.setNewSpeed((float) (event.getNewSpeed() * BoostMath.serverSpeedFactor(mining.extraTicks, elapsed)));
     }
 
-    /** まだ使える掘る前のヒットの予約があるか（1.11.3。コンボを揃えるとき、クライアントはもう数えている 1 つ）。 */
+    /** まだ使える掘る前のヒットの予約があるか（コンボを揃えるとき、クライアントはもう数えている 1 つ）。 */
     static boolean hasReservation(EntityPlayer player) {
         Reserved reserved = RESERVED.get(player.getUniqueID());
         return reserved != null && player.world.getTotalWorldTime() - reserved.tick <= BoostMath.PRE_DIG_TICKS;

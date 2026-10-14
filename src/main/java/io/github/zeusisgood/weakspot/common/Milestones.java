@@ -24,7 +24,7 @@ public final class Milestones {
     }
 
     /**
-     * 繰り返しの節目も含めて、累計がちょうど達した節目（1.7.0）。返すのは {節目の数, 量の添字} の一覧。
+     * 繰り返しの節目も含めて、累計がちょうど達した節目。返すのは {節目の数, 量の添字} の一覧。
      * milestones の一番大きい数より先は、repeatInterval ごと（0 以下なら繰り返さない）に節目にし、量は最後の添字を使う。
      */
     public static List<long[]> reachedWithRepeat(int[] milestones, int repeatInterval, long totalHits) {
@@ -43,7 +43,7 @@ public final class Milestones {
         return reached;
     }
 
-    /** 7 だけが並ぶ数（777、7777 …）か。節目の演出を虹色にする（1.7.0）。 */
+    /** 7 だけが並ぶ数（777、7777 …）か。節目の演出を虹色にする。 */
     public static boolean isLucky(long milestone) {
         if (milestone < 7) {
             return false;

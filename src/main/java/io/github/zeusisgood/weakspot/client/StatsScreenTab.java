@@ -3,7 +3,7 @@ package io.github.zeusisgood.weakspot.client;
 import java.io.IOException;
 
 /**
- * 統計画面（StatsScreen）の 1 つのタブ（1.8.9 で StatsScreen から分けた）。ボタンは init で画面に足し、見せる・隠すは
+ * 統計画面（StatsScreen）の 1 つのタブ。ボタンは init で画面に足し、見せる・隠すは
  * show。画面の共通の枠（題・タブ・下のボタン・ホイール・説明の吹き出し）は StatsScreen が持つ。
  */
 abstract class StatsScreenTab {

@@ -20,7 +20,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.world.BlockEvent;
 
 /**
- * 収穫の弱点の効果（論理サーバー。1.7.0。検証は成長と同じ RightClickHits）。実った作物を収穫して植え直す。
+ * 収穫の弱点の効果（論理サーバー。検証は成長と同じ RightClickHits）。実った作物を収穫して植え直す。
  * 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物は、ほかの Mod も変えられるように
  * HarvestDropsEvent を通す。植え直しには収穫物の「種」（ピックしたときの物。getPickBlock）を 1 つ使い、なければ使わずに植え直す
  * （不運で畑に穴が空かないように）。種と別の収穫物は、コンボの掛け数だけ増やす（harvestComboBonus）。

@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * 進捗（1.11.0。進捗の画面の「WeakSpot」のタブ）。定義は assets/weakspot/advancements/*.json で、条件はどれも
+ * 進捗（進捗の画面の「WeakSpot」のタブ）。定義は assets/weakspot/advancements/*.json で、条件はどれも
  * minecraft:impossible にして、ここ（サーバー）で判定して与える。1.10.x までの記録は、ログインのときに判定する。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -42,7 +42,7 @@ public final class WeakSpotAdvancements {
         }
     }
 
-    /** 死ぬ見込みだった落下を、落下の弱点に当てて生き延びた（MoveHits。1.11.0）。 */
+    /** 死ぬ見込みだった落下を、落下の弱点に当てて生き延びた（MoveHits）。 */
     static void grantCloseCall(EntityPlayerMP player) {
         grant(player, "close_call");
     }
@@ -58,7 +58,7 @@ public final class WeakSpotAdvancements {
     }
 
     /**
-     * 取った的当ての進捗のいちばん上の段階（1.11.1。しきい値を上げても、1.11.0 で解放した段階を残すため）。
+     * 取った的当ての進捗のいちばん上の段階（しきい値を上げる前に解放した段階を残すため）。
      * 進捗が見つからなければ数えない。
      */
     static TargetRules.Tier earnedTargetTier(EntityPlayerMP player) {

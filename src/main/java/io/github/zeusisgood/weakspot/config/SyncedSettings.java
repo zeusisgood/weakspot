@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
  */
 public final class SyncedSettings {
 
-    /** 値を送ったサーバーの Mod の版（1.6.0。ServerFeatures）。自分の設定の値なら、自分の版。 */
+    /** 値を送ったサーバーの Mod の版（ServerFeatures が使う）。自分の設定の値なら、自分の版。 */
     public String serverVersion;
 
     // 弱点の置き方（全種類で共通）
@@ -34,14 +34,14 @@ public final class SyncedSettings {
     public double weakSpotMaxRadiusRatio;
     public double minFaceSize;
     public int lingerTicks;
-    /** 弱点の大きさの倍率（1.11.0。種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う）。 */
+    /** 弱点の大きさの倍率（種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う）。 */
     public double spotSize;
-    /** 右クリックで何もしないアイテムを、素手と同じに扱うか（1.11.0。HeldItems）。 */
+    /** 右クリックで何もしないアイテムを、素手と同じに扱うか（HeldItems）。 */
     public boolean heldItemsCountAsEmptyHand;
     /** 素手と同じに扱わないアイテム。登録名。 */
     public Set<String> heldItemExcludes;
 
-    // 採掘（全体のオン・オフとコンボ倍率のオン・オフは 1.9.0）
+    // 採掘
     public boolean miningWeakSpotEnabled;
     public boolean miningComboBonus;
     public double boostMultiplier;
@@ -54,7 +54,7 @@ public final class SyncedSettings {
     public double growthMinRadius;
     /** 登録名（"minecraft:grass" など）。 */
     public Set<String> growthExcludedBlocks;
-    /** 成長の弱点の追加リスト。1行は「登録名」か「登録名[状態の条件]」（1.4.0。GrowthFilters）。 */
+    /** 成長の弱点の追加リスト。1行は「登録名」か「登録名[状態の条件]」（GrowthFilters）。 */
     public Set<String> growthExtraBlocks;
     /** growthExtraBlocks を読んだもの。最初に使うときに作る（作った後は読むだけなので、使い回してよい）。送らない。 */
     private GrowthFilters growthFilters;
@@ -95,7 +95,7 @@ public final class SyncedSettings {
     public int bowMinHitIntervalTicks;
     public int bowHitTicks;
 
-    // 近接（溜め。1.8.0）
+    // 近接（溜め）
     public boolean meleeWeakSpotEnabled;
     public int meleeMinHitIntervalTicks;
     public double meleeChargePerHit;
@@ -154,7 +154,7 @@ public final class SyncedSettings {
     public int portalMinHitIntervalTicks;
     public int portalHitTicks;
 
-    // 泳ぎ（速さはクライアントで足す。残り時間のゲージのため、倍率・時間も送る。1.10.0）
+    // 泳ぎ（速さはクライアントで足す。残り時間のゲージのため、倍率・時間も送る）
     public boolean swimWeakSpotEnabled;
     public int swimMinHitIntervalTicks;
     public double swimBoostMultiplier;
@@ -162,7 +162,7 @@ public final class SyncedSettings {
     public int swimBoostDurationTicks;
     public double swimDashDistance;
 
-    // 落下（落ちた距離を減らすのはサーバー。クライアントは出し始める距離と、見込みのダメージの表示に使う。1.11.0）
+    // 落下（落ちた距離を減らすのはサーバー。クライアントは出し始める距離と、見込みのダメージの表示に使う）
     public boolean fallWeakSpotEnabled;
     public int fallMinHitIntervalTicks;
     public double fallMinDistance;
@@ -175,7 +175,7 @@ public final class SyncedSettings {
     private SyncedSettings() {
     }
 
-    /** その種類の弱点の大きさの倍率（1.11.0。spotSize × 種類ごとの決まった倍率）。 */
+    /** その種類の弱点の大きさの倍率（spotSize × 種類ごとの決まった倍率）。 */
     public double spotSize(HitKind kind) {
         return (spotSize > 0 ? spotSize : 1) * kind.sizeFactor();
     }
@@ -191,7 +191,7 @@ public final class SyncedSettings {
     }
 
     /**
-     * 送る項目と並び（1.8.6 で一覧にした。1.9.0 で、フィールドと同じ種類ごとの素直な並びにした）。
+     * 送る項目と並び（フィールドと同じ、種類ごとの並び）。
      * 項目を足すときは、フィールドとこの一覧の両方に足す（通信が変わるので、マイナー）。フィールドの名前が
      * WeakSpotConfig の同じ名前の項目から値を取る（serverVersion は自分の版）。
      */
@@ -237,7 +237,7 @@ public final class SyncedSettings {
     }
 
     /**
-     * 種類ごとのオン・オフと、ヒットの最小間隔の表（1.8.9）。フィールドの名前は、オン・オフが
+     * 種類ごとのオン・オフと、ヒットの最小間隔の表。フィールドの名前は、オン・オフが
      * "<key>WeakSpotEnabled"、間隔が "<key>MinHitIntervalTicks"
      * （採掘だけ "minHitIntervalTicks"）。クライアントもサーバーも、この表から引く。どちらかがない種類があれば、
      * このクラスを読み込んだ時点で例外にする（種類を足して項目を忘れたときに気づくため）。
@@ -281,7 +281,7 @@ public final class SyncedSettings {
         }
     }
 
-    /** サーバーが使う自分の値（1.8.9。作り直すのは invalidateServer のあと。ヒットのたびに作り直さないため）。 */
+    /** サーバーが使う自分の値（作り直すのは invalidateServer のあと。ヒットのたびに作り直さないため）。 */
     private static volatile SyncedSettings server;
 
     /** この側の weakspot.cfg の値を、使い回す。読むだけにすること。 */

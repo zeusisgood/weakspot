@@ -17,11 +17,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * プレイヤーのコンボ（サーバーで数えている連続ヒット数）を、近くのほかのプレイヤーに送る（1.6.0。頭の上の「n HIT」）。
+ * プレイヤーのコンボ（サーバーで数えている連続ヒット数）を、近くのほかのプレイヤーに送る（頭の上の「n HIT」）。
  * 数が変わったとき（途切れたときは 0）に、RANGE ブロック以内のほかのプレイヤーへ送る。1 人あたり MIN_INTERVAL_TICKS に
  * 1 回までに間引き、間引いた分は次に送れるときに送る。弱点を一時オフにしているプレイヤーの数は送らない。
  * <p>
- * 1.11.3 から、本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。ヒットのたびにクライアントが送ってきた数と
+ * 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。ヒットのたびにクライアントが送ってきた数と
  * 比べ（checkOwn）、ずれていたら、最後のヒットから ComboSync.IDLE_TICKS たったときに今のサーバーの数を送る。
  * 送る相手は 1.11.3 以降のクライアントだけ（古いクライアントは、自分の ID を「ほかのプレイヤー」として描いてしまう）。
  */
@@ -32,7 +32,7 @@ public final class ComboRelay {
     static final int MIN_INTERVAL_TICKS = 4;
 
     private static final Map<UUID, Sent> SENT = new HashMap<>();
-    /** 本人宛て（1.11.3）。 */
+    /** 本人宛て。 */
     private static final Map<UUID, Own> OWN = new HashMap<>();
     /** 本人宛てを送る相手の版。 */
     private static final String OWN_SINCE = "1.11.3";
@@ -89,7 +89,7 @@ public final class ComboRelay {
     }
 
     /**
-     * クライアントからのヒットを処理したあとに呼ぶ（HitHandlers。1.11.3）。clientStreak はクライアントのヒット後の数。
+     * クライアントからのヒットを処理したあとに呼ぶ（HitHandlers）。clientStreak はクライアントのヒット後の数。
      * 比べるだけで、サーバーの数をこれに合わせることはしない。
      */
     static void checkOwn(EntityPlayerMP player, int clientStreak) {
@@ -122,7 +122,7 @@ public final class ComboRelay {
         return streak == null ? 0 : streak.count(now);
     }
 
-    /** 後片付け（HitGate から呼ぶ。1.8.9 でログアウト、1.11.3 から本人宛ては死亡・ディメンション移動も。両側とも 0 に戻すため）。 */
+    /** 後片付け（HitGate から呼ぶ。本人宛ては死亡・ディメンション移動でも。両側とも 0 に戻すため）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             SENT.remove(player.getUniqueID());

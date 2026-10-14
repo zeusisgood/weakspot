@@ -79,7 +79,7 @@ public final class FishingHits {
     }
 
     /**
-     * 浮きのいる位置のブロックが水か（1.10.2）。バニラの EntityFishHook#onUpdate は、浮いている状態（BOBBING）でも、
+     * 浮きのいる位置のブロックが水か。バニラの EntityFishHook#onUpdate は、浮いている状態（BOBBING）でも、
      * この条件（水で、液体の高さ &gt; 0）のときしか待ち時間を減らさない（catchingFish）。水面ぎりぎりやブロックの縁に
      * 引っかかると、浮いている状態のまま位置が水の外になり、魚が来なくなる。
      */

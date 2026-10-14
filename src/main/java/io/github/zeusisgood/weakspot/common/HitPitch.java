@@ -2,7 +2,7 @@ package io.github.zeusisgood.weakspot.common;
 
 /**
  * 連続ヒット数（HitStreak。戻らずに上がり続ける）に応じたヒット音のピッチ。
- * 長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す（初期値。1.11.1 から各自の音階は HitScale）。
+ * 長音階で1オクターブ上がり、上がりきったら最低音に戻って繰り返す（初期値。各自の音階は HitScale）。
  */
 public final class HitPitch {
 
@@ -19,10 +19,10 @@ public final class HitPitch {
         return HitScale.DEFAULT.melody(streak);
     }
 
-    /** このコンボ以上で途切れたとき、下がる 2 音を鳴らす（1.9.5）。 */
+    /** このコンボ以上で途切れたとき、下がる 2 音を鳴らす。 */
     public static final int BREAK_SOUND_FROM = 10;
 
-    /** 和音の形（旋律から何度下を重ねるか。音階の度数）。1.11.0 でコンボの段階（ComboTier）に合わせて増やした。 */
+    /** 和音の形（旋律から何度下を重ねるか。音階の度数。コンボの段階 ComboTier に合わせる）。 */
     private static final int[] THIRD = {-2};
     private static final int[] TRIAD = {-2, -4};
     private static final int[] TRIAD_OCTAVE = {-2, -4, -7};
@@ -35,7 +35,7 @@ public final class HitPitch {
     /** このコンボから、旋律にベルを重ねる。 */
     public static final int BELL_FROM = 300;
 
-    /** そのコンボで旋律の下に重ねる度数（1.11.0。長音階で数える。ほかの音階では HitScale が数え直す）。 */
+    /** そのコンボで旋律の下に重ねる度数（長音階で数える。ほかの音階では HitScale が数え直す）。 */
     static int[] chordOffsets(int streak) {
         if (streak >= 400) {
             return CYCLE[(streak / 100 - 4) % CYCLE.length];
@@ -67,15 +67,15 @@ public final class HitPitch {
         return new int[0];
     }
 
-    /** sus4 の形か（解決の音を鳴らす。1.11.0）。 */
+    /** sus4 の形か（解決の音を鳴らす）。 */
     static boolean isSus4(int streak) {
         return chordOffsets(streak) == SUS4;
     }
 
     /**
-     * 1 回のヒットで鳴らすピッチ（1.9.5）。先頭が旋律（forStreak）、続けて重ねる音（旋律より下。ピッチの上限 2.0 のため）。
-     * 1.11.0 から、重ねる形はコンボの段階ごと（chordOffsets）。下のドより低くなる音は 1 オクターブ上げる（下限 0.5 のため）。
-     * chords が false なら旋律だけ。初期値の音階で数える（各自の音階は HitScale.forHit。1.11.1）。
+     * 1 回のヒットで鳴らすピッチ。先頭が旋律（forStreak）、続けて重ねる音（旋律より下。ピッチの上限 2.0 のため）。
+     * 重ねる形はコンボの段階ごと（chordOffsets）。下のドより低くなる音は 1 オクターブ上げる（下限 0.5 のため）。
+     * chords が false なら旋律だけ。初期値の音階で数える（各自の音階は HitScale.forHit）。
      */
     public static float[] forHit(int streak, boolean chords) {
         return HitScale.DEFAULT.forHit(streak, chords);
@@ -91,7 +91,7 @@ public final class HitPitch {
         return chords && streak >= BELL_FROM;
     }
 
-    /** コンボが途切れたときの下がる 2 音（下のソ → 下のド。1.9.5）。 */
+    /** コンボが途切れたときの下がる 2 音（下のソ → 下のド）。 */
     public static float[] breakNotes() {
         return HitScale.DEFAULT.breakNotes();
     }

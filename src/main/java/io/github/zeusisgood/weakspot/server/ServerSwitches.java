@@ -19,10 +19,10 @@ public final class ServerSwitches {
 
     /** オフにしたプレイヤー（オフだけを覚えるので、届く前のプレイヤーはオン）。 */
     private static final Set<UUID> OFF = new HashSet<>();
-    /** 機械の粒子を見ないプレイヤー（1.6.0。クライアントの machineParticlesVisible。届く前は見る）。 */
+    /** 機械の粒子を見ないプレイヤー（クライアントの machineParticlesVisible。届く前は見る）。 */
     private static final Set<UUID> PARTICLES_OFF = new HashSet<>();
 
-    /** 自分でオフにした種類（1.7.0。KindMask のビット。届く前は 0 = どれもオン）。 */
+    /** 自分でオフにした種類（KindMask のビット。届く前は 0 = どれもオン）。 */
     private static final Map<UUID, Integer> DISABLED_KINDS = new HashMap<>();
 
     private ServerSwitches() {
@@ -32,7 +32,7 @@ public final class ServerSwitches {
         return !OFF.contains(player.getUniqueID());
     }
 
-    /** オンで、その種類も自分でオフにしていないか（1.7.0。統計画面の「弱点マーカー」タブ）。 */
+    /** オンで、その種類も自分でオフにしていないか（統計画面の「弱点マーカー」タブ）。 */
     public static boolean isEnabled(EntityPlayer player, HitKind kind) {
         return isEnabled(player) && !KindMask.isDisabled(DISABLED_KINDS.getOrDefault(player.getUniqueID(), 0), kind);
     }
@@ -69,7 +69,7 @@ public final class ServerSwitches {
         }
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forgetOnLogout(EntityPlayer player) {
         OFF.remove(player.getUniqueID());
         PARTICLES_OFF.remove(player.getUniqueID());

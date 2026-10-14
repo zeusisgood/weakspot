@@ -54,7 +54,7 @@ public class SyncedSettingsTest {
         org.junit.Assert.assertEquals(9, s.minHitInterval(io.github.zeusisgood.weakspot.common.HitKind.PORTAL));
         org.junit.Assert.assertFalse(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.BOW));
         org.junit.Assert.assertTrue(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.PORTAL));
-        // 採掘・成長・機械・動物にも、1.9.0 から全体のオン・オフがある
+        // 採掘・成長・機械・動物にも、全体のオン・オフがある
         s.miningWeakSpotEnabled = true;
         org.junit.Assert.assertTrue(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.MINING));
         org.junit.Assert.assertFalse(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.ANIMAL));

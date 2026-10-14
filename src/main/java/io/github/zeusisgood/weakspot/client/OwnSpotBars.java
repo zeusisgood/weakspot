@@ -8,7 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.RayTraceResult;
 
 /**
- * 自分のブロック・動物の弱点に付くバーの値（1.8.9 で ClientWeakSpotHandler から分けた）: 採掘の耐久バー、機械の進み具合、
+ * 自分のブロック・動物の弱点に付くバーの値: 採掘の耐久バー、機械の進み具合、
  * 成長バー、動物の足元のバー。描くのは WeakSpotRenderer。
  */
 final class OwnSpotBars {
@@ -37,7 +37,7 @@ final class OwnSpotBars {
     }
 
     /**
-     * 機械の進み具合のバーを出すか（1.6.0）。機械の弱点がかまど・醸造台・スポナーに出ていて、このフレームで照準が
+     * 機械の進み具合のバーを出すか。機械の弱点がかまど・醸造台・スポナーに出ていて、このフレームで照準が
      * 合っているとき。出すときは、サーバーに値を問い合わせる（間隔があいていなければ送らない）。
      */
     static boolean machineBar(Minecraft mc) {

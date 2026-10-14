@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 
 /**
- * 使っている物（弓・食べ物）の残り時間を、ヒットで縮める共通の部品（両側。1.8.8 で BowDraw と EatDraw から切り出した）。
+ * 使っている物（弓・食べ物）の残り時間を、ヒットで縮める共通の部品（両側。BowDraw と EatDraw）。
  * ヒットの時点では残り時間を直接変えず（非公開のフィールド）、縮める tick 数をプレイヤーごとに覚えておき、次の tick の
  * LivingEntityUseItemEvent.Tick（setDuration）で減らす。使い始めたら（Start）捨てる。
  * シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。

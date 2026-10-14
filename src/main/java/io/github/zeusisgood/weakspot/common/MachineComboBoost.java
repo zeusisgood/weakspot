@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * コンボ（連続ヒット数）に応じた機械の加速（1.4.2）。掛け数は ComboFactor（1.8.6 で切り出した）。機械の倍率 = min(machineBoostMultiplier × 掛け数, 上限)。
+ * コンボ（連続ヒット数）に応じた機械の加速。掛け数は ComboFactor。機械の倍率 = min(machineBoostMultiplier × 掛け数, 上限)。
  * サーバーはこれで倍率を決め、クライアントは「機械 ×n」の表示に使う（掛け数だけ。サーバーの倍率は届いていない）。
  */
 public final class MachineComboBoost {
@@ -14,7 +14,7 @@ public final class MachineComboBoost {
         return Math.min(base * ComboFactor.factor(combo), max);
     }
 
-    /** 表示用の速さ（1.6.0。整数なら整数で「4」、そうでなければ小数 1 桁で「7.5」）。 */
+    /** 表示用の速さ（整数なら整数で「4」、そうでなければ小数 1 桁で「7.5」）。 */
     public static String speedLabel(double speed) {
         long rounded = Math.round(speed);
         if (Math.abs(speed - rounded) < 1e-9) {

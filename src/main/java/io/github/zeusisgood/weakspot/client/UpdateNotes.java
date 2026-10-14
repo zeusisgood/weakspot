@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 更新のお知らせ（1.7.1）。版が変わってから初めてワールドに入ったときに 1 回だけ、自分のチャットに要約と変更点のリンク、
+ * 更新のお知らせ。版が変わってから初めてワールドに入ったときに 1 回だけ、自分のチャットに要約と変更点のリンク、
  * /weakspot bug の案内を出す。ソロでもマルチでも同じ（クライアントだけで判定する）。最後に見た版は lastSeenVersion に覚える。
  * 初めて入れた人（lastSeenVersion が空で、起動した時点で weakspot.cfg がなかった）には出さない。
  */
@@ -24,7 +24,7 @@ final class UpdateNotes {
 
     /** ワールドに入ってから出すまでの tick（入ったときのほかのメッセージに埋もれないように）。 */
     private static final int DELAY_TICKS = 40;
-    /** 配布サイトのファイルの一覧（1.11.0 から。それまでは GitHub の Release）。版ごとの変更点もここで読める。 */
+    /** 配布サイトのファイルの一覧。版ごとの変更点もここで読める。 */
     static final String DOWNLOAD_URL = "https://www.curseforge.com/minecraft/mc-mods/weakspot/files";
 
     /** この起動で、もう確かめたか。 */

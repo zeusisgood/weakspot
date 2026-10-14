@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 加速中の機械のまわりに出す粒子の色と量（1.5.3）。色はコンボの掛け数（今の倍率 ÷ machineBoostMultiplier）の段階で、
+ * 加速中の機械のまわりに出す粒子の色と量。色はコンボの掛け数（今の倍率 ÷ machineBoostMultiplier）の段階で、
  * 量は速いほど多く、1 tick に 倍率 ÷ PARTICLES_DIVISOR 個（端数は MachineBoost が持ち越す）。
  */
 public final class MachineParticles {

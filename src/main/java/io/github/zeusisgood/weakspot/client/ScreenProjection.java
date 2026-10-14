@@ -132,7 +132,7 @@ final class ScreenProjection {
     }
 
     /**
-     * 形 shape の中を塗る（1.7.0。自分の弱点の形）。RING は輪の部分だけ塗る。大きさは弱点の半径に合わせる
+     * 形 shape の中を塗る（自分の弱点の形）。RING は輪の部分だけ塗る。大きさは弱点の半径に合わせる
      * （ブロックの弱点の WeakSpotRenderer と同じ比率）。
      */
     static void fillShape(double x, double y, double radius, MarkerShape shape, float[] rgb, float a) {
@@ -166,7 +166,7 @@ final class ScreenProjection {
         tessellator.draw();
     }
 
-    /** 形 shape の輪郭（1.7.0）。 */
+    /** 形 shape の輪郭。 */
     static void outlineShape(double x, double y, double radius, MarkerShape shape, float[] rgb, float a) {
         if (shape == MarkerShape.CIRCLE) {
             outline(x, y, radius, rgb, a);
@@ -192,8 +192,7 @@ final class ScreenProjection {
     }
 
     /**
-     * 画面上の弱点のマーカー（塗り・輪郭・形によっては中心の点。1.8.9 で照準のまわり・釣り・画面のマーカーの描き方を
-     * ここにまとめた）。look は {disk, ring, center}。
+     * 画面上の弱点のマーカー（塗り・輪郭・形によっては中心の点。照準のまわり・釣り・画面のマーカーが使う）。look は {disk, ring, center}。
      */
     static void drawMarker(double x, double y, double radius, MarkerShape shape, float[][] look, float diskAlpha,
                            float outlineAlpha) {
@@ -234,7 +233,7 @@ final class ScreenProjection {
 
     /**
      * 画面の中心から (dx, dy)（度。右・下が正）の方向に、画面の端寄りの三角を描く（色 c、縁 edge）。弱点が画面にないときの
-     * 方向の矢印（1.11.0。的当てと落下の弱点）。beginOverlay と endOverlay の間で呼ぶ。
+     * 方向の矢印（的当てと落下の弱点）。beginOverlay と endOverlay の間で呼ぶ。
      */
     static void edgeArrow(ScaledResolution res, double dx, double dy, float[] c, float[] edge) {
         double len = Math.hypot(dx, dy);

@@ -11,7 +11,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
 /**
- * 統計画面の「統計」タブ（1.8.9 で StatsScreen から分けた）。サーバーから届いた「今回」と「累計」を並べて表示するだけ。
+ * 統計画面の「統計」タブ。サーバーから届いた「今回」と「累計」を並べて表示するだけ。
  * 入りきらない行はホイールで送る。累計のリセットは 2 回押しで確定する。
  */
 final class StatsTab extends StatsScreenTab {

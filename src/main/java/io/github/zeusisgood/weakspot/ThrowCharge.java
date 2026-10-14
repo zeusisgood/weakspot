@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 投げる物の溜め（両側。1.7.0）。弱点に当てるたびに溜め、次の 1 投の速さを (1 + 溜め) 倍にする。
+ * 投げる物の溜め（両側）。弱点に当てるたびに溜め、次の 1 投の速さを (1 + 溜め) 倍にする。
  * 溜めは持ち替える（選んでいるスロットが変わる、メインハンドの物の種類が変わる）まで残り、投げたら使い切る。
  * サーバーは、投げた瞬間（RightClickItem）に倍率を覚え、同じ tick にワールドに出たその人の投げた物（EntityThrowable）の
  * 速さに掛ける。クライアントはゲージのために同じ溜めを持つ（サーバーの返事を待たずに進める）。

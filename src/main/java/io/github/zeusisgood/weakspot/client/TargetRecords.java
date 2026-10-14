@@ -5,14 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 自分の的当ての記録と、サーバー内の上位（1.11.0。サーバーから届いた値）。ご褒美の解放（MarkerLook・KindsTab）と、
+ * 自分の的当ての記録と、サーバー内の上位（サーバーから届いた値）。ご褒美の解放（MarkerLook・KindsTab）と、
  * 統計画面の「的当て」タブが読む。記録はワールドごとなので、ワールドに入るたびにサーバーが送り直す。
  */
 final class TargetRecords {
 
     static long best;
     static long rounds;
-    /** 取った進捗の段階（1.11.1。しきい値を上げる前に解放した段階を残す。ログインのときサーバーが送る）。 */
+    /** 取った進捗の段階（しきい値を上げる前に解放した段階を残す。ログインのときサーバーが送る）。 */
     static TargetRules.Tier earned = TargetRules.Tier.NONE;
     static final List<String> TOP_NAMES = new ArrayList<>();
     static final List<Long> TOP_SCORES = new ArrayList<>();

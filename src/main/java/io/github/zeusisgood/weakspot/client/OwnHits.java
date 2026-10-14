@@ -12,7 +12,7 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * 自分のヒットの共通の処理（1.8.9 で ClientWeakSpotHandler から分けた）: 連続ヒット（コンボ）、ヒット音、コンボの表示、
+ * 自分のヒットの共通の処理: 連続ヒット（コンボ）、ヒット音、コンボの表示、
  * 種類ごとのヒット間隔。すべての種類の弱点が、当てたときに register を呼ぶ。
  */
 final class OwnHits {
@@ -46,7 +46,7 @@ final class OwnHits {
         return hitStreak;
     }
 
-    /** 的当ての金のご褒美（1.11.0）: 当てたとき、目の前に金の粒を散らす。 */
+    /** 的当ての金のご褒美: 当てたとき、目の前に金の粒を散らす。 */
     private static void goldParticles() {
         Minecraft mc = Minecraft.getMinecraft();
         if (!WeakSpotConfig.client.markers.goldHitParticles || !TargetRecords.unlocked(TargetRules.Tier.GOLD)
@@ -71,7 +71,7 @@ final class OwnHits {
     }
 
     /**
-     * サーバーの数で連続ヒットを直す（1.11.3。ComboSync）。当て続けている間（最後のヒットから IDLE_TICKS まで）と、
+     * サーバーの数で連続ヒットを直す（ComboSync）。当て続けている間（最後のヒットから IDLE_TICKS まで）と、
      * もう途切れているときは何もしない。数字は黙って書き換える（音・弾み・段階の演出は出さない）。
      */
     static void correctStreak(int serverCount) {

@@ -3,7 +3,7 @@ package io.github.zeusisgood.weakspot.common;
 import java.util.Random;
 
 /**
- * 落下のダメージの見込み（1.11.0。落下の弱点の表示と、進捗「九死に一生」）。バニラの EntityLivingBase#fall と
+ * 落下のダメージの見込み（落下の弱点の表示と、進捗「九死に一生」）。バニラの EntityLivingBase#fall と
  * applyPotionDamageCalculations と同じ式（落下は防具の防御値では減らないので、耐性のポーション効果と、防具の
  * エンチャントの保護値（落下耐性・ダメージ軽減）だけで減る）。
  */
@@ -15,7 +15,7 @@ public final class FallMath {
     private static final int MAX_PROTECTION = 20;
 
     /**
-     * 落下の弱点を出す、足元の方向の枠（1.11.0 の試してもらったあと）: 下向き 40〜80 度、左右は落ち始めたときの向きの
+     * 落下の弱点を出す、足元の方向の枠: 下向き 40〜80 度、左右は落ち始めたときの向きの
      * ±25 度（的当ての枠と同じ考え方）。次の弱点は、前の位置から WINDOW_MIN_SEPARATION 度以上離す。
      */
     public static final double WINDOW_PITCH_MIN = 40;

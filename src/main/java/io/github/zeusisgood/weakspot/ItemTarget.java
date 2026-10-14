@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * 「弱点の的」（1.11.0）。手に持って右クリックすると的当てを始める。使い捨て（始めた時点で 1 つ使う）、スタックは 64。
+ * 「弱点の的」。手に持って右クリックすると的当てを始める。使い捨て（始めた時点で 1 つ使う）、スタックは 64。
  * ラウンドはサーバーが数える（server/TargetRounds）。レシピは assets/weakspot/recipes/target.json（棒・羊毛・レッドストーン）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)

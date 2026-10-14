@@ -13,8 +13,8 @@ import java.util.Map;
 import net.minecraft.client.Minecraft;
 
 /**
- * 自分の弱点の、種類ごとの色と形（1.7.0。統計画面の「弱点マーカー」タブ、設定 myMarkerColors / myMarkerShapes）。
- * 書いていない種類は、色は初期値（種類ごとの今までの色）、形は円。
+ * 自分の弱点の、種類ごとの色と形（統計画面の「弱点マーカー」タブ、設定 myMarkerColors / myMarkerShapes）。
+ * 書いていない種類は、色は初期値（種類ごとの色）、形は円。
  */
 public final class MarkerLook {
 
@@ -22,7 +22,7 @@ public final class MarkerLook {
     static final int[] PRESETS = {0xFF5926, 0xFF3DCB, 0xFF8C42, 0xFFE14D, 0x7CFC00, 0x2ED3B7, 0x55CCFF, 0x7FB2FF,
             0xB070FF, 0xC8A060, 0xF0F0F0, 0xFF5A5F};
 
-    /** 的当てのご褒美の特別な色（1.11.0。設定には「種類=silver」「種類=rainbow」と書く）。 */
+    /** 的当てのご褒美の特別な色（設定には「種類=silver」「種類=rainbow」と書く）。 */
     static final String SILVER = "silver";
     static final String RAINBOW = "rainbow";
     private static final int SILVER_RGB = 0xC0C0C0;
@@ -86,7 +86,7 @@ public final class MarkerLook {
     }
 
     /**
-     * 円・輪・中心の色 {disk, ring, center}。色を書き換えていなければ、渡した初期値の色のまま（今までの見た目）。
+     * 円・輪・中心の色 {disk, ring, center}。色を書き換えていなければ、渡した初期値の色のまま。
      */
     static float[][] palette(HitKind kind, float[] disk, float[] ring, float[] center) {
         Integer custom = customColor(kind);
@@ -105,7 +105,7 @@ public final class MarkerLook {
         refresh();
         MarkerShape shape = SHAPES.get(kind);
         if (shape == MarkerShape.STAR && !TargetRecords.unlocked(TargetRules.Tier.BRONZE)) {
-            // 星は的当ての銅のご褒美（1.11.0）。解放していないワールドでは円
+            // 星は的当ての銅のご褒美。解放していないワールドでは円
             return MarkerShape.CIRCLE;
         }
         return shape != null ? shape : MarkerShape.CIRCLE;

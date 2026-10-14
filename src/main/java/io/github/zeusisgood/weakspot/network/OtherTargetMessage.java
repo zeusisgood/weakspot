@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: 近くのほかのプレイヤーの的当て（1.11.0。エンティティ ID と、ラウンド中のヒット数。負なら終わった）。
+ * サーバー → クライアント: 近くのほかのプレイヤーの的当て（エンティティ ID と、ラウンド中のヒット数。負なら終わった）。
  * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
  */
 public class OtherTargetMessage implements IMessage {

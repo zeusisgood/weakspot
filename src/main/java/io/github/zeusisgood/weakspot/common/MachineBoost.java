@@ -23,7 +23,7 @@ public final class MachineBoost {
         return multiplier;
     }
 
-    /** この tick に出す粒子の数（1.5.3。倍率 ÷ MachineParticles.PARTICLES_DIVISOR、端数は持ち越す）。残り時間は減らさない。 */
+    /** この tick に出す粒子の数（倍率 ÷ MachineParticles.PARTICLES_DIVISOR、端数は持ち越す）。残り時間は減らさない。 */
     public int nextParticles() {
         if (!isActive()) {
             return 0;

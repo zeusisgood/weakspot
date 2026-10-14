@@ -3,14 +3,14 @@ package io.github.zeusisgood.weakspot.common;
 import java.util.Random;
 
 /**
- * 弓の弱点の計算（1.3.0、過剰チャージは 1.3.4）。Minecraft に依存しない。
+ * 弓の弱点の計算。Minecraft に依存しない。
  * 弱点の向き（yaw / pitch。Minecraft と同じ度の向き）、引きの進め方、引きゲージの値、過剰チャージの倍率。
  */
 public final class BowMath {
 
     /** バニラの弓を引き切るまでの時間（tick）。ゲージと「引き切った」の基準。 */
     public static final int FULL_DRAW_TICKS = 20;
-    /** 弱点を出す、視線からずらす角度の範囲（度）。1.5.4 で 3〜8 から広げた（近すぎて照準を動かさずに当たったため）。 */
+    /** 弱点を出す、視線からずらす角度の範囲（度。近すぎると、照準を動かさずに当たるため）。 */
     public static final double MIN_OFFSET_DEGREES = 10.0;
     public static final double MAX_OFFSET_DEGREES = 20.0;
     /** ずらす角度の上限を、縦の視野角の半分のこの割合までに抑える（画面からはみ出さないように）。 */
@@ -18,16 +18,16 @@ public final class BowMath {
     /** ヒットのあと、前の向きから最低でも離れる角度（度）。 */
     public static final double MIN_MOVE_DEGREES = 8.0;
     /**
-     * 照準が水平からこの角度（度）より上か下を向いていたら、次の弱点は水平に戻る側に出す（1.8.1。当て続けても
+     * 照準が水平からこの角度（度）より上か下を向いていたら、次の弱点は水平に戻る側に出す（当て続けても
      * 照準が真上・真下まで行かないように）。この範囲の中では、前の弱点と反対側に出す（交互）。
      */
     public static final double HORIZON_BAND_DEGREES = 20.0;
     /**
-     * 弱点が照準からこの角度（度）より離れたら、照準の近くに出し直す（1.8.2。ボートで曲がった、大きく振り向いた、など）。
+     * 弱点が照準からこの角度（度）より離れたら、照準の近くに出し直す（ボートで曲がった、大きく振り向いた、など）。
      * 弱点の距離の上限 MAX_OFFSET_DEGREES より外。
      */
     public static final double RELOCATE_DEGREES = 35.0;
-    /** 過剰チャージ（引き切ったあとのヒット）1回で上げる、矢のダメージの割合（1.3.4）。 */
+    /** 過剰チャージ（引き切ったあとのヒット）1回で上げる、矢のダメージの割合。 */
     public static final double OVERCHARGE_PER_HIT = 0.10;
     /** 過剰チャージの上限のヒット数（+50%）。 */
     public static final int MAX_OVERCHARGE_HITS = 5;
@@ -87,7 +87,7 @@ public final class BowMath {
     }
 
     /**
-     * 向きを決めた次の弱点の向き（1.8.1）。yawSign は視線より yaw が増える側（+1）か減る側（-1）、pitchSign は視線より
+     * 向きを決めた次の弱点の向き。yawSign は視線より yaw が増える側（+1）か減る側（-1）、pitchSign は視線より
      * 下（+1。pitch が増える）か上（-1）。0 ならどちらでもよい。決めた側の、10〜20 度の輪の 4 分の 1（斜めを含む）に出す。
      * その側に前の向きから離れた所が取れなければ、一番離れた所。
      */
@@ -132,7 +132,7 @@ public final class BowMath {
     }
 
     /**
-     * 弱点 (spotYaw, spotPitch) が照準 (lookYaw, lookPitch) から離れすぎたか（1.8.2）。useYaw / usePitch は、
+     * 弱点 (spotYaw, spotPitch) が照準 (lookYaw, lookPitch) から離れすぎたか。useYaw / usePitch は、
      * どちらの向きで測るか（上下だけの弱点は pitch だけ、左右だけは yaw だけ、全方向は両方 = 向きの間の角度）。
      */
     public static boolean isTooFar(double spotYaw, double spotPitch, double lookYaw, double lookPitch,
@@ -154,7 +154,7 @@ public final class BowMath {
     }
 
     /**
-     * 次の弱点を、照準の上（-1）と下（+1）のどちらに出すか（1.8.1）。keepNearHorizon なら、照準が水平から
+     * 次の弱点を、照準の上（-1）と下（+1）のどちらに出すか。keepNearHorizon なら、照準が水平から
      * HORIZON_BAND_DEGREES より上を向いていれば下、下を向いていれば上（水平に戻る側）。そうでなければ、
      * 前の側 prevSign の反対（交互）。最初（prevSign が 0）はランダム。エリトラは keepNearHorizon を false にする。
      */
@@ -170,7 +170,7 @@ public final class BowMath {
         return alternate(prevSign, random);
     }
 
-    /** 次の弱点を、照準の左右のどちらに出すか（1.8.1。前の側の反対。最初はランダム）。 */
+    /** 次の弱点を、照準の左右のどちらに出すか（前の側の反対。最初はランダム）。 */
     public static int nextYawSign(int prevSign, Random random) {
         return alternate(prevSign, random);
     }
@@ -183,7 +183,7 @@ public final class BowMath {
     }
 
     /**
-     * 照準の真上か真下だけに出す弱点の次の pitch（度。1.6.0。馬・豚に乗っているとき）。yaw は使う側が視線に合わせる。
+     * 照準の真上か真下だけに出す弱点の次の pitch（度。馬・豚に乗っているとき）。yaw は使う側が視線に合わせる。
      * 視線から offsetRange の角度だけ上か下（ランダム）にずらし、±90 度を越えるなら反対側にする。
      * 前の pitch から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
      */
@@ -191,7 +191,7 @@ public final class BowMath {
         return nextVerticalPitch(lookPitch, prevPitch, 0, fovDegrees, random);
     }
 
-    /** 上（-1）か下（+1）を決めた版（1.8.1。0 ならランダム）。 */
+    /** 上（-1）か下（+1）を決めた版（0 ならランダム）。 */
     public static double nextVerticalPitch(double lookPitch, double prevPitch, int pitchSign, double fovDegrees,
                                            Random random) {
         double[] range = offsetRange(fovDegrees);
@@ -218,10 +218,10 @@ public final class BowMath {
     }
 
     /**
-     * 照準の左右だけに出す弱点の次の yaw（度。1.8.0。近接の弱点）。pitch は使う側が視線に合わせる。
+     * 照準の左右だけに出す弱点の次の yaw（度。近接の弱点）。pitch は使う側が視線に合わせる。
      * 視線から offsetRange の角度だけ左か右（yawSign）にずらす。前の yaw から MIN_MOVE 度以上離れる（取れなければ一番離れたもの）。
      * 前の yaw との差は、一周（360 度）をまたいでも正しく測る。
-     * yawSign（1.8.1）は yaw が増える側 +1 か減る側 -1。0 ならランダム。
+     * yawSignは yaw が増える側 +1 か減る側 -1。0 ならランダム。
      */
     public static double nextHorizontalYaw(double lookYaw, double prevYaw, int yawSign, double fovDegrees,
                                            Random random) {
@@ -244,32 +244,32 @@ public final class BowMath {
     }
 
     /**
-     * 左右だけの弱点（近接）の pitch が視線についてくる範囲（度。1.11.1）。真上・真下では yaw をずらしても同じ点に
+     * 左右だけの弱点（近接）の pitch が視線についてくる範囲（度）。真上・真下では yaw をずらしても同じ点に
      * なり、弱点が照準の中央に出てしまうので、これより深く向いても弱点の pitch はここで止める。
      */
     public static final double HORIZONTAL_PITCH_LIMIT = 60.0;
 
-    /** 左右だけの弱点を出す pitch（視線の pitch を ±HORIZONTAL_PITCH_LIMIT に収めたもの。1.11.1）。 */
+    /** 左右だけの弱点を出す pitch（視線の pitch を ±HORIZONTAL_PITCH_LIMIT に収めたもの）。 */
     public static double horizontalPitch(double lookPitch) {
         return Math.max(-HORIZONTAL_PITCH_LIMIT, Math.min(HORIZONTAL_PITCH_LIMIT, lookPitch));
     }
 
     /**
-     * 左右だけの弱点の yaw のずれを広げる倍率（1.11.1）。上下を向くほど画面の上で左右の幅が cos(pitch) 倍に縮むので、
+     * 左右だけの弱点の yaw のずれを広げる倍率。上下を向くほど画面の上で左右の幅が cos(pitch) 倍に縮むので、
      * 1 / cos(horizontalPitch) 倍に広げて、画面の上で照準から 10〜20 度離れたままにする（60 度で 2 倍）。
      */
     public static double horizontalYawScale(double lookPitch) {
         return 1 / Math.cos(Math.toRadians(horizontalPitch(lookPitch)));
     }
 
-    /** 左右だけの弱点の次の yaw を、今の視線の pitch に合わせて広げたもの（1.11.1）。 */
+    /** 左右だけの弱点の次の yaw を、今の視線の pitch に合わせて広げたもの。 */
     public static double nextWideHorizontalYaw(double lookYaw, double lookPitch, double prevYaw, int yawSign,
                                                double fovDegrees, Random random) {
         double yaw = nextHorizontalYaw(lookYaw, prevYaw, yawSign, fovDegrees, random);
         return lookYaw + wrapDegrees(yaw - lookYaw) * horizontalYawScale(lookPitch);
     }
 
-    /** 左右だけの弱点が照準から離れすぎたか（広げた分を戻して、画面の上の角度で測る。1.11.1）。 */
+    /** 左右だけの弱点が照準から離れすぎたか（広げた分を戻して、画面の上の角度で測る）。 */
     public static boolean isTooFarHorizontal(double spotYaw, double lookYaw, double lookPitch) {
         return Math.abs(wrapDegrees(spotYaw - lookYaw)) / horizontalYawScale(lookPitch) > RELOCATE_DEGREES;
     }

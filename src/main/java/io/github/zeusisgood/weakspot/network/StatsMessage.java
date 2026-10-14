@@ -14,7 +14,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** サーバー → クライアント: そのプレイヤーの「今回」と累計の統計と、的当てのサーバー内の上位（1.11.0）。 */
+/** サーバー → クライアント: そのプレイヤーの「今回」と累計の統計と、的当てのサーバー内の上位。 */
 public class StatsMessage implements IMessage {
 
     private MiningStats session;
@@ -59,7 +59,7 @@ public class StatsMessage implements IMessage {
         }
     }
 
-    /** 並びは MiningStats#writeTo（1.8.5 までと同じ並び）。 */
+    /** 並びは MiningStats#writeTo。 */
     private static MiningStats read(ByteBuf buf) {
         try {
             return MiningStats.readFrom(new ByteBufInputStream(buf));

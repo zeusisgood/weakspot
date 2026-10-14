@@ -26,7 +26,7 @@ import net.minecraftforge.fml.relauncher.Side;
  * ヒット音。楽器と音量は各自の設定（myHitSound / myHitVolume、othersHitSound / othersHitVolume）。
  * どれも「プレイヤー」のカテゴリで鳴らすので、バニラの「プレイヤー」音量が掛かる。
  * 自分の音と試聴は距離なし、他のプレイヤーの音は叩かれたブロックの位置から距離で小さくなる。
- * 1.9.5: 自分のヒット音はコンボで和音が厚くなる（HitPitch.forHit。hitChordEnabled）。コンボの段階と累計の節目の音は
+ * 自分のヒット音はコンボで和音が厚くなる（HitPitch.forHit。hitChordEnabled）。コンボの段階と累計の節目の音は
  * ベルで大きめに鳴らし（accent）、駆け上がりが鳴っている間は自分の通常のヒット音を小さくする（埋もれないように）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
@@ -36,9 +36,9 @@ final class HitSounds {
     private static final List<Scheduled> QUEUE = new ArrayList<>();
     /** 重ねる音の音量（旋律に対する倍率）。 */
     private static final float CHORD_VOLUME = 0.6F;
-    /** sus4 の解決の音を遅らせる tick（1.11.0）。 */
+    /** sus4 の解決の音を遅らせる tick。 */
     private static final int RESOLVE_DELAY_TICKS = 2;
-    /** 300 から旋律に重ねるベルの音量（自分のヒット音の音量に掛ける。1.11.0）。 */
+    /** 300 から旋律に重ねるベルの音量（自分のヒット音の音量に掛ける）。 */
     private static final double BELL_VOLUME = 0.5;
     /** 段階・節目の音（ベル）の音量（自分のヒット音の音量に対する倍率。上限 1.0）。 */
     private static final float ACCENT_VOLUME = 1.5F;
@@ -74,7 +74,7 @@ final class HitSounds {
         boolean chords = WeakSpotConfig.client.sound.hitChordEnabled;
         HitScale scale = scale();
         float[] pitches = scale.forHit(streak, chords);
-        // 重ねる音が多いほど 1 音を小さくする（1.11.0。9 の和音などで大きくなりすぎないように）
+        // 重ねる音が多いほど 1 音を小さくする（9 の和音などで大きくなりすぎないように）
         double chordVolume = volume * CHORD_VOLUME * Math.min(1, 2.0 / Math.max(1, pitches.length - 1));
         for (int i = 0; i < pitches.length; i++) {
             playFlatPitch(WeakSpotConfig.client.sound.myHitSound, i == 0 ? volume : chordVolume, pitches[i]);
@@ -117,7 +117,7 @@ final class HitSounds {
         accentRun(scale().oneOctave(), ticksPerNote, startDelay);
     }
 
-    /** 各自の音階の設定（1.11.1。hitScaleType / hitScaleDirection / hitScaleOctaves。変わったときだけ作り直す）。 */
+    /** 各自の音階の設定（hitScaleType / hitScaleDirection / hitScaleOctaves。変わったときだけ作り直す）。 */
     private static HitScale cachedScale = HitScale.DEFAULT;
 
     static HitScale scale() {
@@ -152,7 +152,7 @@ final class HitSounds {
                 scale().melody(streak), pos));
     }
 
-    /** 他のプレイヤーが的当て（1.11.0）の ✕ に当てた: 本人と同じ低い音（音符ブロックのプリング、ピッチ 0.5）。 */
+    /** 他のプレイヤーが的当ての ✕ に当てた: 本人と同じ低い音（音符ブロックのプリング、ピッチ 0.5）。 */
     static void playOtherMiss(BlockPos pos) {
         float volume = (float) WeakSpotConfig.client.sound.othersHitVolume;
         if (volume <= 0 || Minecraft.getMinecraft().world == null) {
@@ -188,7 +188,7 @@ final class HitSounds {
         playScale(note, ticksPerNote, startDelay, scale().cycleLength());
     }
 
-    /** 音階の始めの count 音を鳴らす（設定を切り替えたときの短い試聴。1.11.1）。 */
+    /** 音階の始めの count 音を鳴らす（設定を切り替えたときの短い試聴）。 */
     static void playScale(IntConsumer note, int ticksPerNote, int startDelay, int count) {
         for (int i = 0; i < count; i++) {
             int streak = i + 1;

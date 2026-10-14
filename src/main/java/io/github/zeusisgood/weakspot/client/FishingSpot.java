@@ -24,8 +24,8 @@ import net.minecraftforge.fml.relauncher.Side;
 
 /**
  * 釣りの弱点（自分だけ。他のプレイヤーには見せない）。浮きが水に入って魚を待っている間、浮きのまわり（半径1ブロック）の
- * 水面の上の点に弱点を出し、釣り竿を持って、照準を重ねるだけで当たり（1.10.1。それまでは左クリックで叩いた。左クリックは
- * 今は止めず、通常どおり掘る・攻撃する）。
+ * 水面の上の点に弱点を出し、釣り竿を持って、照準を重ねるだけで当たり（左クリックは
+ * 止めず、通常どおり掘る・攻撃する）。
  *
  * 弱点はワールドの1点（浮きからの水平の差 dx, dz。浮きが揺れても追従する）で、描くときに画面上の位置へ変換して、
  * 画面上で一定の大きさ（半径 12 GUI ピクセル）の円として描く（浮きが遠くても近くても同じ大きさ）。
@@ -59,7 +59,7 @@ final class FishingSpot {
     private static float progress;
     private static long receivedTick = Long.MIN_VALUE / 2;
     /** 問い合わせの相手は自分の浮きだけなので、相手は区別しない。 */
-    /** 画面の上の半径（GUI の座標。1.11.0 から設定 spotSize × 釣りの倍率 0.75）。 */
+    /** 画面の上の半径（GUI の座標。設定 spotSize × 釣りの倍率 0.75）。 */
     private static double radius() {
         return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(HitKind.FISHING);
     }
@@ -193,7 +193,7 @@ final class FishingSpot {
             double allowed = FishingMath.allowedAngle(radius() * scale, SCREEN.fovDegrees(),
                     SCREEN.viewportHeight());
             aimed = FishingMath.isAimed(p[2], allowed);
-            // 照準を重ねるだけで当たり（1.10.1。それまでは左クリック）
+            // 照準を重ねるだけで当たり
             if (aimed && OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
                 onHit();
             }

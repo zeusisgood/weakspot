@@ -59,7 +59,7 @@ public class LangFilesTest {
         Set<String> expected = new HashSet<>();
         for (WeakSpotConfig.Setting setting : WeakSpotConfig.settings()) {
             expected.add(setting.tooltipKey());
-            // 設定画面の項目の名前（1.10.2）
+            // 設定画面の項目の名前
             expected.add(setting.nameKey());
             String category = "weakspot." + setting.category;
             for (int i = category.indexOf('.', "weakspot.".length()); ; i = category.indexOf('.', i + 1)) {
@@ -87,7 +87,7 @@ public class LangFilesTest {
     }
 
     /**
-     * 設定の説明の書き方（1.10.2）: サーバーの項目は「マルチプレイ時、サーバー側設定が優先されます。」で始め、
+     * 設定の説明の書き方: サーバーの項目は「マルチプレイ時、サーバー側設定が優先されます。」で始め、
      * クライアントの項目には断り書きを付けない。どちらも最後の行はファイルのキー。
      */
     @Test
@@ -114,7 +114,7 @@ public class LangFilesTest {
         }
     }
 
-    /** 設定画面のまとめ（SettingGroups）の名前と説明（1.10.2）。 */
+    /** 設定画面のまとめ（SettingGroups）の名前と説明。 */
     @Test
     public void everySettingGroupHasItsNames() {
         List<String> missing = new ArrayList<>();
@@ -165,7 +165,7 @@ public class LangFilesTest {
         assertTrue("keys used in the code but missing from the lang files: " + missing, missing.isEmpty());
     }
 
-    /** サーバーから翻訳キーで送る文（1.9.6。PlayerText）は、クライアントの翻訳で使える %s / %1$s の形だけを使う。 */
+    /** サーバーから翻訳キーで送る文（PlayerText）は、クライアントの翻訳で使える %s / %1$s の形だけを使う。 */
     @Test
     public void serverSentTextsUseOnlyPercentS() {
         Pattern format = Pattern.compile("%(?!(\\d+\\$)?s)");
@@ -183,7 +183,7 @@ public class LangFilesTest {
         assertTrue("server-sent texts with formats other than %s: " + bad, bad.isEmpty());
     }
 
-    /** チャットの頭は、日英とも [WeakSpot]（1.9.6。コマンド /weakspot と同じ綴り）。 */
+    /** チャットの頭は、日英とも [WeakSpot]（コマンド /weakspot と同じ綴り）。 */
     @Test
     public void chatPrefixIsWeakSpot() {
         List<String> old = new ArrayList<>();

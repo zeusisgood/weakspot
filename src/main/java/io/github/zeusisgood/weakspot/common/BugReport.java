@@ -5,7 +5,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 /**
- * 不具合の報告（/weakspot bug。1.7.1）の本文とリンクを作る。環境の集め方と文章（翻訳）は呼ぶ側が渡す。
+ * 不具合の報告（/weakspot bug）の本文とリンクを作る。環境の集め方と文章（翻訳）は呼ぶ側が渡す。
  * GitHub の新しい issue の画面は、リンクの title と body で最初から書き込める。Mod の一覧でリンクが長くなりすぎるときは、
  * 一覧を外して「貼り付けてください」と書く。Minecraft に依存しない。
  */
@@ -32,7 +32,7 @@ public final class BugReport {
         }
     }
 
-    /** 本文の形: 環境の前の節、環境の見出し、環境の後の節（1.9.1。それまでは環境が最後）。 */
+    /** 本文の形: 環境の前の節、環境の見出し、環境の後の節。 */
     public static final class Template {
         final List<Section> before;
         final String environmentHeading;
@@ -78,7 +78,7 @@ public final class BugReport {
     }
 
     /**
-     * 環境の OS の行に、「OS 名が不正確かもしれない」注記を付けるか（1.9.1）。Minecraft のランチャーが同梱する古い
+     * 環境の OS の行に、「OS 名が不正確かもしれない」注記を付けるか。Minecraft のランチャーが同梱する古い
      * Java 8（8u51 など）は Windows 10・11 を知らず、os.name を「Windows 8.1」と答える（Windows 11 を正しく答えるのは
      * 8u321 から）。Windows で、java.version が 1.8.0_N（N < 321）のときだけ true。
      */

@@ -10,10 +10,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
- * 投げる物の弱点（自分だけ。1.7.0）。エンダーパール・雪玉などをメインハンドに持っている間、照準から 10〜20 度
+ * 投げる物の弱点（自分だけ）。エンダーパール・雪玉などをメインハンドに持っている間、照準から 10〜20 度
  * （馬・豚に乗っているときは真上か真下だけ）に青緑の弱点を出し、照準を合わせるだけでヒットにする。当てるたびに
  * 次の 1 投の溜めが増え（ThrowCharge。クライアントもサーバーの返事を待たずに進める）、照準の下にゲージを出す。
- * 1.8.6 から AimSpotKind（AimSpots が回す）。
+ * AimSpotKind（AimSpots が回す）。
  */
 final class ThrowSpot extends AimSpotKind {
 

@@ -26,10 +26,10 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
 /**
- * クライアントのコマンド /weakspot（1.7.1）。/weakspot bug だけを自分のクライアントで受け取り、不具合の報告の方法を出す
+ * クライアントのコマンド /weakspot。/weakspot bug だけを自分のクライアントで受け取り、不具合の報告の方法を出す
  * （サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。古いサーバーにも無い）。
  * 環境を自動で集め、GitHub の issue の画面に最初から書き込むリンクと、クリップボードへのコピーの両方で渡す。
- * skipupdate <版>（1.9.2）は、新しい版の通知の [この版は通知しない] から動く。
+ * skipupdate <版>は、新しい版の通知の [この版は通知しない] から動く。
  * bug・skipupdate 以外（/weakspot、stats、reset、reload）は、打った文字をそのままサーバーへ送る（サーバーのコマンドが動く）。
  */
 final class BugCommand extends CommandBase {
@@ -68,7 +68,7 @@ final class BugCommand extends CommandBase {
             showGuide(mc);
             return;
         }
-        // 新しい版の通知の [この版は通知しない]（1.9.2）。クリックで動くもので、補完には出さない
+        // 新しい版の通知の [この版は通知しない]。クリックで動くもので、補完には出さない
         if (args.length >= 1 && "skipupdate".equalsIgnoreCase(args[0])) {
             if (args.length >= 2) {
                 UpdateCheckNotice.skip(mc, args[1]);
@@ -91,7 +91,7 @@ final class BugCommand extends CommandBase {
         List<String> environment = environment(mc);
         List<String> mods = mods();
         String modsSummary = I18n.format("weakspot.bug.template.mods", mods.size());
-        // 一般的な不具合報告のテンプレートと同じ見出し（1.9.1）
+        // 一般的な不具合報告のテンプレートと同じ見出し
         BugReport.Template template = new BugReport.Template(Arrays.asList(
                 new BugReport.Section(I18n.format("weakspot.bug.template.summary")),
                 new BugReport.Section(I18n.format("weakspot.bug.template.steps"), "1. "),
@@ -123,7 +123,7 @@ final class BugCommand extends CommandBase {
         lines.add("Minecraft " + Loader.MC_VERSION + " / Forge " + ForgeVersion.getVersion());
         String javaVersion = System.getProperty("java.version");
         String osName = System.getProperty("os.name");
-        // 古い Java は Windows 10・11 を 8.1 と答えるので、そのときは注記を付ける（1.9.1）
+        // 古い Java は Windows 10・11 を 8.1 と答えるので、そのときは注記を付ける
         String osNote = BugReport.osNameMayBeWrong(osName, javaVersion) ? I18n.format("weakspot.bug.env.osNote") : "";
         lines.add("Java " + javaVersion + " (" + System.getProperty("java.vendor") + ") / "
                 + osName + " " + System.getProperty("os.version") + " ("

@@ -12,11 +12,11 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 
 /**
- * エリトラの弱点（自分だけ。1.7.0）。エリトラで飛んでいる間、照準から 10〜20 度の所に空の青の弱点を出し、照準を
+ * エリトラの弱点（自分だけ）。エリトラで飛んでいる間、照準から 10〜20 度の所に空の青の弱点を出し、照準を
  * 合わせるだけでヒットにする。当てた瞬間に、見ている向きへ一気に飛び出す（トライデントの激流のような急加速）。
  * 速さはクライアントで足す（エリトラの動きは本人のクライアントが決める）。上限は付けない（ユーザーの方針）。
  * 急加速の演出（視野が一瞬広がる、雲の尾、打ち上げの音）は自分の画面だけ。サーバーは検証だけ（MoveHits）。
- * 1.8.6 から AimSpotKind（AimSpots が回す）。
+ * AimSpotKind（AimSpots が回す）。
  */
 final class ElytraSpot extends AimSpotKind {
 

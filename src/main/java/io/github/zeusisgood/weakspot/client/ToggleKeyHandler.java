@@ -16,7 +16,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
 /**
- * 弱点の一時オフのキー（初期値 HOME。1.3.3 までは J だったが、JourneyMap と重なるので変えた。操作設定で変更できる）。押すたびに、自分の弱点のオンとオフが切り替わる。
+ * 弱点の一時オフのキー（初期値 HOME。J は JourneyMap と重なるため。操作設定で変更できる）。押すたびに、自分の弱点のオンとオフが切り替わる。
  * 状態は設定 weakSpotsEnabled に保存するので、次に起動したときも引き継ぐ。
  *
  * オフの間に止める処理は ClientWeakSpotHandler.stopOwnWeakSpots と、それを呼ぶ側にある
@@ -34,7 +34,7 @@ public final class ToggleKeyHandler {
     private ToggleKeyHandler() {
     }
 
-    /** 弱点のオン・オフのキーの、今の割り当ての名前（1.8.3。「すべてオフ中（HOME キー）」の表示）。 */
+    /** 弱点のオン・オフのキーの、今の割り当ての名前（「すべてオフ中（HOME キー）」の表示）。 */
     static String keyName() {
         return TOGGLE.getDisplayName();
     }

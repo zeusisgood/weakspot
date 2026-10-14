@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: 近くのほかのプレイヤーのコンボ（エンティティ ID と数。0 なら途切れた）（1.6.0）。
+ * サーバー → クライアント: 近くのほかのプレイヤーのコンボ（エンティティ ID と数。0 なら途切れた）。
  * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
  */
 public class OtherComboMessage implements IMessage {

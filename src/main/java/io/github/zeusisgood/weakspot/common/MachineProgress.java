@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 機械の進み具合のバーの値の計算（1.6.0）。どれも 0〜1 に収める。値が読めない・0 除算のときは 0。
+ * 機械の進み具合のバーの値の計算。どれも 0〜1 に収める。値が読めない・0 除算のときは 0。
  * かまど・醸造台の値はバニラの IInventory#getField の値、スポナーは MobSpawnerBaseLogic の spawnDelay。
  */
 public final class MachineProgress {

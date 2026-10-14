@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * クライアント → サーバー: 弱点を出すための状態の問い合わせ（1.9.0 で、動物・釣り・機械の 3 つの問い合わせをまとめた）。
+ * クライアント → サーバー: 弱点を出すための状態の問い合わせ（動物・釣り・機械）。
  * 種類と相手（動物は生き物の ID、機械はブロックの位置、釣りはなし）を送り、サーバーは StateMessage で返す。
  * 問い合わせの間隔は、クライアントの QueryThrottle が決める。
  */

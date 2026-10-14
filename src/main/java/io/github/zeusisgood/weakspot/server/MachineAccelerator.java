@@ -89,7 +89,7 @@ public final class MachineAccelerator {
     }
 
     /**
-     * 加速中の機械のまわりに、速さに合わせた色の粉の粒子を出す（1.5.3）。数を 0 にすると、オフセットが色として届く
+     * 加速中の機械のまわりに、速さに合わせた色の粉の粒子を出す。数を 0 にすると、オフセットが色として届く
      * （バニラの粉の粒子。近くのプレイヤー全員に見える）。場所は、当たり判定の箱の底面以外の面のランダムな位置の少し外側。
      */
     private static void spawnParticles(World world, BlockPos pos, int count, double multiplier) {
@@ -125,7 +125,7 @@ public final class MachineAccelerator {
                     z = box.maxZ + PARTICLE_OUTSET;
                     break;
             }
-            // 各自の設定（machineParticlesVisible）で見ない人には送らない（1.6.0）
+            // 各自の設定（machineParticlesVisible）で見ない人には送らない
             for (EntityPlayer viewer : world.playerEntities) {
                 if (viewer instanceof EntityPlayerMP && ServerSwitches.isParticlesVisible(viewer)
                         && viewer.getDistanceSq(x, y, z) <= PARTICLE_RANGE * PARTICLE_RANGE) {

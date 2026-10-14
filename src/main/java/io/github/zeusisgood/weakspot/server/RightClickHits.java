@@ -16,7 +16,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-/** 右クリックの弱点（作物・苗木、機械、1.7.0 から収穫）のヒット通知の検証と効果（論理サーバー）。 */
+/** 右クリックの弱点（作物・苗木、機械、収穫）のヒット通知の検証と効果（論理サーバー）。 */
 public final class RightClickHits {
 
     /**
@@ -79,7 +79,7 @@ public final class RightClickHits {
             IBlockState before = world.getBlockState(pos);
             BlockPos target = RightClickTargets.growthTarget(world, pos, before);
             IBlockState targetBefore = world.getBlockState(target);
-            // 自動の対象（1.11.2）は、変わらないことも多いので「育たない」の知らせを出さない
+            // 自動の対象は、変わらないことも多いので「育たない」の知らせを出さない
             boolean auto = !RightClickTargets.isGrowable(world, pos, before, settings);
             grow(world, pos, settings);
             // 柱が伸びると一番上の節が変わるので、前の一番上の節と、叩いたブロックの両方を比べる
@@ -115,7 +115,7 @@ public final class RightClickHits {
         }
         if (!RightClickTargets.isGrowable(world, pos, first, settings)
                 && world.getGameRules().getInt("randomTickSpeed") <= 0) {
-            // 自動の対象（1.11.2）は、ランダム tick を止めたワールドでは早めない（IC2 のフォームは、そのとき
+            // 自動の対象は、ランダム tick を止めたワールドでは早めない（IC2 のフォームは、そのとき
             // ランダム tick を受けると例外を投げる）
             return;
         }

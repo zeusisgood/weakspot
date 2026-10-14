@@ -37,7 +37,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 /**
  * 右クリックの弱点（作物・苗木などの植物、機械）の対象の判定。クライアントとサーバーで同じ条件を使う。
  * しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木（しゃがんでいても、機械でなければ作物・苗木）。
- * 実った作物は収穫（1.7.0）。しゃがんでいれば、ランダム tick を受け取るブロックも成長の対象（1.11.2。isAutoGrowable）。
+ * 実った作物は収穫。しゃがんでいれば、ランダム tick を受け取るブロックも成長の対象（isAutoGrowable）。
  * 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -58,7 +58,7 @@ public final class RightClickTargets {
             return null;
         }
         IBlockState state = world.getBlockState(pos);
-        // サーバーの設定で止めた種類は、対象にしない（1.9.0。収穫は isHarvestable の中で見る）
+        // サーバーの設定で止めた種類は、対象にしない（収穫は isHarvestable の中で見る）
         if (settings.enabled(HitKind.MACHINE) && player.isSneaking()
                 && HeldItems.isFree(player.getHeldItemOffhand(), settings)
                 && isMachine(world, pos, state, settings)) {
@@ -78,7 +78,7 @@ public final class RightClickTargets {
     }
 
     /**
-     * しゃがんで右クリックで自動で拾う成長の対象か（1.11.2。Random Things の Time in a Bottle と同じ考え方）。
+     * しゃがんで右クリックで自動で拾う成長の対象か（Random Things の Time in a Bottle と同じ考え方）。
      * ランダム tick を受け取り、対象外リストにも追加リストにもなく（追加リストのブロックは書いた条件だけで決める）、
      * IGrowable でない（IGrowable は canGrow で決める）ブロック。
      */
@@ -103,7 +103,7 @@ public final class RightClickTargets {
     }
 
     /**
-     * 収穫の弱点の対象か（1.7.0）。実った作物: BlockCrops（と、それを継承した Mod の作物）で isMaxAge、
+     * 収穫の弱点の対象か。実った作物: BlockCrops（と、それを継承した Mod の作物）で isMaxAge、
      * ネザーウォートの age 3、カカオ豆の age 2。
      */
     public static boolean isHarvestable(IBlockState state, SyncedSettings settings) {
@@ -124,7 +124,7 @@ public final class RightClickTargets {
     }
 
     /**
-     * 成長の弱点の対象か。対象外リスト（growthExcludedBlocks）になく、次のどちらか（1.4.0）。
+     * 成長の弱点の対象か。対象外リスト（growthExcludedBlocks）になく、次のどちらか。
      * 追加リスト（growthExtraBlocks）にあるブロックは、書いた状態の条件（GrowthFilters。柱の植物は育てる余地も）を満たすとき。
      * 追加リストにない IGrowable は、成長できる状態のとき。
      */
@@ -189,7 +189,7 @@ public final class RightClickTargets {
     }
 
     /**
-     * ITickable のタイルエンティティを持つか、予約された tick で動くレッドストーンの部品（1.4.4）で、対象外リストにないもの。
+     * ITickable のタイルエンティティを持つか、予約された tick で動くレッドストーンの部品で、対象外リストにないもの。
      */
     public static boolean isMachine(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         return (world.getTileEntity(pos) instanceof ITickable || isScheduledMachine(state.getBlock()))
@@ -197,7 +197,7 @@ public final class RightClickTargets {
     }
 
     /**
-     * 予約された tick（スケジュール tick）で動く、機械の加速の対象のレッドストーンの部品（1.4.4）。
+     * 予約された tick（スケジュール tick）で動く、機械の加速の対象のレッドストーンの部品。
      * リピーター・コンパレーター、オブザーバー、ディスペンサー・ドロッパー（と、それを継承したブロック）。
      */
     public static boolean isScheduledMachine(Block block) {
@@ -221,7 +221,7 @@ public final class RightClickTargets {
         HitKind kind = classify(world, player, event.getPos(), settings(world));
         if (kind == null
                 || (world.isRemote ? !WeakSpotMod.proxy.isKindEnabled(kind) : !ServerSwitches.isEnabled(player, kind))) {
-            // 弱点の一時オフ（HOME キー）、その種類のオフ（1.7.0）: 通常の右クリックのままにする。
+            // 弱点の一時オフ（HOME キー）、その種類のオフ: 通常の右クリックのままにする。
             // サーバーは、クライアントから届いた状態を見る
             return;
         }

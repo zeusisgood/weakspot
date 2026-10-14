@@ -31,8 +31,8 @@ import org.lwjgl.opengl.GL11;
  * 自分の連続ヒット（コンボ）の画面表示。数は OwnHits.STREAK（ヒット音の音階と同じ数）。
  * 2 以上で「12 HIT」と出し、ヒットのたびに弾ませる。下のバーは途切れるまでの残り時間。
  * 途切れたら薄くして消す（5 以上なら「MAX 23」を少し残す）。10、25、50、75、100、150、200、250、300（以降 100 ごと）で
- * 光を出す（音・花火・タイトルは ComboEffects。1.8.9 で分けた）。
- * 直前にヒットした種類の弱点が出ている間は、その下に種類の表示を出す（1.8.7）: コンボの掛け数を使う種類は「走り ×1.25」
+ * 光を出す（音・花火・タイトルは ComboEffects）。
+ * 直前にヒットした種類の弱点が出ている間は、その下に種類の表示を出す: コンボの掛け数を使う種類は「走り ×1.25」
  * （掛け数が 1 より大きいとき）、機械は今の速さ「機械 4倍速」、ディスペンサー・ドロッパーは「発射 ×2」。色はその種類の弱点の色。
  * 時間は ClientWeakSpotHandler.clientTick（一時停止中は止まる）で数える。F1 で HUD を隠している間は描かない。
  */
@@ -47,7 +47,7 @@ final class ComboHud {
     private static final int LOW_RGB = 0xFF3333;
     /** 種類の表示（「走り ×1.25」「機械 4倍速」）の文字の大きさ（コンボの数字に対する割合）。 */
     private static final float KIND_LABEL_SCALE = 0.75F;
-    /** 次の段階までのゲージの幅（GUI ピクセル。comboScale を掛ける。1.10.2）。 */
+    /** 次の段階までのゲージの幅（GUI ピクセル。comboScale を掛ける）。 */
     private static final float GAUGE_WIDTH = 40;
 
     private static final ComboMilestones MILESTONES = new ComboMilestones();
@@ -104,7 +104,7 @@ final class ComboHud {
         }
     }
 
-    /** サーバーの数で直した（1.11.3）。数字だけを書き換え、弾み・光・音は出さない。0 なら「MAX n」を残さずに消す。 */
+    /** サーバーの数で直した。数字だけを書き換え、弾み・光・音は出さない。0 なら「MAX n」を残さずに消す。 */
     static void correct(int newCombo) {
         combo = Math.max(0, newCombo);
     }
@@ -164,7 +164,7 @@ final class ComboHud {
                     ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= ComboMilestones.STRONG_FROM, now);
             drawKindLabel(mc, bottom, now);
         } else if (combo == 1 && lastKind == HitKind.MACHINE && ClientWeakSpotHandler.machineSpotActive()) {
-            // 1 ヒット目はコンボの数字が出ないので、数字の位置に機械の表示だけを出す（1.6.0）
+            // 1 ヒット目はコンボの数字が出ないので、数字の位置に機械の表示だけを出す
             FontRenderer font = mc.fontRenderer;
             float scale = (float) WeakSpotConfig.client.combo.comboScale;
             float[] center = center(event.getResolution(), 0, font.FONT_HEIGHT * scale);
@@ -190,7 +190,7 @@ final class ComboHud {
     }
 
     /**
-     * 直前にヒットした種類の弱点が今出ていれば、その下に種類の表示を出す（1.8.7。1.8.6 までは機械だけ）。
+     * 直前にヒットした種類の弱点が今出ていれば、その下に種類の表示を出す。
      * ディスペンサー・ドロッパーは「発射 ×2」、機械は「機械 4倍速」、コンボの掛け数を使う種類は、掛け数が 1 より大きいとき
      * 「走り ×1.25」。色はその種類の自分の弱点の色（段階が上がった瞬間は、その段階の色で光る）。
      */
@@ -206,7 +206,7 @@ final class ComboHud {
     }
 
     /**
-     * 次に掛け数が上がる段階（ComboFactor の 25・50・100…、300 から 100 ごと）までの進み具合のゲージ（1.10.2）。
+     * 次に掛け数が上がる段階（ComboFactor の 25・50・100…、300 から 100 ごと）までの進み具合のゲージ。
      * 色は次の段階の色。top は種類の表示の下端（表示がなければコンボの表示の下端）。
      */
     private static void drawFactorGauge(Minecraft mc, float top) {
@@ -224,11 +224,11 @@ final class ComboHud {
     private static float drawKindText(Minecraft mc, float top, HitKind kind, double now) {
         int rgb = MarkerLook.color(kind);
         if (kind == HitKind.MACHINE && ClientWeakSpotHandler.dispenserSpotActive()) {
-            // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（1.5.2。1.6.0 から上限の設定も考える）
+            // ディスペンサー・ドロッパーは、1 回の信号での発射の回数を出す（上限の設定も考える）
             return drawKindLabel(mc, top, I18n.format("weakspot.combo.shots", dispenseCount(combo)), rgb,
                     ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
         } else if (kind == HitKind.MACHINE) {
-            // その機械の今の速さ（サーバーと同じ計算。1.6.0）
+            // その機械の今の速さ（サーバーと同じ計算）
             return drawKindLabel(mc, top, I18n.format("weakspot.combo.machine",
                     MachineComboBoost.speedLabel(machineSpeed(combo))), rgb,
                     ComboDisplay.glowAlpha(now - factorStepTime), glowRgb(factorStepCombo));
@@ -258,7 +258,7 @@ final class ComboHud {
         }
     }
 
-    /** 種類の表示の値: 機械は速さ、ほかはコンボの掛け数（採掘は、サーバーが 1.8.7 より前なら 1）。 */
+    /** 種類の表示の値: 機械は速さ、ほかはコンボの掛け数（採掘は MiningBoost.comboFactor）。 */
     private static double labelValue(HitKind kind, int combo) {
         if (kind == HitKind.MACHINE) {
             return machineSpeed(combo);

@@ -10,7 +10,7 @@ package io.github.zeusisgood.weakspot.common;
  */
 public final class BoostMath {
 
-    /** 掘る前のヒット（1.11.2）を、掘り始めるまで残す tick 数（クライアントとサーバーで同じ）。 */
+    /** 掘る前のヒットを、掘り始めるまで残す tick 数（クライアントとサーバーで同じ）。 */
     public static final int PRE_DIG_TICKS = 20;
 
 
@@ -22,12 +22,12 @@ public final class BoostMath {
         return Math.max(0, multiplier - 1) * Math.max(0, durationTicks);
     }
 
-    /** コンボの掛け数つき（1.8.7）: (倍率 − 1) × 継続時間 × 掛け数。 */
+    /** コンボの掛け数つき: (倍率 − 1) × 継続時間 × 掛け数。 */
     public static double extraTicksPerHit(double multiplier, int durationTicks, double comboFactor) {
         return extraTicksPerHit(multiplier, durationTicks) * Math.max(0, comboFactor);
     }
 
-    /** クライアントで時間枠の中の破壊速度に掛ける倍率（1.8.7）: 1 + (倍率 − 1) × 掛け数。 */
+    /** クライアントで時間枠の中の破壊速度に掛ける倍率: 1 + (倍率 − 1) × 掛け数。 */
     public static double clientMultiplier(double multiplier, double comboFactor) {
         return 1 + Math.max(0, multiplier - 1) * Math.max(0, comboFactor);
     }

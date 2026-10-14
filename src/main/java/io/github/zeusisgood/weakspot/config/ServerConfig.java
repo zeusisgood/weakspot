@@ -723,7 +723,7 @@ public final class ServerConfig {
         }
     }
 
-    /** 落下（server.fall。1.11.0） */
+    /** 落下（server.fall） */
     public static final class Fall {
 
         @Config.Comment({"[サーバー] 落下の弱点のオン・オフ",

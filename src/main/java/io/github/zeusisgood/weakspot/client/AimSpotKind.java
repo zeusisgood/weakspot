@@ -9,7 +9,7 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 
 /**
- * 照準のまわりの弱点の 1 つの種類（1.8.6。共通の土台）。出す・当てる・描く流れは AimSpots が回し、種類ごとに
+ * 照準のまわりの弱点の 1 つの種類（共通の土台）。出す・当てる・描く流れは AimSpots が回し、種類ごとに
  * 違うこと（出す条件、出し方、当てたときの効果、ゲージ）だけを、ここを継いだクラスが書く。
  * 使う種類: 乗り物・食事・はしご・走り・エリトラ・投げる物・近接・ネザーゲート・弓。釣り（水面の位置）は別（FishingSpot）。
  */
@@ -17,7 +17,7 @@ abstract class AimSpotKind {
 
     final HitKind kind;
     final HudSpot spot;
-    /** 種類ごとの条件（wanted）から外れて続いている tick 数（keepTicks の間は弱点を残す。1.11.1）。 */
+    /** 種類ごとの条件（wanted）から外れて続いている tick 数（keepTicks の間は弱点を残す）。 */
     int missedTicks;
 
     /** 動いている間に出す種類が、条件から一瞬外れても弱点を残す長さ（tick。サーバーの受け付け MoveHits.RECENT_TICKS と同じ）。 */
@@ -32,7 +32,7 @@ abstract class AimSpotKind {
     abstract boolean wanted(EntityPlayerSP player, SyncedSettings settings);
 
     /**
-     * 種類ごとの条件（wanted）から外れても、弱点を消さずに残す tick 数（1.11.1）。走りは壁にこすれた瞬間にバニラが
+     * 種類ごとの条件（wanted）から外れても、弱点を消さずに残す tick 数。走りは壁にこすれた瞬間にバニラが
      * 一度切る、段差・着地の瞬間は 1 tick の移動が小さい、など一瞬外れることがあるので、動いている間に出す種類は
      * MOVING_KEEP_TICKS 残す（その間に戻れば同じ位置のまま。残している間は当たらない）。0 ならすぐ消す。
      */
@@ -48,7 +48,7 @@ abstract class AimSpotKind {
     /** 出し方（HudSpot.FREE / VERTICAL / HORIZONTAL / VERTICAL_FIXED）。 */
     abstract int placement(EntityPlayerSP player);
 
-    /** ヒットの最小間隔（設定の表から。1.8.9）。 */
+    /** ヒットの最小間隔（設定の表から）。 */
     final int minHitInterval(SyncedSettings settings) {
         return settings.minHitInterval(kind);
     }

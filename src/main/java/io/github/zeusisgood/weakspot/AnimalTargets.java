@@ -55,7 +55,7 @@ public final class AnimalTargets {
 
     /**
      * プレイヤーが今の手の状態で、この動物の弱点を出せるか（動いているタイマーがあるかは別）。
-     * 素手（両手が空。1.11.0 から、右クリックで何もしないアイテムも空とみなす。HeldItems。餌を持った右クリックは「繁殖・餌やり」
+     * 素手（両手が空。右クリックで何もしないアイテムも空とみなす。HeldItems。餌を持った右クリックは「繁殖・餌やり」
      * なので出さない）で、しゃがみが要る動物ではしゃがんでいること。
      */
     public static boolean isTarget(EntityPlayer player, Entity entity, SyncedSettings settings) {

@@ -9,7 +9,7 @@ import net.minecraft.entity.passive.EntityPig;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
- * 乗り物の弱点の対象（両側。1.6.0）。馬系・豚は視線の向きに進む（STEERED。弱点は照準の真上か真下だけ）、
+ * 乗り物の弱点の対象（両側）。馬系・豚は視線の向きに進む（STEERED。弱点は照準の真上か真下だけ）、
  * トロッコ・ボートは視線と関係なく進む（FREE）。
  */
 public final class VehicleTargets {

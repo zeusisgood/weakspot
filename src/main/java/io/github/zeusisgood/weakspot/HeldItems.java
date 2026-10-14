@@ -17,7 +17,7 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 
 /**
- * 素手と同じに扱う手（1.11.0）。成長・収穫・機械・動物の弱点は「手が空いている」ときに出すが、右クリックで何もしないアイテム
+ * 素手と同じに扱う手。成長・収穫・機械・動物の弱点は「手が空いている」ときに出すが、右クリックで何もしないアイテム
  * （ツルハシ・斧・剣・棒・インゴットなど）を持っていても、空いているとみなす（設定 heldItemsCountAsEmptyHand）。
  * 何もしないかは、アイテムのクラス（Item より下の親を含む）が右クリックの処理（onItemUse・onItemRightClick・
  * itemInteractionForEntity・Forge の onItemUseFirst）を上書きしていないかで、自動で見分ける（Mod のアイテムにも効く）。

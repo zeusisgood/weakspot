@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.Test;
 
-/** 設定画面のまとめ（1.10.2）: すべての設定が、ちょうど 1 つのまとめに入っている（画面に出さない項目を除く）。 */
+/** 設定画面のまとめ: すべての設定が、ちょうど 1 つのまとめに入っている（画面に出さない項目を除く）。 */
 public class SettingGroupsTest {
 
     @Test

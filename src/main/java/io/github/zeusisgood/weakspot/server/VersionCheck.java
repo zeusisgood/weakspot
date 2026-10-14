@@ -20,10 +20,10 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * サーバーとクライアントの Mod の版が違うときに、本人・OP 権限を持つほかのプレイヤー・サーバーのログに知らせる（1.5.1）。
+ * サーバーとクライアントの Mod の版が違うときに、本人・OP 権限を持つほかのプレイヤー・サーバーのログに知らせる。
  * クライアントの版は、接続のときに Forge が受け取った Mod の一覧（NetworkDispatcher#getModList）から読む（通信は増やさない）。
  * ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。文は翻訳キーで送り、プレイヤーの言語で表示する
- * （キーは 1.5.1 から。接続できるクライアントは必ず持っている）。
+ * （接続できるクライアントは必ずキーを持っている）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VersionCheck {
@@ -43,7 +43,7 @@ public final class VersionCheck {
         }
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ。1.8.9）。 */
+    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forgetOnLogout(EntityPlayer player) {
         PENDING.remove(player.getUniqueID());
     }

@@ -34,7 +34,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 的当て（1.11.0）のクライアント側。サーバーの知らせ（TargetMessage）で始まり・終わり、カウントダウン（見本「的 当てる　✕ 当てない」）、
+ * 的当てのクライアント側。サーバーの知らせ（TargetMessage）で始まり・終わり、カウントダウン（見本「的 当てる　✕ 当てない」）、
  * 30 秒の間の的（赤白のアーチェリーの的）とハズレ（黒い丸に黄色い ✕。最後の 10 秒）を照準のまわりに出して、照準を合わせたら
  * サーバーへ知らせる。ヒット数はサーバーの数を出す。的は始めたときの向きを中心にした枠の中だけに出し、画面にないときは矢印で
  * 方向を示す。終わったら、結果の板（今回・自己ベスト・サーバーの 1 位・当てた数と ✕ の数・次のご褒美）を出す。
@@ -79,7 +79,7 @@ public final class TargetPlay {
         double vpitch;
         final boolean decoy;
         long placedTick;
-        /** 表示の位置（当てて移るときに滑らせ、残像を残す。ほかの照準の弱点と同じ。1.11.0）。 */
+        /** 表示の位置（当てて移るときに滑らせ、残像を残す。ほかの照準の弱点と同じ）。 */
         final MarkerMotion motion = new MarkerMotion(0, 0);
         boolean placedOnce;
 

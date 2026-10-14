@@ -6,7 +6,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** クライアント → サーバー: 的当て（1.11.0）で当てた（当たり・ハズレ）。 */
+/** クライアント → サーバー: 的当てで当てた（当たり・ハズレ）。 */
 public class TargetActionMessage implements IMessage {
 
     public static final byte HIT = 0;

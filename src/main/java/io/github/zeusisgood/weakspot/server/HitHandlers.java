@@ -7,7 +7,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * ヒット通知（HitMessage）の種類ごとの処理の表（1.8.6。それまでは if の連なり）。種類を足すときは、ここに 1 行足す。
+ * ヒット通知（HitMessage）の種類ごとの処理の表。種類を足すときは、ここに 1 行足す。
  * 登録のない種類は無視する。どれもサーバースレッドで呼ぶ。
  */
 public final class HitHandlers {
@@ -55,7 +55,7 @@ public final class HitHandlers {
         Handler handler = HANDLERS.get(kind);
         if (handler != null) {
             handler.onHit(player, kind, pos, entityId, streak);
-            // 受け付けなかったヒットで、クライアントのコンボだけが増えていないか（1.11.3）
+            // 受け付けなかったヒットで、クライアントのコンボだけが増えていないか
             ComboRelay.checkOwn(player, streak);
         }
     }

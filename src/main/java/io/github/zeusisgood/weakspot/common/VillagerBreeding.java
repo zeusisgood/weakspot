@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * 村人が繁殖できない理由（1.8.4）。バニラの EntityAIVillagerMate と同じ条件を、上から順に調べる。
+ * 村人が繁殖できない理由。バニラの EntityAIVillagerMate と同じ条件を、上から順に調べる。
  * 村が見つからないときは、ほかの条件は調べない（村を作るのが先）。
  */
 public final class VillagerBreeding {
