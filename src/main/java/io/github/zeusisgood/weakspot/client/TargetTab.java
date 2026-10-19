@@ -5,15 +5,12 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
-/**
- * 統計画面の「的当て」タブ。自己ベスト・回数・ご褒美の段階と次の段階まで・ご褒美の一覧（使えるか）・
- * サーバー内の上位 10 人。金の粒（金の段階のご褒美）のオン・オフもここで切り替える。値はサーバーから届いたもの（TargetRecords）。
- */
+/** 値はサーバーから届いたもの（TargetRecords）。 */
 final class TargetTab extends StatsScreenTab {
 
     private static final int BUTTON_GOLD_PARTICLES = 700;
     private static final int ROW_HEIGHT = 11;
-    /** 金の粒のオン・オフのボタン（高さ 20 なので、その行だけ上下に間をあけて、ほかの行に重ねない）。 */
+    /** 高さ 20 なので、その行だけ上下に間をあけて、ほかの行に重ねない。 */
     private static final int GOLD_BUTTON_WIDTH = 60;
     private static final int GOLD_ROW_GAP = 6;
 
@@ -76,7 +73,6 @@ final class TargetTab extends StatsScreenTab {
         screen.drawRight(tierText, right, y, tierRgb(tier));
         y += ROW_HEIGHT + 4;
 
-        // ご褒美（解放したもの、まだのもの）
         screen.drawString(screen.font(), I18n.format("weakspot.target.tab.rewards"), left, y, 0xAAAAAA);
         y += ROW_HEIGHT;
         for (TargetRules.Tier t : TargetRules.Tier.values()) {
@@ -101,7 +97,6 @@ final class TargetTab extends StatsScreenTab {
         }
         y += 4;
 
-        // サーバー内の上位
         screen.drawString(screen.font(), I18n.format("weakspot.target.tab.top"), left, y, 0xAAAAAA);
         y += ROW_HEIGHT;
         if (TargetRecords.TOP_NAMES.isEmpty()) {

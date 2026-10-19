@@ -34,35 +34,28 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 的当てのクライアント側。サーバーの知らせ（TargetMessage）で始まり・終わり、カウントダウン（見本「的 当てる　✕ 当てない」）、
- * 30 秒の間の的（赤白のアーチェリーの的）とハズレ（黒い丸に黄色い ✕。最後の 10 秒）を照準のまわりに出して、照準を合わせたら
- * サーバーへ知らせる。ヒット数はサーバーの数を出す。的は始めたときの向きを中心にした枠の中だけに出し、画面にないときは矢印で
- * 方向を示す。終わったら、結果の板（今回・自己ベスト・サーバーの 1 位・当てた数と ✕ の数・次のご褒美）を出す。
- * 自分ではやめられない（持ち替え・画面を開いても続く）。ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
- */
+* 的当てのクライアント側。ヒット数はサーバーの数を出す。自分ではやめられない（持ち替え・画面を開いても続く）。
+* ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class TargetPlay {
 
-    /** 的の赤・白・中心の黄と、外側の縁（半透明の黒）。 */
     private static final float[] TARGET_RED = rgb(0xD32F2F);
     private static final float[] TARGET_WHITE = rgb(0xFFFFFF);
     private static final float[] TARGET_YELLOW = rgb(0xFFD54F);
     private static final float[] BLACK = rgb(0x000000);
-    /** ハズレの丸（半透明の黒）と ✕（黄）。 */
     private static final float[] DECOY_DISK = rgb(0x1A1A1A);
     private static final float[] DECOY_CROSS = rgb(0xFFEB3B);
-    /** ハズレに当てたときの「−5」。 */
     private static final int PENALTY_RGB = 0xE53935;
     /** ほかの人の頭の上の「的当て中」。 */
     static final int OTHERS_RGB = 0xFF8A2A;
-    /** ハズレに当てたときの低い音のピッチ（近くの人にも同じ音。HitSounds.playOtherMiss）。 */
+    /** 近くの人にも同じ音（HitSounds.playOtherMiss）。 */
     static final float MISS_PITCH = 0.5F;
     private static final int GOLD = 0xFFD700;
     private static final int GRAY = 0xAAAAAA;
-    /** 弱点の点を置く、目からの距離（ブロック。向きだけが意味を持つ）。 */
+    /** ブロック。向きだけが意味を持つ。 */
     private static final double SPOT_DISTANCE = 16.0;
     private static final int RESULT_TICKS = 100;
-    /** 結果の板の幅と行の高さ。 */
     private static final int BOARD_WIDTH = 210;
     private static final int LINE = 12;
     private static final int POPUP_TICKS = 20;
@@ -70,7 +63,6 @@ public final class TargetPlay {
     private static final ScreenProjection SCREEN = new ScreenProjection();
     private static final Random RANDOM = new Random();
 
-    /** 方向（yaw / pitch）で持つ的。 */
     private static final class Spot {
         /** 基準の向きからのずれ（度）。 */
         double yaw;
@@ -79,7 +71,7 @@ public final class TargetPlay {
         double vpitch;
         final boolean decoy;
         long placedTick;
-        /** 表示の位置（当てて移るときに滑らせ、残像を残す。ほかの照準の弱点と同じ）。 */
+        /** 当てて移るときに滑らせ、残像を残す（ほかの照準の弱点と同じ）。 */
         final MarkerMotion motion = new MarkerMotion(0, 0);
         boolean placedOnce;
 
@@ -113,14 +105,12 @@ public final class TargetPlay {
     private static double eyeY;
     private static double eyeZ;
     private static int lastCountdown;
-    /** 始めたときの自己ベストと、このラウンドでそれを超えた tick（超えていなければ負）。 */
+    /** 超えていなければ負。 */
     private static long bestAtStart;
     private static long passedTick = Long.MIN_VALUE / 2;
     private static final int PASS_GLOW_TICKS = 12;
-    /** 始めたときの向き（的はこのまわりの枠の中だけに出す）。 */
     private static double anchorYaw;
     private static double anchorPitch;
-    /** 結果の表示。 */
     private static long resultTick = Long.MIN_VALUE / 2;
     private static int resultHits;
     private static boolean resultNewBest;
@@ -133,12 +123,12 @@ public final class TargetPlay {
     private TargetPlay() {
     }
 
-    /** ラウンド（カウントダウンを含む）の最中か。ほかの種類の弱点を止めるのに使う。 */
+    /** カウントダウンを含む。 */
     static boolean active() {
         return active;
     }
 
-    /** サーバーの知らせ（クライアントのスレッド）。 */
+    /** クライアントのスレッド。 */
     static void receive(TargetMessage message) {
         Minecraft mc = Minecraft.getMinecraft();
         long now = ClientWeakSpotHandler.clientTick;
@@ -162,7 +152,6 @@ public final class TargetPlay {
             case TargetMessage.SCORE:
                 hits = newHits;
                 if (bestAtStart > 0 && hits > bestAtStart && passedTick < startTick) {
-                    // 自己ベストを超えた瞬間
                     passedTick = now;
                     playNote(mc, 2.0F, 0.8F);
                 }
@@ -239,7 +228,6 @@ public final class TargetPlay {
         }
         long into = into();
         if (into < 0) {
-            // カウントダウンの音（3・2・1）
             int count = (int) Math.ceil(-into / 20.0);
             if (count != lastCountdown) {
                 lastCountdown = count;
@@ -277,7 +265,7 @@ public final class TargetPlay {
         }
     }
 
-    /** 始めたときの向きを中心にした、段階の枠の中に置く。avoid があれば、そこから MIN_SEPARATION 以上離す。 */
+    /** avoid があれば、そこから MIN_SEPARATION 以上離す。 */
     private static void place(Spot s, int phase, Spot avoid) {
         double w = TargetRules.windowYaw(phase);
         double h = TargetRules.windowPitch(phase);
@@ -301,7 +289,7 @@ public final class TargetPlay {
         s.placedOnce = true;
     }
 
-    /** 段階の速さで、枠の中を動かす（端で跳ね返る）。止まっている段階から動く段階になったら、向きを決め直す。 */
+    /** 止まっている段階から動く段階になったら、向きを決め直す。 */
     private static void move(Spot s, int phase) {
         double speed = TargetRules.speed(phase);
         if (speed <= 0) {
@@ -322,7 +310,7 @@ public final class TargetPlay {
         s.vpitch = p[1];
     }
 
-    /** 毎フレーム、照準が的に合ったかを見る（RenderWorldLastEvent。ほかの照準の弱点と同じ）。 */
+    /** 毎フレーム見る（ほかの照準の弱点と同じ）。 */
     @SubscribeEvent
     public static void onRenderWorldLast(RenderWorldLastEvent event) {
         SCREEN.invalidate();
@@ -375,7 +363,6 @@ public final class TargetPlay {
         return projectAt(s.yaw, s.pitch);
     }
 
-    /** 基準の向きからのずれ (u, v) の向きを、画面に写す。 */
     private static double[] projectAt(double u, double v) {
         double[] d = BowMath.vector(anchorYaw + u, anchorPitch + v);
         return SCREEN.project(eyeX + d[0] * SPOT_DISTANCE, eyeY + d[1] * SPOT_DISTANCE, eyeZ + d[2] * SPOT_DISTANCE);
@@ -413,7 +400,6 @@ public final class TargetPlay {
         }
     }
 
-    /** 「3」「2」「1」と、見本「(的) 当てる　(✕) 当てない」（的とハズレは本物と同じ絵）。 */
     private static void drawCountdown(Minecraft mc, ScaledResolution res, int count) {
         FontRenderer font = mc.fontRenderer;
         float cx = res.getScaledWidth() / 2F;
@@ -435,7 +421,6 @@ public final class TargetPlay {
         font.drawStringWithShadow(avoid, (float) (decoyX + icon + 4), y - font.FONT_HEIGHT / 2F + 1, 0xFFFFFF);
     }
 
-    /** 的とハズレを描く。 */
     private static void drawSpots(Minecraft mc, ScaledResolution res) {
         if (!SCREEN.isValid() || spot == null) {
             return;
@@ -453,10 +438,7 @@ public final class TargetPlay {
         HudSpot.endOverlay();
     }
 
-    /**
-     * 的かハズレを、残像（移るときに通った跡。薄い絵）と、滑っている途中の表示の位置で描く（weakSpotTrailEnabled が
-     * オフなら本当の位置に）。画面に写らなければ false。
-     */
+    /** 画面に写らなければ false。 */
     private static boolean drawWithTrail(Spot s, double scale, double radius, long nowMs) {
         boolean trail = WeakSpotConfig.client.markers.weakSpotTrailEnabled;
         if (trail) {
@@ -485,10 +467,8 @@ public final class TargetPlay {
         return true;
     }
 
-    /** 残像の濃さ（ほかの弱点の残像と同じくらい）。 */
     private static final double TRAIL_ALPHA = 0.4;
 
-    /** アーチェリーの的（外から半透明の黒の縁・赤・白・赤・中心の黄）。 */
     static void drawTarget(double x, double y, double radius, float a) {
         ScreenProjection.fill(x, y, radius * 1.15, BLACK, 0.45F * a);
         ScreenProjection.fill(x, y, radius, TARGET_RED, 0.95F * a);
@@ -497,7 +477,6 @@ public final class TargetPlay {
         ScreenProjection.fill(x, y, radius * 0.25, TARGET_YELLOW, a);
     }
 
-    /** ハズレ（半透明の黒い丸に、黄色い太い ✕ と白い縁）。 */
     private static void drawDecoy(double x, double y, double radius, float a) {
         ScreenProjection.fill(x, y, radius, DECOY_DISK, 0.75F * a);
         ScreenProjection.outline(x, y, radius, TARGET_WHITE, 0.9F * a);
@@ -507,7 +486,7 @@ public final class TargetPlay {
         bar(x - k, y + k, x + k, y - k, w, DECOY_CROSS, a);
     }
 
-    /** 太さ w の線（四角形で描く。線の太さの上限がある環境でも太く見えるように）。 */
+    /** 四角形で描く（線の太さの上限がある環境でも太く見えるように）。 */
     private static void bar(double x0, double y0, double x1, double y1, double w, float[] c, float a) {
         double len = Math.hypot(x1 - x0, y1 - y0);
         double nx = -(y1 - y0) / len * w / 2;
@@ -522,7 +501,6 @@ public final class TargetPlay {
         tessellator.draw();
     }
 
-    /** 的が画面にないとき、画面の端寄りに的の方向を示す三角（的と同じ赤に白い縁）。 */
     private static void drawArrow(Minecraft mc, ScaledResolution res, Spot s) {
         EntityPlayerSP player = mc.player;
         double dx = BowMath.wrapDegrees(anchorYaw + s.yaw - player.rotationYaw);
@@ -530,14 +508,12 @@ public final class TargetPlay {
         ScreenProjection.edgeArrow(res, dx, dy, TARGET_RED, TARGET_WHITE);
     }
 
-    /** 画面の上の中央に、ヒット数と残り時間。 */
     private static void drawRoundInfo(Minecraft mc, ScaledResolution res, long into) {
         FontRenderer font = mc.fontRenderer;
         float cx = res.getScaledWidth() / 2F;
         String hitText = I18n.format("weakspot.combo.hit", hits);
         drawScaled(font, hitText, cx, 18, 2, 0xFFFFFF);
         if (bestAtStart > 0) {
-            // 自己ベスト。超えたら金で、超えた瞬間は大きく光る
             boolean passed = passedTick >= startTick;
             double glow = passed
                     ? Math.max(0, 1 - (ClientWeakSpotHandler.clientTick - passedTick) / (double) PASS_GLOW_TICKS) : 0;
@@ -567,10 +543,7 @@ public final class TargetPlay {
         }
     }
 
-    /**
-     * 結果の板（画面の中央の半透明の黒）: 題・大きな「42 HIT」・NEW BEST!・今回の記録・自己ベスト（あと N）・サーバーの 1 位
-     * （自分なら金で「あなた！」）・当てた数と ✕ の数・次のご褒美まで。最後の 1 秒で薄くなる。
-     */
+    /** 最後の 1 秒で薄くなる。 */
     private static void drawResult(Minecraft mc, ScaledResolution res, double t) {
         FontRenderer font = mc.fontRenderer;
         float fade = (float) Math.max(0.03, Math.min(1, (RESULT_TICKS - t) / 20.0));

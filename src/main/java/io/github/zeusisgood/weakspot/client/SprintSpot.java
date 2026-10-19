@@ -13,16 +13,14 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 
 /**
- * 走りの弱点（自分だけ）。地面を走っている間、照準の真上か真下に赤の弱点を出し、照準を合わせるだけで
- * ヒットにする（左右に向きを変えると進む向きがぶれるため。馬と同じ）。速さはサーバーが移動速度の修正でかける
- * （MoveHits。自分のクライアントにも届いて効く）。ここでは残り時間のゲージと、視野の広がりの抑えだけを受け持つ。
- * AimSpotKind（AimSpots が回す）。
- */
+* 照準の真上か真下だけに出す（左右に向きを変えると進む向きがぶれるため）。速さはサーバーが移動速度の修正でかける
+* （MoveHits。自分のクライアントにも届いて効く）。ここでは残り時間のゲージと、視野の広がりの抑えだけを受け持つ。
+*/
 final class SprintSpot extends AimSpotKind {
 
-    /** 走っているとみなす、1 tick の水平の移動（ブロック）。 */
+    /** 1 tick の水平の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
-    /** 走りの加速中の、視野の倍率の上限（見た目だけ。速さには上限を付けない）。 */
+    /** 見た目だけ。速さには上限を付けない。 */
     private static final float MAX_FOV = 1.3F;
 
     private final TimedBoost boost = new TimedBoost();
@@ -54,17 +52,13 @@ final class SprintSpot extends AimSpotKind {
         return HudSpot.VERTICAL;
     }
 
-
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
         boost.start(TimedBoostMath.multiplier(settings.sprintBoostMultiplier, settings.sprintBoostMaxMultiplier,
                 streak), settings.sprintBoostDurationTicks, ClientWeakSpotHandler.clientTick);
     }
 
-    /**
-     * 走りの加速の修正がかかっている間、バニラの視野の広がり（移動速度から決まる）を MAX_FOV までに抑える。
-     * 修正を除いた速さでの視野より狭くはしない。
-     */
+    /** バニラの視野の広がり（移動速度から決まる）を MAX_FOV までに抑える。修正を除いた速さでの視野より狭くはしない。 */
     @Override
     void onFovUpdate(FOVUpdateEvent event) {
         IAttributeInstance speed = event.getEntity().getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED);
@@ -91,7 +85,7 @@ final class SprintSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        HudSpot.gauge(mc, boost.remaining(ClientWeakSpotHandler.clientTick, partialTicks),
+        HudSpot.gauge(mc, boost.remainingFraction(ClientWeakSpotHandler.clientTick, partialTicks),
                 MarkerLook.color(HitKind.SPRINT), true);
     }
 }

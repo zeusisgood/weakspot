@@ -12,25 +12,20 @@ import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
-/**
- * 新しい版の通知。Forge の更新確認（@Mod の updateJSON）の結果を見て、新しい版があれば、
- * ワールドに入ったときに起動ごとに 1 回、チャットに出す。[この版は通知しない]（/weakspot skipupdate）を押した版は出さない。
- * ワールドに入ってからの tick は UpdateNotes が数えて、tick に渡す。
- */
+/** Forge の更新確認（@Mod の updateJSON）の結果を見て、起動ごとに 1 回出す。 */
 final class UpdateCheckNotice {
 
-    /** ワールドに入ってから出すまでの tick（更新のお知らせ UpdateNotes の 40 tick より後）。 */
+    /** 更新のお知らせ UpdateNotes の 40 tick より後。 */
     private static final int DELAY_TICKS = 60;
     /** 確認がまだ終わっていないときに、待つ tick。 */
     private static final int PENDING_TICKS = 200;
 
-    /** この起動で、もう確かめ終えたか。 */
     static boolean done;
 
     private UpdateCheckNotice() {
     }
 
-    /** ワールドの中で毎 tick 呼ぶ。waitTicks はワールドに入ってからの tick（UpdateNotes が数える）。 */
+    /** waitTicks はワールドに入ってからの tick（UpdateNotes が数える）。 */
     static void tick(Minecraft mc, int waitTicks) {
         if (done || waitTicks < DELAY_TICKS) {
             return;
@@ -70,7 +65,6 @@ final class UpdateCheckNotice {
                 new ClickEvent(ClickEvent.Action.OPEN_URL, UpdateNotes.DOWNLOAD_URL)));
         first.appendText(" ");
         ITextComponent skip = new TextComponentTranslation("weakspot.updateCheck.skip");
-        // 灰色 #AAAAAA に下線
         skip.getStyle().setColor(TextFormatting.GRAY).setUnderlined(true)
                 .setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/weakspot skipupdate " + target));
         first.appendSibling(skip);
@@ -83,7 +77,6 @@ final class UpdateCheckNotice {
         }
     }
 
-    /** /weakspot skipupdate <版>。その版の通知を止める。 */
     static void skip(Minecraft mc, String version) {
         String target = version.trim();
         if (target.isEmpty()) {

@@ -1,9 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
-/**
- * 自分の側で覚えている、時間で続く加速（はしご・走り・泳ぎ・乗り物）。
- * 時間は ClientWeakSpotHandler.clientTick で数える（一時停止中は止まる）。
- */
+/** 時間は ClientWeakSpotHandler.clientTick（一時停止中は止まる）。 */
 final class TimedBoost {
 
     private double multiplier = 1;
@@ -28,8 +25,7 @@ final class TimedBoost {
         return multiplier;
     }
 
-    /** 残り時間の割合（0〜1）。partialTicks でなめらかにする。 */
-    double remaining(long now, float partialTicks) {
+    double remainingFraction(long now, float partialTicks) {
         return Math.max(0, Math.min(1, (until - now - partialTicks) / duration));
     }
 }

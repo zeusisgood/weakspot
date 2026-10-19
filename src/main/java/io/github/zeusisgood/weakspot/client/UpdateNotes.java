@@ -15,21 +15,19 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 更新のお知らせ。版が変わってから初めてワールドに入ったときに 1 回だけ、自分のチャットに要約と変更点のリンク、
- * /weakspot bug の案内を出す。ソロでもマルチでも同じ（クライアントだけで判定する）。最後に見た版は lastSeenVersion に覚える。
- * 初めて入れた人（lastSeenVersion が空で、起動した時点で weakspot.cfg がなかった）には出さない。
- */
+* 版が変わってから初めてワールドに入ったときに 1 回だけ出す（クライアントだけで判定する）。
+* 初めて入れた人（lastSeenVersion が空で、起動した時点で weakspot.cfg がなかった）には出さない。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class UpdateNotes {
 
-    /** ワールドに入ってから出すまでの tick（入ったときのほかのメッセージに埋もれないように）。 */
+    /** 入ったときのほかのメッセージに埋もれないように。 */
     private static final int DELAY_TICKS = 40;
-    /** 配布サイトのファイルの一覧。版ごとの変更点もここで読める。 */
+    /** 版ごとの変更点もここで読める。 */
     static final String DOWNLOAD_URL = "https://www.curseforge.com/minecraft/mc-mods/weakspot/files";
 
-    /** この起動で、もう確かめたか。 */
     private static boolean checked;
-    /** ワールドに入ってからの tick（ワールドを出たら 0 に戻す。新しい版の通知 UpdateCheckNotice もこれで数える）。 */
+    /** ワールドを出たら 0 に戻す。新しい版の通知 UpdateCheckNotice もこれで数える。 */
     private static int waitTicks;
 
     private UpdateNotes() {
@@ -80,7 +78,6 @@ final class UpdateNotes {
         mc.player.sendMessage(second);
     }
 
-    /** 水色 #55FFFF に下線の、クリックできる文字。 */
     static ITextComponent link(ITextComponent text, ClickEvent click) {
         text.getStyle().setColor(TextFormatting.AQUA).setUnderlined(true).setClickEvent(click);
         return text;

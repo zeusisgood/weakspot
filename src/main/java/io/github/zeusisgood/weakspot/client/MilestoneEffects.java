@@ -11,13 +11,10 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
-/**
- * 節目の演出（達成した本人の画面だけ）: 画面中央の大きな文字、チャット1行、花火、音階の駆け上がり。
- * 7 だけが並ぶ数は虹色で派手に、合計の節目は金で派手にする。
- */
+/** 達成した本人の画面だけ。 */
 final class MilestoneEffects {
 
-    /** 合計の節目の金 #FFD700（コンボの 1000 と同じ）。 */
+    /** コンボの 1000 と同じ。 */
     private static final int GOLD_RGB = 0xFFD700;
     private static final String GOLD_BOLD = TextFormatting.GOLD + "" + TextFormatting.BOLD;
     private static final TextFormatting[] RAINBOW = {
@@ -25,16 +22,13 @@ final class MilestoneEffects {
             TextFormatting.AQUA, TextFormatting.BLUE, TextFormatting.LIGHT_PURPLE};
     private static final int[] RAINBOW_RGB = {0xFF5555, 0xFFAA00, 0xFFFF55, 0x55FF55, 0x55FFFF, 0x5555FF, 0xFF55FF};
 
-    /** 最後に節目のタイトルを出した clientTick（コンボの 1000 のタイトルは、これと重ならないようにする）。 */
+    /** コンボの 1000 のタイトルは、これと重ならないようにする。 */
     static long lastShownTick = Long.MIN_VALUE / 2;
 
     private MilestoneEffects() {
     }
 
-    /**
-     * type は MilestoneMessage の MINING / KIND / TOTAL。7 だけが並ぶ数（777、7777 …）は虹色で派手にする。
-     * 合計の節目は、金のタイトルと花火 3 発で、コンボの 1000 と同じくらい派手にする。
-     */
+    /** type は MilestoneMessage の MINING / KIND / TOTAL。 */
     static void show(int type, int kindId, long milestone) {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayerSP player = mc.player;
@@ -90,10 +84,7 @@ final class MilestoneEffects {
         }
     }
 
-    /**
-     * コンボの段階の花火（自分の画面だけ。粒子と音はクライアントだけで出し、エンティティは出さない）。
-     * count 発を、プレイヤーの頭の上に横に並べる。
-     */
+    /** 粒子と音はクライアントだけで出し、エンティティは出さない。 */
     static void comboFireworks(int count, int rgb) {
         Minecraft mc = Minecraft.getMinecraft();
         EntityPlayerSP player = mc.player;
@@ -111,7 +102,6 @@ final class MilestoneEffects {
         }
     }
 
-    /** 1文字ずつ色を変える。 */
     private static String rainbow(String text) {
         StringBuilder sb = new StringBuilder();
         int n = 0;
@@ -121,7 +111,6 @@ final class MilestoneEffects {
         return sb.toString();
     }
 
-    /** バニラの花火の爆発（Fireworks タグ）。 */
     private static NBTTagCompound fireworks(boolean lucky, int index) {
         NBTTagCompound explosion = new NBTTagCompound();
         explosion.setByte("Type", (byte) (lucky ? 1 : 0));

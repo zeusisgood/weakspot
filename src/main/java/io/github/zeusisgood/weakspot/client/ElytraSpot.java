@@ -11,18 +11,11 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 
-/**
- * エリトラの弱点（自分だけ）。エリトラで飛んでいる間、照準から 10〜20 度の所に空の青の弱点を出し、照準を
- * 合わせるだけでヒットにする。当てた瞬間に、見ている向きへ一気に飛び出す（トライデントの激流のような急加速）。
- * 速さはクライアントで足す（エリトラの動きは本人のクライアントが決める）。上限は付けない（ユーザーの方針）。
- * 急加速の演出（視野が一瞬広がる、雲の尾、打ち上げの音）は自分の画面だけ。サーバーは検証だけ（MoveHits）。
- * AimSpotKind（AimSpots が回す）。
- */
+/** 速さはクライアントで足す（エリトラの動きは本人のクライアントが決める）。上限は付けない。サーバーは検証だけ（MoveHits）。 */
 final class ElytraSpot extends AimSpotKind {
 
-    /** 演出の長さ（tick）。視野はこの間に元に戻り、雲の尾もこの間だけ出す。 */
+    /** 視野はこの間に元に戻り、雲の尾もこの間だけ出す。 */
     private static final int DASH_TICKS = 10;
-    /** 当てた瞬間の視野の倍率。 */
     private static final float DASH_FOV = 1.25F;
     private static final int SPARKS = 8;
     private static final int CLOUDS_PER_TICK = 2;
@@ -54,7 +47,6 @@ final class ElytraSpot extends AimSpotKind {
         return HudSpot.FREE;
     }
 
-
     @Override
     void afterTick(Minecraft mc) {
         long since = ClientWeakSpotHandler.clientTick - dashTick;
@@ -63,7 +55,7 @@ final class ElytraSpot extends AimSpotKind {
         }
     }
 
-    /** 見ている向きへ power（ブロック/tick）だけ速さを足す（激流と同じく、今の速さに足す）。 */
+    /** 激流と同じく、今の速さに足す。 */
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
         double power = settings.elytraBoostPower * ComboFactor.factor(streak);
@@ -82,7 +74,6 @@ final class ElytraSpot extends AimSpotKind {
                 SoundCategory.PLAYERS, 1.0F, 0.8F, false);
     }
 
-    /** 急加速のあと、後ろに雲の尾を出す。 */
     private static void trail(EntityPlayerSP player) {
         Vec3d look = player.getLookVec();
         for (int i = 0; i < CLOUDS_PER_TICK; i++) {
@@ -91,7 +82,6 @@ final class ElytraSpot extends AimSpotKind {
         }
     }
 
-    /** 当てた瞬間に視野を DASH_FOV 倍に広げ、DASH_TICKS かけて元に戻す（ease-out）。 */
     @Override
     void onFovUpdate(FOVUpdateEvent event) {
         long since = ClientWeakSpotHandler.clientTick - dashTick;

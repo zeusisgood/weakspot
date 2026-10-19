@@ -9,14 +9,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiSleepMP;
 import net.minecraft.client.multiplayer.WorldClient;
 
-/**
- * 寝ている間の弱点。夜にベッドで寝ている間は、寝ている画面（GuiSleepMP）が開いていて、マウスのカーソルが
- * 出ている。その画面の上に月の淡い黄のマーカーを出し、クリックで当てる（描く・当てる流れは ScreenSpots）。
- * 当てると、サーバーがワールドの時刻を進める（SleepHits）。
- */
+/** 寝ている画面（GuiSleepMP）にはマウスのカーソルが出ているので、その上にマーカーを出す。当てると、サーバーが時刻を進める（SleepHits）。 */
 final class SleepSpot extends ScreenSpotKind {
 
-    /** 月の淡い黄 #FFF1A8。 */
     private static final float[] DISK = {0xFF / 255F, 0xF1 / 255F, 0xA8 / 255F};
     private static final float[] RING = {1.0F, 0.98F, 0.85F};
     private static final float[] CENTER = {1.0F, 1.0F, 0.95F};
@@ -42,16 +37,12 @@ final class SleepSpot extends ScreenSpotKind {
                 && world.getGameRules().getBoolean("doDaylightCycle") && SleepTime.isNight(world.getWorldTime());
     }
 
-
-    /**
-     * 画面の中央の範囲（SleepSpotArea。画面全体だと、次のマーカーが遠すぎるため）のランダムな位置。
-     * 前の位置から SleepSpotArea.minMove 以上離す（取れなければ、一番離れた位置）。
-     */
+    /** 画面の中央の範囲（画面全体だと、次のマーカーが遠すぎるため）。 */
     @Override
     boolean place(GuiScreen gui, double prevX, double prevY) {
         double[] area = SleepSpotArea.area(gui.width, gui.height, radius());
         double minMove = SleepSpotArea.minMove(gui.width, gui.height, radius());
-        // 除く所がないので、必ず置ける（いつも true）
+        // 除く所がないので、必ず置ける
         return placeRandom(area[0], area[1], area[2], area[3], null, 40, minMove, prevX, prevY);
     }
 

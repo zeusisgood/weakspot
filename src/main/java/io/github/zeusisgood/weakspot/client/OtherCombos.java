@@ -16,11 +16,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-/**
- * 近くのほかのプレイヤーのコンボを、頭の上（名前の少し上）に「25 HIT」と出す。数はサーバーから届く
- * （OtherComboMessage）。MIN_SHOWN 以上のときだけ出し、STALE_TICKS 更新がなければ消す。色はコンボの表示と同じ段階の色。
- * 機械はしゃがんで叩くので、名前と違って、しゃがんでいる人の分も出す。壁の向こうは見えない（深度テストあり）。
- */
+/** 機械はしゃがんで叩くので、名前と違って、しゃがんでいる人の分も出す。壁の向こうは見えない（深度テストあり）。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class OtherCombos {
 
@@ -31,7 +27,7 @@ final class OtherCombos {
     private static final float TEXT_SCALE = 0.025F;
 
     private static final Map<Integer, int[]> COMBOS = new HashMap<>();
-    /** 的当て中の人: {ヒット数, 届いた tick}。ラウンドは 33 秒なので、それより長く届かなければ消す。 */
+    /** {ヒット数, 届いた tick}。ラウンドは 33 秒なので、それより長く届かなければ消す。 */
     private static final Map<Integer, int[]> TARGETS = new HashMap<>();
     private static final int TARGET_STALE_TICKS = 700;
     private static final double TARGET_ABOVE = 0.28;
@@ -39,7 +35,7 @@ final class OtherCombos {
     private OtherCombos() {
     }
 
-    /** 届いた数（クライアントのスレッドで呼ぶ）。{数, 届いた tick} を覚える。 */
+    /** クライアントのスレッドで呼ぶ。 */
     static void receive(int entityId, int count) {
         if (count <= 0) {
             COMBOS.remove(entityId);
@@ -48,7 +44,7 @@ final class OtherCombos {
         }
     }
 
-    /** 的当てのヒット数（負なら終わった）。 */
+    /** 負なら終わった。 */
     static void receiveTarget(int entityId, int hits) {
         if (hits < 0) {
             TARGETS.remove(entityId);
@@ -87,13 +83,12 @@ final class OtherCombos {
             target = null;
         }
         if (target != null) {
-            // 的当て中
             draw(mc, I18n.format("weakspot.target.others", target[0]), TargetPlay.OTHERS_RGB, event.getX(), y,
                     event.getZ());
         }
     }
 
-    /** カメラからの相対位置 (x, y, z) に、カメラの方を向いた文字を描く（深度テストあり）。 */
+    /** x, y, z はカメラからの相対位置。 */
     private static void draw(Minecraft mc, String text, int rgb, double x, double y, double z) {
         RenderManager manager = mc.getRenderManager();
         FontRenderer font = mc.fontRenderer;

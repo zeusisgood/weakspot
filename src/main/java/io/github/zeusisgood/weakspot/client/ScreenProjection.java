@@ -14,10 +14,9 @@ import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 
 /**
- * ワールドの点を、画面上の位置に変換する（HUD に画面上で一定の大きさの弱点を描くため。釣りと弓の弱点が使う）。
- * RenderWorldLastEvent の時点の OpenGL の行列（モデルビュー、射影、ビューポート）とカメラの位置を capture で覚え、
- * そのフレームの HUD の描画と当たり判定に使う。HUD の図形（円、輪、矩形）の描き方も持つ。
- */
+* RenderWorldLastEvent の時点の OpenGL の行列とカメラの位置を capture で覚え、そのフレームの HUD の描画と当たり判定に使う
+* （HUD に画面上で一定の大きさの弱点を描くため）。
+*/
 final class ScreenProjection {
 
     private static final int SEGMENTS = 32;
@@ -31,10 +30,9 @@ final class ScreenProjection {
     private double camX;
     private double camY;
     private double camZ;
-    /** 最後に capture したフレームの行列などが使えるか。 */
     private boolean valid;
 
-    /** このフレームの行列とカメラの位置（足元。目の高さはモデルビューに入っている）を覚える。使えれば true。 */
+    /** カメラの位置は足元（目の高さはモデルビューに入っている）。使えれば true。 */
     boolean capture(Minecraft mc, float partialTicks) {
         valid = false;
         Entity camera = mc.getRenderViewEntity();
@@ -67,15 +65,12 @@ final class ScreenProjection {
         valid = false;
     }
 
-    /** 画面の高さ（実際のウィンドウのピクセル）。 */
+    /** 実際のウィンドウのピクセル。 */
     int viewportHeight() {
         return vp[3];
     }
 
-    /**
-     * ワールドの点を画面上の位置に変換する。返すのは {画面の左端からのピクセル, 上端からのピクセル, 視線との角度（ラジアン）}
-     * （ピクセルは実際のウィンドウのピクセル）。カメラの後ろ、画面の外なら null。
-     */
+    /** {左端からのピクセル, 上端からのピクセル, 視線との角度（ラジアン）} を返す（実際のウィンドウのピクセル）。カメラの後ろ、画面の外なら null。 */
     double[] project(double wx, double wy, double wz) {
         double x = wx - camX;
         double y = wy - camY;
@@ -101,7 +96,7 @@ final class ScreenProjection {
         return new double[] {px, py, angle};
     }
 
-    /** 縦の視野角（度）。射影行列の [1][1] が 1 / tan(fov / 2)。弓を引くと狭くなるので、フレームごとに求める。 */
+    /** 射影行列の [1][1] が 1 / tan(fov / 2)。弓を引くと狭くなるので、フレームごとに求める。 */
     double fovDegrees() {
         return Math.toDegrees(2 * Math.atan(1.0 / proj[5]));
     }
@@ -131,10 +126,7 @@ final class ScreenProjection {
         tessellator.draw();
     }
 
-    /**
-     * 形 shape の中を塗る（自分の弱点の形）。RING は輪の部分だけ塗る。大きさは弱点の半径に合わせる
-     * （ブロックの弱点の WeakSpotRenderer と同じ比率）。
-     */
+    /** 大きさは、ブロックの弱点の WeakSpotRenderer と同じ比率。 */
     static void fillShape(double x, double y, double radius, MarkerShape shape, float[] rgb, float a) {
         if (shape == MarkerShape.CIRCLE) {
             fill(x, y, radius, rgb, a);
@@ -166,7 +158,6 @@ final class ScreenProjection {
         tessellator.draw();
     }
 
-    /** 形 shape の輪郭。 */
     static void outlineShape(double x, double y, double radius, MarkerShape shape, float[] rgb, float a) {
         if (shape == MarkerShape.CIRCLE) {
             outline(x, y, radius, rgb, a);
@@ -185,15 +176,13 @@ final class ScreenProjection {
         tessellator.draw();
     }
 
-    /** rgb から、円・輪・中心の色 {disk, ring, center}（中心ほど白に寄せる）。 */
+    /** {disk, ring, center} を返す（中心ほど白に寄せる）。 */
     static float[][] lookOf(int rgb) {
         return new float[][] {MarkerColor.towardWhite(rgb, 0), MarkerColor.towardWhite(rgb, 0.5F),
                 MarkerColor.towardWhite(rgb, 0.8F)};
     }
 
-    /**
-     * 画面上の弱点のマーカー（塗り・輪郭・形によっては中心の点。照準のまわり・釣り・画面のマーカーが使う）。look は {disk, ring, center}。
-     */
+    /** look は {disk, ring, center}。 */
     static void drawMarker(double x, double y, double radius, MarkerShape shape, float[][] look, float diskAlpha,
                            float outlineAlpha) {
         fillShape(x, y, radius, shape, look[0], diskAlpha);
@@ -203,13 +192,13 @@ final class ScreenProjection {
         }
     }
 
-    /** 残像（薄い形と輪郭）。a は残像の濃さ（0〜1）。 */
+    /** a は 0〜1。 */
     static void drawAfterimage(double x, double y, double radius, MarkerShape shape, float[][] look, float a) {
         fillShape(x, y, radius, shape, look[0], 0.35F * a);
         outlineShape(x, y, radius, shape, look[1], 0.5F * a);
     }
 
-    /** 動いた直後に先頭を白く光らせる（head は 0〜1）。 */
+    /** head は 0〜1。 */
     static void drawHeadHighlight(double x, double y, double radius, MarkerShape shape, double head) {
         if (head > 0) {
             fillShape(x, y, radius, shape, new float[] {1, 1, 1}, (float) (0.5 * head));
@@ -227,14 +216,11 @@ final class ScreenProjection {
         tessellator.draw();
     }
 
-    /** 矢印の大きさと、画面の中心からの距離（画面の短い辺に対する比率）。 */
+    /** 距離は、画面の短い辺に対する比率。 */
     private static final double ARROW_SIZE = 7;
     private static final double ARROW_RADIUS = 0.36;
 
-    /**
-     * 画面の中心から (dx, dy)（度。右・下が正）の方向に、画面の端寄りの三角を描く（色 c、縁 edge）。弱点が画面にないときの
-     * 方向の矢印（的当てと落下の弱点）。beginOverlay と endOverlay の間で呼ぶ。
-     */
+    /** dx, dy は度（右・下が正）。beginOverlay と endOverlay の間で呼ぶ。 */
     static void edgeArrow(ScaledResolution res, double dx, double dy, float[] c, float[] edge) {
         double len = Math.hypot(dx, dy);
         if (len < 1e-6) {

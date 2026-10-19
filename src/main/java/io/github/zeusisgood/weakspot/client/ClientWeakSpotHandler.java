@@ -29,14 +29,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * クライアント側の弱点処理。弱点の位置は自分のクライアントだけが持ち、他プレイヤーとは共有しない。
- * 左クリックの長押し（採掘）と、右クリックの押しっぱなし（作物・苗木、機械、動物、収穫）の弱点を扱う
- * （近接は MeleeSpot）。
- * 弱点は一度に1つだけ。
- *
- * ヒット判定は毎フレーム行う（素早く照準を動かしたときに tick 単位だと取りこぼすため）。
- * 採掘のブーストは MiningBoost、共通のヒット処理（連続ヒット・間隔）は OwnHits、足元・面のバーは OwnSpotBars。
- */
+* 採掘と右クリックの弱点（作物・苗木、機械、動物、収穫）。弱点の位置は自分のクライアントだけが持ち、一度に 1 つだけ。
+* ヒット判定は毎フレーム行う（素早く照準を動かしたときに、tick 単位だと取りこぼすため）。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ClientWeakSpotHandler {
 
@@ -45,7 +40,7 @@ public final class ClientWeakSpotHandler {
     /** ClientTickEvent の START で増える。PlayerControllerMP の進捗計算はその後に走る。 */
     static long clientTick;
     static WeakSpot spot;
-    /** 今のフレームの partialTicks（ヒットした瞬間を、フレームの途中の値まで含めてコンボの表示に渡す）。 */
+    /** ヒットした瞬間を、フレームの途中の値まで含めてコンボの表示に渡すため。 */
     static float framePartialTicks;
 
     /** 死亡・ディメンション移動（どちらもプレイヤーが作り直される）を見分けるため。 */
@@ -67,7 +62,6 @@ public final class ClientWeakSpotHandler {
             return;
         }
         if (mc.player != lastPlayer || mc.player.getHealth() <= 0) {
-            // 死亡したとき、リスポーンやディメンション移動でプレイヤーが作り直されたときは、連続ヒットを最初に戻す
             lastPlayer = mc.player;
             OwnHits.resetStreak();
         }
@@ -94,7 +88,6 @@ public final class ClientWeakSpotHandler {
         WeakSpotRenderer.expireFlashes(clientTick);
     }
 
-    /** 弱点を出したブロックがなくなった（壊れた、育ちきった、など）。 */
     private static boolean isGone(World world, WeakSpot spot) {
         if (spot.kind == HitKind.ANIMAL) {
             return spot.entity == null || spot.entity.isDead;
@@ -135,21 +128,18 @@ public final class ClientWeakSpotHandler {
             }
             animal = OwnSpotBars.animalProgress();
             if (spot != null && spot.entity != null) {
-                // 動物・敵の弱点は、描く時点の位置に合わせる（当たり判定は updateAim で、その tick の位置に合わせた）
+                // 当たり判定は updateAim で、その tick の位置に合わせた
                 spot.follow(WeakSpot.renderBox(spot.entity, event.getPartialTicks()));
             }
         } else {
-            // 一時オフ。J を押した直後のフレームでも、自分の弱点を出さない
+            // J を押した直後のフレームでも、自分の弱点を出さない
             stopOwnWeakSpots();
         }
         WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.client.markers.weakSpotsEnabled && OwnSpotBars.machineBar(mc),
                 clientTick, event.getPartialTicks());
     }
 
-    /**
-     * 弱点の一時オフ（HOME キー）の間、自分の弱点を出さず、ヒットも起こさない。
-     * 出ていた弱点は消す（自分のマークの送信は、弱点が null になると「消えた」を送る）。ブーストも止める。
-     */
+    /** 自分のマークの送信は、弱点が null になると「消えた」を送る。 */
     static void stopOwnWeakSpots() {
         spot = null;
         MiningBoost.clear();
@@ -188,7 +178,7 @@ public final class ClientWeakSpotHandler {
         }
     }
 
-    /** 右クリックを押しっぱなしにしているか（バニラが右クリックを繰り返す条件と同じ）。 */
+    /** バニラが右クリックを繰り返す条件と同じ。 */
     private static boolean isHoldingUse(Minecraft mc) {
         return mc.currentScreen == null && mc.gameSettings.keyBindUseItem.isKeyDown() && !mc.player.isHandActive();
     }
@@ -215,11 +205,9 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 掘る前の採掘の弱点。照準が合ったブロックに薄く出し、掘る前に 1 回だけ当てられる。
-     * 当たるのは左クリックを押している間だけ（照準を合わせるだけで当たると、ブロックを交互に見るだけで
-     * ヒット音とコンボの表示が増え続けるため）。当てたら弱点は動き、掘り始めるまで当たらない。
-     * ヒットはサーバーで予約され、掘り始めた瞬間に確定する。
-     */
+    * 当たるのは左クリックを押している間だけ（照準を合わせるだけで当たると、ブロックを交互に見るだけで
+    * ヒット音とコンボの表示が増え続けるため）。
+    */
     private static void aimPreDig(Minecraft mc, RayTraceResult target) {
         BlockPos pos = target.getBlockPos();
         IBlockState state = mc.world.getBlockState(pos);
@@ -242,11 +230,6 @@ public final class ClientWeakSpotHandler {
         }
     }
 
-    /**
-     * 右クリックの弱点。植物は一番大きい面（多くは上面。サトウキビなどは側面。1マス全体のブロックは照準の面）に、
-     * 機械は狙っている面に出す。
-     * 照準がその面に当たっているときだけヒットにする。
-     */
     private static void aimRightClick(Minecraft mc, RayTraceResult target) {
         BlockPos pos = target.getBlockPos();
         SyncedSettings settings = ClientSettings.get();
@@ -274,11 +257,9 @@ public final class ClientWeakSpotHandler {
     }
 
     /**
-     * 動物の弱点。素手（しゃがみが要る動物ではしゃがみ+素手）で右クリックを押しっぱなしにして動物に照準を合わせている間、
-     * サーバーに状態を問い合わせ、動いているタイマーがあるという返事のときだけ、照準が当たっている面に出す。
-     * 弱点の面は、その面がプレイヤーから見えている間は変えない。見えなくなったとき（回り込んだとき）と、消えたあとの
-     * 出し直しで、照準が当たっている面に選び直す。
-     */
+    * サーバーに問い合わせ、動いているタイマーがあるという返事のときだけ出す。
+    * 弱点の面は、その面がプレイヤーから見えている間は変えない（回り込んだら選び直す）。
+    */
     private static void aimAnimal(Minecraft mc, RayTraceResult target) {
         Entity entity = target.entityHit;
         SyncedSettings settings = ClientSettings.get();
@@ -307,10 +288,7 @@ public final class ClientWeakSpotHandler {
         }
     }
 
-    /**
-     * 成長の弱点を出す面。同じ大きさの側面が複数あるとき（サトウキビなど）は、今の弱点の面が見えている間は変えない
-     * （照準が隣の側面へ移ってもちらつかない）。見えなくなったとき（回り込んだとき）や出し直すときに選び直す。
-     */
+    /** 同じ大きさの側面が複数あるとき（サトウキビなど）は、今の弱点の面が見えている間は変えない（照準が隣の側面へ移ってもちらつかない）。 */
     private static EnumFacing growthFace(Minecraft mc, BlockPos pos, AxisAlignedBB box, EnumFacing aimed) {
         Vec3d eye = mc.player.getPositionEyes(1.0F);
         EnumFacing keep = spot != null && (spot.kind == HitKind.GROWTH || spot.kind == HitKind.HARVEST)
@@ -319,7 +297,6 @@ public final class ClientWeakSpotHandler {
         return WeakSpot.growthFace(box, eye, aimed, keep);
     }
 
-    /** 当たり判定の箱が、そのマス全体か。 */
     private static boolean isFullCube(AxisAlignedBB box, BlockPos pos) {
         double eps = 1e-6;
         return Math.abs(box.minX - pos.getX()) < eps && Math.abs(box.minY - pos.getY()) < eps
@@ -327,17 +304,17 @@ public final class ClientWeakSpotHandler {
                 && Math.abs(box.maxY - pos.getY() - 1) < eps && Math.abs(box.maxZ - pos.getZ() - 1) < eps;
     }
 
-    /** 機械の弱点が出ていて、このフレームで照準が合っているか（コンボの「機械 ×n」の表示）。 */
+    /** このフレームで照準が合っていることも見る。 */
     static boolean machineSpotActive() {
         return blockSpotActive(HitKind.MACHINE);
     }
 
-    /** その種類（採掘・機械・収穫など）の弱点が出ていて、このフレームで照準が合っているか（コンボの種類の表示）。 */
+    /** このフレームで照準が合っていることも見る。 */
     static boolean blockSpotActive(HitKind kind) {
         return spot != null && spot.kind == kind && spot.lastActiveTick == clientTick;
     }
 
-    /** 機械の弱点がディスペンサー・ドロッパーに出ていて、このフレームで照準が合っているか（「発射 ×n」の表示）。 */
+    /** このフレームで照準が合っていることも見る。 */
     static boolean dispenserSpotActive() {
         return machineSpotActive() && Minecraft.getMinecraft().world != null
                 && Minecraft.getMinecraft().world.getBlockState(spot.pos).getBlock() instanceof BlockDispenser;
@@ -365,7 +342,7 @@ public final class ClientWeakSpotHandler {
             WeakSpotMod.network.sendToServer(new HitMessage(kind, spot.pos, hitStreak));
         }
 
-        // 同じ面の中の移動なので、演出がオンならマーカーを動かす（当たり判定は移動先ですぐに行う）
+        // 当たり判定は移動先ですぐに行う
         spot.relocate(RANDOM, WeakSpotConfig.client.markers.weakSpotTrailEnabled, Minecraft.getSystemTime());
     }
 

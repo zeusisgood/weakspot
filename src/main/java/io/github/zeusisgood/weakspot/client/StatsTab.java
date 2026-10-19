@@ -10,17 +10,13 @@ import java.util.function.Function;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.resources.I18n;
 
-/**
- * 統計画面の「統計」タブ。サーバーから届いた「今回」と「累計」を並べて表示するだけ。
- * 入りきらない行はホイールで送る。累計のリセットは 2 回押しで確定する。
- */
+/** サーバーから届いた「今回」と「累計」を並べて表示するだけ。 */
 final class StatsTab extends StatsScreenTab {
 
     private static final int BUTTON_RESET = 0;
-    /** 統計の 1 行の高さ。 */
     private static final int ROW_HEIGHT = 10;
 
-    /** サーバーから最後に届いた統計。届くまでは null。 */
+    /** 届くまでは null。 */
     private static MiningStats session;
     private static MiningStats total;
 
@@ -32,13 +28,13 @@ final class StatsTab extends StatsScreenTab {
         super(screen);
     }
 
-    /** サーバーから統計が届いた（クライアントのスレッドで呼ぶ）。 */
+    /** クライアントのスレッドで呼ぶ。 */
     static void receive(MiningStats newSession, MiningStats newTotal) {
         session = newSession;
         total = newTotal;
     }
 
-    /** 画面を開くとき。前のワールドの数字を出さないように、届くまでは空欄にする。 */
+    /** 前のワールドの数字を出さないように、届くまでは空欄にする。 */
     static void forget() {
         session = null;
         total = null;
@@ -70,7 +66,7 @@ final class StatsTab extends StatsScreenTab {
         return true;
     }
 
-    /** 累計のリセットは2回押しで確定する（誤操作防止）。 */
+    /** 誤操作防止のため、2 回押しで確定する。 */
     private void setConfirmingReset(boolean confirming) {
         confirmingReset = confirming;
         resetButton.displayString = I18n.format(confirming ? "weakspot.stats.reset.confirm" : "weakspot.stats.reset");
@@ -119,7 +115,7 @@ final class StatsTab extends StatsScreenTab {
         screen.drawScrollHint(scroll > 0, scroll + fit < rows.size());
     }
 
-    /** 種類ごとのヒット数の翻訳キー（近接はクリティカル数）。 */
+    /** 近接はクリティカル数。 */
     private static String statsKey(HitKind kind) {
         return kind == HitKind.MELEE ? "weakspot.stats.critHits" : "weakspot.stats." + kind.key() + "Hits";
     }

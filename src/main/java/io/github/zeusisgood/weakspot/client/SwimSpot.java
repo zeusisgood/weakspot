@@ -13,15 +13,14 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * 泳ぎの弱点（自分だけ）。水の中で動いている間、照準の上下（10〜20 度）に深い青の弱点を出し、照準を合わせるだけで
- * ヒットにする。当てると、視線の方向に小さく突進し、しばらく泳ぐ速さを上げる。1.12.2 の移動速度の値は水中の移動に効かない
- * ので、はしごと同じく、その tick の移動の (倍率 − 1) 倍をクライアントで足す（上下も含む）。サーバーは検証だけ（MoveHits）。
- */
+* 1.12.2 の移動速度の値は水中の移動に効かないので、はしごと同じく、その tick の移動の (倍率 − 1) 倍をクライアントで足す
+* （上下も含む）。サーバーは検証だけ（MoveHits）。
+*/
 final class SwimSpot extends AimSpotKind {
 
-    /** 泳いでいるとみなす、1 tick の移動（ブロック。上下も含む）。 */
+    /** ブロック。上下も含む。 */
     private static final double MOVING_SPEED = 0.03;
-    /** 突進の距離（ブロック）から足す速さへの換算（水中の減速で止まるまでに、およそ距離 ÷ 0.2 進む）。 */
+    /** 水中の減速で止まるまでに、およそ距離 ÷ 0.2 進む。 */
     private static final double DASH_MOTION_PER_BLOCK = 0.2;
     private static final int BUBBLES = 12;
 
@@ -37,7 +36,7 @@ final class SwimSpot extends AimSpotKind {
         boost.clear();
     }
 
-    /** 泳いでいるか（弱点を出す条件と、速さを足す条件）。乗り物・はしご・エリトラ・溶岩は、それぞれの弱点に任せる。 */
+    /** 乗り物・はしご・エリトラ・溶岩は、それぞれの弱点に任せる。 */
     private static boolean swimming(EntityPlayerSP player) {
         if (!player.isInWater() || player.isInLava() || player.isRiding() || player.isOnLadder()
                 || player.isElytraFlying()) {
@@ -61,7 +60,6 @@ final class SwimSpot extends AimSpotKind {
 
     @Override
     int placement(EntityPlayerSP player) {
-        // 上下だけ（ダッシュ・はしごと同じ）
         return HudSpot.VERTICAL;
     }
 
@@ -84,10 +82,7 @@ final class SwimSpot extends AimSpotKind {
                 SoundCategory.PLAYERS, 0.4F, 1.4F, false);
     }
 
-    /**
-     * 加速中は、その tick に泳いだ分の (倍率 − 1) 倍を足す（上下も含む。1 tick に足す量に上限は付けない。ユーザーの方針）。
-     * 乗り物に乗ったら、加速の残りを止める（乗っている間に体へ移動を足さないように）。
-     */
+    /** 1 tick に足す量に上限は付けない（速さの上限は付けない方針）。乗り物に乗ったら、加速の残りを止める（乗っている間に体へ移動を足さないように）。 */
     @Override
     void tickEnd(Minecraft mc) {
         EntityPlayerSP player = mc.player;
@@ -116,7 +111,7 @@ final class SwimSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        HudSpot.gauge(mc, boost.remaining(ClientWeakSpotHandler.clientTick, partialTicks),
+        HudSpot.gauge(mc, boost.remainingFraction(ClientWeakSpotHandler.clientTick, partialTicks),
                 MarkerLook.color(HitKind.SWIM), true);
     }
 }

@@ -7,10 +7,7 @@ import io.github.zeusisgood.weakspot.server.MachineStates;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.RayTraceResult;
 
-/**
- * 自分のブロック・動物の弱点に付くバーの値: 採掘の耐久バー、機械の進み具合、
- * 成長バー、動物の足元のバー。描くのは WeakSpotRenderer。
- */
+/** 描くのは WeakSpotRenderer。 */
 final class OwnSpotBars {
 
     private OwnSpotBars() {
@@ -20,11 +17,7 @@ final class OwnSpotBars {
         return ClientWeakSpotHandler.spot;
     }
 
-    /**
-     * 耐久バーに出す、掘っているブロックの残りの耐久（0〜1）。出さないときは -1。
-     * 採掘の弱点がこのフレームの照準の面に出ていて（弱点が出るブロックで、クリエイティブでない）、
-     * そのブロックを今掘っているときだけ出す。長押しをやめた・壊れたときは、掘っていない扱いになってすぐに消える。
-     */
+    /** 0〜1。出さないときは -1。長押しをやめた・壊れたときは、掘っていない扱いになってすぐに消える。 */
     static double healthRemaining(Minecraft mc, float partialTicks) {
         RayTraceResult target = mc.objectMouseOver;
         if (spot() == null || spot().lastActiveTick != ClientWeakSpotHandler.clientTick || mc.player.capabilities.isCreativeMode
@@ -36,10 +29,7 @@ final class OwnSpotBars {
         return progress < 0 ? -1 : BlockHealthBar.remaining(progress);
     }
 
-    /**
-     * 機械の進み具合のバーを出すか。機械の弱点がかまど・醸造台・スポナーに出ていて、このフレームで照準が
-     * 合っているとき。出すときは、サーバーに値を問い合わせる（間隔があいていなければ送らない）。
-     */
+    /** 出すときは、サーバーに値を問い合わせる（間隔があいていなければ送らない）。 */
     static boolean machineBar(Minecraft mc) {
         if (!WeakSpotConfig.client.hud.machineBarEnabled || !ClientWeakSpotHandler.machineSpotActive()
                 || !MachineStates.hasBar(mc.world.getTileEntity(spot().pos))) {
@@ -49,7 +39,7 @@ final class OwnSpotBars {
         return true;
     }
 
-    /** 成長バーに出す作物の進み具合（0〜1）。成長の弱点が今出ているときだけ。出さないときは -1。 */
+    /** 0〜1。出さないときは -1。 */
     static double growthProgress(Minecraft mc) {
         if (spot() == null || spot().kind != HitKind.GROWTH || spot().lastActiveTick != ClientWeakSpotHandler.clientTick) {
             return -1;
@@ -57,7 +47,7 @@ final class OwnSpotBars {
         return GrowthBar.progress(mc.world, spot().pos);
     }
 
-    /** 動物の足元のバーに出す進み具合（0〜1）。動物の弱点が今出ていて、サーバーの返事があるときだけ。出さないときは -1。 */
+    /** 0〜1。出さないときは -1。 */
     static double animalProgress() {
         if (spot() == null || spot().kind != HitKind.ANIMAL || spot().lastActiveTick != ClientWeakSpotHandler.clientTick) {
             return -1;

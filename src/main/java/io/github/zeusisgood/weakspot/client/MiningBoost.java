@@ -22,31 +22,25 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 自分の採掘のブースト（クライアント）。PlayerControllerMP は tick ごとに
- * 進捗を積むので、ヒットの次の tick から boostDurationTicks の間だけ、破壊速度に倍率（コンボの掛け数つき）を掛ける。
- * サーバーは瞬間判定なので別の計算（server/ServerBoostTracker・BoostMath）。
- *
- * 掘る前のヒットを覚えておき、同じブロックを掘り始めたらブーストをかける。当てたブロックを壊したら、
- * 次を掘り始めるまでの待ち（PlayerControllerMP の非公開の blockHitDelay、5 tick）を 0 にする。
- *
- * ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
- * クリックし直したブロックがクライアントだけでその場で壊れ、ゴーストブロックになる。
- */
+* PlayerControllerMP は tick ごとに進捗を積むので、クライアントはヒットの次の tick から boostDurationTicks の間だけ、
+* 破壊速度に倍率を掛ける。サーバーは瞬間判定なので別の計算（ServerBoostTracker・BoostMath）。
+*
+* ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
+* クリックし直したブロックがクライアントだけでその場で壊れ、ゴーストブロックになる。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class MiningBoost {
 
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
-    /** 最後の採掘ヒットのコンボの掛け数（サーバーが古ければ 1）。 */
+    /** サーバーが古ければ 1。 */
     private static double boostFactor = 1;
-    /** 瞬間破壊の判定中は、自分のブーストを掛けない。 */
     private static boolean suppressBoost;
 
     private static final Field HIT_DELAY = Reflect.field(PlayerControllerMP.class,
             "skipping the wait after breaking a block that was hit", "blockHitDelay", "field_78781_i");
-    /** 当てたブロック。壊したら、次を掘り始めるまでの待ちを 0 にする。 */
+    /** 壊したら、次を掘り始めるまでの待ち（blockHitDelay）を 0 にする。 */
     private static BlockPos hitBlock;
-    /** 掘る前のヒット。掘り始めたらブーストをかける。 */
     private static BlockPos preHitPos;
     private static long preHitTick;
     private static int preHitStreak;
@@ -54,7 +48,7 @@ final class MiningBoost {
     private MiningBoost() {
     }
 
-    /** 採掘の弱点に当てた（streak はヒット後の連続ヒット数）。 */
+    /** streak はヒット後の数。 */
     static void onHit(BlockPos pos, int streak) {
         boostHitTick = ClientWeakSpotHandler.clientTick;
         boostPos = pos;
@@ -62,7 +56,6 @@ final class MiningBoost {
         hitBlock = pos;
     }
 
-    /** 掘る前の採掘の弱点に当てた。 */
     static void onPreHit(BlockPos pos, int streak) {
         preHitPos = pos;
         preHitTick = ClientWeakSpotHandler.clientTick;
@@ -70,12 +63,12 @@ final class MiningBoost {
         hitBlock = pos;
     }
 
-    /** そのブロックに、掘る前のヒットがまだ残っているか（掘る前に当てられるのは 1 回まで）。 */
+    /** 掘る前に当てられるのは 1 回まで。 */
     static boolean hasPreHit(BlockPos pos) {
         return pos.equals(preHitPos) && ClientWeakSpotHandler.clientTick - preHitTick <= BoostMath.PRE_DIG_TICKS;
     }
 
-    /** そのブロックを掘っている（フレームごと）。掘る前に当てていれば、掘り始めたここからブーストをかける。 */
+    /** フレームごとに呼ぶ。 */
     static void onDigging(BlockPos pos) {
         if (preHitPos == null || !preHitPos.equals(pos)) {
             return;
@@ -86,16 +79,13 @@ final class MiningBoost {
         preHitPos = null;
     }
 
-    /** 掘る前の弱点を出せるブロックか。1 tick で壊れるブロックも出す。クリエイティブは一瞬で壊れるので出さない。 */
+    /** 1 tick で壊れるブロックも出す。クリエイティブは一瞬で壊れるので出さない。 */
     static boolean isPreDigEligible(World world, EntityPlayerSP player, BlockPos pos, IBlockState state) {
         return !player.capabilities.isCreativeMode && !state.getBlock().isAir(state, world, pos)
                 && state.getBlockHardness(world, pos) >= 0;
     }
 
-    /**
-     * 当てたブロックが壊れたら、次を掘り始めるまでの待ちを 0 にする。バニラは壊した tick の進捗の計算の中で
-     * 待ちを 5 にするので、その tick の END で戻す。
-     */
+    /** バニラは壊した tick の進捗の計算の中で待ちを 5 にするので、その tick の END で戻す。 */
     @SubscribeEvent
     public static void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase != TickEvent.Phase.END || hitBlock == null || HIT_DELAY == null) {
@@ -120,9 +110,9 @@ final class MiningBoost {
     }
 
     /**
-     * ブロックをクリックした（PlayerControllerMP.clickBlock。その場で壊れるかの判定より先に来る）。サーバーと同じく、
-     * ブーストを捨てる。掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。
-     */
+    * PlayerControllerMP.clickBlock から来る（その場で壊れるかの判定より先）。
+    * 掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。
+    */
     @SubscribeEvent
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         if (!event.getWorld().isRemote || event.getEntityPlayer() != Minecraft.getMinecraft().player) {
@@ -133,7 +123,6 @@ final class MiningBoost {
         boostFactor = 1;
     }
 
-    /** 一時オフ・ワールドを出たとき。 */
     static void clear() {
         boostPos = null;
         boostHitTick = Long.MIN_VALUE / 2;
@@ -142,7 +131,7 @@ final class MiningBoost {
         preHitPos = null;
     }
 
-    /** 壊せないブロック（硬度が負）と、今の破壊速度で1tick以内に壊れるブロックは対象外。 */
+    /** 壊せないブロック（硬度が負）と、今の破壊速度で 1 tick 以内に壊れるブロックは対象外。 */
     static boolean isEligible(World world, EntityPlayerSP player, BlockPos pos, IBlockState state) {
         if (state.getBlock().isAir(state, world, pos) || state.getBlockHardness(world, pos) < 0) {
             return false;
@@ -155,7 +144,6 @@ final class MiningBoost {
         }
     }
 
-    /** ヒット後の次の tick から boostDurationTicks 回分の進捗計算に倍率を掛ける。 */
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         if (!event.getEntityPlayer().world.isRemote || suppressBoost || !KindSwitches.isEnabled(HitKind.MINING)) {
@@ -172,7 +160,7 @@ final class MiningBoost {
         }
     }
 
-    /** 採掘のコンボの掛け数（サーバーの設定 miningComboBonus でオフにできる）。 */
+    /** サーバーの設定 miningComboBonus でオフにできる。 */
     static double comboFactor(int combo) {
         return ClientSettings.get().miningComboBonus ? ComboFactor.factor(combo) : 1;
     }

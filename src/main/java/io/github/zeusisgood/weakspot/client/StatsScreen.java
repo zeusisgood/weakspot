@@ -13,16 +13,11 @@ import net.minecraft.client.gui.GuiScreenBook;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Mouse;
 
-/**
- * 統計画面（K キー。題は「弱点破壊」）の共通の枠: 題、タブの切り替え、「ガイド」「設定画面を開く」「完了」、
- * ホイールの送り、説明の吹き出し。タブの中身は、それぞれのクラス:
- * 「統計」StatsTab、「サウンド」SoundTab、「弱点マーカー」KindsTab、「的当て」TargetTab。
- */
+/** 統計画面（K キー）の共通の枠。タブの中身は StatsScreenTab を継いだクラス。 */
 final class StatsScreen extends GuiScreen {
 
     private static final int BUTTON_DONE = 1;
     private static final int BUTTON_CONFIG = 2;
-    /** ガイドの本を開く。どのタブでも出す。 */
     private static final int BUTTON_GUIDE = 3;
     private static final int BUTTON_TAB_STATS = 10;
     private static final int BUTTON_TAB_SOUND = 11;
@@ -33,7 +28,7 @@ final class StatsScreen extends GuiScreen {
     private static final int TAB_KINDS = 2;
     private static final int TAB_TARGET = 3;
 
-    /** 最後に開いていたタブ（画面を開き直しても保つ）。 */
+    /** 画面を開き直しても保つ。 */
     private static int tab = TAB_STATS;
 
     private final StatsScreenTab[] tabs = {new StatsTab(this), new SoundTab(this), new KindsTab(this),
@@ -41,23 +36,23 @@ final class StatsScreen extends GuiScreen {
     private GuiButton[] tabButtons;
     private int top;
     private int bottom;
-    /** 今のフレームの、マウスが乗っている行の説明（統計タブ）。 */
+    /** 統計タブで、マウスが乗っている行の説明。 */
     private String tooltip;
     private int mouseX;
     private int mouseY;
 
-    /** サーバーから統計が届いた（クライアントのスレッドで呼ぶ）。 */
+    /** クライアントのスレッドで呼ぶ。 */
     static void receive(MiningStats newSession, MiningStats newTotal) {
         StatsTab.receive(newSession, newTotal);
     }
 
-    /** 画面を開くとき。前のワールドの数字を出さないように、届くまでは空欄にする。 */
+    /** 前のワールドの数字を出さないように、届くまでは空欄にする。 */
     static void open(Minecraft mc) {
         StatsTab.forget();
         mc.displayGuiScreen(new StatsScreen());
     }
 
-    /** initGui は設定画面から戻ったときにも呼ばれるので、そのたびに統計をもらい直し、設定の値も読み直す。 */
+    /** 設定画面から戻ったときにも呼ばれるので、そのたびに統計をもらい直し、設定の値も読み直す。 */
     @Override
     public void initGui() {
         WeakSpotMod.network.sendToServer(new StatsRequestMessage(false));
@@ -150,7 +145,6 @@ final class StatsScreen extends GuiScreen {
         }
     }
 
-    /** 行が入りきらないタブは、ホイールで送る。 */
     @Override
     public void handleMouseInput() throws IOException {
         super.handleMouseInput();
@@ -179,13 +173,11 @@ final class StatsScreen extends GuiScreen {
         }
     }
 
-    // タブが使う、画面の共通の部品
-
     int top() {
         return top;
     }
 
-    /** 下のボタンの行の y（タブの行はこれより上に収める）。 */
+    /** タブの行はこれより上に収める。 */
     int bottom() {
         return bottom;
     }
@@ -210,7 +202,6 @@ final class StatsScreen extends GuiScreen {
         drawString(fontRenderer, text, right - fontRenderer.getStringWidth(text), y, color);
     }
 
-    /** まだ上・下に行があるとき、右端に ▲ ▼ を出す（ホイールで送れる）。 */
     void drawScrollHint(boolean up, boolean down) {
         int x = width / 2 + 158;
         if (up) {

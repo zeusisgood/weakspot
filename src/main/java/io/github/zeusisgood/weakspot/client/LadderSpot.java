@@ -9,14 +9,12 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.MoverType;
 
 /**
- * はしごの弱点（自分だけ）。はしご・ツタ（バニラの isOnLadder に当たるもの）を登り降りしている間、照準の
- * 真上か真下に木の茶色の弱点を出し、照準を合わせるだけでヒットにする（左右に向きを変えると、はしごから外れるため）。
- * 速さはクライアントで足す（プレイヤーの動きはクライアントが決める。ボートと同じ方式）。サーバーは検証だけ（MoveHits）。
- * AimSpotKind（AimSpots が回す）。
- */
+* 照準の真上か真下だけに出す（左右に向きを変えると、はしごから外れるため）。速さはクライアントで足す
+* （プレイヤーの動きはクライアントが決める）。サーバーは検証だけ（MoveHits）。
+*/
 final class LadderSpot extends AimSpotKind {
 
-    /** 登り降りしているとみなす、1 tick の縦の移動（ブロック）。 */
+    /** 1 tick の縦の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
 
     private final TimedBoost boost = new TimedBoost();
@@ -31,7 +29,6 @@ final class LadderSpot extends AimSpotKind {
         boost.clear();
     }
 
-    /** はしごを登り降りしているか（弱点を出す条件と、速さを足す条件）。 */
     private static boolean climbing(EntityPlayerSP player) {
         return player.isOnLadder() && !player.isRiding() && !player.isElytraFlying()
                 && Math.abs(player.posY - player.prevPosY) >= MOVING_SPEED;
@@ -52,17 +49,13 @@ final class LadderSpot extends AimSpotKind {
         return HudSpot.VERTICAL;
     }
 
-
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
         boost.start(TimedBoostMath.multiplier(settings.ladderBoostMultiplier, settings.ladderBoostMaxMultiplier,
                 streak), settings.ladderBoostDurationTicks, ClientWeakSpotHandler.clientTick);
     }
 
-    /**
-     * 加速中は、その tick に登り降りした分の (倍率 − 1) 倍を、縦に足す。1 tick に足す量に上限は付けない
-     * （ユーザーの方針）。はしごの上では落下の距離を数えない（バニラと同じ）。
-     */
+    /** 1 tick に足す量に上限は付けない（速さの上限は付けない方針）。はしごの上では落下の距離を数えない（バニラと同じ）。 */
     @Override
     void tickEnd(Minecraft mc) {
         EntityPlayerSP player = mc.player;
@@ -87,7 +80,7 @@ final class LadderSpot extends AimSpotKind {
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
-        HudSpot.gauge(mc, boost.remaining(ClientWeakSpotHandler.clientTick, partialTicks),
+        HudSpot.gauge(mc, boost.remainingFraction(ClientWeakSpotHandler.clientTick, partialTicks),
                 MarkerLook.color(HitKind.LADDER), true);
     }
 }

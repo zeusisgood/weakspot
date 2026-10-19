@@ -19,12 +19,10 @@ import net.minecraft.init.SoundEvents;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
 /**
- * 統計画面の「サウンド」タブ。ヒット音の楽器と音量、音階を変えて試聴する。
- * 自分の音とほかの人の音を枠で分け、1 行目に音のプリセットのボタン「プリセット: 標準」（OptiFine の
- * シェーダーのプロファイルと同じ形。左クリックで次、右クリックか Shift + 左クリックで前）。プリセット名は今の設定から求め
- * （どれにも一致しなければ「カスタム」）、選んだものは保存しない。マイプリセットの読み込み・保存は MyPresetsScreen。
- * クライアントだけで完結し、値は weakspot.cfg にそのまま保存する（Forge の設定画面と同じ値になる）。
- */
+* プリセットのボタンは OptiFine のシェーダーのプロファイルと同じ形（左クリックで次、右クリックか Shift + 左クリックで前）。
+* プリセット名は今の設定から求め（どれにも一致しなければ「カスタム」）、選んだものは保存しない。
+* 値は weakspot.cfg にそのまま保存する（Forge の設定画面と同じ値になる）。
+*/
 final class SoundTab extends StatsScreenTab {
 
     private static final int BUTTON_MY_SOUND = 20;
@@ -33,32 +31,25 @@ final class SoundTab extends StatsScreenTab {
     private static final int BUTTON_OTHERS_SOUND = 30;
     private static final int BUTTON_OTHERS_VOLUME = 31;
     private static final int BUTTON_OTHERS_PREVIEW = 32;
-    /** 自分のヒット音に、コンボで音を重ねるか。 */
     private static final int BUTTON_CHORD = 40;
-    /** 音階の動き・種類・音域。 */
     private static final int BUTTON_SCALE_DIRECTION = 41;
     private static final int BUTTON_SCALE_TYPE = 42;
     private static final int BUTTON_SCALE_OCTAVES = 43;
-    /** プリセットと、マイプリセットの画面を開く。 */
     private static final int BUTTON_PRESET = 50;
     private static final int BUTTON_MY_PRESETS = 51;
-    /** 細かい設定をランダムに。 */
     private static final int BUTTON_RANDOM = 52;
     private static final int RANDOM_WIDTH = 60;
-    /** 試聴で音階を鳴らす間隔（tick）。 */
     private static final int PREVIEW_TICKS_PER_NOTE = 4;
-    /** 音階の設定を切り替えたときの短い試聴（音の数と間隔 tick）。往復なら上がって 1 つ下がるまで分かる数。 */
+    /** 往復なら、上がって 1 つ下がるまで分かる数。 */
     private static final int SWITCH_PREVIEW_NOTES = 5;
     private static final int SWITCH_PREVIEW_TICKS = 2;
-    /** 枠（半透明の黒 #000000 と、枠線の灰 #555555）と、見出しの文字（灰 #AAAAAA）。 */
     static final int BOX_FILL = 0x60000000;
     static final int BOX_LINE = 0xFF555555;
     static final int SUBTLE_RGB = 0xAAAAAA;
-    /** 中身の幅の半分（タブのボタンの列と同じ）。 */
+    /** タブのボタンの列と同じ。 */
     private static final int HALF = 154;
-    /** マイプリセットの画面を開くボタンの幅。 */
     private static final int MY_PRESETS_WIDTH = 96;
-    /** 下の説明を出すのに要る、上から下のボタンまでの高さ（小さい画面では出さない）。 */
+    /** 小さい画面では下の説明を出さない。 */
     private static final int NOTE_NEEDS_HEIGHT = 217;
 
     private final List<GuiButton> buttons = new ArrayList<>();
@@ -84,13 +75,11 @@ final class SoundTab extends StatsScreenTab {
         int right = screen.width / 2 + HALF - 4;
         int top = screen.top();
 
-        // 自分のヒット音: 1 行目はプリセットと、マイプリセットの画面
         int y = top + 49;
         preset = add(new GuiButton(BUTTON_PRESET, left, y, right - left - MY_PRESETS_WIDTH - 4, 20, ""));
         myPresets = add(new GuiButton(BUTTON_MY_PRESETS, right - MY_PRESETS_WIDTH, y, MY_PRESETS_WIDTH, 20,
                 I18n.format("weakspot.sound.myPresets")));
 
-        // 「細かい設定」の見出し（draw で描く）と、その右端の [ランダム]
         y += 22;
         random = add(new GuiButton(BUTTON_RANDOM, right - RANDOM_WIDTH, y, RANDOM_WIDTH, 20,
                 I18n.format("weakspot.sound.random")));
@@ -112,7 +101,6 @@ final class SoundTab extends StatsScreenTab {
         scaleOctaves = add(new GuiButton(BUTTON_SCALE_OCTAVES, left, y, half, 20, ""));
         chord = add(new GuiButton(BUTTON_CHORD, right - half, y, half, 20, ""));
 
-        // ほかの人のヒット音
         y = top + 178;
         othersSound = add(new GuiButton(BUTTON_OTHERS_SOUND, left, y, 110, 20, ""));
         add(new VolumeSlider(BUTTON_OTHERS_VOLUME, left + 114, y, WeakSpotConfig.client.sound.othersHitVolume, v -> {
@@ -195,7 +183,7 @@ final class SoundTab extends StatsScreenTab {
         }
     }
 
-    /** プリセットのボタンの右クリックは「前へ」（バニラのボタンは右クリックを拾わないので、ここで受ける）。 */
+    /** バニラのボタンは右クリックを拾わないので、ここで受ける。 */
     @Override
     void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         Minecraft mc = Minecraft.getMinecraft();
@@ -205,9 +193,7 @@ final class SoundTab extends StatsScreenTab {
         }
     }
 
-    /**
-     * 巡る順（最初から入っているもの → 保存してあるマイプリセット。空きは飛ばす）。
-     */
+    /** 最初から入っているもの → 保存してあるマイプリセット（空きは飛ばす）。 */
     private static List<SoundPreset> cycle() {
         List<SoundPreset> list = new ArrayList<>(SoundPreset.BUILT_IN);
         for (int slot = 1; slot <= SoundPreset.MY_SLOTS; slot++) {
@@ -219,7 +205,7 @@ final class SoundTab extends StatsScreenTab {
         return list;
     }
 
-    /** 今の設定と一致する巡る順の位置（最初から入っているものを先に探す。なければ -1 = カスタム）。 */
+    /** 最初から入っているものを先に探す。なければ -1（カスタム）。 */
     private static int matchIndex(List<SoundPreset> cycle) {
         SoundPreset current = SoundPreset.of(WeakSpotConfig.client.sound);
         for (int i = 0; i < cycle.size(); i++) {
@@ -230,7 +216,7 @@ final class SoundTab extends StatsScreenTab {
         return -1;
     }
 
-    /** 次（step = 1）か前（-1）のプリセットにして保存し、短く鳴らす。カスタムからは、次なら最初、前なら最後へ。 */
+    /** step は 1 か -1。カスタムからは、次なら最初、前なら最後へ。 */
     private void choosePreset(int step) {
         List<SoundPreset> cycle = cycle();
         int index = matchIndex(cycle);
@@ -241,19 +227,18 @@ final class SoundTab extends StatsScreenTab {
         updateLabels();
     }
 
-    /** 楽器・和音を変えた: 保存して、表示を直す。 */
     private void onSoundChanged() {
         WeakSpotConfig.save();
         updateLabels();
     }
 
-    /** 音階の設定を切り替えた: 保存して、新しい設定の始めの数音を速めに鳴らす（続けて押したら前の試聴を止める）。 */
+    /** 続けて押したら前の試聴を止める。 */
     private void onScaleChanged() {
         onSoundChanged();
         playSwitchPreview();
     }
 
-    /** 今の設定の始めの数音を速めに鳴らす。往復は、上がりきる手前から鳴らして、折り返しが分かるようにする。 */
+    /** 往復は、上がりきる手前から鳴らして、折り返しが分かるようにする。 */
     static void playSwitchPreview() {
         HitSounds.clear();
         HitScale scale = HitSounds.scale();
@@ -277,7 +262,6 @@ final class SoundTab extends StatsScreenTab {
         scaleOctaves.displayString = I18n.format("weakspot.sound.scaleOctaves", sound.hitScaleOctaves);
     }
 
-    /** 今の設定のプリセット名（最初から入っているもの → マイプリセット n → カスタム）。 */
     private static String currentPresetName() {
         SoundPreset current = SoundPreset.of(WeakSpotConfig.client.sound);
         for (SoundPreset p : SoundPreset.BUILT_IN) {
@@ -303,12 +287,11 @@ final class SoundTab extends StatsScreenTab {
         int left = center - HALF + 4;
         int right = center + HALF - 4;
         int top = screen.top();
-        // 自分の音とほかの人の音の枠（ボタンより先に描くので、ボタンの後ろになる）
+        // ボタンより先に描くので、ボタンの後ろになる
         box(center - HALF, top + 37, center + HALF, top + 163);
         box(center - HALF, top + 167, center + HALF, top + 202);
         screen.drawString(screen.font(), I18n.format("weakspot.sound.mine"), left, top + 39, 0xFFFFFF);
         screen.drawString(screen.font(), I18n.format("weakspot.sound.others"), left, top + 169, 0xFFFFFF);
-        // 「細かい設定」の見出しと細い線
         String fine = I18n.format("weakspot.sound.fineSettings");
         int textY = top + 77;
         screen.drawString(screen.font(), fine, left, textY, SUBTLE_RGB);
@@ -327,7 +310,6 @@ final class SoundTab extends StatsScreenTab {
         } else if (over(myPresets, mx, my)) {
             screen.setTooltip(I18n.format("weakspot.sound.myPresets.tooltip"));
         } else if (over(chord, mx, my)) {
-            // コンボの和音の説明は、和音のボタンにマウスを乗せたとき
             screen.setTooltip(I18n.format("weakspot.sound.comboNote"));
         }
     }
@@ -337,7 +319,6 @@ final class SoundTab extends StatsScreenTab {
                 && my < button.y + button.height;
     }
 
-    /** 薄い枠（半透明の黒と、灰の枠線）。 */
     static void box(int left, int top, int right, int bottom) {
         Gui.drawRect(left, top, right, bottom, BOX_FILL);
         Gui.drawRect(left, top, right, top + 1, BOX_LINE);
@@ -346,7 +327,7 @@ final class SoundTab extends StatsScreenTab {
         Gui.drawRect(right - 1, top, right, bottom, BOX_LINE);
     }
 
-    /** 音量（0〜100%）のスライダー。動かし終えたとき（マウスを離したとき）に、値を保存して1音鳴らす。 */
+    /** 動かし終えたとき（マウスを離したとき）に、値を保存して 1 音鳴らす。 */
     private static final class VolumeSlider extends GuiSlider {
 
         private final DoubleConsumer onRelease;

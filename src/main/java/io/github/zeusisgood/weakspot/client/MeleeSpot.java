@@ -11,19 +11,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
- * 近接の弱点（自分だけ）。剣か斧を持ち、16 ブロック以内に敵がいる間、照準の
- * 左右だけに銀の弱点を出し（走りの弱点の上下と見分けるため）、照準を合わせるだけでヒットにする。当てるたびに
- * 次の攻撃の溜めが増え（MeleeCharge。クライアントもサーバーの返事を待たずに溜める）、照準の下にゲージを出す。
- * 馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。AimSpotKind（AimSpots が回す）。
- */
+* 照準の左右だけに出す（走りの弱点の上下と見分けるため）。馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。
+* クライアントもサーバーの返事を待たずに溜める。
+*/
 final class MeleeSpot extends AimSpotKind {
 
-    /** 敵を探す距離（ブロック）。 */
+    /** ブロック。 */
     private static final double ENEMY_RANGE = 16;
-    /** ゲージ 1 本分の溜め（倍率 ×2）。 */
+    /** 倍率 ×2。 */
     private static final double CHARGE_PER_BAR = 1.0;
 
-    /** 近くに敵がいるか（tick ごとに探し直す）。 */
+    /** tick ごとに探し直す。 */
     private boolean enemyNear;
 
     MeleeSpot() {
@@ -51,7 +49,6 @@ final class MeleeSpot extends AimSpotKind {
     int placement(EntityPlayerSP player) {
         return HudSpot.HORIZONTAL;
     }
-
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {
