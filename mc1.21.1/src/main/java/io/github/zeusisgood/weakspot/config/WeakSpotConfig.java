@@ -161,16 +161,31 @@ public final class WeakSpotConfig {
     }
 
     /** 統計画面などから [クライアント] の値を書き換えた後に呼ぶ。 */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void save() {
+        saveSpec(clientSpec, "client");
+    }
+
+    /**
+     * 設定画面から [サーバー] の値を書き換えた後に呼ぶ（シングルプレイ・LAN のホスト、またはワールドの外）。
+     * この側でサーバーが動いていれば、つないでいる全員へ送り直す。
+     */
+    public static void saveServer() {
+        saveSpec(serverSpec, "server");
+        SettingsSync.resendToAll();
+        warnIfMisconfigured();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void saveSpec(ModConfigSpec spec, String root) {
+        if (!spec.isLoaded()) {
+            return;
+        }
         for (Map.Entry<Setting, ModConfigSpec.ConfigValue<?>> e : VALUES.entrySet()) {
-            if (e.getKey().category.startsWith("client") && clientSpec.isLoaded()) {
+            if (e.getKey().category.startsWith(root)) {
                 ((ModConfigSpec.ConfigValue) e.getValue()).set(e.getKey().toFile());
             }
         }
-        if (clientSpec.isLoaded()) {
-            clientSpec.save();
-        }
+        spec.save();
     }
 
     /** category は設定ファイルのカテゴリ（例: server.mining）。 */
@@ -204,6 +219,15 @@ public final class WeakSpotConfig {
 
         public String tooltipKey() {
             return nameKey() + ".tooltip";
+        }
+
+        /** value はフィールドと同じ型（配列は配列のまま）。保存は WeakSpotConfig.save / saveServer。 */
+        public void set(Object value) {
+            try {
+                field.set(owner, value);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         void setFromFile(Object value) {
