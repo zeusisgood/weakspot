@@ -1,12 +1,12 @@
 # 弱点破壊 Mod 追加仕様書（v1.12.0）
 
-`SPEC_v1.11.11.md`（Mod 1.11.11）に対する**マイナー**の仕様（Minecraft 1.21.1 + NeoForge への移植）。ここに書かれていないことは、それと現行実装のままとする。
+`SPEC_v1.11.12.md`（Mod 1.11.12）に対する**マイナー**の仕様（Minecraft 1.21.1 + NeoForge への移植）。ここに書かれていないことは、それと現行実装のままとする。
 この仕様書は `doc/spec/SPEC_v1.12.0.md`。
 
 - 対象:
   - **Minecraft Java Edition 1.21.1 / NeoForge 21.1.x**（新規。`mc1.21.1/`）
   - Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860（今まで。`mc1.12.2/`）
-- 前提: 1.11.11（下ごしらえ: `common/`・`mc1.12.2/`・`lang/*.json`・版ごとのリリースの流れ）が `main` に取り込み済み
+- 前提: 1.11.12（下ごしらえ: `common/`・`mc1.12.2/`・`lang/*.json`・版ごとのリリースの流れ）が `main` に取り込み済み
 - ユーザーとの相談で決まったこと:
   - 移植先は **1.21.1 + NeoForge**（Modpack での採用が多い版にしたい。All the Mods 10 など、上位の Modpack が 1.21.1 + NeoForge）
   - リポジトリ・CurseForge・Modrinth のプロジェクトは分けない。1 つの版に、Minecraft の版ごとの jar を並べる
@@ -18,7 +18,7 @@
 
 ## 0. バージョンと互換性
 
-- バージョンを 1.11.11 → **1.12.0** にする。版を書く場所は、`mc1.12.2/build.gradle`・`WeakSpotMod.VERSION`（1.12.2）と、`mc1.21.1/gradle.properties` の `mod_version`・1.21.1 の `WeakSpotMod.VERSION` の 4 か所。必ず揃える（`ReleaseFilesTest` で確かめる）
+- バージョンを 1.11.12 → **1.12.0** にする。版を書く場所は、`mc1.12.2/build.gradle`・`WeakSpotMod.VERSION`（1.12.2）と、`mc1.21.1/gradle.properties` の `mod_version`・1.21.1 の `WeakSpotMod.VERSION` の 4 か所。必ず揃える（`ReleaseFilesTest` で確かめる）
 - **マイナーにする理由**: 新しい Minecraft の版に対応する節目のため（ユーザーの判断）。1.12.2 版どうしの通信内容は変わらないが、決まりどおり接続できる範囲を新しいマイナーにする
 - 1.12.2 版: `ACCEPTED_VERSIONS` を `"[1.12,1.13)"` にする。1.11.x とは接続できない（`CHANGELOG.md` に書く）
 - 1.21.1 版と 1.12.2 版は、もともと Minecraft の版が違うので接続できない（Mod の側では何もしない）

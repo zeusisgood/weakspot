@@ -1,120 +1,97 @@
 # 弱点破壊 Mod 追加仕様書（v1.11.11）
 
-`SPEC_v1.11.10.md`（Mod 1.11.10）に対する**パッチ**の仕様（別の Minecraft の版への移植の下ごしらえ）。ここに書かれていないことは、それと現行実装のままとする。
-この仕様書は `doc/spec/SPEC_v1.11.11.md`。移植そのものは `SPEC_v1.12.0.md`。
+`SPEC_v1.11.10.md`（Mod 1.11.10）に対する**パッチ**の仕様（コードのコメントの整理）。ここに書かれていないことは、それと現行実装のままとする。
+この仕様書は `doc/spec/SPEC_v1.11.11.md`。このあと、下ごしらえ（`SPEC_v1.11.12.md`）・移植（`SPEC_v1.12.0.md`）と続く。
 
 - 対象: Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860
-- 前提: 1.11.10 がリリース済み。**開いている PR がない時期に作業する**（§2 でファイルを大きく動かすため）
-- 考え方（`doc/roadmap.md` の「別の Minecraft の版への対応」・1.11.10 のあとの相談）:
-  - リポジトリは 1 つのまま。版ごとに別々の Gradle のビルドを置き、版に依存しない計算（`common`）は**ソースで共有**する
-  - 移植のあとも、1.12.2 版と機能を揃え続ける（ユーザーの判断）。同じ機能を 2 回書く量を減らすため、移植の前に、版に依存しない処理をできるだけ `common/` に寄せる
-  - 配布は、1 つの版に Minecraft の版ごとの jar を並べる形にする（§5）。1.12.0 で jar が 2 つになる前に、この版で 1 つの jar のまま新しい流れを試しておく
-- 遊び方・見た目・通信内容・設定・保存データ・動作は変えない
-- PR は 1 つ（「1.11.11」）。コミットは §ごとに分ける
+- 前提: 1.11.10 がリリース済み
+- 考え方（ユーザーとの相談。t-wada 氏の「コードには How、テストコードには What、コミットログには Why、コードコメントには Why not」）:
+  - 今のコメントは過剰（ユーザーの判断）。調べた時点で、`src/main/java` の約 21,560 行のうちコメントが約 2,900 行（13%）、そのほとんど（約 2,740 行）が Javadoc。1.11.10 では版の注記と経緯を消したが、名前の言い直し（How）は「移植で自然に減る」として残していた（1.11.10 §3.3 の案 C の見送り）
+  - 移植のあとも 1.12.2 版は機能を揃えて残る（捨てるコードではない）。移植では 1.12.2 のコードを手本に読むので、Why だけが残っているほうが、気をつける所がはっきりする
+  - 振る舞いをテストに移すと、`common/` のテストは 1.21.1 版でも流れ、両方の版で同じ動きになることの保証になる
+- **案 B**（ユーザーの判断）: 名前の言い直しを消す（§1）＋ What をテストの名前に（§2）＋ How を名前に（§3）。コードの塊のメソッドへの切り出し（案 C）はしない（動きを変える心配があり、得が小さいため）
+- **動作は変えない**。遊び方・見た目・通信内容・設定・保存データ・翻訳キー（お知らせの 1 行を除く）は変わらない
+- PR は 1 つ（「1.11.11」）。コミットはパッケージごと（`common/` → `client/` → `server/` → `config/`・`network/`・直下 → テスト）に分ける
 
 ---
 
 ## 0. バージョンと互換性
 
 - バージョンを 1.11.10 → **1.11.11** にする（`build.gradle` の `version` と `WeakSpotMod.VERSION`）
-- 通信内容・設定・保存データ・翻訳キー（お知らせの 1 行を除く）は変わらない。`ServerFeatures.since` も要らない。1.11.x 同士はそのまま接続できる
-- 翻訳の元データの形式（§3）と jar の名前（§5）が変わるが、ゲームに入るファイル（`.lang`）の中身は変わらない
+- 中身はコメント・名前（§3）・テスト（§2）だけ。`ServerFeatures.since` も要らない。1.11.x 同士はそのまま接続できる
 
-## 1. `common/` を独立したディレクトリに出す
+## 1. コメントの線引き
 
-- `src/main/java/io/github/zeusisgood/weakspot/common/` → **`common/src/main/java/io/github/zeusisgood/weakspot/common/`**（`git mv`。パッケージ名は変えない）
-- テストも同じく `common/src/test/java/…/common/` へ
-- `common/` には Gradle のビルドを置かない。各版のビルドが `../common/src/main/java`（とテストの `../common/src/test/java`）をソースに足す（1.12.2 の Gradle 4.9 と新しい版の Gradle 8 は 1 つのマルチプロジェクトにできないため）
-- `common/` の約束（今と同じ）: Minecraft・Forge・NeoForge のクラスを持ち込まない。1.12.2 版を残す限り **Java 8 の書き方**（`var`・レコード・テキストブロック・`switch` 式は使わない）
-- `common/` のテストは、各版のビルドで流す（1.12.2 では JDK 8、新しい版ではその JDK で。同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）
+`CLAUDE.md` の決まり（コメントには Why / Why not と、型で分からない約束だけ）を、今あるコメント全部に当てはめる。
 
-## 2. 1.12.2 のビルドを `mc1.12.2/` に移す
+### 1.1 消すもの
 
-- `git mv` で次を `mc1.12.2/` へ: `src/`・`build.gradle`・`gradle.properties`・`gradlew`・`gradlew.bat`・`gradle/`（ラッパー）
-- 直下に残すもの（全部の版で共通）: `doc/`・`common/`・`lang/`（§3）・`CHANGELOG.md`・`README.md`・`README.en.md`・`LICENSE`・`update.json`・`CLAUDE.md`・`.github/`
-- できあがりの形:
+- **名前の言い直し**: 名前・型を読めば分かること（例: `RESERVED` の `/** 掘る前のヒットの予約。 */`、`Mining` の `/** プレイヤーが今破壊しているブロックと、そこで得た追加進捗。 */`）
+- **呼ばれ方・どこから使われるか**（例: `/** バニラの破壊開始 (PlayerInteractionManager#onBlockClicked) で呼ばれる。 */`、`時間は ClientWeakSpotHandler.clientTick で数える`）。地図は `doc/architecture.md` にある
+- **処理の流れの言い直し**（例: 「〜して、〜して、〜を返す」。メソッドの中身を読めば分かるもの）
+- **振る舞いの説明**（What）で、§2 でテストの名前に移したもの
 
-```
-common/            版に依存しない計算とそのテスト（Java 8 の書き方）
-lang/              翻訳の元データ（en_us.json・ja_jp.json）
-mc1.12.2/          1.12.2 + Forge のビルド（Gradle 4.9、JDK 8）
-doc/ CHANGELOG.md README*.md LICENSE update.json   共通
-```
+### 1.2 残すもの
 
-- `mc1.12.2/build.gradle` で直すこと:
-  - `sourceSets` に `../common/src/main/java`・`../common/src/test/java` を足す
-  - jar に入れる `LICENSE` を `../LICENSE` に
-  - jar の名前を **`weakspot-1.12.2-<版>.jar`** にする（§5）。`reobfJar` のあとの名前も同じ
-- テストが直下のファイル（`update.json`・`CHANGELOG.md`・`README*.md`・`doc/`・`lang/`）を読む所（`ResourceFiles`）は、リポジトリの直下からの道筋で読む（Gradle の作業ディレクトリが `mc1.12.2/` になるので、`../` を付けるか、テストの `workingDir` を直下にする。どちらかは実装で決める）
-- `run/`（runServer の作業場所）・`build/`・`.gradle/` の `.gitignore` を新しい場所に合わせる
-- `build/release/`（リリースの jar の置き場所）は `mc1.12.2/build/release/` になる
+- **Why / Why not**: コードを読んでも分からない理由・そうしない理由（例: `ServerBoostTracker` の「時間枠の間だけ倍率を掛けても、判定の瞬間に枠外なら効かない」、`DESTROYING` の「長押しをやめた（ABORT）には Forge のイベントがないので、これで見る」）
+- **型で分からない約束**で、§3 の名前にできないもの: 単位（度・tick・ブロック）・範囲（0〜1 など）・どちらの側で動くか（論理サーバー・物理サーバーでは呼ばれない など）・`null` や 0 の意味・失敗したときの代わりの動き（「読めなければ、〜」）
+- **バニラ・Forge の調べた結果**で、そのコードの理由になっているもの（`doc/architecture.md` にもあるが、コードの側にも 1 文あると、触る人が気づける）
+- **動作に関わる版の番号**（`ServerFeatures.since` などのまわり。1.11.10 §3.2 のまま）
+- **振る舞いの説明**で、テストにできないもの（Minecraft のクラスに頼っていて `common/` にない）のうち、Why を含むもの。Why を含まないものは消す（振る舞いは `doc/play.md` にある）
+- `@Config.Comment`（設定ファイルと設定画面に出る説明）は対象外。消さない
+- 迷ったら残す
 
-## 3. 翻訳の元データを `lang/*.json` にする
+### 1.3 量の目安
 
-- 正本を **`lang/en_us.json`・`lang/ja_jp.json`**（キーと値の 1 段の JSON。キーの順は今の `.lang` の行の順のまま）にする。新しい版（1.13 以降）は翻訳に `.json` を使うので、そのまま読める
-- 1.12.2 のビルドは、`processResources` でこの JSON から `assets/weakspot/lang/en_us.lang`・`ja_jp.lang` を作る（`キー=値` の 1 行ずつ）。**できる `.lang` の中身は、今のファイルと 1 文字も変わらない**ことを確かめる（並びを含めて。コメント行 2 つは消えてよい）
-- `mc1.12.2/src/main/resources/assets/weakspot/lang/*.lang` は消す（手で直す場所を 1 つにする）
-- 今の `.lang` の中の `\n`（バックスラッシュと n の 2 文字。Mod のコードが改行に直す）は、JSON では `"\\n"` と書き、`.lang` で同じ 2 文字に戻す
-- `.lang` の今のコメント行（2 行）に書いてあることが要るなら、`doc/development.md` に移す
-- 翻訳を読むものを全部 JSON に合わせる:
-  - `LangFilesTest`・`ReleaseFilesTest`（日英のキーの一致、`weakspot.news.<版>` など）
-  - `.github/scripts/changelog.sh`（`weakspot.news.<版>` を `jq` で読む）
-  - `CLAUDE.md`・`doc/development.md`・`doc/architecture.md` の `en_us.lang` / `ja_jp.lang` の記述 → `lang/en_us.json` / `lang/ja_jp.json`
+- 約 2,900 行 → **約 800 行**（目安。残すものを削ってまで合わせない）
 
-## 4. 版に依存しない処理を `common/` に寄せる
+## 2. What をテストの名前に
 
-- 移植のときに 2 回書かずに済むよう、Minecraft のクラスを使っていない処理を `common/` に移す。**動作は変えない**
-- 対象（調べた時点で、`client/`・`server/`・`config/`・`network/` の中で Minecraft・Forge のクラスを `import` していないもの）: `TimedBoost`・`ServerFeatures`・`StatsScreenTab`・`TargetRecords`・`AnimalStates`・`KindSwitches`・`QueryThrottle`・`SettingGroups`・`SoundPreset`・`HitSound`・`ComboPosition`
-  - それぞれ、`common/` の外のクラス（`WeakSpotConfig`・`ClientSettings` など）に頼っていないかを確かめ、頼っていなければ移す。頼っていれば、頼らない部分（計算・表）だけを分けて移すか、移さない（**迷ったら移さない**）
-- 上のほか、`client/`・`server/` のクラスの中にある、Minecraft のクラスを受け取らない計算（数・文字列・表だけを扱うメソッド）も、見つけた分だけ `common/` の新しいクラスか既存のクラスに移す。量は目安を決めない（この版で全部やりきらなくてよい。移植の途中で見つけたら、そのときに寄せる）
-- 移したクラスにテストがなければ、移したついでに足してよい（足さなくてもよい）
-- `config/SettingGroups`（設定画面のまとめの並び）は両方の版で同じ並びにするので、特に移したい。設定の値の型（`@Config` の注釈）に頼っている所は、名前の文字列の表にして共有する
-- `doc/architecture.md` の地図（クラスの置き場所）を直す
+- `common/`・`config/`・`compat/` のクラスのコメントにある振る舞いの説明（例: `ComboTier` の「1 以下は表示しない」）は、**テストのメソッドの名前**にして、コメントを消す
+  - 同じことを確かめるテストがもうあれば、その名前を振る舞いが読める形に直す（例 `combosBelowTwoAreNotShown`）
+  - なければ、テストを足す
+- テストの名前は今の形のまま（英語で、振る舞いを文として書く。`oneHitComesBackPerInterval` など）。今ある名前で、何を確かめているかが読めないもの（例 `clock`・`keyRoundTrip`）は、見つけた分だけ直す
+- テストの中のコメントも §1 と同じ線引き（例: `HitBudgetTest.canUseAnEarlierTick` の「掘る前のヒットの予約は、予約した（前の）tick で数える」は Why なので残す）
+- テストの中身（確かめる値）は変えない。足すテストは、今の動きをそのまま確かめる（足したテストが落ちたら、テストの側を今の動きに合わせる。動きは変えない）
 
-## 5. CI とリリースの流れを、版ごとの jar に合わせる
+## 3. How を名前に
 
-1.12.0 で jar が 2 つになるので、その形の流れをこの版で先に作る（jar は 1 つのまま）。
+- 範囲・単位など、コメントで補っていることを名前で言えるものは、名前を変えてコメントを消す（例: `TimedBoost.remaining` の「残り時間の割合（0〜1）」→ `remainingFraction`、tick の数の引数 `ticks` → `durationTicks`）
+- **名前を変えないもの**（変えると互換性・設定・翻訳に関わる）:
+  - `@Config` のフィールド（設定のキー）と、そのカテゴリのクラス・フィールド（`WeakSpotConfig.setting(名前)`・`SettingGroups`・`LangFilesTest` が名前で読む）
+  - 通信のメッセージのクラスの番号・中身の並び、`SyncedSettings`・`StatsMessage` の項目
+  - 保存データ（NBT）のキーの文字列、翻訳キーの文字列
+  - `@Mod` の `guiFactory`・`@SidedProxy` に文字列で書いたクラス名
+  - リフレクションで読むバニラの名前（`Reflect` の MCP 名・SRG 名）
+- 名前を変えたら、`doc/architecture.md`・`CLAUDE.md` の中のその名前も直す
+- 量は目安を決めない（見つけた分だけ。コメントを消すために名前を長くしすぎない）
 
-- **`ci.yml` の `build`**: Minecraft の版ごとの matrix にする（この版では `mc1.12.2`・JDK 8 の 1 つ）。各版のディレクトリで `./gradlew build`。テストの結果と jar を、版ごとの名前（`jar-1.12.2` など）で上げる
-- **`release`**: 全部の版の `build` が通ったときだけ動く。全部の版の jar を集めて、タグ `v<版>` の Release を 1 つ作り、jar を全部付ける。本文は今と同じ（`CHANGELOG.md` のその版の節）
-- **`publish-modrinth.sh` / `publish-curseforge.sh`**: 引数を `<版> <Minecraft の版>` にし、版ごとに 1 回ずつ呼ぶ
-  - jar は `weakspot-<Minecraft の版>-<版>.jar`
-  - Modrinth: バージョンの番号を **`<版>+<Minecraft の版>`**（例 `1.11.11+1.12.2`）、名前も同じにする。`game_versions`・`loaders` を Minecraft の版から決める（この版では `1.12.2`・`forge`）。上げ済みかは、この番号で確かめる
-  - CurseForge: 表示名を `Weak Spot Mining <版> (<Minecraft の版>)` にする。版の ID（Minecraft の版・ローダー・Java）を Minecraft の版から決める（この版では今と同じ 1.12.2・Forge・Java 8）
-  - Minecraft の版ごとの値（ローダー・Java・CurseForge の版の種類の slug）は、スクリプトの中の 1 か所の表にまとめる
-- **手動のワークフロー**（`modrinth-publish.yml` / `curseforge-publish.yml`）: 入力に「Minecraft の版」を足す（空なら全部の版）。CurseForge は二重に上げないよう、失敗した版だけを選んで流せるようにする
-- `update.json` は今のまま（`1.12.2` の節だけ）。1.12.0 で `1.21.1` の節を足す
-- 今までの Modrinth のバージョン（番号が `1.11.10` の形）はそのまま残す（直さない）
+## 4. Why をコミットログに
 
-## 6. `doc/roadmap.md` の整理（この仕様書の PR で行う）
+- `CLAUDE.md` に決まりを 1 つ足す: **仕様書に書いていない理由（不具合の原因・レビューで直した理由・やり方を選んだ理由）は、コミットの本文に 1〜3 行で書く**。件名は今の形（中身の要約と、仕様書の節への参照）のまま
+- この版のコミットから当てはめる。今までのコミットは直さない
 
-- 1.11.0 のあとの「優先度低めのメモ」のうち、次の 3 つを「見送ったもの」に移す（ユーザーの判断。公開サーバーで使われる予定がないため。話が出たら両方の版で作る）
-  - 的当てのサーバー設定 `targetPracticeEnabled`
-  - 的当ての記録を消す管理コマンド `/weakspot resettarget <プレイヤー>`
-  - 的当ての不正対策（案 A）
-- 的当ての数字（大きさ・距離・速さ・ご褒美のしきい値）は今の値で決める（ユーザーの判断）
-- 「別の Minecraft の版への対応」の節を、決まったこと（1.21.1 + NeoForge・1.12.0・揃え続ける・配布の形）に書き換え、この仕様書と `SPEC_v1.12.0.md` を指す
+## 5. ついでに作るもの
 
-## 7. README・doc
+- 全部のファイルを読むので、**`common/` に寄せられる処理の一覧**（Minecraft のクラスを受け取らない計算・表）を作り、PR の本文に書く。1.11.12 §4 の出発点にする（この版では移さない）
 
-- `CHANGELOG.md`: 「## 1.11.11」に「内部の整理（別の Minecraft の版への対応の下ごしらえ）。遊び方・見た目に変更なし」「通信内容・設定・保存データに変更なし。1.11.x 同士はそのまま接続可能」「配布するファイルの名前を `weakspot-1.12.2-1.11.11.jar` の形に変更」
+## 6. README・doc
+
+- `CHANGELOG.md`: 「## 1.11.11」に「内部の整理（コードのコメントを理由だけに絞り、振る舞いをテストに移す）。遊び方・見た目に変更なし」「通信内容・設定・保存データに変更なし。1.11.x 同士はそのまま接続可能」
 - README（日英）の「最近の更新」に 1.11.11 を足し、一番古いものを消す
 - お知らせ `weakspot.news.1.11.11`: 日本語「内部の整理（遊び方は変更なし）」、英語「Internal cleanup (no gameplay changes)」
 - `update.json` の `promos` と `"1.12.2"` の 1 行
-- `doc/development.md`: ビルドのコマンド（`cd mc1.12.2 && ./gradlew build`）・JDK 8 の手順・`common/` だけのテストの流し方・runServer の場所・リリースの手順（翻訳は `lang/*.json`、jar の名前、`build/release/` の場所）・配布サイト（版ごとに上げる、Modrinth の番号の形）
-- `doc/architecture.md`: ディレクトリの形と、`common/` に移したクラス
-- `doc/install.md`: jar の名前が変わったことに触れている所があれば直す
-- 直さない文書: `doc/play.md`・`doc/config.md`・ガイドの本・`doc/store/description.md`（遊び方・設定が変わらないため）。PR の本文に理由を書く
+- `doc/architecture.md`: §3 で変えた名前
+- 直さない文書: `doc/play.md`・`doc/config.md`・ガイドの本・`doc/store/description.md`（遊び方・設定が変わらないため）、`doc/roadmap.md`（この仕様書の PR で直し済み）。PR の本文に理由を書く
 
-## 8. `CLAUDE.md` に書くこと
+## 7. `CLAUDE.md` に書くこと
 
-- 「開発環境・コマンド」: ビルドは `mc1.12.2/` の中で（`cd mc1.12.2 && JAVA_HOME=… ./gradlew build -q`）、jar は `mc1.12.2/build/libs/weakspot-1.12.2-<版>.jar`
-- 「アーキテクチャの約束事」: `common/` の置き場所（直下の `common/`。Java 8 の書き方）。翻訳の正本は `lang/*.json`（「画面の文字列は `en_us.lang` と `ja_jp.lang` の両方に」→ `lang/en_us.json` と `lang/ja_jp.json`）
-- 版の 2 か所の道筋（`mc1.12.2/build.gradle`）
+- 「アーキテクチャの約束事」のコメントの決まりの行に、「名前で言えることは名前に、振る舞いはテストの名前に（コメントに書かない）」を足す
+- §4 のコミットの本文の決まり（「ブランチと PR」の近く）
 - 現行の版を 1.11.11 に
 
-## 9. ユーザーに確認してもらうこと
+## 8. ユーザーに確認してもらうこと
 
 - 動作は変わらない。CI（ビルドとテスト）が通れば十分
-- 1.11.11 の jar（名前が `weakspot-1.12.2-1.11.11.jar`）で、ゲームの文字（日英）が今までどおり出ること（翻訳を JSON から作るように変えたため。設定画面・ガイドの本・チャットを少し見てもらう）
-- Merge のあと、GitHub の Release・Modrinth・CurseForge に新しい名前で上がること（Modrinth の番号は `1.11.11+1.12.2`）
+- 差分は多いので、見本として数ファイル（例: `ServerBoostTracker`・`TimedBoost`・`ComboTier` とそのテスト）を見て、残ったコメント・消えたコメントの線引きがよいかを確かめてもらう
+- PR の本文の「`common/` に寄せられる処理の一覧」（1.11.12 で使う）
