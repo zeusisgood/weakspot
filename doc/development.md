@@ -2,15 +2,24 @@
 
 [← README に戻る](../README.md)
 
-開発・動作確認には Minecraft 1.12.2 / **Forge 14.23.5.2860**（公式 MDK、ForgeGradle 3 + Gradle 4.9）を使っています。Mod 側では Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。
+対応する Minecraft の版ごとに、別々のビルドがあります。
 
-JDK 8 が必要です。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます。
+| 版 | ローダー（開発・動作確認） | ビルド | JDK |
+|---|---|---|---|
+| 1.12.2 | **Forge 14.23.5.2860**（公式 MDK、ForgeGradle 3 + Gradle 4.9） | `mc1.12.2/` | 8 |
+| 1.21.1 | **NeoForge 21.1.264**（ModDevGradle 2 + Gradle 8。名前は Mojang の名前） | `mc1.21.1/` | 21 |
+
+1.12.2 版は Mod 側で Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。1.21.1 版は `neoforge.mods.toml` で NeoForge 21.1.264 以上を求めます。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます（1.21.1 には JDK 21 を足す）。
 
 ```sh
 cd mc1.12.2
 ./gradlew build        # ビルドとテスト（common/ のテストも）。成果物は mc1.12.2/build/libs/weakspot-1.12.2-<版>.jar
 ./gradlew test         # 単体テストのみ
 ./gradlew runServer    # 開発用の専用サーバーを起動（mc1.12.2/run/ で起動。初回は run/eula.txt の同意が必要）
+
+cd mc1.21.1            # JDK 21 で
+./gradlew build        # 成果物は mc1.21.1/build/libs/weakspot-1.21.1-<版>.jar（common/ のテストも流れる）
+./gradlew runServer    # mc1.21.1/run/ で起動
 ```
 
 コンテナ内ではゲーム画面を表示できないため、クライアント側の動作は、ビルドした jar をホスト側の Minecraft の `mods` に入れて確認します。
@@ -21,6 +30,7 @@ cd mc1.12.2
 common/      版に依存しない計算とそのテスト（Java 8 の書き方）。各版のビルドが ../common をソースとして読む
 lang/        翻訳の正本（en_us.json・ja_jp.json。読みやすさのため 1 行に 1 つの "キー": "値"）。1.12.2 はビルドのときに .lang を作る
 mc1.12.2/    1.12.2 + Forge のビルド（Gradle 4.9、JDK 8）
+mc1.21.1/    1.21.1 + NeoForge のビルド（Gradle 8、JDK 21）。翻訳は ../lang の json をそのまま jar に入れる
 doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 ```
 
@@ -60,7 +70,8 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
   - パイプで `stop` を流しても Gradle 経由では届かない。起動の確認は `timeout 150 ./gradlew runServer > ログ` で起動し、ログの `Done (` と `mc1.12.2/run/config/weakspot.cfg` を見る。
   - devcontainer が使えない環境（クラウドのセッションなど）では、FML の `NetworkRegistry.newChannel` の NPE で落ちる。そこでは `runServer` での確認はしない（ビルドとテストは通す。jar はユーザーが試す）。
   - 起動ログの `module-info.class ... IllegalArgumentException`（`Unable to read a class file correctly`）は FG3 + 1.12 でいつも出るノイズ。`Missing English translation for weakspot: .../build/classes/java/main/assets/...` の WARN も、開発環境のリソースの置き場所によるノイズ。
-- 非公開のフィールドはリフレクションで読む（アクセストランスフォーマーは使わない）。開発環境は MCP 名、reobf 後は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（`Reflect`）。Forge の 3 引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
+- 1.21.1: クラウドでは `apt-get install -y openjdk-21-jdk-headless`。ネットワークの許可に `maven.neoforged.net`・`piston-meta.mojang.com`・`piston-data.mojang.com`・`libraries.minecraft.net`・`resources.download.minecraft.net` も足す。初回のビルドは Minecraft の展開と再コンパイルで数分かかる。非公開のフィールド・メソッドは**アクセストランスフォーマー**（`mc1.21.1/src/main/resources/META-INF/accesstransformer.cfg`。`neoforge.mods.toml` の `[[accessTransformers]]` で読む）。名前を間違えるとビルドの「recompile」で止まる。上書きしているサブクラスがあれば、そちらも同じ公開範囲にする（例: ディスペンサーとドロッパーの `dispenseFrom`）。バニラの名前・中身は、ビルドが作るソースの jar（`~/.gradle/caches` の `neoforge-*-sources.jar`。IDE で開く）で調べる。
+- 1.12.2: 非公開のフィールドはリフレクションで読む（アクセストランスフォーマーは使わない）。開発環境は MCP 名、reobf 後は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（`Reflect`）。Forge の 3 引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
   - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/maven_downloader/de/oceanlabs/mcp/mcp_snapshot/20171003-1.12/mcp_snapshot-20171003-1.12.zip` の `fields.csv`（`methods.csv`）、または `~/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-srg.jar` を `javap -p` で見る。
   - 画面を出さずに両方の環境で確かめるには、自分のクラスを小さなプログラムからリフレクションで呼ぶ（インスタンスは `Unsafe.allocateInstance`）。開発環境は `sourceSets.main.runtimeClasspath`（Gradle の init スクリプトで書き出す）、実際の環境はその中の `build/classes` `build/resources` と `..._mapped_snapshot_...` の jar を、`build/libs` の reobf 済み jar と上の `-srg.jar` に差し替えたクラスパスで動かす。
 
@@ -69,15 +80,15 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 （直し忘れの多くは `ReleaseFilesTest` で CI が赤くなる。）
 
 1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
-2. `mc1.12.2/build.gradle` の `version` と `WeakSpotMod.VERSION` を揃えて上げる。マイナーを上げるときは `WeakSpotMod.ACCEPTED_VERSIONS` も新しいマイナーの範囲に（例 `[1.10,1.11)`）。あわせて、前のマイナーの仕様書を `doc/spec/` から消す（タグに残る。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移し、コードのコメントからの参照をタグのリンクに直し、`doc/spec/README.md` の表の行をタグへのリンクの 1 行にまとめる）。
+2. 版を書く 4 か所（`mc1.12.2/build.gradle` の `version`・1.12.2 の `WeakSpotMod.VERSION`・`mc1.21.1/gradle.properties` の `mod_version`・1.21.1 の `WeakSpotMod.VERSION`）を揃えて上げる。片方の版だけを直したときも、両方を上げる。マイナーを上げるときは 1.12.2 の `WeakSpotMod.ACCEPTED_VERSIONS` を新しいマイナーの範囲に（例 `[1.12,1.13)`）、1.21.1 の `Network.PROTOCOL` を新しいマイナーの番号に（例 `1.12`）。あわせて、前のマイナーの仕様書を `doc/spec/` から消す（タグに残る。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移し、コードのコメントからの参照をタグのリンクに直し、`doc/spec/README.md` の表の行をタグへのリンクの 1 行にまとめる）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
 4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。`README.en.md` の「Recent updates」も同じ 3 件にし、各版は英語のお知らせ（6.）の 1 行をそのまま使う。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
 5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`lang/en_us.json` / `lang/ja_jp.json` の `weakspot.guide.*`。1 ページは 14 行まで）を直す。操作が変わったら `README.en.md` の操作の表も（種類の説明は `doc/store/description.md` にだけ書く）。
 6. 更新のお知らせの要約 `weakspot.news.<版>` を `lang/ja_jp.json` と `lang/en_us.json` に 1 行足す（日本語で 40 字くらいまで）。
-7. 直下の `update.json` の `promos` の 2 つ（`1.12.2-latest` / `1.12.2-recommended`）を新しい版にし、`"1.12.2"` に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
+7. 直下の `update.json` の `promos` の 4 つ（`1.12.2-latest` / `1.12.2-recommended` / `1.21.1-latest` / `1.21.1-recommended`）を新しい版にし、`"1.12.2"` と `"1.21.1"` の両方の節に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
 8. 種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md` を直す（下の「配布サイト」）。
 9. コミットは「Add the spec for X.Y.Z」→ 機能のコミット（1 つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。
-10. jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push して `main` への PR を作る。
+10. 両方の jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push して `main` への PR を作る。
 
 Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge への公開を行う（上の「ブランチとリリース」）。
 

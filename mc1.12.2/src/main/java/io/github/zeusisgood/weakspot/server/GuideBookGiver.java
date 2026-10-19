@@ -30,8 +30,6 @@ public final class GuideBookGiver {
     private static final String TAG_GIFT_VERSION = "targetGiftVersion";
     /** targetGiftVersion がない、的をもらったことのある人は、この版から更新したとみなす。 */
     private static final String FIRST_GIFT_FROM = "1.11.0";
-    /** アップデートの知らせのキーを足した版。 */
-    private static final String GIFT_SINCE = "1.11.1";
     private static final int STARTER_TARGETS = 3;
     private static final ResourceLocation TARGET_RECIPE = new ResourceLocation(WeakSpotMod.MODID, "target");
 
@@ -74,7 +72,7 @@ public final class GuideBookGiver {
         }
         data.setString(TAG_GIFT_VERSION, WeakSpotMod.VERSION);
         give(player, new ItemStack(ItemTarget.INSTANCE, count));
-        ITextComponent text = PlayerText.of(player, GIFT_SINCE, "weakspot.target.updateGift", WeakSpotMod.VERSION,
+        ITextComponent text = new TextComponentTranslation("weakspot.target.updateGift", WeakSpotMod.VERSION,
                 count);
         text.getStyle().setColor(TextFormatting.GOLD);
         player.sendMessage(text);

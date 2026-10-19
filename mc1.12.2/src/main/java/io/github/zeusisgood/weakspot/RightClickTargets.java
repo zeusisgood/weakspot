@@ -4,7 +4,6 @@ import io.github.zeusisgood.weakspot.common.GrowthFilters;
 import io.github.zeusisgood.weakspot.common.GrowthRoom;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
-import io.github.zeusisgood.weakspot.server.PlayerText;
 import io.github.zeusisgood.weakspot.server.RightClickHits;
 import io.github.zeusisgood.weakspot.server.ServerSwitches;
 import java.util.Arrays;
@@ -24,7 +23,6 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -68,8 +66,7 @@ public final class RightClickTargets {
         if (isHarvestable(state, settings)) {
             return HitKind.HARVEST;
         }
-        if (settings.enabled(HitKind.GROWTH) && player.isSneaking() && isAutoGrowable(state, settings)
-                && autoGrowthSupported(world, player)) {
+        if (settings.enabled(HitKind.GROWTH) && player.isSneaking() && isAutoGrowable(state, settings)) {
             return HitKind.GROWTH;
         }
         return null;
@@ -89,14 +86,6 @@ public final class RightClickTargets {
     /** 出す条件（しゃがみ）は classify で見る。 */
     public static boolean isGrowthTarget(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         return isGrowable(world, pos, state, settings) || isAutoGrowable(state, settings);
-    }
-
-    /** サーバーとクライアントの両方が 1.11.2 以上のときだけ（古い側が右クリックを止めないので）。 */
-    private static boolean autoGrowthSupported(World world, EntityPlayer player) {
-        if (world.isRemote) {
-            return WeakSpotMod.proxy.serverSince("1.11.2");
-        }
-        return player instanceof EntityPlayerMP && PlayerText.clientSince((EntityPlayerMP) player, "1.11.2");
     }
 
     /** BlockCrops（と、それを継承した Mod の作物）は isMaxAge、ネザーウォートは age 3、カカオ豆は age 2。 */
