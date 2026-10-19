@@ -36,7 +36,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 
 ソースのパッケージは `io.github.zeusisgood.weakspot`。パッケージごとの中身は [architecture.md](architecture.md) の「全体」を参照してください。
 
-仕様書（1.11.0 以降の版ごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
+仕様書（今のマイナーの版ごとの差分）の一覧は [spec/README.md](spec/README.md)。各機能の仕組みの詳細は [architecture.md](architecture.md)、開発の約束事は [CLAUDE.md](../CLAUDE.md) を参照してください。
 
 ## ブランチとリリース
 
