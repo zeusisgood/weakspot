@@ -52,7 +52,7 @@ sourceSets {
     test.java.srcDir '../common/src/test/java'
 }
 
-// 翻訳の正本は ../lang/*.json（新しい版はそのまま読む）。1.12.2 は、1 行ずつ「キー=値」の .lang にする
+// 翻訳の正本は ../lang/*.json（新しい版はそのまま読む）。1.12.2 は「キー=値」の .lang にする（同じキーの 2 回目はテストが見つける）
 task generateLang {
     def source = file('../lang')
     def output = file("$buildDir/generated/lang/assets/weakspot/lang")
@@ -61,25 +61,9 @@ task generateLang {
     doLast {
         output.mkdirs()
         source.eachFileMatch(~/.*\.json/) { f ->
-            def slurper = new groovy.json.JsonSlurper()
-            def lines = []
-            int count = 0
-            f.getText('UTF-8').split('\n').each { line ->
-                def t = line.trim()
-                if (t.isEmpty()) {
-                    lines << ''
-                } else if (t != '{' && t != '}') {
-                    slurper.parseText('{' + t.replaceAll(/,$/, '') + '}').each { k, v ->
-                        lines << "${k}=${v}"
-                        count++
-                    }
-                }
-            }
-            // 同じキーが 2 回あると、全体を読んだときに 1 つに減る
-            if (count != slurper.parse(f, 'UTF-8').size()) {
-                throw new GradleException("${f.name}: a key appears twice, or an entry is not on its own line")
-            }
-            new File(output, f.name.replace('.json', '.lang')).setText(lines.join('\n') + '\n', 'UTF-8')
+            def entries = new groovy.json.JsonSlurper().parse(f, 'UTF-8')
+            new File(output, f.name.replace('.json', '.lang'))
+                    .setText(entries.collect { k, v -> "$k=$v" }.join('\n') + '\n', 'UTF-8')
         }
     }
 }

@@ -19,7 +19,7 @@ cd mc1.12.2
 
 ```
 common/      版に依存しない計算とそのテスト（Java 8 の書き方）。各版のビルドが ../common をソースとして読む
-lang/        翻訳の正本（en_us.json・ja_jp.json。1 行に 1 つの "キー": "値"）。1.12.2 はビルドのときに .lang を作る
+lang/        翻訳の正本（en_us.json・ja_jp.json。読みやすさのため 1 行に 1 つの "キー": "値"）。1.12.2 はビルドのときに .lang を作る
 mc1.12.2/    1.12.2 + Forge のビルド（Gradle 4.9、JDK 8）
 doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 ```

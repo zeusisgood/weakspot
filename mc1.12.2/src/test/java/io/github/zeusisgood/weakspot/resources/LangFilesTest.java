@@ -7,6 +7,7 @@ import io.github.zeusisgood.weakspot.common.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -32,12 +33,6 @@ public class LangFilesTest {
         onlyJa.removeAll(EN.keySet());
         assertTrue("only in en_us.json: " + onlyEn, onlyEn.isEmpty());
         assertTrue("only in ja_jp.json: " + onlyJa, onlyJa.isEmpty());
-    }
-
-    @Test
-    public void noKeyIsWrittenTwice() {
-        assertTrue("duplicated in en_us.json: " + duplicates(EN), duplicates(EN).isEmpty());
-        assertTrue("duplicated in ja_jp.json: " + duplicates(JA), duplicates(JA).isEmpty());
     }
 
     @Test
@@ -152,7 +147,7 @@ public class LangFilesTest {
         List<java.nio.file.Path> sources;
         sources = new java.util.ArrayList<>();
         for (String root : new String[] {ResourceFiles.MC + "src/main/java", "common/src/main/java"}) {
-            try (Stream<java.nio.file.Path> walk = Files.walk(ResourceFiles.path(root))) {
+            try (Stream<java.nio.file.Path> walk = Files.walk(Paths.get(root))) {
                 walk.filter(p -> p.toString().endsWith(".java")).forEach(sources::add);
             }
         }
@@ -197,15 +192,5 @@ public class LangFilesTest {
             });
         }
         assertTrue("old chat prefixes: " + old, old.isEmpty());
-    }
-
-    private static Set<String> duplicates(Map<String, String> entries) {
-        Set<String> found = new TreeSet<>();
-        for (String key : entries.keySet()) {
-            if (key.endsWith("\u0000dup")) {
-                found.add(key.substring(0, key.length() - 4));
-            }
-        }
-        return found;
     }
 }

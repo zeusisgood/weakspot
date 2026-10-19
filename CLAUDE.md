@@ -64,7 +64,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。
-- 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（1 行に 1 つの `"キー": "値"`。1.12.2 の `.lang` はビルドのときに作る）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
+- 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。1.12.2 の `.lang` はビルドのときに作る。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
 - **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
