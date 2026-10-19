@@ -1,7 +1,8 @@
 package io.github.zeusisgood.weakspot.config;
 
+import io.github.zeusisgood.weakspot.common.ComboPosition;
 import io.github.zeusisgood.weakspot.common.HitScale;
-
+import io.github.zeusisgood.weakspot.common.HitSound;
 import io.github.zeusisgood.weakspot.common.MarkerShape;
 import net.minecraftforge.common.config.Config;
 

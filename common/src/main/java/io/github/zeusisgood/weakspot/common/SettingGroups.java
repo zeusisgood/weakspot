@@ -1,4 +1,4 @@
-package io.github.zeusisgood.weakspot.config;
+package io.github.zeusisgood.weakspot.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,7 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
-import io.github.zeusisgood.weakspot.config.SettingGroups;
+import io.github.zeusisgood.weakspot.common.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,10 @@ import net.minecraft.client.resources.I18n;
 import net.minecraftforge.common.config.ConfigElement;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.client.config.DummyConfigElement;
-import net.minecraftforge.fml.client.config.IConfigElement;
 import net.minecraftforge.fml.client.IModGuiFactory;
+import net.minecraftforge.fml.client.config.DummyConfigElement;
 import net.minecraftforge.fml.client.config.GuiConfig;
+import net.minecraftforge.fml.client.config.IConfigElement;
 
 /**
  * ファイルのカテゴリ（server / client）ではなく、種類・用途のまとめ（SettingGroups）で組む。項目そのもの（Property）は

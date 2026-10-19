@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
+import io.github.zeusisgood.weakspot.common.TimedBoost;
 import io.github.zeusisgood.weakspot.common.TimedBoostMath;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;

@@ -1,4 +1,4 @@
-package io.github.zeusisgood.weakspot.config;
+package io.github.zeusisgood.weakspot.common;
 
 /** 描画はクライアント側の ComboHud。 */
 public enum ComboPosition {

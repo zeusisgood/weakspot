@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.config;
 
 import io.github.zeusisgood.weakspot.common.HitScale;
+import io.github.zeusisgood.weakspot.common.HitSound;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

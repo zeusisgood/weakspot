@@ -3,7 +3,7 @@ package io.github.zeusisgood.weakspot.resources;
 import static org.junit.Assert.assertTrue;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
-import io.github.zeusisgood.weakspot.config.SettingGroups;
+import io.github.zeusisgood.weakspot.common.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
 import java.nio.file.Files;

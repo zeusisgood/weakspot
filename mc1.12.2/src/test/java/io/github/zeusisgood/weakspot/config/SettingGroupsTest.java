@@ -3,6 +3,7 @@ package io.github.zeusisgood.weakspot.config;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import io.github.zeusisgood.weakspot.common.SettingGroups;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

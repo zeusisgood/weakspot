@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import io.github.zeusisgood.weakspot.common.HitScale;
+import io.github.zeusisgood.weakspot.common.HitSound;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;

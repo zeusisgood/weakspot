@@ -1,15 +1,16 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.PlayerRules;
-import io.github.zeusisgood.weakspot.common.MarkerShape;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.FishingMath;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MarkerMotion;
+import io.github.zeusisgood.weakspot.common.MarkerShape;
+import io.github.zeusisgood.weakspot.common.QueryThrottle;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
-import io.github.zeusisgood.weakspot.network.QueryMessage;
 import io.github.zeusisgood.weakspot.network.HitMessage;
+import io.github.zeusisgood.weakspot.network.QueryMessage;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;

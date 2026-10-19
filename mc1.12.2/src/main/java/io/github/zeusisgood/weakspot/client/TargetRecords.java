@@ -26,10 +26,8 @@ final class TargetRecords {
         TOP_SCORES.addAll(scores);
     }
 
-    /** 自己ベストの段階と、取った進捗の段階の高いほう。 */
     static TargetRules.Tier tier() {
-        TargetRules.Tier byBest = TargetRules.Tier.of(best);
-        return earned.atLeast(byBest) ? earned : byBest;
+        return TargetRules.Tier.unlocked(best, earned);
     }
 
     static boolean unlocked(TargetRules.Tier needed) {

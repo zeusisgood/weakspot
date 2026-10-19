@@ -49,6 +49,13 @@ public class TargetRulesTest {
     }
 
     @Test
+    public void rewardsKeepTheHigherOfTheBestAndTheEarnedTier() {
+        assertEquals(TargetRules.Tier.SILVER, TargetRules.Tier.unlocked(30, TargetRules.Tier.SILVER));
+        assertEquals(TargetRules.Tier.GOLD, TargetRules.Tier.unlocked(80, TargetRules.Tier.SILVER));
+        assertEquals(TargetRules.Tier.NONE, TargetRules.Tier.unlocked(0, TargetRules.Tier.NONE));
+    }
+
+    @Test
     public void spotsBounceInsideTheWindow() {
         double[] r = TargetRules.bounce(14, 2, 15);
         assertEquals(15 - 1, r[0], 1e-9);

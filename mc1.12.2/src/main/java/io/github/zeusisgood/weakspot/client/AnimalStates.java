@@ -2,6 +2,7 @@ package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.AnimalTimers;
+import io.github.zeusisgood.weakspot.common.QueryThrottle;
 import io.github.zeusisgood.weakspot.network.QueryMessage;
 import java.util.HashMap;
 import java.util.Map;

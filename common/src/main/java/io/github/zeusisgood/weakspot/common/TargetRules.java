@@ -111,5 +111,11 @@ public final class TargetRules {
         public boolean atLeast(Tier other) {
             return ordinal() >= other.ordinal();
         }
+
+        /** earned は取った進捗の段階（しきい値を上げる前に解放した段階を残すため、自己ベストより高いことがある）。 */
+        public static Tier unlocked(long best, Tier earned) {
+            Tier byBest = of(best);
+            return earned.atLeast(byBest) ? earned : byBest;
+        }
     }
 }

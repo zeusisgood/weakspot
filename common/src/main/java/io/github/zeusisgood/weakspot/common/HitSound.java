@@ -1,4 +1,4 @@
-package io.github.zeusisgood.weakspot.config;
+package io.github.zeusisgood.weakspot.common;
 
 /** ノートブロックの楽器。音の対応はクライアント側（HitSounds）。 */
 public enum HitSound {
