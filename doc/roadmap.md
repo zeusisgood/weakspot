@@ -6,7 +6,7 @@
 
 ## 1.11.11〜1.12.0: 別の Minecraft の版への対応
 
-仕様書は [spec/SPEC_v1.11.11.md](spec/SPEC_v1.11.11.md)（コメントの整理）・[spec/SPEC_v1.11.12.md](spec/SPEC_v1.11.12.md)（下ごしらえ）・[spec/SPEC_v1.12.0.md](spec/SPEC_v1.12.0.md)（移植）。いずれも下書き（ユーザーが「実装」と言うまで実装しない）。
+仕様書は [spec/SPEC_v1.11.11.md](spec/SPEC_v1.11.11.md)（コメントの整理。リリース済み）・[spec/SPEC_v1.11.12.md](spec/SPEC_v1.11.12.md)（下ごしらえ）・[spec/SPEC_v1.12.0.md](spec/SPEC_v1.12.0.md)（移植）。下ごしらえと移植は下書き（ユーザーが「実装」と言うまで実装しない）。
 
 - **決まったこと**（1.10.2 のあと・1.11.10 のあとの相談）
   - **移植先**: 1.21.1 + NeoForge（Modpack での採用が多い版にしたい。All the Mods 10 など、上位の Modpack が 1.21.1 + NeoForge）

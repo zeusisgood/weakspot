@@ -34,6 +34,10 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.11.11
+
+- Internal cleanup (no gameplay changes)
+
 ### 1.11.10
 
 - Internal cleanup (no gameplay changes)
@@ -41,10 +45,6 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 ### 1.11.8
 
 - Internal cleanup (no gameplay changes)
-
-### 1.11.7
-
-- Internal cleanup; the docs now explain how to stop elytra rubber-banding on servers
 
 ## More
 
