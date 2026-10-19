@@ -34,15 +34,15 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.11.12
+
+- Internal cleanup (no gameplay changes)
+
 ### 1.11.11
 
 - Internal cleanup (no gameplay changes)
 
 ### 1.11.10
-
-- Internal cleanup (no gameplay changes)
-
-### 1.11.8
 
 - Internal cleanup (no gameplay changes)
 
@@ -55,8 +55,8 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 ## For developers
 
 - Requires JDK 8. Built with the official Forge MDK (Forge 14.23.5.2860, ForgeGradle 3 + Gradle 4.9).
-- `./gradlew build` builds and tests (jar in `build/libs/`). `./gradlew runServer` starts a dev server.
-- Both the server and the client need the mod. `common/` holds pure logic with no Minecraft classes (unit-tested); `client/` and `server/` hold the sides.
+- `cd mc1.12.2 && ./gradlew build` builds and tests (jar in `mc1.12.2/build/libs/`). `./gradlew runServer` starts a dev server.
+- Both the server and the client need the mod. `common/` holds pure logic with no Minecraft classes (unit-tested, shared by every Minecraft version's build); `lang/` holds the translations; `mc1.12.2/` holds the 1.12.2 build with its `client/` and `server/` sides.
 - Design notes and the release checklist are in Japanese: [doc/development.md](doc/development.md), [doc/architecture.md](doc/architecture.md), [doc/roadmap.md](doc/roadmap.md).
 - Issues and pull requests are welcome (in English or Japanese).
 
