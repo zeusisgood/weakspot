@@ -11,7 +11,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-mc:
+    name: build (${{ matrix.mc }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -48,6 +49,16 @@ jobs:
         with:
           name: jar-${{ matrix.mc }}
           path: mc${{ matrix.mc }}/build/libs/*.jar
+
+  # Merge に必須のチェックは、ブランチの保護の設定で「build」という名前で決めてある。matrix のジョブは
+  # 版ごとに名前が変わるので、全部の版が通ったときだけ成功する「build」をここで出す（版を足しても設定を変えずに済む）
+  build:
+    needs: build-mc
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every Minecraft version built
+        run: test "${{ needs.build-mc.result }}" = success
 
   release:
     needs: build

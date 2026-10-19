@@ -33,7 +33,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 - 作業は `main` 以外のブランチで行い、`main` への PR を作ります。PR ごとに GitHub Actions（[`.github/workflows/ci.yml`](../.github/workflows/ci.yml)）がビルドと全テストを実行し、成功しないと Merge できません。
 - テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）の確認も含まれます。配布サイトへ上げるスクリプトは、CI で `shellcheck` にかけます。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
-- ビルドは Minecraft の版ごと（`ci.yml` の matrix。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。
+- ビルドは Minecraft の版ごと（`ci.yml` の matrix の `build-mc`。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。Merge に必須のチェック「`build`」は、全部の版が通ったときだけ成功するまとめのジョブ（ブランチの保護の設定は変えなくてよい）。
 - `main` に取り込まれた時、`mc1.12.2/build.gradle` の `version` がまだ Release のない版なら、全部の版のビルドが通ったときだけ、同じワークフローがタグ `vX.Y.Z` と GitHub Release を 1 つ自動で作成します（本文は `CHANGELOG.md` のその版の節、全部の版の jar `weakspot-<Minecraft の版>-<版>.jar` を添付）。版を上げない変更（文書だけなど）では作成しません。
 - 続けて、Release の jar を Minecraft の版ごとに Modrinth と CurseForge にも上げます（下の「配布サイト」）。
 
