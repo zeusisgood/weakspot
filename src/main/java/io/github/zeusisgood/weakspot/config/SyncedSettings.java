@@ -15,18 +15,15 @@ import java.util.Set;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 /**
- * サーバーの値が正の設定のうち、クライアントが使うもの。サーバーが自分の WeakSpotConfig から作って送り、
- * クライアントは接続中この値を使う（WeakSpotConfig のフィールドには書き込まない。書き込むと
- * ConfigManager.sync でサーバーの値がクライアントの weakspot.cfg に保存されてしまうため）。
- *
- * 作った後は読むだけにする。項目を足すと通信内容が変わる（マイナーを上げる）。
- */
+* クライアントは接続中この値を使う（WeakSpotConfig のフィールドには書き込まない。書き込むと
+* ConfigManager.sync でサーバーの値がクライアントの weakspot.cfg に保存されてしまうため）。
+* 作った後は読むだけにする。項目を足すと通信内容が変わる（マイナーを上げる）。
+*/
 public final class SyncedSettings {
 
-    /** 値を送ったサーバーの Mod の版（ServerFeatures が使う）。自分の設定の値なら、自分の版。 */
+    /** ServerFeatures が使う。自分の設定の値なら、自分の版。 */
     public String serverVersion;
 
-    // 弱点の置き方（全種類で共通）
     public double weakSpotRadiusRatio;
     public double edgeMargin;
     public double minMoveDistance;
@@ -34,40 +31,35 @@ public final class SyncedSettings {
     public double weakSpotMaxRadiusRatio;
     public double minFaceSize;
     public int lingerTicks;
-    /** 弱点の大きさの倍率（種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う）。 */
+    /** 種類ごとの決まった倍率 HitKind.sizeFactor を掛けて使う。 */
     public double spotSize;
-    /** 右クリックで何もしないアイテムを、素手と同じに扱うか（HeldItems）。 */
     public boolean heldItemsCountAsEmptyHand;
-    /** 素手と同じに扱わないアイテム。登録名。 */
+    /** 登録名。 */
     public Set<String> heldItemExcludes;
 
-    // 採掘
     public boolean miningWeakSpotEnabled;
     public boolean miningComboBonus;
     public double boostMultiplier;
     public int boostDurationTicks;
     public int minHitIntervalTicks;
 
-    // 成長
     public boolean growthWeakSpotEnabled;
     public int growthMinHitIntervalTicks;
     public double growthMinRadius;
-    /** 登録名（"minecraft:grass" など）。 */
+    /** 登録名。 */
     public Set<String> growthExcludedBlocks;
-    /** 成長の弱点の追加リスト。1行は「登録名」か「登録名[状態の条件]」（GrowthFilters）。 */
     public Set<String> growthExtraBlocks;
-    /** growthExtraBlocks を読んだもの。最初に使うときに作る（作った後は読むだけなので、使い回してよい）。送らない。 */
+    /** 最初に使うときに作る（作った後は読むだけなので、使い回してよい）。送らない。 */
     private GrowthFilters growthFilters;
 
-    // 機械（倍率と上限は、HUD に実際の速さを出すため）
+    // 機械の倍率と上限は、HUD に実際の速さを出すため
     public boolean machineWeakSpotEnabled;
     public int machineMinHitIntervalTicks;
-    /** 機械の加速の対象外。登録名。 */
+    /** 登録名。 */
     public Set<String> excludedBlocks;
     public double machineBoostMultiplier;
     public double machineBoostMaxMultiplier;
 
-    // 動物
     public boolean animalWeakSpotEnabled;
     public int animalMinHitIntervalTicks;
     public boolean animalBabyEnabled;
@@ -80,81 +72,76 @@ public final class SyncedSettings {
     public int sheepWoolHits;
     public int chickenEggHits;
     public int villagerTradeResetHits;
-    /** 動物の弱点の対象外。エンティティの ID。 */
+    /** エンティティの ID。 */
     public Set<String> animalExcludedEntities;
-    /** しゃがみを条件にする MOD の動物。エンティティの ID。 */
+    /** エンティティの ID。 */
     public Set<String> animalSneakRequiredEntities;
 
-    // 釣り
     public boolean fishingWeakSpotEnabled;
     public int fishingMinHitIntervalTicks;
     public int fishingHits;
 
-    // 弓
     public boolean bowWeakSpotEnabled;
     public int bowMinHitIntervalTicks;
     public int bowHitTicks;
 
-    // 近接（溜め）
     public boolean meleeWeakSpotEnabled;
     public int meleeMinHitIntervalTicks;
     public double meleeChargePerHit;
     public double meleeChargeMax;
 
-    // 乗り物
     public boolean vehicleWeakSpotEnabled;
     public int vehicleMinHitIntervalTicks;
     public double vehicleBoostMultiplier;
     public double vehicleBoostMaxMultiplier;
     public int vehicleBoostDurationTicks;
 
-    // 飲食
     public boolean eatWeakSpotEnabled;
     public int eatMinHitIntervalTicks;
     public int eatHitTicks;
 
-    // 睡眠（進める時刻はサーバーだけが使うので送らない）
+    // 睡眠の進める時刻はサーバーだけが使うので送らない
     public boolean sleepWeakSpotEnabled;
     public int sleepMinHitIntervalTicks;
 
-    // はしご（速さはクライアントで足すので、倍率・上限・時間も送る）
+    // はしごの速さはクライアントで足すので、倍率・上限・時間も送る
     public boolean ladderWeakSpotEnabled;
     public int ladderMinHitIntervalTicks;
     public double ladderBoostMultiplier;
     public double ladderBoostMaxMultiplier;
     public int ladderBoostDurationTicks;
 
-    // エリトラ（速さはクライアントで足す）
+    // エリトラの速さはクライアントで足す
     public boolean elytraWeakSpotEnabled;
     public int elytraMinHitIntervalTicks;
     public double elytraBoostPower;
 
-    // エンチャント（サーバーが種を読み書きできないときは false で送る）
+    // サーバーが種を読み書きできないときは false で送る
     public boolean enchantWeakSpotEnabled;
     public int enchantMinHitIntervalTicks;
 
-    // 収穫（おまけの有無はサーバーだけが使うので送らない）
+    // 収穫のおまけの有無はサーバーだけが使うので送らない
     public boolean harvestWeakSpotEnabled;
     public int harvestMinHitIntervalTicks;
 
-    // 投擲物（溜めのゲージをクライアントも進める）
+    // 投擲物の溜めのゲージはクライアントも進める
     public boolean throwWeakSpotEnabled;
     public int throwMinHitIntervalTicks;
     public double throwChargePerHit;
 
-    // ダッシュ（残り時間のゲージのため、倍率・時間も送る）
+    // ダッシュの残り時間のゲージのため、倍率・時間も送る
     public boolean sprintWeakSpotEnabled;
     public int sprintMinHitIntervalTicks;
     public double sprintBoostMultiplier;
     public double sprintBoostMaxMultiplier;
     public int sprintBoostDurationTicks;
 
-    // ネザーゲート（サーバーが待ち時間を読み書きできないときは false で送る）
+    // サーバーが待ち時間を読み書きできないときは false で送る
     public boolean portalWeakSpotEnabled;
     public int portalMinHitIntervalTicks;
     public int portalHitTicks;
 
-    // 泳ぎ（速さはクライアントで足す。残り時間のゲージのため、倍率・時間も送る）
+    // 泳ぎの速さはクライアントで足す。残り時間のゲージのため、倍率・時間も送る
     public boolean swimWeakSpotEnabled;
     public int swimMinHitIntervalTicks;
     public double swimBoostMultiplier;
@@ -162,25 +149,22 @@ public final class SyncedSettings {
     public int swimBoostDurationTicks;
     public double swimDashDistance;
 
-    // 落下（落ちた距離を減らすのはサーバー。クライアントは出し始める距離と、見込みのダメージの表示に使う）
+    // 落ちた距離を減らすのはサーバー。クライアントは出し始める距離と、見込みのダメージの表示に使う
     public boolean fallWeakSpotEnabled;
     public int fallMinHitIntervalTicks;
     public double fallMinDistance;
     public double fallReduceBlocks;
 
-    // 他のプレイヤーの弱点マーク
     public double markerShareRange;
     public int markerSendMinIntervalTicks;
 
     private SyncedSettings() {
     }
 
-    /** その種類の弱点の大きさの倍率（spotSize × 種類ごとの決まった倍率）。 */
     public double spotSize(HitKind kind) {
         return (spotSize > 0 ? spotSize : 1) * kind.sizeFactor();
     }
 
-    /** 成長の弱点の追加リストを読んだもの。 */
     public GrowthFilters growthFilters() {
         GrowthFilters filters = growthFilters;
         if (filters == null) {
@@ -191,10 +175,9 @@ public final class SyncedSettings {
     }
 
     /**
-     * 送る項目と並び（フィールドと同じ、種類ごとの並び）。
-     * 項目を足すときは、フィールドとこの一覧の両方に足す（通信が変わるので、マイナー）。フィールドの名前が
-     * WeakSpotConfig の同じ名前の項目から値を取る（serverVersion は自分の版）。
-     */
+    * 項目を足すときは、フィールドとこの一覧の両方に足す（通信が変わるので、マイナー）。フィールドの名前が
+    * WeakSpotConfig の同じ名前の項目から値を取る（serverVersion は自分の版）。
+    */
     static final String[] WIRE = {
             "serverVersion", "weakSpotRadiusRatio", "edgeMargin", "minMoveDistance", "weakSpotMinRadius",
             "weakSpotMaxRadiusRatio", "minFaceSize", "lingerTicks", "spotSize", "heldItemsCountAsEmptyHand",
@@ -237,11 +220,9 @@ public final class SyncedSettings {
     }
 
     /**
-     * 種類ごとのオン・オフと、ヒットの最小間隔の表。フィールドの名前は、オン・オフが
-     * "<key>WeakSpotEnabled"、間隔が "<key>MinHitIntervalTicks"
-     * （採掘だけ "minHitIntervalTicks"）。クライアントもサーバーも、この表から引く。どちらかがない種類があれば、
-     * このクラスを読み込んだ時点で例外にする（種類を足して項目を忘れたときに気づくため）。
-     */
+    * フィールドの名前は、オン・オフが "<key>WeakSpotEnabled"、間隔が "<key>MinHitIntervalTicks"（採掘だけ "minHitIntervalTicks"）。
+    * どちらかがない種類があれば、このクラスを読み込んだ時点で例外にする（種類を足して項目を忘れたときに気づくため）。
+    */
     private static final Map<HitKind, Field> ENABLED = new EnumMap<>(HitKind.class);
     private static final Map<HitKind, Field> INTERVAL = new EnumMap<>(HitKind.class);
 
@@ -262,7 +243,7 @@ public final class SyncedSettings {
         }
     }
 
-    /** サーバーの設定で、その種類の弱点を出すか（読み書きできない種類は false。fromConfig の最後を見る）。 */
+    /** 読み書きできない種類は false（fromConfig の最後を見る）。 */
     public boolean enabled(HitKind kind) {
         Field field = ENABLED.get(kind);
         try {
@@ -272,7 +253,7 @@ public final class SyncedSettings {
         }
     }
 
-    /** その種類のヒットの最小間隔（tick）。 */
+    /** tick。 */
     public int minHitInterval(HitKind kind) {
         try {
             return INTERVAL.get(kind).getInt(this);
@@ -281,10 +262,10 @@ public final class SyncedSettings {
         }
     }
 
-    /** サーバーが使う自分の値（作り直すのは invalidateServer のあと。ヒットのたびに作り直さないため）。 */
+    /** ヒットのたびに作り直さないため、invalidateServer のあとだけ作り直す。 */
     private static volatile SyncedSettings server;
 
-    /** この側の weakspot.cfg の値を、使い回す。読むだけにすること。 */
+    /** 読むだけにすること。 */
     public static SyncedSettings server() {
         SyncedSettings s = server;
         if (s == null) {
@@ -294,12 +275,12 @@ public final class SyncedSettings {
         return s;
     }
 
-    /** 設定が変わった（起動・/weakspot reload・設定画面）。次の server() で作り直す。 */
+    /** 起動・/weakspot reload・設定画面のあとに呼ぶ。 */
     public static void invalidateServer() {
         server = null;
     }
 
-    /** この側の weakspot.cfg の値（毎回作る）。 */
+    /** 毎回作る。 */
     public static SyncedSettings fromConfig() {
         SyncedSettings s = new SyncedSettings();
         try {

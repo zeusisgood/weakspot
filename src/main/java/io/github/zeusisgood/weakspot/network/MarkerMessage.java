@@ -10,9 +10,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * クライアント → サーバー: 自分の採掘の弱点マークの状態（出た・動いた / 消えた）。
- * 位置はクライアントが決めた値のまま、サーバーは検証せずに近くの他のプレイヤーへ転送する（見えるだけで、破壊やヒットには影響しない）。
- */
+* クライアント → サーバー。位置はクライアントが決めた値のまま、サーバーは検証せずに近くの他のプレイヤーへ転送する
+* （見えるだけで、破壊やヒットには影響しない）。
+*/
 public class MarkerMessage implements IMessage {
 
     private MarkerData marker;
@@ -40,29 +40,26 @@ public class MarkerMessage implements IMessage {
         @Override
         public IMessage onMessage(MarkerMessage message, MessageContext ctx) {
             MarkerData marker = message.marker;
-            // オフのプレイヤーのマークは転送しない（オフにする直前に送られたものが遅れて届いても消す）
+            // オフにする直前に送られたものが遅れて届いても消す
             return ServerThread.run(ctx,
                     player -> MarkerRelay.onMarker(player, ServerSwitches.isEnabled(player) ? marker : null));
         }
     }
 
-    /**
-     * 弱点マークの中身: どのブロック（または動物）の、どの面の、面の中のどの位置か。
-     * ブロックの位置はワールド座標系の u, v。動物は、面の左下の角からの位置。
-     */
+    /** ブロックの位置はワールド座標系の u, v。動物は、面の左下の角からの位置。 */
     public static final class MarkerData {
         public final BlockPos pos;
         public final EnumFacing face;
         public final double u;
         public final double v;
-        /** 動物の弱点のときの動物のエンティティ ID。ブロックの弱点は -1。動物の (u, v) は、面の左下の角からの位置。 */
+        /** ブロックの弱点は -1。 */
         public final int entityId;
 
         public MarkerData(BlockPos pos, EnumFacing face, double u, double v) {
             this(pos, face, u, v, -1);
         }
 
-        /** 動物の弱点。pos は動物のいるブロック（転送する範囲の計算に使う）。 */
+        /** pos は動物のいるブロック（転送する範囲の計算に使う）。 */
         public MarkerData(BlockPos pos, EnumFacing face, double u, double v, int entityId) {
             this.pos = pos;
             this.face = face;

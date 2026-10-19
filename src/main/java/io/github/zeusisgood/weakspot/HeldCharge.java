@@ -9,13 +9,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 /**
- * メインハンドに持っている物に溜める、次の 1 回の強化（両側。投げる物と近接）。
- * 溜めは持ち替える（選んでいるスロットが変わる、メインハンドの物の種類が変わる）まで残る。
- * シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
- */
+* 溜めは持ち替える（選んでいるスロットが変わる、メインハンドの物の種類が変わる）まで残る。
+* シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
+*/
 public final class HeldCharge {
 
-    /** 溜めと、溜めたときに持っていたスロットと物。 */
     private static final class Charge {
         double amount;
         int slot;
@@ -30,13 +28,12 @@ public final class HeldCharge {
         this.accepts = accepts;
     }
 
-    /** メインハンドに、溜められる物を持っているか。 */
     public boolean isHolding(EntityPlayer player) {
         ItemStack stack = player.getHeldItemMainhand();
         return !stack.isEmpty() && accepts.test(stack);
     }
 
-    /** ヒットで溜める（溜められる物を持っているときだけ）。max が 0 より大きければ、そこで止める。 */
+    /** 溜められる物を持っているときだけ。max が 0 より大きければ、そこで止める。 */
     public void add(EntityPlayer player, double amount, double max) {
         if (!isHolding(player) || amount <= 0) {
             return;
@@ -54,13 +51,12 @@ public final class HeldCharge {
         }
     }
 
-    /** 今の溜め（持ち替えていたら 0）。 */
+    /** 持ち替えていたら 0。 */
     public double amount(EntityPlayer player) {
         Charge charge = current(player);
         return charge == null ? 0 : charge.amount;
     }
 
-    /** 今の溜めを返して、使い切る。 */
     public double take(EntityPlayer player) {
         double amount = amount(player);
         charges.remove(player);
@@ -71,14 +67,14 @@ public final class HeldCharge {
         charges.remove(player);
     }
 
-    /** 持ち替えていたら、溜めを消す（毎 tick 呼ぶ）。 */
+    /** 毎 tick 呼ぶ。 */
     public void tick(EntityPlayer player) {
         if (!charges.isEmpty()) {
             current(player);
         }
     }
 
-    /** 持ち替えていなければ、覚えている溜め。持ち替えていたら消して null。 */
+    /** 持ち替えていたら消して null。 */
     private Charge current(EntityPlayer player) {
         Charge charge = charges.get(player);
         if (charge != null && (charge.slot != player.inventory.currentItem

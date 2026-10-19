@@ -8,9 +8,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: 近くの他のプレイヤーの弱点マークの状態（転送、範囲に入ったときの現在の状態、消えた通知）。
- * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
- */
+* サーバー → クライアント。
+* ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
+*/
 public class OtherMarkerMessage implements IMessage {
 
     private int playerEntityId;

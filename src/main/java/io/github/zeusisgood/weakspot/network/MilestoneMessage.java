@@ -6,17 +6,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/**
- * サーバー → 達成したプレイヤーのクライアント: ヒットの累計が節目に達した。演出を出すためだけに使う。
- * 節目の種類（採掘・種類ごと・合計）と、種類ごとの節目の HitKind の番号も運ぶ。
- */
+/** サーバー → 達成したプレイヤーのクライアント。演出を出すためだけに使う。 */
 public class MilestoneMessage implements IMessage {
 
-    /** 採掘の節目。 */
     public static final int MINING = 0;
-    /** 種類ごとの節目（kindId に HitKind の番号）。 */
+    /** kindId に HitKind の番号。 */
     public static final int KIND = 1;
-    /** すべての種類の合計の節目。 */
     public static final int TOTAL = 2;
 
     private int type;

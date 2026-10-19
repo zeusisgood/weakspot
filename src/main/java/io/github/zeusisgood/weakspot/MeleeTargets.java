@@ -5,10 +5,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
 
-/**
- * 近接の弱点の敵（両側で同じ条件）。IMob を持つ生き物だけ。動物・村人・プレイヤーは対象外。
- * 近くに敵がいる間だけ近接の弱点を出す（壁越しでもよい）。
- */
+/** IMob を持つ生き物だけ（動物・村人・プレイヤーは対象外）。壁越しでもよい。 */
 public final class MeleeTargets {
 
     private MeleeTargets() {
@@ -19,7 +16,6 @@ public final class MeleeTargets {
                 && entity.isEntityAlive();
     }
 
-    /** range ブロック以内に敵がいるか。 */
     public static boolean hasEnemyNear(EntityPlayer player, double range) {
         double rangeSq = range * range;
         for (EntityLivingBase entity : player.world.getEntitiesWithinAABB(EntityLivingBase.class,

@@ -2,10 +2,7 @@ package io.github.zeusisgood.weakspot.config;
 
 import net.minecraftforge.common.config.Config;
 
-/**
- * [サーバー] の設定（weakspot.cfg の server）。サーバーの値が正で、クライアントが使うものは SyncedSettings で送る。
- * Forge の @Config の決まりで、入れ子のカテゴリの項目は static ではないインスタンスのフィールドにする。
- */
+/** Forge の @Config の決まりで、入れ子のカテゴリの項目は static ではないインスタンスのフィールドにする。 */
 public final class ServerConfig {
 
     @Config.Comment("共通")
@@ -76,7 +73,6 @@ public final class ServerConfig {
     @Config.Comment("落下")
     public final Fall fall = new Fall();
 
-    /** 共通（server.general） */
     public static final class General {
 
         @Config.Comment({"[サーバー] 初めてログインしたプレイヤーに、遊び方のガイドの本を渡すか（1人1回）",
@@ -114,7 +110,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 採掘（server.mining） */
     public static final class Mining {
 
         @Config.Comment({"[サーバー] 採掘の弱点のオン・オフ",
@@ -172,7 +167,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 道具の修理（server.repair） */
     public static final class Repair {
 
         @Config.Comment({"[サーバー] ブロックを壊したとき、そのブロックで当てた採掘ヒットを数え、この数ごとに手に持っているツールの耐久を回復する",
@@ -193,7 +187,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 節目（server.milestones） */
     public static final class Milestones {
 
         @Config.Comment({"[サーバー] 節目にする採掘ヒットの累計。達した瞬間に1回だけ、祝いの演出と報酬が出る",
@@ -242,7 +235,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 成長（server.growth） */
     public static final class Growth {
 
         @Config.Comment({"[サーバー] 作物・苗木の成長の弱点のオン・オフ",
@@ -294,7 +286,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 機械（server.machine） */
     public static final class Machine {
 
         @Config.Comment({"[サーバー] 機械の弱点のオン・オフ",
@@ -340,7 +331,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 動物（server.animal） */
     public static final class Animal {
 
         @Config.Comment({"[サーバー] 動物の弱点のオン・オフ",
@@ -404,7 +394,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 釣り（server.fishing） */
     public static final class Fishing {
 
         @Config.Comment("[サーバー] 釣りの弱点のオン・オフ")
@@ -423,7 +412,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 弓（server.bow） */
     public static final class Bow {
 
         @Config.Comment("[サーバー] 弓の弱点のオン・オフ")
@@ -442,7 +430,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 近接（server.melee） */
     public static final class Melee {
 
         @Config.Comment({"[サーバー] 近接の弱点のオン・オフ",
@@ -475,7 +462,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 睡眠（server.sleep） */
     public static final class Sleep {
 
         @Config.Comment({"[サーバー] 寝ている間の弱点のオン・オフ",
@@ -495,7 +481,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 飲食（server.eat） */
     public static final class Eat {
 
         @Config.Comment({"[サーバー] 飲食の弱点のオン・オフ",
@@ -514,7 +499,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 乗り物（server.vehicle） */
     public static final class Vehicle {
 
         @Config.Comment({"[サーバー] 乗り物の弱点のオン・オフ",
@@ -542,7 +526,6 @@ public final class ServerConfig {
         }
     }
 
-    /** はしご（server.ladder） */
     public static final class Ladder {
 
         @Config.Comment({"[サーバー] はしごの弱点のオン・オフ",
@@ -569,7 +552,6 @@ public final class ServerConfig {
         }
     }
 
-    /** エリトラ（server.elytra） */
     public static final class Elytra {
 
         @Config.Comment({"[サーバー] エリトラの弱点のオン・オフ",
@@ -589,7 +571,6 @@ public final class ServerConfig {
         }
     }
 
-    /** エンチャント（server.enchant） */
     public static final class Enchant {
 
         @Config.Comment({"[サーバー] エンチャントの弱点のオン・オフ",
@@ -604,7 +585,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 収穫（server.harvest） */
     public static final class Harvest {
 
         @Config.Comment({"[サーバー] 収穫の弱点のオン・オフ",
@@ -624,7 +604,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 投擲物（server.throw） */
     public static final class Throw {
 
         @Config.Comment({"[サーバー] 投擲物の弱点のオン・オフ",
@@ -645,7 +624,6 @@ public final class ServerConfig {
         }
     }
 
-    /** ダッシュ（server.sprint） */
     public static final class Sprint {
 
         @Config.Comment({"[サーバー] ダッシュの弱点のオン・オフ",
@@ -672,7 +650,6 @@ public final class ServerConfig {
         }
     }
 
-    /** ネザーゲート（server.portal） */
     public static final class Portal {
 
         @Config.Comment({"[サーバー] ネザーゲートの弱点のオン・オフ",
@@ -691,7 +668,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 泳ぎ（server.swim） */
     public static final class Swim {
 
         @Config.Comment({"[サーバー] 泳ぎの弱点のオン・オフ",
@@ -723,7 +699,6 @@ public final class ServerConfig {
         }
     }
 
-    /** 落下（server.fall） */
     public static final class Fall {
 
         @Config.Comment({"[サーバー] 落下の弱点のオン・オフ",

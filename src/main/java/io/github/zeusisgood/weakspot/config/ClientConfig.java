@@ -5,10 +5,7 @@ import io.github.zeusisgood.weakspot.common.HitScale;
 import io.github.zeusisgood.weakspot.common.MarkerShape;
 import net.minecraftforge.common.config.Config;
 
-/**
- * [クライアント] の設定（weakspot.cfg の client）。各プレイヤーの設定のまま使う。
- * Forge の @Config の決まりで、入れ子のカテゴリの項目は static ではないインスタンスのフィールドにする。
- */
+/** Forge の @Config の決まりで、入れ子のカテゴリの項目は static ではないインスタンスのフィールドにする。 */
 public final class ClientConfig {
 
     @Config.Comment("音")
@@ -26,7 +23,6 @@ public final class ClientConfig {
     @Config.Comment("更新")
     public final Updates updates = new Updates();
 
-    /** 音（client.sound） */
     public static final class Sound {
 
         @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（採掘・成長・機械で共通）",
@@ -75,7 +71,6 @@ public final class ClientConfig {
         }
     }
 
-    /** マーカー（client.markers） */
     public static final class Markers {
 
         @Config.Comment({"[クライアント] 自分の弱点のオン・オフ（HOME キーで切り替わる。操作設定で変えられる）",
@@ -125,7 +120,6 @@ public final class ClientConfig {
         }
     }
 
-    /** コンボ（client.combo） */
     public static final class Combo {
 
         @Config.Comment({"[クライアント] 連続ヒット（コンボ）の数を画面に表示するか",
@@ -158,7 +152,6 @@ public final class ClientConfig {
         }
     }
 
-    /** ゲージ・表示（client.hud） */
     public static final class Hud {
 
         @Config.Comment({"[クライアント] 掘っているブロックの残りの耐久を、面の下の余白に緑のバーで表示するか",
@@ -206,7 +199,6 @@ public final class ClientConfig {
         }
     }
 
-    /** 更新（client.updates） */
     public static final class Updates {
 
         @Config.Comment("[クライアント] 版が変わって初めてワールドに入ったときに、チャットに更新のお知らせを出すか")

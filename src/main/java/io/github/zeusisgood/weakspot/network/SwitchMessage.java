@@ -6,10 +6,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/**
- * クライアント → サーバー: 弱点のオン・オフ（HOME キー）の状態と、機械の粒子を見るか（machineParticlesVisible）。
- * 自分でオフにした弱点の種類（KindMask のビット）も送る。ログイン時と、どれかが変わったときに送る。
- */
+/** クライアント → サーバー。ログイン時と、どれかが変わったときに送る。 */
 public class SwitchMessage implements IMessage {
 
     private boolean enabled;

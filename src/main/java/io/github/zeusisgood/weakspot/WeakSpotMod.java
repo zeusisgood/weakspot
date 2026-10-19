@@ -33,10 +33,7 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
-/**
- * サーバーとクライアントの両方に必要。同じマイナー同士（1.4.x）なら、パッチが違っても接続できる。
- * 通信内容を変えたらマイナーを上げ、ACCEPTED_VERSIONS も新しいマイナーに書き換える（CLAUDE.md のバージョンの方針）。
- */
+/** 同じマイナー同士なら、パッチが違っても接続できる。通信内容を変えたらマイナーを上げ、ACCEPTED_VERSIONS も書き換える。 */
 @Mod(modid = WeakSpotMod.MODID, name = WeakSpotMod.NAME, version = WeakSpotMod.VERSION,
         acceptableRemoteVersions = WeakSpotMod.ACCEPTED_VERSIONS,
         updateJSON = WeakSpotMod.UPDATE_JSON,
@@ -46,17 +43,14 @@ public class WeakSpotMod {
     public static final String MODID = "weakspot";
     public static final String NAME = "Weak Spot Mining";
     public static final String VERSION = "1.11.10";
-    /** 接続できる相手のバージョンの範囲（Maven の書式）。 */
+    /** Maven の書式。 */
     public static final String ACCEPTED_VERSIONS = "[1.11,1.12)";
-    /** Forge の更新確認が読む、最新の版の情報。リリースのたびに update.json の版を書き換える。 */
+    /** リリースのたびに update.json の版を書き換える。 */
     public static final String UPDATE_JSON = "https://raw.githubusercontent.com/zeusisgood/weakspot/main/update.json";
 
     public static SimpleNetworkWrapper network;
 
-    /**
-     * 起動した時点で config/weakspot.cfg がもうあったか（更新のお知らせで、初めて入れた人を見分ける）。
-     * Forge が設定ファイルを作るより前（Mod のクラスを作るとき）に確かめる。
-     */
+    /** 更新のお知らせで、初めて入れた人を見分ける。Forge が設定ファイルを作るより前（Mod のクラスを作るとき）に確かめる。 */
     public static boolean configExistedAtStart;
 
     public WeakSpotMod() {
@@ -78,11 +72,9 @@ public class WeakSpotMod {
         network.registerMessage(MarkerMessage.Handler.class, MarkerMessage.class, 6, Side.SERVER);
         network.registerMessage(OtherMarkerMessage.Handler.class, OtherMarkerMessage.class, 7, Side.CLIENT);
         network.registerMessage(SwitchMessage.Handler.class, SwitchMessage.class, 8, Side.SERVER);
-        // 動物・釣り・機械の問い合わせと返事
         network.registerMessage(QueryMessage.Handler.class, QueryMessage.class, 9, Side.SERVER);
         network.registerMessage(StateMessage.Handler.class, StateMessage.class, 10, Side.CLIENT);
         network.registerMessage(OtherComboMessage.Handler.class, OtherComboMessage.class, 11, Side.CLIENT);
-        // 的当て
         network.registerMessage(TargetMessage.Handler.class, TargetMessage.class, 12, Side.CLIENT);
         network.registerMessage(TargetActionMessage.Handler.class, TargetActionMessage.class, 13, Side.SERVER);
         network.registerMessage(OtherTargetMessage.Handler.class, OtherTargetMessage.class, 14, Side.CLIENT);

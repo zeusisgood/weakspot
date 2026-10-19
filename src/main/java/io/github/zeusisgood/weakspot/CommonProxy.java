@@ -8,76 +8,67 @@ import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.List;
 import net.minecraft.util.math.BlockPos;
 
-/** 物理サーバー用。クライアント専用の処理は ClientProxy で行う。 */
+/** 物理サーバー用。on〜 はサーバー → クライアントのパケットから呼ばれる。 */
 public class CommonProxy {
 
     public void init() {
     }
 
-    /** クライアントが今使う [サーバー] の設定値。物理サーバーでは呼ばれないが、念のため自分の値を返す。 */
+    /** 物理サーバーでは呼ばれないが、念のため自分の値を返す。 */
     public SyncedSettings clientSettings() {
         return SyncedSettings.server();
     }
 
-    /** 他のプレイヤーがヒットした（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onOtherPlayerHit(BlockPos pos, int streak, boolean miss) {
     }
 
-    /** サーバーの設定値が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onSettingsReceived(SyncedSettings settings) {
     }
 
-    /** 自分の統計が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onStatsReceived(MiningStats session, MiningStats total, List<String> topNames, List<Long> topScores) {
     }
 
-    /** 近くの他のプレイヤーの弱点マークが届いた。marker が null なら消えた（サーバー → クライアントのパケットから呼ばれる）。 */
+    /** marker が null なら消えた。 */
     public void onOtherMarker(int playerEntityId, MarkerData marker) {
     }
 
-    /** 動物の状態が届いた（サーバー → クライアントのパケットから呼ばれる）。progress は Timer の順番の進み具合。 */
+    /** progress は Timer の順番。 */
     public void onAnimalState(int entityId, int mask, float[] progress) {
     }
 
-    /** 近くのほかのプレイヤーのコンボが届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onOtherCombo(int entityId, int count) {
     }
 
-    /** 機械の進み具合が届いた（サーバー → クライアントのパケットから呼ばれる）。fuel が負なら燃料なし。 */
+    /** fuel が負なら燃料なし。 */
     public void onMachineState(BlockPos pos, float progress, float fuel) {
     }
 
-    /** 釣りの浮きの状態が届いた（サーバー → クライアントのパケットから呼ばれる）。 */
     public void onFishingState(boolean waiting, float progress) {
     }
 
-    /** クライアントが、この動物に弱点が出ていると知っているか（サーバーの返事を覚えているか）。 */
+    /** サーバーの返事を覚えているか。 */
     public boolean animalWeakSpotActive(int entityId) {
         return false;
     }
 
-    /** 接続中のサーバーの版が version 以上か（ServerFeatures.since）。物理サーバーでは呼ばれない。 */
+    /** 物理サーバーでは呼ばれない。 */
     public boolean serverSince(String version) {
         return true;
     }
 
-    /** 自分のその種類の弱点がオンか（一時オフと、種類ごとのオフ）。物理サーバーでは呼ばれない。 */
+    /** 物理サーバーでは呼ばれない。 */
     public boolean isKindEnabled(HitKind kind) {
         return true;
     }
 
-    /**
-     * ヒットの累計が節目に達した（サーバー → クライアントのパケットから呼ばれる）。type は MilestoneMessage の
-     * MINING / KIND / TOTAL、kindId は種類ごとの節目の HitKind の番号。
-     */
+    /** type は MilestoneMessage の MINING / KIND / TOTAL。 */
     public void onMilestone(int type, int kindId, long milestone) {
     }
 
-    /** 的当ての状態が届いた（サーバー → クライアントのパケットから呼ばれる。END には結果の板の中身も付く）。 */
     public void onTarget(TargetMessage message) {
     }
 
-    /** 近くのほかのプレイヤーの的当てのヒット数が届いた（負なら終わった）。 */
+    /** 負なら終わった。 */
     public void onOtherTarget(int entityId, int hits) {
     }
 }

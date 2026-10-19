@@ -15,21 +15,19 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
 /**
- * 遊び方のガイドの本（両側）。サーバーは初めてのログインで渡し、クライアントは統計画面の「ガイド」で開く。
- * ページは翻訳キーの文章なので、読む人のクライアントの言語で出る。キーの名前は、読む人の操作設定から出す。
- * 表紙・目次（クリックで飛ぶ）・章ごとのページで、各ページは小見出し（■）で分ける。
- * 遊び方（doc/play.md）を変えたら、lang の weakspot.guide.* も合わせて直す（CLAUDE.md）。
- */
+* ページは翻訳キーの文章なので、読む人のクライアントの言語で出る。キーの名前は、読む人の操作設定から出す。
+* 遊び方（doc/play.md）を変えたら、lang の weakspot.guide.* も合わせて直す（CLAUDE.md）。
+*/
 public final class GuideBook {
 
-    /** 本の形の版（NBT の TAG_FORMAT）。 */
+    /** NBT の TAG_FORMAT。 */
     public static final int FORMAT = 2;
     public static final String TAG_FORMAT = "weakspotGuide";
     private static final String TITLE = "Weak Spot Mining";
     private static final String TOGGLE_KEY = "key.weakspot.toggle";
     private static final String STATS_KEY = "key.weakspot.stats";
 
-    /** 章。見出しの色は、本の紙（ベージュ）で読める濃い色だけ。 */
+    /** 見出しの色は、本の紙（ベージュ）で読める濃い色だけ。 */
     private enum Chapter {
         BASICS(TextFormatting.DARK_BLUE),
         MINING(TextFormatting.DARK_GREEN),
@@ -45,7 +43,7 @@ public final class GuideBook {
         }
     }
 
-    /** 小見出しと本文。本文は weakspot.guide.<ページ>.<name>、小見出しは weakspot.guide.head.<name>。 */
+    /** 本文は weakspot.guide.<ページ>.<name>、小見出しは weakspot.guide.head.<name>。 */
     private static final class Section {
         final String name;
         /** 本文の %s に入れるキー（なければ null）。 */
@@ -77,7 +75,6 @@ public final class GuideBook {
         return new Section(name, keybind);
     }
 
-    /** 本文のページの並び（章の順）。 */
     private static final Page[] CONTENT = {
             new Page("keys", Chapter.BASICS, s("toggle", TOGGLE_KEY), s("menu", STATS_KEY)),
             new Page("combo", Chapter.BASICS, s("combo"), s("sound")),
@@ -109,21 +106,19 @@ public final class GuideBook {
             new Page("help", Chapter.MORE, s("busy", TOGGLE_KEY), s("bug"), s("update")),
     };
 
-    /** 目次の各ページに載せる章（本の 1 ページに 14 行まで）。 */
+    /** 本の 1 ページに 14 行まで。 */
     private static final Chapter[][] CONTENTS_PAGES = {
             {Chapter.BASICS, Chapter.MINING, Chapter.RIGHT_CLICK},
             {Chapter.AIM},
             {Chapter.SCREEN, Chapter.MORE},
     };
-    /** 目次の最初のページ（1 から数える）。 */
+    /** 1 から数える。 */
     private static final int CONTENTS_FIRST_PAGE = 2;
-    /** 本文の最初のページ（1 から数える）。表紙と目次のあと。 */
     private static final int CONTENT_FIRST_PAGE = CONTENTS_FIRST_PAGE + CONTENTS_PAGES.length;
 
     private GuideBook() {
     }
 
-    /** 記入済みの本。 */
     public static ItemStack create() {
         ItemStack book = new ItemStack(Items.WRITTEN_BOOK);
         NBTTagCompound tag = new NBTTagCompound();
@@ -188,7 +183,7 @@ public final class GuideBook {
         return page;
     }
 
-    /** 本文のページ: 章の色の太字の題、小見出しと本文、最後に目次へのリンク（1 ページは 14 行なので、空行は入れない）。 */
+    /** 1 ページは 14 行なので、空行は入れない。 */
     private static ITextComponent content(Page p) {
         ITextComponent page = new TextComponentString("");
         page.appendSibling(styled(new TextComponentTranslation("weakspot.guide." + p.id + ".title"),
@@ -221,7 +216,7 @@ public final class GuideBook {
         return component;
     }
 
-    /** クリックで page ページ目（1 から数える）へ飛ぶ。 */
+    /** page は 1 から数える。 */
     private static ITextComponent link(ITextComponent component, int page) {
         component.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, String.valueOf(page)));
         return component;

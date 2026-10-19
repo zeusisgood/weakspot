@@ -8,16 +8,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/**
- * クライアント → サーバー: 「弱点にヒットした」という通知。kind はヒットの種類（HitKind）。
- * streak は連続ヒット数で、周りのプレイヤーのヒット音の音階を合わせるためだけに使う（すべての種類）。
- */
+/** クライアント → サーバー。streak は、周りのプレイヤーのヒット音の音階を合わせるためだけに使う。 */
 public class HitMessage implements IMessage {
 
     private HitKind kind;
     private BlockPos pos;
     private int streak;
-    /** 動物・近接のヒットのときの、動物・敵のエンティティ ID。それ以外は -1。 */
+    /** 動物・近接のとき。それ以外は -1。 */
     private int entityId = -1;
 
     public HitMessage() {
@@ -29,14 +26,13 @@ public class HitMessage implements IMessage {
         this.streak = streak;
     }
 
-    /** 動物・敵（近接）のヒット。位置は使わない。 */
     public static HitMessage entity(HitKind kind, int entityId, int streak) {
         HitMessage message = new HitMessage(kind, BlockPos.ORIGIN, streak);
         message.entityId = entityId;
         return message;
     }
 
-    /** 釣り・弓のヒット。位置も動物も使わない。 */
+    /** 釣り・弓。位置も動物も使わない。 */
     public static HitMessage withoutTarget(HitKind kind, int streak) {
         return new HitMessage(kind, BlockPos.ORIGIN, streak);
     }

@@ -9,15 +9,14 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
- * サーバー → クライアント: QueryMessage の返事（動物・釣り・機械）。
- * 種類と相手と、整数 1 つ（flags）と小数の並び（values）。中身の意味は種類ごと:
- * <ul>
- * <li>動物: flags = 動いているタイマーの mask（0 なら弱点を出さない）、values = タイマーごとの進み具合（0〜1）</li>
- * <li>釣り: flags = 待ち時間の段階なら 1、values = {待ち時間の進み具合}</li>
- * <li>機械: values = {進み具合, 燃料（燃料のない機械は負）}</li>
- * </ul>
- * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
- */
+* サーバー → クライアント。flags と values の意味は種類ごと:
+* <ul>
+* <li>動物: flags = 動いているタイマーの mask（0 なら弱点を出さない）、values = タイマーごとの進み具合（0〜1）</li>
+* <li>釣り: flags = 待ち時間の段階なら 1、values = {待ち時間の進み具合}</li>
+* <li>機械: values = {進み具合, 燃料（燃料のない機械は負）}</li>
+* </ul>
+* ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
+*/
 public class StateMessage implements IMessage {
 
     private HitKind kind;
