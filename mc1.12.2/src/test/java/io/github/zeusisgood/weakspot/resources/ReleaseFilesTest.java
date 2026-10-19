@@ -14,9 +14,9 @@ import org.junit.Test;
  */
 public class ReleaseFilesTest {
 
-    private static final String VERSION = find(ResourceFiles.read("build.gradle"), "(?m)^version = '([^']+)'");
+    private static final String VERSION = find(ResourceFiles.read(ResourceFiles.MC + "build.gradle"), "(?m)^version = '([^']+)'");
     private static final String MOD_SOURCE =
-            ResourceFiles.read("src/main/java/io/github/zeusisgood/weakspot/WeakSpotMod.java");
+            ResourceFiles.read(ResourceFiles.MC + "src/main/java/io/github/zeusisgood/weakspot/WeakSpotMod.java");
 
     @Test
     public void modVersionMatchesBuildGradle() {
@@ -63,8 +63,8 @@ public class ReleaseFilesTest {
     @Test
     public void newsExistsInBothLanguages() {
         String key = "weakspot.news." + VERSION;
-        assertTrue("en_us.lang: " + key, ResourceFiles.lang(ResourceFiles.EN_US).containsKey(key));
-        assertTrue("ja_jp.lang: " + key, ResourceFiles.lang(ResourceFiles.JA_JP).containsKey(key));
+        assertTrue("en_us.json: " + key, ResourceFiles.lang(ResourceFiles.EN_US).containsKey(key));
+        assertTrue("ja_jp.json: " + key, ResourceFiles.lang(ResourceFiles.JA_JP).containsKey(key));
     }
 
     /** 新しい版の通知（Forge の更新確認）。 */

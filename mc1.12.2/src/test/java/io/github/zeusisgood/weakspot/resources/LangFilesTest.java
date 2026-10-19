@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.Test;
 
@@ -31,14 +30,14 @@ public class LangFilesTest {
         onlyEn.removeAll(JA.keySet());
         Set<String> onlyJa = new TreeSet<>(JA.keySet());
         onlyJa.removeAll(EN.keySet());
-        assertTrue("only in en_us.lang: " + onlyEn, onlyEn.isEmpty());
-        assertTrue("only in ja_jp.lang: " + onlyJa, onlyJa.isEmpty());
+        assertTrue("only in en_us.json: " + onlyEn, onlyEn.isEmpty());
+        assertTrue("only in ja_jp.json: " + onlyJa, onlyJa.isEmpty());
     }
 
     @Test
     public void noKeyIsWrittenTwice() {
-        assertTrue("duplicated in en_us.lang: " + duplicates(EN), duplicates(EN).isEmpty());
-        assertTrue("duplicated in ja_jp.lang: " + duplicates(JA), duplicates(JA).isEmpty());
+        assertTrue("duplicated in en_us.json: " + duplicates(EN), duplicates(EN).isEmpty());
+        assertTrue("duplicated in ja_jp.json: " + duplicates(JA), duplicates(JA).isEmpty());
     }
 
     @Test
@@ -151,8 +150,11 @@ public class LangFilesTest {
         Pattern literal = Pattern.compile("\"(weakspot\\.[A-Za-z0-9_.]*[A-Za-z0-9_])\"(\\s*\\+)?");
         Set<String> missing = new TreeSet<>();
         List<java.nio.file.Path> sources;
-        try (Stream<java.nio.file.Path> walk = Files.walk(ResourceFiles.path("src/main/java"))) {
-            sources = walk.filter(p -> p.toString().endsWith(".java")).collect(Collectors.toList());
+        sources = new java.util.ArrayList<>();
+        for (String root : new String[] {ResourceFiles.MC + "src/main/java", "common/src/main/java"}) {
+            try (Stream<java.nio.file.Path> walk = Files.walk(ResourceFiles.path(root))) {
+                walk.filter(p -> p.toString().endsWith(".java")).forEach(sources::add);
+            }
         }
         for (java.nio.file.Path source : sources) {
             Matcher m = literal.matcher(ResourceFiles.read(source.toString()));
@@ -162,7 +164,7 @@ public class LangFilesTest {
                 }
             }
         }
-        assertTrue("keys used in the code but missing from the lang files: " + missing, missing.isEmpty());
+        assertTrue("keys used in the code but missing from the lang files (lang/*.json): " + missing, missing.isEmpty());
     }
 
     /** サーバーから翻訳キーで送る文（PlayerText）は、クライアントの翻訳で使える %s / %1$s の形だけを使う。 */

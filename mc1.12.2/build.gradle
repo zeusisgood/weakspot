@@ -14,7 +14,8 @@ apply plugin: 'eclipse'
 
 version = '1.11.11'
 group = 'io.github.zeusisgood'
-archivesBaseName = 'weakspot'
+ext.mcVersion = '1.12.2'
+archivesBaseName = "weakspot-${mcVersion}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
@@ -44,6 +45,51 @@ minecraft {
     }
 }
 
+// 版に依存しない計算（common）は、各版のビルドがソースで読む
+sourceSets {
+    main.java.srcDir '../common/src/main/java'
+    main.resources.srcDir "$buildDir/generated/lang"
+    test.java.srcDir '../common/src/test/java'
+}
+
+// 翻訳の正本は ../lang/*.json（新しい版はそのまま読む）。1.12.2 は、1 行ずつ「キー=値」の .lang にする
+task generateLang {
+    def source = file('../lang')
+    def output = file("$buildDir/generated/lang/assets/weakspot/lang")
+    inputs.dir source
+    outputs.dir output
+    doLast {
+        output.mkdirs()
+        source.eachFileMatch(~/.*\.json/) { f ->
+            def slurper = new groovy.json.JsonSlurper()
+            def lines = []
+            int count = 0
+            f.getText('UTF-8').split('\n').each { line ->
+                def t = line.trim()
+                if (t.isEmpty()) {
+                    lines << ''
+                } else if (t != '{' && t != '}') {
+                    slurper.parseText('{' + t.replaceAll(/,$/, '') + '}').each { k, v ->
+                        lines << "${k}=${v}"
+                        count++
+                    }
+                }
+            }
+            // 同じキーが 2 回あると、全体を読んだときに 1 つに減る
+            if (count != slurper.parse(f, 'UTF-8').size()) {
+                throw new GradleException("${f.name}: a key appears twice, or an entry is not on its own line")
+            }
+            new File(output, f.name.replace('.json', '.lang')).setText(lines.join('\n') + '\n', 'UTF-8')
+        }
+    }
+}
+processResources.dependsOn generateLang
+
+test {
+    // テストは、リポジトリ直下のファイル（翻訳・README・update.json など）を読む
+    workingDir = file('..')
+}
+
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
 
@@ -54,7 +100,7 @@ processResources {
     inputs.property 'version', project.version
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-        expand 'version': project.version, 'mcversion': '1.12.2'
+        expand 'version': project.version, 'mcversion': mcVersion
     }
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
@@ -63,7 +109,7 @@ processResources {
 
 jar {
     // MIT の条件（配布物に著作権表示を付ける）のため、jar にも LICENSE を入れる
-    from('LICENSE') {
+    from('../LICENSE') {
         rename { 'LICENSE_weakspot' }
     }
     manifest {
