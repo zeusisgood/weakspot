@@ -4,9 +4,9 @@
 
 決まったことと、ユーザーの判断を待っていることのメモ。リリース済みの版の中身は [../CHANGELOG.md](../CHANGELOG.md) と [spec/README.md](spec/README.md)。実装は、ユーザーが「実装」と言うまでしない。
 
-## 1.11.11〜1.12.0: 別の Minecraft の版への対応
+## 1.11.11〜1.12.0: 別の Minecraft の版への対応（済み）
 
-仕様書は [spec/SPEC_v1.11.11.md](spec/SPEC_v1.11.11.md)（コメントの整理）・[spec/SPEC_v1.11.12.md](spec/SPEC_v1.11.12.md)（下ごしらえ）はリリース済み。[spec/SPEC_v1.12.0.md](spec/SPEC_v1.12.0.md)（移植）は下書き（ユーザーが「実装」と言うまで実装しない）。
+仕様書は [SPEC_v1.11.11.md](https://github.com/zeusisgood/weakspot/blob/v1.11.12/doc/spec/SPEC_v1.11.11.md)（コメントの整理）・[SPEC_v1.11.12.md](https://github.com/zeusisgood/weakspot/blob/v1.11.12/doc/spec/SPEC_v1.11.12.md)（下ごしらえ）はリリース済み。[spec/SPEC_v1.12.0.md](spec/SPEC_v1.12.0.md)（移植。1.12.2 + Forge と 1.21.1 + NeoForge）も 1.12.0 で実装した。
 
 - **決まったこと**（1.10.2 のあと・1.11.10 のあとの相談）
   - **移植先**: 1.21.1 + NeoForge（Modpack での採用が多い版にしたい。All the Mods 10 など、上位の Modpack が 1.21.1 + NeoForge）

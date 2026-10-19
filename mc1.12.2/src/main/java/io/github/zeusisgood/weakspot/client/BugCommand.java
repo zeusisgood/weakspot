@@ -129,7 +129,7 @@ final class BugCommand extends CommandBase {
 
     private static String shortEnvironment(Minecraft mc, int modCount) {
         return I18n.format("weakspot.bug.env.short", WeakSpotMod.VERSION, serverVersion(), playMode(mc),
-                Loader.MC_VERSION, ForgeVersion.getVersion(), modCount);
+                Loader.MC_VERSION, "Forge " + ForgeVersion.getVersion(), modCount);
     }
 
     private static String serverVersion() {

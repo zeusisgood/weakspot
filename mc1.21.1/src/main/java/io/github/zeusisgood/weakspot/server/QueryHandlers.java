@@ -1,0 +1,42 @@
+package io.github.zeusisgood.weakspot.server;
+
+import io.github.zeusisgood.weakspot.common.HitKind;
+import java.util.EnumMap;
+import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+
+/**
+ * HitHandlers と同じ形。登録のない種類は無視する。
+ * 状態を問い合わせる種類を足すときは、ここに足し、返事は StateMessage で送る（パケットは足さない）。
+ */
+public final class QueryHandlers {
+
+    interface Handler {
+        void onQuery(ServerPlayer player, long target);
+    }
+
+    private static final Map<HitKind, Handler> HANDLERS = new EnumMap<>(HitKind.class);
+
+    static {
+        HANDLERS.put(HitKind.ANIMAL, (player, target) -> AnimalHits.onQuery(player, (int) target));
+        HANDLERS.put(HitKind.FISHING, (player, target) -> FishingHits.onQuery(player));
+        HANDLERS.put(HitKind.MACHINE, (player, target) -> MachineStates.onQuery(player, BlockPos.of(target)));
+    }
+
+    private QueryHandlers() {
+    }
+
+    /** サーバーのスレッドで呼ぶ。 */
+    public static void onQuery(ServerPlayer player, HitKind kind, long target) {
+        Handler handler = HANDLERS.get(kind);
+        if (handler != null) {
+            handler.onQuery(player, target);
+        }
+    }
+
+    /** テスト用。 */
+    public static boolean handles(HitKind kind) {
+        return HANDLERS.containsKey(kind);
+    }
+}

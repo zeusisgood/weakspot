@@ -4,45 +4,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860**。
+Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込む Mod。対象は **Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860** と **1.21.1 / NeoForge 21.1.264** の 2 つ（機能は揃え続ける）。
 
-- 仕様書は `doc/spec/`（一覧は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。置いてあるのは 1.11.0 以降の版ごとの差分だけ（1.10.2 までは、タグ `v1.10.2` の `doc/spec/`）。今の挙動の正本は `doc/play.md`・`doc/config.md`・`doc/architecture.md`（とコード）だけで、仕様書は今のマイナーの経緯と決定の記録。仕様書に書かれていないことは、その前の版と現行実装のまま。置いてある仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。**新しいマイナーを始めたら、前のマイナーの仕様書を消す**（タグに残る。同じマイナーの間は本数が増えても消さない。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移す。手順は `doc/development.md` の「リリースの手順」）。
+- 仕様書は `doc/spec/`（一覧は `doc/spec/README.md`。新しい版の仕様書を作ったら、表の一番上に 1 行足す）。置いてあるのは 1.12.0 以降の版ごとの差分だけ（1.11.x はタグ `v1.11.12`、1.10.2 までは、タグ `v1.10.2` の `doc/spec/`）。今の挙動の正本は `doc/play.md`・`doc/config.md`・`doc/architecture.md`（とコード）だけで、仕様書は今のマイナーの経緯と決定の記録。仕様書に書かれていないことは、その前の版と現行実装のまま。置いてある仕様書が実装と違うと分かったら、本文は書き換えずに「（注: 実装では…）」を足す（当時の決定の記録を残す）。**新しいマイナーを始めたら、前のマイナーの仕様書を消す**（タグに残る。同じマイナーの間は本数が増えても消さない。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移す。手順は `doc/development.md` の「リリースの手順」）。
 - **この節以外の詳しいことは `doc/` にある**（必要なときに読む）:
 
 | 内容 | 文書 |
 |---|---|
 | 仕組み（各機能の中身・通信・共通の部品・弱点の種類を足すときに直す所） | `doc/architecture.md` |
-| 開発環境の細かいこと（runServer・リフレクションと SRG 名）・**リリースの手順**・配布サイト・画像・ライセンス・ブランチの片付け | `doc/development.md` |
+| 開発環境の細かいこと（runServer・リフレクションと SRG 名・アクセストランスフォーマー）・**リリースの手順**・配布サイト・画像・ライセンス・ブランチの片付け | `doc/development.md` |
 | 今後の予定・保留中の相談（1.11.0・別の版への対応・TODO） | `doc/roadmap.md` |
 | 遊び方 / 設定の一覧 / 導入 / 更新履歴 | `doc/play.md` / `doc/config.md` / `doc/install.md` / `CHANGELOG.md` |
 
-- `README.md` は入門だけ（ダウンロード・対応する版・操作・種類の一覧・最近の更新 3 件・文書へのリンク）。`README.en.md` は日本語版と同じ見出しの並びの英語の入口（ダウンロード・対応する版・操作・種類の名前の列挙・最近の更新 3 件・開発者向けの短い節。種類ごとの説明は CurseForge のページ＝`doc/store/description.md` に任せる。最近の更新は英語のお知らせ `weakspot.news.<版>` の 1 行をそのまま使う。ほかの文書は日本語のみ）。対応する版は「1.12.2 + Forge（開発・動作確認は 14.23.5.2860）」と書く。
+- `README.md` は入門だけ（ダウンロード・対応する版・操作・種類の一覧・最近の更新 3 件・文書へのリンク）。`README.en.md` は日本語版と同じ見出しの並びの英語の入口（ダウンロード・対応する版・操作・種類の名前の列挙・最近の更新 3 件・開発者向けの短い節。種類ごとの説明は CurseForge のページ＝`doc/store/description.md` に任せる。最近の更新は英語のお知らせ `weakspot.news.<版>` の 1 行をそのまま使う。ほかの文書は日本語のみ）。対応する版は「1.12.2 + Forge（開発・動作確認は 14.23.5.2860）／1.21.1 + NeoForge（開発・動作確認は 21.1.264）」と書く。
 - `doc/play.md` には版の注記（「（1.7.0）」など）を書かない（更新履歴に書く）。
 - README・`CHANGELOG.md`・`doc/` の文章は、ひらがなに開きすぎず漢字を適度に使う（例「当てると速くなる」→「当てると各動作が加速」、「変わっていない」→「変更なし」。更新履歴は体言止めでよい）。
 
 ## 開発環境・コマンド
 
-- **JDK 8**、ForgeGradle 3 + Gradle 4.9（Gradle 5 以降の構文は使えない。依存は `compile` / `testCompile`）。
-- リポジトリの形: `common/`（版に依存しない計算。各版のビルドがソースで読む）・`lang/`（翻訳の正本）・`mc1.12.2/`（1.12.2 のビルド）。`doc/` などは直下で全部の版に共通（`doc/development.md` の冒頭）。
-- ビルド + テスト（`mc1.12.2/` の中で）: `./gradlew build` → `mc1.12.2/build/libs/weakspot-1.12.2-<version>.jar`（reobf 済み）。テストのみ: `./gradlew test`（作業ディレクトリはリポジトリの直下）。
-- クラウドでは JDK 8 を `apt-get install -y openjdk-8-jdk-headless` で入れ、`cd mc1.12.2 && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q`（Maven Central が 429 なら、30 秒ずつ間をあけて 5 回まで再実行）。クラウドの環境のネットワーク設定で `maven.minecraftforge.net` を許可しておく（拒否されると 403。許可のしかたと、Gradle が使えないときに `common/` のテストだけ流す方法は `doc/development.md`）。
+- 1.12.2: **JDK 8**、ForgeGradle 3 + Gradle 4.9（Gradle 5 以降の構文は使えない。依存は `compile` / `testCompile`）。1.21.1: **JDK 21**、ModDevGradle 2 + Gradle 8（`implementation` / `testImplementation`）。
+- リポジトリの形: `common/`（版に依存しない計算。各版のビルドがソースで読む）・`lang/`（翻訳の正本）・`mc1.12.2/`（1.12.2 のビルド）・`mc1.21.1/`（1.21.1 のビルド）。2 つは別々の Gradle のビルド（1 つのマルチプロジェクトにできない）。`doc/` などは直下で全部の版に共通（`doc/development.md` の冒頭）。
+- ビルド + テスト（各版のディレクトリの中で）: `./gradlew build` → `mc1.12.2/build/libs/weakspot-1.12.2-<version>.jar`（reobf 済み）・`mc1.21.1/build/libs/weakspot-1.21.1-<version>.jar`。テストのみ: `./gradlew test`（作業ディレクトリはリポジトリの直下）。`common/` のテストはどちらのビルドでも流れる。
+- クラウドでは JDK 8 を `apt-get install -y openjdk-8-jdk-headless` で入れ、`cd mc1.12.2 && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q`（Maven Central が 429 なら、30 秒ずつ間をあけて 5 回まで再実行）。1.21.1 は JDK 21（`openjdk-21-jdk-headless`）で `cd mc1.21.1 && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 PATH=/usr/lib/jvm/java-21-openjdk-amd64/bin:$PATH ./gradlew build -q`（初回は Minecraft の展開で数分かかる）。クラウドの環境のネットワーク設定で `maven.minecraftforge.net`・`maven.neoforged.net`・`piston-meta.mojang.com`・`piston-data.mojang.com`・`libraries.minecraft.net`・`resources.download.minecraft.net` を許可しておく（拒否されると 403。許可のしかたと、Gradle が使えないときに `common/` のテストだけ流す方法は `doc/development.md`）。
 - `runServer` の確認は devcontainer でだけ行う（クラウドでは FML の NPE で落ちるので、しなくてよい。止まる条件にも当たらない）。やり方とノイズのログは `doc/development.md`。
 - クライアントの描画・ヒット判定・体感速度は Claude が検証できない。jar をユーザーのホスト側 Minecraft で試してもらう。
-- 非公開のフィールドは、アクセストランスフォーマーではなくリフレクションで、MCP 名 → SRG 名の順に試す（`Reflect`）。3 引数の `ReflectionHelper.findField` は使わない。SRG 名の調べ方と両環境での確かめ方は `doc/development.md`。
+- 非公開のフィールド: 1.12.2 版は、アクセストランスフォーマーではなくリフレクションで、MCP 名 → SRG 名の順に試す（`Reflect`）。3 引数の `ReflectionHelper.findField` は使わない。SRG 名の調べ方と両環境での確かめ方は `doc/development.md`。1.21.1 版はアクセストランスフォーマー（`mc1.21.1/src/main/resources/META-INF/accesstransformer.cfg`。動いているときも Mojang の名前なので、名前の間違いはビルドで分かる）。
 
 ## バージョン
 
-- 版は `mc1.12.2/build.gradle` の `version` と `WeakSpotMod.VERSION` の 2 か所。必ず揃える。
+- 版は `mc1.12.2/build.gradle` の `version`・1.12.2 の `WeakSpotMod.VERSION`・`mc1.21.1/gradle.properties` の `mod_version`・1.21.1 の `WeakSpotMod.VERSION` の 4 か所。必ず揃える（`ReleaseFilesTest`）。**片方の版だけを直したときも、いつも両方の jar を同じ番号で出す**。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
 - 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
-- `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS` で同じマイナー同士を接続可能にする。マイナーを上げたら範囲も書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.11.12**、範囲は `"[1.11,1.12)"`。
+- 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
+- 現行は **1.12.0**、範囲は `"[1.12,1.13)"`（1.21.1 の `PROTOCOL` は `"1.12"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
 
-- **手順のチェックリストは `doc/development.md` の「リリースの手順」**（版・CHANGELOG・README の日英のリンクと「最近の更新」・`doc/spec/README.md`・`weakspot.news.<版>`・`update.json`・説明文・コミットの形・`mc1.12.2/build/release/`）。直し忘れは `ReleaseFilesTest` で CI が赤くなる。
+- **手順のチェックリストは `doc/development.md` の「リリースの手順」**（版・CHANGELOG・README の日英のリンクと「最近の更新」・`doc/spec/README.md`・`weakspot.news.<版>`・`update.json` の 2 つの節・説明文・コミットの形・`mc1.12.2/build/release/`）。直し忘れは `ReleaseFilesTest` で CI が赤くなる。
 - 仕様書にもとづく作業は、ユーザーの承認を待たずに実装から push と PR まで進める。ただし**止まる条件**（互換性を破る変更が必要、仕様の意図が読み取れない、ビルドやテストが通らない、runServer が起動しない）に当たったら、push せずに止まって報告する。Merge はユーザーが行う。
 - 環境のせいでビルドできない（ネットワークの拒否・429 が続く）ときも、push と PR はしない。コードの誤りとは分けて、拒否されたホストと直し方を報告し、ビルドできない間は `common/` のテストだけでも流しておく。
 - マイナーを上げる仕様書に書かれた互換性の変更（通信内容、`SyncedSettings`・`StatsMessage` の項目の追加など）は、止まる条件に当たらない。仕様書にない互換性の変更（特に古いワールドの保存データが読めなくなる変更。項目の追加で古いデータを読めるならよい）は当たる。
@@ -58,14 +58,15 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - クライアントとサーバーの**両方に Mod が必要**。パッケージは `io.github.zeusisgood.weakspot`。クラス名を文字列で書くのは `@Mod` の `guiFactory` と `@SidedProxy` だけ。
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。**種類を足すときに直す所の一覧は `doc/architecture.md`**。的当て（1.11.0）は種類ではなく別の仕組み（`TargetRounds` / `TargetPlay`。種類別の統計・設定・節目に入らない）。
 - 成長・収穫・機械・動物の「手が空いている」は、空か、右クリックで何もしないアイテム（`HeldItems`。1.11.0）。**移植のときは、版ごとに右クリックで動くアイテムを調べ直す**。
-- `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない。1.12.2 版を残す限り Java 8 の書き方）。移植の版でも同じものを使うので、版に依存しない処理はここに書く。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。
-- `client/` は `@EventBusSubscriber(value = Side.CLIENT)`。パケットのハンドラーは専用サーバーでもインスタンス化されるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る。
-- ヒット判定は `RenderWorldLastEvent` で**毎フレーム**（tick 単位だと素早い照準移動を取りこぼす）。
-- **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。
+- **機能を足す・直すときは、両方の版で同じ PR で行う**（揃え続ける。ユーザーの判断）。版に依存しない部分は先に `common/` に書く。1.21.1 にしかない物（ラクダなど）が 1.21.1 版でだけ対象になるのはよい。
+- `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない。1.12.2 版を残す限り Java 8 の書き方）。両方の版で同じものを使うので、版に依存しない処理はここに書く。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。
+- `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（1.21.1 は `value = Dist.CLIENT`）。パケットのハンドラーは専用サーバーでも読み込まれるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る（両方の版）。
+- ヒット判定は `RenderWorldLastEvent`（1.21.1 は `RenderLevelStageEvent` の `AFTER_WEATHER`）で**毎フレーム**（tick 単位だと素早い照準移動を取りこぼす）。
+- **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。相手のクライアントの版は、1.12.2 は Forge が受け取った Mod の一覧、1.21.1 は接続直後にクライアントが送る `HelloMessage` で知る。
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
-- **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。
-- 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。1.12.2 の `.lang` はビルドのときに作る。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
-- **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
+- **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。1.21.1 は HUD が `RenderGuiEvent.Post`、GUI の上が `ScreenEvent.Render.Post` で、図形は `client/Draw`（頂点は `GuiGraphics` の pose を掛ける）。
+- 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。1.12.2 の `.lang` はビルドのときに作る。1.21.1 は json をそのまま使う。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
+- **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`（1.21.1 は `Component.translatable`）、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
 - **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
@@ -98,8 +99,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
   - ユーザーが「Create a merge commit」で取り込み、取り込んだブランチは GitHub が自動で消す（想定どおり）。**作業ごとに、始めるときに `main` から新しい名前のブランチを切る**（名前は `claude/<内容が分かる英語>`。例 `claude/combo-sync-1.11.3`・`claude/docs-match-code`。セッションに割り当てられた名前は使わない）。取り込まれたブランチを同じ名前で作り直したり、取り込み済みの PR を使い回したりしない。
   - Dependabot の更新 PR は、CI が緑ならユーザーが Merge してよい。赤なら Claude が原因を調べる。
   - ブランチを消すのはユーザー。Claude は候補の一覧と削除のコマンドを渡す（判定の仕方は `doc/development.md` の「ブランチの片付け」）。
-- リリースしたら、jar を `mc1.12.2/build/release/` にコピーしてユーザーに添付し、PR のリンクと「試してほしいこと」の箇条書きを渡す。
+- リリースしたら、両方の jar を `mc1.12.2/build/release/` にコピーしてユーザーに添付し、PR のリンクと「試してほしいこと」の箇条書きを渡す。
 
 ## 次の作業
 
-現行は 1.11.12。機能は止め、別の Minecraft の版（1.21.1 + NeoForge）へ移植する。移植は仕様書 `doc/spec/SPEC_v1.12.0.md`（下書き）。保留中の相談は `doc/roadmap.md`。
+現行は 1.12.0（1.12.2 + Forge と 1.21.1 + NeoForge）。1.21.1 の新しい物（メイス・トライデント・クロスボウ・クラフター）と、ほかの版への対応は `doc/roadmap.md` の保留中の相談。

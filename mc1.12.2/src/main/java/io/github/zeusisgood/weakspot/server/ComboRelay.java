@@ -20,8 +20,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
  * 頭の上の「n HIT」。1 人あたり MIN_INTERVAL_TICKS に 1 回までに間引き、間引いた分は次に送れるときに送る。
  * 弱点を一時オフにしているプレイヤーの数は送らない。
  * <p>
- * 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。送る相手は 1.11.3 以降のクライアントだけ
- * （古いクライアントは、自分の ID を「ほかのプレイヤー」として描いてしまう）。
+ * 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ComboRelay {
@@ -32,8 +31,6 @@ public final class ComboRelay {
     private static final Map<UUID, Sent> SENT = new HashMap<>();
     /** 本人宛て。 */
     private static final Map<UUID, Own> OWN = new HashMap<>();
-    /** 本人宛てを送る相手の版。 */
-    private static final String OWN_SINCE = "1.11.3";
 
     private static final class Sent {
         int count;
@@ -102,7 +99,7 @@ public final class ComboRelay {
             }
             own.mismatched = false;
             EntityPlayerMP player = server.getPlayerList().getPlayerByUUID(entry.getKey());
-            if (player == null || !PlayerText.clientSince(player, OWN_SINCE)) {
+            if (player == null) {
                 continue;
             }
             own.sentTick = now;

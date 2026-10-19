@@ -7,8 +7,8 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。
-- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.21.1 のビルドは `mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方は両方の版で同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.21.1 版」にまとめる。
+- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
@@ -18,7 +18,7 @@
 ### 右クリックの弱点（成長・機械・収穫）
 
 - 対象の判定は `RightClickTargets.classify`（機械 → 成長 → 収穫 → 自動の成長の順）。成長は `IGrowable` の `canGrow` と、追加リスト `growthExtraBlocks`（`common/BlockFilter` / `GrowthFilters`。状態の条件はプロパティの名前と値の名前で見るので、IC2 などのクラスに依存しない）。柱の植物（`COLUMN_BLOCKS`）はバニラの `updateTick` と同じ条件をコードで見る。機械は `ITickable` の TE と、予約された tick で動くレッドストーンの部品（`isScheduledMachine`）。
-- 自動の成長（`isAutoGrowable`）: `getTickRandomly()` のブロックを、しゃがんでいるときだけ（Random Things の Time in a Bottle と同じ考え方。通常の右クリックを横取りしないため）。両側とも 1.11.2 以上のときだけ（`ServerFeatures.since` / `PlayerText.clientSince`）。`randomTickSpeed` が 0 以下なら効果をかけない（IC2 の `BlockFoam.randomTick` がそのとき例外を投げる）。
+- 自動の成長（`isAutoGrowable`）: `getTickRandomly()` のブロックを、しゃがんでいるときだけ（Random Things の Time in a Bottle と同じ考え方。通常の右クリックを横取りしないため）。追加リストのブロックと `IGrowable` は自動の対象にしない（書いた条件を満たさないとき・育ちきったときに、拾い直さないため）。`randomTickSpeed` が 0 以下なら効果をかけない（IC2 の `BlockFoam.randomTick` がそのとき例外を投げる）。
 - 対象を右クリックしたら、`RightClickBlock` をメインハンドで SUCCESS にしてキャンセルし、通常動作（GUI・オフハンドの設置）を止める。クライアントでキャンセルしてもバニラは右クリックのパケットを送るので、サーバーでも発火し、そこで「直前に右クリックした」ことを記録する。押しっぱなしでバニラは 4 tick ごとに右クリックする。
 - 検証と効果は `server/RightClickHits`（成長は `randomTick` を余分に呼ぶ。キノコは `randomTick` では広がるだけなので、確率で `grow`）。育たないときの知らせは `server/GrowthWarnings`・`common/GrowthStuck`。収穫は `server/HarvestHits`・`common/HarvestBonus`（`BreakEvent` で保護を確かめてから）。
 - 機械の加速は `server/MachineAccelerator`（Time in a Bottle と同じく `update()` を余分に呼ぶ。例外はあえて捕まえない: クラッシュレポートで機械を特定し、`excludedBlocks` に足してもらう。ユーザーの判断）。レッドストーンの部品は `server/ScheduledTicks`・`common/ScheduledBoost`（予約の前倒し。`getPendingBlockUpdates` は X と Z だけで絞るので、同じ列のほかの予約は元の時刻のまま入れ直す。ディスペンサーの余分の発射は非公開の `dispense`）。
@@ -26,7 +26,7 @@
 
 ### 採掘
 
-- 対象: 壊せて、今の破壊速度で 1 tick に進む量（`getPlayerRelativeBlockHardness`）が 1.0 未満のブロック。1.0 以上はバニラの `PlayerControllerMP.clickBlock` がクリックした瞬間に壊し、「掘っている」状態にも入らない。
+- 対象: 壊せて、今の破壊速度で 1 tick に進む量（`getPlayerRelativeBlockHardness`）が 1.0 未満のブロック。1.0 以上はバニラの `PlayerControllerMP.clickBlock` がクリックした瞬間に壊し、「掘っている」状態にも入らない。このブロックは掘る前の弱点だけを出し、掘る前に当てていれば、統計の「壊したブロック数」と耐久回復に数える（予約の確定は `LeftClickBlock` で、バニラが壊すより先）。
 - クライアント: `ClientWeakSpotHandler`（照準と出し直し）・`MiningBoost`（ブースト・掘る前のヒット・次を掘るまでの待ち）・`WeakSpotRenderer`。サーバー: `ServerBoostTracker`（下の「重要」の節）・`MiningRewards`（耐久回復と節目）。
 - 掘る前のヒット: 照準のブロックに薄く出し、左クリックを押している間だけ当たる（照準を合わせるだけで当たると、ブロックを交互に見るだけでコンボが増え続けるため）。サーバーは予約にして、掘り始めた瞬間に確定する（`ServerBoostTracker.RESERVED`。掘らずにコンボを稼げないように）。
 - 次を掘るまでの待ち: 当てたブロックを壊したら、`PlayerControllerMP` の非公開の `blockHitDelay`（バニラは 5）を 0 にする。サーバーはこの待ちを確かめていない。
@@ -36,7 +36,7 @@
 ### 照準のまわり・画面の上の弱点
 
 - 照準のまわり（乗り物・食事・弓・はしご・走り・エリトラ・投げる物・近接・ゲート・泳ぎ・落下）: 土台は `AimSpotKind` / `AimSpots`、描き方と当たり判定は `HudSpot`・`ScreenProjection`・`FishingMath.allowedAngle`、向きの計算は `common/BowMath`。種類ごとのクラスは条件・出し方・効果・ゲージだけを書く。
-  - 動いている間に出す種類（走り・はしご・泳ぎ・エリトラ・乗り物）は、条件が一瞬外れても 10 tick 残す（サーバーの `MoveHits` の「直前 10 tick」と同じ。バニラは壁にこすれた瞬間に走りを一度切るので、2 マスの通路で弱点がちらついていた）。
+  - 動いている間に出す種類（走り・はしご・泳ぎ・エリトラ・乗り物）は、条件が一瞬外れても 10 tick 残す（サーバーの `MoveHits` の「直前 10 tick」と同じ。バニラは壁にこすれた瞬間に走りを一度切るので、2 マスの通路で弱点がちらついていた）。残している間は当たらない（走っていないときの加速を防ぐため）。遊び方として弱点を止めるとき（`allowed` が外れる。一時オフ・種類のオフなど）は、残さずにすぐ消す。
   - 近接は左右だけ（走りの上下と見分けるため）。pitch は ±60 度で止め、yaw のずれを 1 / cos で広げる（真上・真下では yaw をずらしても照準の中央になり、当て放題だった）。
   - 照準が水平から大きく上下を向いていたら、水平に戻る側に出す（当て続けても真上・真下まで行かないように）。
   - 移動の加速: はしご・泳ぎ・ボートはクライアントが `move` で足す（泳ぎは 1.12.2 の移動速度の値が水中に効かないため、ボートは乗っている人のクライアントが動きを決めるため）。馬・豚・走りはサーバーの `server/SpeedModifier`。トロッコはサーバーで `onUpdate` を余分に呼ぶ（レールの最高速度は `BlockRailBase` が決めていて上げられないため）。
@@ -67,11 +67,11 @@
 - 他のプレイヤー: マークは `OtherMarkers` → `MarkerRelay`（サーバーは検証せずに転送する）、音は `OtherHitMessage`、頭の上のコンボは `OtherCombos`、節目の知らせの非表示は `OthersMilestoneFilter`。
 - 統計画面（K キー）: `StatsScreen` と各タブ（`StatsTab`・`SoundTab`・`KindsTab`・`TargetTab`。土台 `StatsScreenTab`）。設定画面は `WeakSpotGuiFactory` が `common/SettingGroups` のまとめで組む（ファイルのカテゴリではなく、種類・用途で）。
 - 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。
-- サーバーの版で機能を止める: `ServerFeatures.since("1.x.y")`（`SyncedSettings.serverVersion`）。古いサーバーにつなぐと、弱点が出るのにバニラの動作（GUI など）も起きる食い違いを防ぐ。今使っている版は 1.11.2（自動の成長・掘る前のヒット）と 1.11.3（本人のコンボの直し）。
+- サーバーの版で機能を止める: `ServerFeatures.since("1.x.y")`（`SyncedSettings.serverVersion`）。古いサーバーにつなぐと、弱点が出るのにバニラの動作（GUI など）も起きる食い違いを防ぐ。今は使っている所がない（1.11.x の条件は、接続できる下限が 1.12 になったので消した）。
 
 ### 的当て・記録・知らせ（サーバー）
 
-- 的当て: `ItemTarget`・`server/TargetRounds`・`client/TargetPlay`・`common/TargetRules`。ラウンドの時間はサーバーの tick で数える。的の位置はクライアントが、始めたときの向きからのずれで持つ。記録は `MiningStats` の `targetBest`・`targetRounds`（「統計をリセット」では消さない。ご褒美の解放が消えるため）。ご褒美の段階は、自己ベストと取った進捗の高いほう（`TargetRules.Tier.unlocked`。しきい値を上げる前に取った段階を残すため）。
+- 的当て: `ItemTarget`・`server/TargetRounds`・`client/TargetPlay`・`common/TargetRules`。ラウンドの時間はサーバーの tick で数える。弱点の大きさの設定 `spotSize` は掛けない（記録を公平にするため）。的の位置はクライアントが、始めたときの向きからのずれで持つ。記録は `MiningStats` の `targetBest`・`targetRounds`（「統計をリセット」では消さない。ご褒美の解放が消えるため）。ご褒美の段階は、自己ベストと取った進捗の高いほう（`TargetRules.Tier.unlocked`。しきい値を上げる前に取った段階を残すため）。
 - 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存のキーは `saveKey`。近接は古いキー `critHits` も読む）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
 - 配る物: `GuideBookGiver`（ガイドの本・的・ようこその案内。永続データの `guideGiven`・`targetsGiven`・`targetGiftVersion`（ない人は 1.11.0 とみなす））。
 - ほかのプレイヤーへの知らせ: 節目・コンボの段階・的当ての 1 位（`MiningRewards.broadcast*`・`TargetRounds`）。
@@ -92,7 +92,7 @@
 
 ### 通信
 
-`network/`（`WeakSpotMod.preInit` で登録。番号は登録順）。
+`network/`（1.12.2 は `WeakSpotMod.preInit` で登録し、番号は登録順。1.21.1 は `Network.register` で、ID は `weakspot:<名前>`。中身の並びは両方の版で同じ）。
 
 | 番号 | メッセージ | 向き | 中身 |
 |---|---|---|---|
@@ -107,6 +107,7 @@
 | 11 | `OtherComboMessage` | S→C | 頭の上のコンボと、本人のコンボの直し |
 | 12 / 13 | `TargetMessage` / `TargetActionMessage` | S→C / C→S | 的当て |
 | 14 | `OtherTargetMessage` | S→C | 近くのプレイヤーの的当てのヒット数 |
+| -（1.21.1 版のみ） | `HelloMessage` | C→S | 接続直後に自分の Mod の版（NeoForge は相手の Mod の版を教えてくれないため。`PlayerText.clientSince`・`VersionCheck` が使う） |
 
 ## クライアントを信じる範囲
 
@@ -133,6 +134,23 @@
 - クリックのたびにブーストを捨てる（`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`。`LeftClickBlock` は、その場で壊れるかの判定より先に来る。例外: 掘る前のヒットと、待ちを 0 にするための当てたブロックは残す）。
 - サーバーは、クリックした座標と前の座標の今の状態を、その tick の終わりに本人にだけ `SPacketBlockChange` で送り直す（`ServerBoostTracker.queueResend`）。古いクライアントや、ほかの Mod で速さがずれたときも、同じ tick のうちに戻る。
 - 保留の破壊: バニラの `blockRemoving` は、進捗が 0.7 未満で掘り終わりが届くと破壊を保留にする（`receivedFinishDiggingPacket` / `delayedDestroyPos`）。**保留は 1 枠だけ**で、埋まっていると次の不足は捨てられて STOP の返事でブロックが戻る。保留中のブロックは「今の速さ × 経過 tick ≥ 1.0」で壊れる。違うブロックを掘り始めても、保留中のブロックには追加進捗を掛け続ける（`ServerBoostTracker.DELAYED`）。保留のあとに壊れたら、統計・耐久回復に数える。
+
+## 1.21.1 版
+
+共通の考え方（上の各節）は同じで、Minecraft・NeoForge の API で違う所だけを書く。
+
+- 入口: `WeakSpotMod`（`@Mod`。設定・通信・登録・サーバーのイベント）。物理クライアントでは `client.ClientProxy` を名前で作る（専用サーバーでクライアントのクラスを読まないため。1.12.2 の `@SidedProxy` と同じ考え）。アイテムと保存データの登録は `Registration`。
+- 非公開のメンバーは `accesstransformer.cfg`（1.12.2 の `Reflect` に当たる）。読めないときの代わりの動き（1.12.2 の「読めなければ弱点を出さない」）は要らないので、`EnchantHits`・`PortalHits` の `isAvailable` はいつも true。
+- 毎フレームのヒット判定と、ワールドへの描画: `RenderLevelStageEvent` の `AFTER_WEATHER`（モデルビューにカメラの向きが入っている最後の段）。頂点はカメラ（目）からの相対座標。HUD の弱点の投影に使う行列も、ここで `ScreenProjection.onFrame` に渡す。
+- HUD は `RenderGuiEvent.Post`、GUI の上は `ScreenEvent.Render.Post`。色だけの図形は `client/Draw`（1.21 には `GL_LINE_LOOP` がないので、線の輪は最初の点に戻して閉じる）。
+- 採掘: クライアントの `MultiPlayerGameMode` とサーバーの `ServerPlayerGameMode` の判定（積算／「破壊速度 × (経過tick+1) ≥ 0.7」・保留 1 枠）は 1.12.2 と同じなので、`BoostMath` をそのまま使う。NeoForge は `LeftClickBlock` を、クライアントでは押している間毎 tick（`CLIENT_HOLD`）、サーバーでは掘り終わり・中断でも送るので、ブーストを捨てるのは `START` だけ。サーバーが状態を送り直すのは `ClientboundBlockUpdatePacket`。
+- 機械: かまどなどの ticker はサーバーにしかないので、毎 tick 動くブロックの一覧はサーバーが作って `SyncedSettings.tickingBlocks` で送る（1.21.1 版だけの項目）。加速は ticker を余分に呼ぶ。レッドストーン部品の予約は、チャンクの `LevelChunkTicks` から探して早め、同じ位置・ブロックの予約を消してから入れ直す（予約は 1 つまでのため）。
+- 動物: アルマジロのウロコは、ニワトリの卵と同じ間隔（6000〜11999 tick）なので、卵の設定と `AnimalTimers.eggAfterHit` を使い、`Timer.SCUTE` で別のバーにする。村人の繁殖の案内は、1.14 以降の条件（空いているベッド・食べ物の点数）で `VillagerBreeding.reasonsWithBeds`。取引の段階の解放は、職業レベルを 1 つ上げる。
+- ネザーゲート: 待ちは `Entity.portalProcess`（`PortalProcessor.portalTime`）。ネザーゲートだけ（エンドのゲートは待たない）。
+- 収穫: 1.21 には `HarvestDropsEvent` がないので、収穫物は `CommonHooks.handleBlockDrops`（`BlockDropsEvent`）を通す。壊すときの許可は `CommonHooks.fireBlockBreak`。
+- 保存データ: プレイヤーはデータアタッチメント `Registration.PLAYER_DATA`（死んでも残す。中身のキーは 1.12.2 の `PlayerPersisted.weakspot` と同じ）、順位はワールドの `SavedData`（`weakspot_leaderboard`）。
+- 設定: `ModConfigSpec` を、`ServerConfig`・`ClientConfig` のフィールドと注釈（`config/Config`）からリフレクションで組む（項目の名前・範囲・説明を 1.12.2 と 1 か所で揃えるため）。ファイルを保存すると NeoForge が読み直し（`ModConfigEvent.Reloading`）、サーバーの項目なら全員に送り直す。設定画面は `WeakSpotGuiFactory`（NeoForge の標準の画面はファイルのカテゴリの並びになるので、`SettingGroups` のまとめで自作）。
+- コマンド: サーバーの `/weakspot` は Brigadier。クライアントの `/weakspot bug`・`skipupdate` は `RegisterClientCommandsEvent`（クライアントに無いサブコマンドは、NeoForge がそのままサーバーへ送る）。
 
 ## 設定
 

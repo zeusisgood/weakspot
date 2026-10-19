@@ -1,0 +1,68 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+version = mod_version
+group = 'io.github.zeusisgood'
+base.archivesName = "weakspot-${minecraft_version}"
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+// 版に依存しない計算（common）は、各版のビルドがソースで読む
+sourceSets {
+    main.java.srcDir '../common/src/main/java'
+    test.java.srcDir '../common/src/test/java'
+}
+
+neoForge {
+    version = neo_version
+
+    runs {
+        client {
+            client()
+        }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+    }
+
+    mods {
+        weakspot {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.13.2'
+}
+
+// 翻訳の正本は ../lang/*.json。1.21.1 はそのまま読む
+processResources {
+    inputs.property 'version', version
+    from('../lang') {
+        include '*.json'
+        into 'assets/weakspot/lang'
+    }
+    filesMatching('META-INF/neoforge.mods.toml') {
+        expand 'version': version, 'minecraft_version': minecraft_version, 'neo_version': neo_version
+    }
+}
+
+jar {
+    // MIT の条件（配布物に著作権表示を付ける）のため、jar にも LICENSE を入れる
+    from('../LICENSE') {
+        rename { 'LICENSE_weakspot' }
+    }
+}
+
+test {
+    // テストは、リポジトリ直下のファイル（翻訳・README・update.json など）を読む
+    workingDir = file('..')
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

@@ -23,6 +23,15 @@ public class ReleaseFilesTest {
         assertEquals("WeakSpotMod.VERSION", VERSION, find(MOD_SOURCE, "String VERSION = \"([^\"]+)\""));
     }
 
+    /** いつも両方の jar を同じ番号で出す。 */
+    @Test
+    public void everyMinecraftVersionHasTheSameModVersion() {
+        assertEquals("mc1.21.1/gradle.properties mod_version", VERSION,
+                find(ResourceFiles.read("mc1.21.1/gradle.properties"), "(?m)^mod_version=(\\S+)"));
+        assertEquals("mc1.21.1 WeakSpotMod.VERSION", VERSION, find(ResourceFiles.read(
+                "mc1.21.1/src/main/java/io/github/zeusisgood/weakspot/WeakSpotMod.java"), "String VERSION = \"([^\"]+)\""));
+    }
+
     /** ACCEPTED_VERSIONS は [今のマイナー,次のマイナー)。 */
     @Test
     public void acceptedVersionsCoverTheCurrentMinor() {
@@ -31,6 +40,15 @@ public class ReleaseFilesTest {
         String next = parts[0] + "." + (Integer.parseInt(parts[1]) + 1);
         assertEquals("WeakSpotMod.ACCEPTED_VERSIONS", "[" + minor + "," + next + ")",
                 find(MOD_SOURCE, "String ACCEPTED_VERSIONS = \"([^\"]+)\""));
+    }
+
+    /** 1.21.1 は、同じマイナーの印（Network.PROTOCOL）同士だけが接続できる。 */
+    @Test
+    public void networkProtocolIsTheCurrentMinor() {
+        String[] parts = VERSION.split("\\.");
+        assertEquals("mc1.21.1 Network.PROTOCOL", parts[0] + "." + parts[1], find(ResourceFiles.read(
+                "mc1.21.1/src/main/java/io/github/zeusisgood/weakspot/network/Network.java"),
+                "String PROTOCOL = \"([^\"]+)\""));
     }
 
     /** README のダウンロードは配布サイトへのリンクだけ（版ごとに直さない）。「最近の更新」は版ごとに足す。 */
@@ -67,15 +85,20 @@ public class ReleaseFilesTest {
         assertTrue("ja_jp.json: " + key, ResourceFiles.lang(ResourceFiles.JA_JP).containsKey(key));
     }
 
-    /** 新しい版の通知（Forge の更新確認）。 */
+    /** 新しい版の通知（Forge・NeoForge の更新確認）。Minecraft の版ごとの節の両方。 */
     @Test
     public void updateJsonPointsToTheCurrentVersion() {
         String json = ResourceFiles.read("update.json");
-        assertEquals("update.json 1.12.2-latest", VERSION, find(json, "\"1\\.12\\.2-latest\"\\s*:\\s*\"([^\"]+)\""));
-        assertEquals("update.json 1.12.2-recommended", VERSION,
-                find(json, "\"1\\.12\\.2-recommended\"\\s*:\\s*\"([^\"]+)\""));
-        assertTrue("update.json \"1.12.2\" has \"" + VERSION + "\"",
-                Pattern.compile("\"" + Pattern.quote(VERSION) + "\"\\s*:").matcher(json).find());
+        for (String mc : new String[] {"1.12.2", "1.21.1"}) {
+            String quoted = Pattern.quote(mc);
+            assertEquals("update.json " + mc + "-latest", VERSION,
+                    find(json, "\"" + quoted + "-latest\"\\s*:\\s*\"([^\"]+)\""));
+            assertEquals("update.json " + mc + "-recommended", VERSION,
+                    find(json, "\"" + quoted + "-recommended\"\\s*:\\s*\"([^\"]+)\""));
+            String section = find(json, "\"" + quoted + "\"\\s*:\\s*\\{([^}]*)\\}");
+            assertTrue("update.json \"" + mc + "\" has \"" + VERSION + "\"",
+                    Pattern.compile("\"" + Pattern.quote(VERSION) + "\"\\s*:").matcher(section).find());
+        }
     }
 
     private static String find(String text, String regex) {

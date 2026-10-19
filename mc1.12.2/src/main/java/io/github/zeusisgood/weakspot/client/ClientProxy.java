@@ -64,10 +64,8 @@ public class ClientProxy extends CommonProxy {
         Minecraft.getMinecraft().addScheduledTask(() -> {
             Minecraft mc = Minecraft.getMinecraft();
             if (mc.player != null && entityId == mc.player.getEntityId()) {
-                // 自分の ID はサーバーの数での直し（古いサーバーは本人には送らない）
-                if (ServerFeatures.since("1.11.3")) {
-                    OwnHits.correctStreak(count);
-                }
+                // 自分の ID はサーバーの数での直し
+                OwnHits.correctStreak(count);
                 return;
             }
             OtherCombos.receive(entityId, count);

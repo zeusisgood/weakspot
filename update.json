@@ -1,10 +1,13 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.11.12",
-    "1.12.2-recommended": "1.11.12"
+    "1.12.2-latest": "1.12.0",
+    "1.12.2-recommended": "1.12.0",
+    "1.21.1-latest": "1.12.0",
+    "1.21.1-recommended": "1.12.0"
   },
   "1.12.2": {
+    "1.12.0": "Now available for Minecraft 1.21.1 (NeoForge)",
     "1.11.12": "Internal cleanup (no gameplay changes)",
     "1.11.11": "Internal cleanup (no gameplay changes)",
     "1.11.10": "Internal cleanup (no gameplay changes)",
@@ -25,5 +28,8 @@
     "1.9.4": "Clearer name for the stats average; logo in the Mods list",
     "1.9.3": "Internal cleanup (no gameplay changes)",
     "1.9.2": "Chat notice when a new version is out"
+  },
+  "1.21.1": {
+    "1.12.0": "Now available for Minecraft 1.21.1 (NeoForge)"
   }
 }

@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/** バニラの EntityAIVillagerMate と同じ条件。村が見つからないときは、ほかの条件は調べない（村を作るのが先）。 */
+/**
+ * reasons は 1.12 のバニラ（EntityAIVillagerMate）と同じ条件。村が見つからないときは、ほかの条件は調べない（村を作るのが先）。
+ * reasonsWithBeds は 1.14 以降（村と扉の代わりに、空いているベッドが要る）。
+ */
 public final class VillagerBreeding {
 
     /** EntityAIVillagerMate#checkSufficientDoorsPresentForNewVillager。 */
@@ -14,9 +17,11 @@ public final class VillagerBreeding {
     public static final int POTATO_OR_CARROT = 12;
     public static final double MATE_RANGE = 8.0;
     public static final double MATE_RANGE_Y = 3.0;
+    /** 1.14 以降の Villager#canBreed（パン 4・ほかの作物 1 の合計）。 */
+    public static final int FOOD_POINTS = 12;
 
     public enum Reason {
-        NO_VILLAGE, NOT_SEASON, DOORS, COOLDOWN, FOOD, NO_MATE, MATE_CHILD, MATE_COOLDOWN, MATE_FOOD
+        NO_VILLAGE, NOT_SEASON, DOORS, COOLDOWN, FOOD, NO_MATE, MATE_CHILD, MATE_COOLDOWN, MATE_FOOD, NO_BED
     }
 
     /** 一番近い村人。 */
@@ -79,6 +84,11 @@ public final class VillagerBreeding {
         if (!ready) {
             reasons.add(Reason.FOOD);
         }
+        addMate(reasons, mate);
+        return reasons;
+    }
+
+    private static void addMate(List<Reason> reasons, Mate mate) {
         switch (mate) {
             case NONE:
                 reasons.add(Reason.NO_MATE);
@@ -95,7 +105,26 @@ public final class VillagerBreeding {
             default:
                 break;
         }
+    }
+
+    /** 空なら、そろっている。 */
+    public static List<Reason> reasonsWithBeds(boolean freeBed, boolean cooldown, boolean ready, Mate mate) {
+        List<Reason> reasons = new ArrayList<>();
+        if (!freeBed) {
+            reasons.add(Reason.NO_BED);
+        }
+        if (cooldown) {
+            reasons.add(Reason.COOLDOWN);
+        }
+        if (!ready) {
+            reasons.add(Reason.FOOD);
+        }
+        addMate(reasons, mate);
         return reasons;
+    }
+
+    public static boolean hasFoodPoints(int points) {
+        return points >= FOOD_POINTS;
     }
 
     public static Mate mate(boolean exists, boolean child, boolean cooldown, boolean ready) {

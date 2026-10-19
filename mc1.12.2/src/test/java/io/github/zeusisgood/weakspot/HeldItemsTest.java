@@ -19,7 +19,7 @@ import net.minecraft.item.ItemSpade;
 import net.minecraft.item.ItemSword;
 import org.junit.Test;
 
-/** 右クリックで何もしないアイテムの見分け。1.12.2 のバニラのクラスで確かめる（SPEC_v1.11.0.md の 7.2）。 */
+/** 右クリックで何もしないアイテムの見分け。1.12.2 のバニラのクラスで確かめる（1.11.0 の仕様書（タグ v1.11.12）の 7.2）。 */
 public class HeldItemsTest {
 
     @Test

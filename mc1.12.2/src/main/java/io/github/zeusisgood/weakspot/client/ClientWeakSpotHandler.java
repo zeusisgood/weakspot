@@ -172,8 +172,7 @@ public final class ClientWeakSpotHandler {
             }
         } else if (isHoldingUse(mc)) {
             aimRightClick(mc, target);
-        } else if (KindSwitches.isEnabled(HitKind.MINING) && ClientSettings.get().enabled(HitKind.MINING)
-                && ServerFeatures.since("1.11.2")) {
+        } else if (KindSwitches.isEnabled(HitKind.MINING) && ClientSettings.get().enabled(HitKind.MINING)) {
             aimPreDig(mc, target);
         }
     }

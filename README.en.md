@@ -14,9 +14,9 @@ A Minecraft mod that brings Fortnite's "weak spot" harvesting to Minecraft. A gl
 
 - **[CurseForge](https://www.curseforge.com/minecraft/mc-mods/weakspot)**
 
-Requires **Minecraft Java Edition 1.12.2 + Forge**. Developed and tested with Forge 14.23.5.2860; much older Forge builds may not run every feature.
+Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with 14.23.5.2860; much older Forge builds may not run every feature) or **1.21.1 + NeoForge** (developed and tested with 21.1.264). Pick the file for your Minecraft version on the download page.
 
-For multiplayer, install it on the server **and** on every player's client, all on the same minor version (for example 1.10.x). In single player, only your client needs it.
+For multiplayer, install it on the server **and** on every player's client, all on the same minor version (for example 1.12.x) and the same Minecraft version. In single player, only your client needs it.
 
 ## Controls
 
@@ -34,15 +34,15 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.12.0
+
+- Now available for Minecraft 1.21.1 (NeoForge)
+
 ### 1.11.12
 
 - Internal cleanup (no gameplay changes)
 
 ### 1.11.11
-
-- Internal cleanup (no gameplay changes)
-
-### 1.11.10
 
 - Internal cleanup (no gameplay changes)
 
