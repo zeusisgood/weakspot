@@ -12,6 +12,12 @@ mc_info() {
       CF_JAVA="Java 8"
       CF_TYPE=minecraft-1-12
       ;;
+    1.21.1)
+      LOADER=neoforge
+      CF_LOADER=NeoForge
+      CF_JAVA="Java 21"
+      CF_TYPE=minecraft-1-21
+      ;;
     *)
       echo "::error::Unknown Minecraft version: $1 (add it to .github/scripts/mc-versions.sh)"
       return 1
