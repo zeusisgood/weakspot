@@ -274,7 +274,7 @@ final class WeakSpotRenderer {
 
     /** 上面・下面の「下」は、プレイヤーに一番近い辺（視点の x, z はカメラの位置と同じ）。 */
     private static void drawHealthBar(WeakSpot spot, double health, double cx, double cy, double cz) {
-        int sign = spot.face.getAxisDirection().getOffset();
+        int sign = spot.face.getAxisDirection().getStep();
         BlockHealthBar bar = BlockHealthBar.place(spot.axis, sign, spot.rect, cx, cz);
         drawQuad(spot, bar.rect(1), HEALTH_LIFT, cx, cy, cz, HEALTH_BACK);
         if (health > 0) {

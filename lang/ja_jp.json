@@ -471,7 +471,7 @@
   "weakspot.bug.step5": " 5. 報告には GitHub アカウントが必要です。ログ・クラッシュレポートは自動送信されません",
   "weakspot.bug.env.mod": "Mod: %s / サーバーの Mod: %s（%s）",
   "weakspot.bug.env.language": "言語: %s",
-  "weakspot.bug.env.short": "Mod %s / サーバーの Mod %s（%s） / Minecraft %s / Forge %s / Mod %s 個",
+  "weakspot.bug.env.short": "Mod %s / サーバーの Mod %s（%s） / Minecraft %s / %s / Mod %s 個",
   "weakspot.bug.env.unknown": "不明",
   "weakspot.bug.env.solo": "ソロ",
   "weakspot.bug.env.multi": "マルチ",

@@ -471,7 +471,7 @@
   "weakspot.bug.step5": " 5. A GitHub account is required. Logs and crash reports are never sent automatically",
   "weakspot.bug.env.mod": "Mod: %s / Server mod: %s (%s)",
   "weakspot.bug.env.language": "Language: %s",
-  "weakspot.bug.env.short": "Mod %s / Server mod %s (%s) / Minecraft %s / Forge %s / %s mods",
+  "weakspot.bug.env.short": "Mod %s / Server mod %s (%s) / Minecraft %s / %s / %s mods",
   "weakspot.bug.env.unknown": "unknown",
   "weakspot.bug.env.solo": "single player",
   "weakspot.bug.env.multi": "multiplayer",
