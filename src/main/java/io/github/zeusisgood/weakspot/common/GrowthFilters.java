@@ -7,13 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 成長の弱点の追加リスト（growthExtraBlocks）を読んだもの。Minecraft に依存しない。
- * 同じブロックの複数行は、どれかを満たせばよい。条件を書かない行には、初期の条件（DEFAULT_CONDITIONS）を付ける。
- */
+/** 同じブロックの複数行は、どれかを満たせばよい。条件を書かない行には、DEFAULT_CONDITIONS を付ける。 */
 public final class GrowthFilters {
 
-    /** 条件を書かないときの初期の条件。 */
     public static final Map<String, String> DEFAULT_CONDITIONS;
 
     static {
@@ -45,12 +41,12 @@ public final class GrowthFilters {
         return filters;
     }
 
-    /** そのブロックが追加リストにあるか（条件は問わない）。 */
+    /** 条件は問わない。 */
     public boolean contains(String block) {
         return byBlock.containsKey(block);
     }
 
-    /** そのブロックの今の状態（プロパティの名前 → 値の名前）が、どれかの行を満たすか。リストになければ false。 */
+    /** properties はプロパティの名前 → 値の名前。リストになければ false。 */
     public boolean matches(String block, Map<String, String> properties) {
         List<BlockFilter> filters = byBlock.get(block);
         if (filters == null) {
@@ -64,7 +60,7 @@ public final class GrowthFilters {
         return false;
     }
 
-    /** 読めなかった行（ログの警告用）。 */
+    /** ログの警告用。 */
     public List<String> invalid() {
         return Collections.unmodifiableList(invalid);
     }

@@ -1,12 +1,12 @@
 package io.github.zeusisgood.weakspot.common;
 
-/** Mod の版（1.5.1 のような「.」区切りの数）を比べる。 */
+/** 版は「1.5.1」のような「.」区切りの数。 */
 public final class ModVersions {
 
     private ModVersions() {
     }
 
-    /** a が b より古ければ負、新しければ正、同じなら 0。足りない桁は 0、数でない部分は無視する。 */
+    /** 足りない桁は 0、数でない部分は無視する。 */
     public static int compare(String a, String b) {
         String[] pa = a.split("\\.");
         String[] pb = b.split("\\.");
@@ -19,10 +19,7 @@ public final class ModVersions {
         return 0;
     }
 
-    /**
-     * 相手のクライアントの版 clientVersion が、翻訳キーを足した版 since 以上か。以上なら、そのキーを持っているので
-     * 翻訳キーのまま送ってよい。版が分からない（null・空）ときは false（サーバーで文にして送る）。
-     */
+    /** 版が分からない（null・空）ときは false（サーバーで文にして送る）。 */
     public static boolean hasKeysSince(String clientVersion, String since) {
         return clientVersion != null && !clientVersion.isEmpty() && compare(clientVersion, since) >= 0;
     }

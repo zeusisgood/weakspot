@@ -5,13 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * 設定に書く「ブロック名と、状態の条件」の1行。Minecraft に依存しない。
- * 書き方は {@code modid:block} か {@code modid:block[property=pattern,property=pattern]}。
- * pattern は、数の範囲 {@code a-b}、{@code *} を含む形（{@code *} は任意の文字列）、それ以外は完全一致。
- */
+* 設定に書く 1 行。{@code modid:block} か {@code modid:block[property=pattern,property=pattern]}。
+* pattern は、数の範囲 {@code a-b}、{@code *} を含む形（{@code *} は任意の文字列）、それ以外は完全一致。
+*/
 public final class BlockFilter {
 
-    /** ブロックの登録名。 */
     public final String block;
     /** プロパティの名前 → 値の条件（書いた順）。空なら条件なし。 */
     public final Map<String, String> conditions;
@@ -25,7 +23,7 @@ public final class BlockFilter {
         return !conditions.isEmpty();
     }
 
-    /** 1行を読む。読めない行は null。前後と区切りの空白は無視する。 */
+    /** 読めない行は null。前後と区切りの空白は無視する。 */
     public static BlockFilter parse(String entry) {
         if (entry == null) {
             return null;
@@ -61,7 +59,7 @@ public final class BlockFilter {
         return new BlockFilter(block, conditions);
     }
 
-    /** 状態（プロパティの名前 → 値の名前）が、すべての条件を満たすか。条件にあるプロパティがなければ満たさない。 */
+    /** properties はプロパティの名前 → 値の名前。条件にあるプロパティがなければ満たさない。 */
     public boolean matches(Map<String, String> properties) {
         for (Map.Entry<String, String> condition : conditions.entrySet()) {
             String value = properties.get(condition.getKey());
@@ -72,7 +70,6 @@ public final class BlockFilter {
         return true;
     }
 
-    /** 値 value が条件 pattern を満たすか。 */
     public static boolean matchesValue(String pattern, String value) {
         int[] range = range(pattern);
         if (range != null) {
@@ -89,7 +86,7 @@ public final class BlockFilter {
         return pattern.equals(value);
     }
 
-    /** {@code a-b}（a, b は 0 以上の整数）なら {a, b}。それ以外は null。 */
+    /** a, b は 0 以上の整数。それ以外の形は null。 */
     private static int[] range(String pattern) {
         int dash = pattern.indexOf('-');
         if (dash <= 0 || dash == pattern.length() - 1) {
@@ -116,7 +113,6 @@ public final class BlockFilter {
         return !text.isEmpty();
     }
 
-    /** {@code *} を任意の文字列として、全体が一致するか。 */
     private static boolean glob(String pattern, String value) {
         String[] parts = pattern.split("\\*", -1);
         if (!value.startsWith(parts[0])) {

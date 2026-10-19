@@ -1,10 +1,6 @@
 package io.github.zeusisgood.weakspot.common;
 
-/**
- * 時間で続く加速（乗り物・はしご・ダッシュ）の倍率。
- * 基本の倍率（vehicleBoostMultiplier など）× コンボの掛け数（ComboFactor.factor）。
- * 上限 max は 0 以下なら無し（初期値。ユーザーの判断）。
- */
+/** 上限 max は 0 以下なら無し（初期値。速さの上限は付けない方針）。 */
 public final class TimedBoostMath {
 
     private TimedBoostMath() {
@@ -15,7 +11,7 @@ public final class TimedBoostMath {
         return max > 0 ? Math.min(value, max) : value;
     }
 
-    /** 余分に進める割合（倍率 − 1。1 より小さい倍率は 0）。 */
+    /** 1 より小さい倍率は 0。 */
     public static double extra(double multiplier) {
         return Math.max(0, multiplier - 1);
     }

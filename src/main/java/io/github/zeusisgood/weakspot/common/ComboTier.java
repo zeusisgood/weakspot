@@ -1,6 +1,5 @@
 package io.github.zeusisgood.weakspot.common;
 
-/** コンボの数の色の段階。1 以下は表示しない。 */
 public enum ComboTier {
     NONE(0, 0xFFFFFF),
     WHITE(2, 0xFFFFFF),
@@ -16,7 +15,6 @@ public enum ComboTier {
     /** 色はゆっくり変える（描画側で時間から決める）。rgb は使わない。 */
     RAINBOW(400, 0xFFFFFF);
 
-    /** この段階になる最小のコンボ。 */
     public final int from;
     public final int rgb;
 

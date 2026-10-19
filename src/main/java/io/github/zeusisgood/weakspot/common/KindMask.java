@@ -1,15 +1,12 @@
 package io.github.zeusisgood.weakspot.common;
 
-/**
- * 弱点の種類ごとのオン・オフ。オフの種類を HitKind の番号のビットで持つ（SwitchMessage で送る）。
- * Minecraft に依存しない。
- */
+/** オフの種類を HitKind の番号のビットで持つ（SwitchMessage で送る）。 */
 public final class KindMask {
 
     private KindMask() {
     }
 
-    /** 設定 disabledKinds（種類の名前の一覧）から、オフの種類のビット。知らない名前は無視する。 */
+    /** keys は設定 disabledKinds。知らない名前は無視する。 */
     public static int fromKeys(String[] keys) {
         int mask = 0;
         if (keys != null) {
@@ -23,7 +20,7 @@ public final class KindMask {
         return mask;
     }
 
-    /** オフの種類のビットから、設定に書く名前の一覧（HitKind の順）。 */
+    /** HitKind の順。 */
     public static String[] toKeys(int mask) {
         java.util.List<String> keys = new java.util.ArrayList<>();
         for (HitKind kind : HitKind.values()) {
@@ -42,7 +39,6 @@ public final class KindMask {
         return (mask & bit(kind)) != 0;
     }
 
-    /** kind のオン・オフを切り替えたビット。 */
     public static int toggled(int mask, HitKind kind) {
         return mask ^ bit(kind);
     }

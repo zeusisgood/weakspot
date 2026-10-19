@@ -2,16 +2,13 @@ package io.github.zeusisgood.weakspot.common;
 
 import java.util.Random;
 
-/**
- * 収穫のコンボのおまけ。収穫物の数にコンボの掛け数（ComboFactor.factor）を掛け、端数は確率で 1 つ足す
- * （×1.25 なら 4 回に 1 回 +1）。上限はない。Minecraft に依存しない。
- */
+/** 端数は確率で 1 つ足す（×1.25 なら 4 回に 1 回 +1）。上限はない。 */
 public final class HarvestBonus {
 
     private HarvestBonus() {
     }
 
-    /** count 個に factor を掛けたあとの数。factor が 1 以下なら count のまま。 */
+    /** factor が 1 以下なら count のまま。 */
     public static int apply(int count, double factor, Random random) {
         if (count <= 0 || factor <= 1) {
             return Math.max(0, count);
