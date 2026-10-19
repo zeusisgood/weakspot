@@ -100,4 +100,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.11.10。機能は止め、1.11.x のパッチを経て別の Minecraft の版への移植へ。候補と保留中の相談は `doc/roadmap.md`。
+現行は 1.11.10。機能は止め、別の Minecraft の版（1.21.1 + NeoForge）へ移植する。下ごしらえは仕様書 `doc/spec/SPEC_v1.11.11.md`、移植は `doc/spec/SPEC_v1.12.0.md`（どちらも下書き）。保留中の相談は `doc/roadmap.md`。
