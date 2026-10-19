@@ -1,13 +1,17 @@
 # GitHub Release の jar を、手動で CurseForge に上げる（自動の公開が失敗したときや、まだ上げていない版を上げるとき）。
 # CurseForge は上げ済みの版を確かめられないので、同じ版を 2 回流すと二重に上がる。流す前に CurseForge の Files を確かめる。
-# Actions の画面の「Run workflow」で、版（空なら build.gradle の版）を指定して流す。
+# Actions の画面の「Run workflow」で、版（空なら mc1.12.2/build.gradle の版）と Minecraft の版（空なら、その Release に付いている全部の版）を指定して流す。
+# 1.11.11 までの Release は jar の名前の形が違う（Minecraft の版が入っていない）ので、ここからは上げられない。
 name: CurseForge publish
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (empty = the version in build.gradle)'
+        description: 'Version to publish (empty = the version in mc1.12.2/build.gradle)'
+        required: false
+      mc:
+        description: 'Minecraft version to publish (empty = every jar on the Release)'
         required: false
 
 jobs:
@@ -24,9 +28,13 @@ jobs:
       - name: Publish
         env:
           INPUT_VERSION: ${{ inputs.version }}
+          INPUT_MC: ${{ inputs.mc }}
         run: |
           version="$INPUT_VERSION"
           if [ -z "$version" ]; then
-            version=$(sed -n "s/^version = '\(.*\)'/\1/p" build.gradle)
+            version=$(sed -n "s/^version = '\(.*\)'/\1/p" mc1.12.2/build.gradle)
           fi
-          bash .github/scripts/publish-curseforge.sh "$version"
+          source .github/scripts/mc-versions.sh
+          for mc in ${INPUT_MC:-$(release_mc_versions "$version")}; do
+            bash .github/scripts/publish-curseforge.sh "$version" "$mc"
+          done

@@ -1,6 +1,7 @@
-# ビルドとテスト（PR と main への push）。main で版（build.gradle の version）が新しくなったら、
-# 同じビルドの jar で、タグ vX.Y.Z と GitHub Release を作る（本文は CHANGELOG.md のその版の節）。
-# そのあと、Release の jar を Modrinth と CurseForge にも上げる（.github/scripts/publish-*.sh）。
+# ビルドとテスト（PR と main への push）。Minecraft の版ごとのディレクトリ（mc<版>/）を matrix で別々にビルドする。
+# main で版（mc1.12.2/build.gradle の version）が新しくなったら、全部の版のビルドが通ったときだけ、同じビルドの jar を
+# 全部付けて、タグ vX.Y.Z と GitHub Release を 1 つ作る（本文は CHANGELOG.md のその版の節）。
+# そのあと、Release の jar を Minecraft の版ごとに Modrinth と CurseForge にも上げる（.github/scripts/publish-*.sh）。
 name: CI
 
 on:
@@ -10,17 +11,29 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-mc:
+    name: build (${{ matrix.mc }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # 版を足すときは、ここと .github/scripts/mc-versions.sh に足す
+      matrix:
+        include:
+          - mc: '1.12.2'
+            java: '8'
+    defaults:
+      run:
+        working-directory: mc${{ matrix.mc }}
     steps:
       - uses: actions/checkout@v7
       - name: Check the publishing scripts
         # 配布サイトへ上げるスクリプトの書き間違いを見つける（shellcheck は ubuntu-latest に入っている）
-        run: shellcheck .github/scripts/*.sh
+        working-directory: .
+        run: shellcheck -x .github/scripts/*.sh
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '8'
+          java-version: ${{ matrix.java }}
           cache: gradle
       - name: Build and test
         # ForgeGradle の初回のダウンロードで Maven が一時的に断ることがあるので、1 回だけやり直す
@@ -29,13 +42,23 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: test-reports
-          path: build/reports/tests/
+          name: test-reports-${{ matrix.mc }}
+          path: mc${{ matrix.mc }}/build/reports/tests/
       - name: Upload the jar
         uses: actions/upload-artifact@v7
         with:
-          name: jar
-          path: build/libs/*.jar
+          name: jar-${{ matrix.mc }}
+          path: mc${{ matrix.mc }}/build/libs/*.jar
+
+  # Merge に必須のチェックは、ブランチの保護の設定で「build」という名前で決めてある。matrix のジョブは
+  # 版ごとに名前が変わるので、全部の版が通ったときだけ成功する「build」をここで出す（版を足しても設定を変えずに済む）
+  build:
+    needs: build-mc
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every Minecraft version built
+        run: test "${{ needs.build-mc.result }}" = success
 
   release:
     needs: build
@@ -50,7 +73,7 @@ jobs:
       - name: Read the version
         id: version
         run: |
-          version=$(sed -n "s/^version = '\(.*\)'/\1/p" build.gradle)
+          version=$(sed -n "s/^version = '\(.*\)'/\1/p" mc1.12.2/build.gradle)
           echo "version=$version" >> "$GITHUB_OUTPUT"
           if gh release view "v$version" > /dev/null 2>&1; then
             echo "Release v$version already exists; nothing to do."
@@ -61,7 +84,8 @@ jobs:
       - uses: actions/download-artifact@v8
         if: steps.version.outputs.new == 'true'
         with:
-          name: jar
+          pattern: jar-*
+          merge-multiple: true
           path: jar
       - name: Create the release
         if: steps.version.outputs.new == 'true'
@@ -69,18 +93,28 @@ jobs:
           version=${{ steps.version.outputs.version }}
           # CHANGELOG.md の「## <版>」から、次の「## 」の手前まで
           awk -v v="## $version" '$0 == v {f = 1; next} /^## / {f = 0} f' CHANGELOG.md > notes.md
-          gh release create "v$version" "jar/weakspot-$version.jar" \
+          gh release create "v$version" jar/weakspot-*-"$version".jar \
             --title "$version" --notes-file notes.md --target "$GITHUB_SHA"
       - name: Publish to Modrinth
-        # Release の有無に関係なく毎回流す（Modrinth にその版がもうあれば何もしない。前回失敗した分もここで上がる）
+        # Release の有無に関係なく毎回流す（Modrinth にその番号がもうあれば何もしない。前回失敗した分もここで上がる）
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
-        run: bash .github/scripts/publish-modrinth.sh "${{ steps.version.outputs.version }}"
+        run: |
+          version=${{ steps.version.outputs.version }}
+          source .github/scripts/mc-versions.sh
+          for mc in $(release_mc_versions "$version"); do
+            bash .github/scripts/publish-modrinth.sh "$version" "$mc"
+          done
       - name: Publish to CurseForge
         # CurseForge は上げ済みの版を確かめられないので、Release を今作ったときだけ流す（失敗したら curseforge-publish.yml を手動で）
         if: steps.version.outputs.new == 'true'
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
-        run: bash .github/scripts/publish-curseforge.sh "${{ steps.version.outputs.version }}"
+        run: |
+          version=${{ steps.version.outputs.version }}
+          source .github/scripts/mc-versions.sh
+          for mc in $(release_mc_versions "$version"); do
+            bash .github/scripts/publish-curseforge.sh "$version" "$mc"
+          done

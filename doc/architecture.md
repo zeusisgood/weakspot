@@ -7,7 +7,8 @@
 
 ## 全体
 
-- `common/`: Minecraft に依存しない純粋な計算。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。
+- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
@@ -64,13 +65,13 @@
 - 自分の弱点の見た目と種類のオン・オフ: `MarkerLook`・`KindSwitches`・`common/KindMask`。オフの種類は `SwitchMessage` でサーバーにも送り、右クリックの抑止とヒットの受け付けを止める（バニラの動きに戻すため）。
 - 一時オフ（`ToggleKeyHandler`。HOME キー。J は JourneyMap と重なるため）: まとめて止めるのは `ClientWeakSpotHandler.stopOwnWeakSpots`。サーバーにも `SwitchMessage` で伝え、`ServerSwitches` が右クリックの抑止・ヒット・ブースト・マークの転送を止める。
 - 他のプレイヤー: マークは `OtherMarkers` → `MarkerRelay`（サーバーは検証せずに転送する）、音は `OtherHitMessage`、頭の上のコンボは `OtherCombos`、節目の知らせの非表示は `OthersMilestoneFilter`。
-- 統計画面（K キー）: `StatsScreen` と各タブ（`StatsTab`・`SoundTab`・`KindsTab`・`TargetTab`。土台 `StatsScreenTab`）。設定画面は `WeakSpotGuiFactory` が `config/SettingGroups` のまとめで組む（ファイルのカテゴリではなく、種類・用途で）。
+- 統計画面（K キー）: `StatsScreen` と各タブ（`StatsTab`・`SoundTab`・`KindsTab`・`TargetTab`。土台 `StatsScreenTab`）。設定画面は `WeakSpotGuiFactory` が `common/SettingGroups` のまとめで組む（ファイルのカテゴリではなく、種類・用途で）。
 - 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。
 - サーバーの版で機能を止める: `ServerFeatures.since("1.x.y")`（`SyncedSettings.serverVersion`）。古いサーバーにつなぐと、弱点が出るのにバニラの動作（GUI など）も起きる食い違いを防ぐ。今使っている版は 1.11.2（自動の成長・掘る前のヒット）と 1.11.3（本人のコンボの直し）。
 
 ### 的当て・記録・知らせ（サーバー）
 
-- 的当て: `ItemTarget`・`server/TargetRounds`・`client/TargetPlay`・`common/TargetRules`。ラウンドの時間はサーバーの tick で数える。的の位置はクライアントが、始めたときの向きからのずれで持つ。記録は `MiningStats` の `targetBest`・`targetRounds`（「統計をリセット」では消さない。ご褒美の解放が消えるため）。ご褒美の段階は、自己ベストと取った進捗の高いほう（`TargetRecords.tier`。しきい値を上げる前に取った段階を残すため）。
+- 的当て: `ItemTarget`・`server/TargetRounds`・`client/TargetPlay`・`common/TargetRules`。ラウンドの時間はサーバーの tick で数える。的の位置はクライアントが、始めたときの向きからのずれで持つ。記録は `MiningStats` の `targetBest`・`targetRounds`（「統計をリセット」では消さない。ご褒美の解放が消えるため）。ご褒美の段階は、自己ベストと取った進捗の高いほう（`TargetRules.Tier.unlocked`。しきい値を上げる前に取った段階を残すため）。
 - 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存のキーは `saveKey`。近接は古いキー `critHits` も読む）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
 - 配る物: `GuideBookGiver`（ガイドの本・的・ようこその案内。永続データの `guideGiven`・`targetsGiven`・`targetGiftVersion`（ない人は 1.11.0 とみなす））。
 - ほかのプレイヤーへの知らせ: 節目・コンボの段階・的当ての 1 位（`MiningRewards.broadcast*`・`TargetRounds`）。
@@ -79,14 +80,14 @@
 
 ### 共通の部品
 
-`src/test/.../compat/WireCompatTest` が、統計・設定の送る中身と保存のキーがパッチの間に 1 バイトも変わらないことを確かめる（通信・保存の形を変えるマイナーでは、期待値を作り直す）。
+`mc1.12.2/src/test/.../compat/WireCompatTest` が、統計・設定の送る中身と保存のキーがパッチの間に 1 バイトも変わらないことを確かめる（通信・保存の形を変えるマイナーでは、期待値を作り直す）。
 
 - ヒットの受け付け: `server/HitHandlers`（種類 → 処理の表。`HitHandlersTest` が全種類の登録を確かめる）→ `server/HitGate`（`allowed` / `ready` / `mark` / `take` / `accept`。間隔は `common/HitBudget`。受け付けたあとの統計・節目・コンボ・ほかの人への音は `accept` にまとめる）。
 - 後片付け: `HitGate.forgetAll`（ログアウト・リスポーン・ディメンション移動。プレイヤーごとの記憶を持つクラスはここに並ぶ）。
 - 種類の表: `HitKind`（初期の色・コンボの掛け数を使うか）、`SyncedSettings.enabled(kind)` / `minHitInterval(kind)`（フィールドの名前の規則 `<key>WeakSpotEnabled` / `<key>MinHitIntervalTicks` で表を作る）、`SyncedSettings.server()`（サーバーの自分の設定。`fromConfig()` はリフレクションで約 80 項目を集めるので、ヒットのたびに呼ばない）。
 - コンボ: `common/ComboFactor`（掛け数）、`ServerStats.countStreak`、本人のコンボの直し `server/ComboRelay.checkOwn`・`common/ComboSync`。
-- 照準のまわり・画面の上: `AimSpotKind` / `AimSpots`、`ScreenSpotKind` / `ScreenSpots`（置き場所の選び方は `placeRandom`）、`HudSpot.gauge`・`ChargeGauge`、`ScreenProjection.drawMarker` / `edgeArrow`、`client/TimedBoost`・`common/TimedBoostMath`。
-- そのほか: `UseTimeCut`、`server/SpeedModifier`、`client/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`。
+- 照準のまわり・画面の上: `AimSpotKind` / `AimSpots`、`ScreenSpotKind` / `ScreenSpots`（置き場所の選び方は `placeRandom`）、`HudSpot.gauge`・`ChargeGauge`、`ScreenProjection.drawMarker` / `edgeArrow`、`common/TimedBoost`・`common/TimedBoostMath`。
+- そのほか: `UseTimeCut`、`server/SpeedModifier`、`common/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`。
 - **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers` とその種類の `*Hits`、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上なら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。名前の規則に合わせると種類の表に自動で入る。上の「種類の表」）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・この文書、ガイドの本（`GuideBook.CONTENT`）。
 
 ### 通信

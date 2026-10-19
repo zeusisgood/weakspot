@@ -45,14 +45,14 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   共通
   - `sourceSets` に `../common/src/main/java`・`../common/src/test/java` を足す
   - jar に入れる `LICENSE` を `../LICENSE` に
   - jar の名前を **`weakspot-1.12.2-<版>.jar`** にする（§5）。`reobfJar` のあとの名前も同じ
-- テストが直下のファイル（`update.json`・`CHANGELOG.md`・`README*.md`・`doc/`・`lang/`）を読む所（`ResourceFiles`）は、リポジトリの直下からの道筋で読む（Gradle の作業ディレクトリが `mc1.12.2/` になるので、`../` を付けるか、テストの `workingDir` を直下にする。どちらかは実装で決める）
+- テストが直下のファイル（`update.json`・`CHANGELOG.md`・`README*.md`・`doc/`・`lang/`）を読む所（`ResourceFiles`）は、リポジトリの直下からの道筋で読む（Gradle の作業ディレクトリが `mc1.12.2/` になるので、`../` を付けるか、テストの `workingDir` を直下にする。どちらかは実装で決める）（注: 実装では、テストの `workingDir` を直下にした。`mc1.12.2/` の中のファイルは `ResourceFiles.MC` を付けて読む。また、jar の `Implementation-Title` にディレクトリ名が入らないよう、`mc1.12.2/settings.gradle` で `rootProject.name` を `weakspot` にした）
 - `run/`（runServer の作業場所）・`build/`・`.gradle/` の `.gitignore` を新しい場所に合わせる
 - `build/release/`（リリースの jar の置き場所）は `mc1.12.2/build/release/` になる
 
 ## 3. 翻訳の元データを `lang/*.json` にする
 
 - 正本を **`lang/en_us.json`・`lang/ja_jp.json`**（キーと値の 1 段の JSON。キーの順は今の `.lang` の行の順のまま）にする。新しい版（1.13 以降）は翻訳に `.json` を使うので、そのまま読める
-- 1.12.2 のビルドは、`processResources` でこの JSON から `assets/weakspot/lang/en_us.lang`・`ja_jp.lang` を作る（`キー=値` の 1 行ずつ）。**できる `.lang` の中身は、今のファイルと 1 文字も変わらない**ことを確かめる（並びを含めて。コメント行 2 つは消えてよい）
+- 1.12.2 のビルドは、`processResources` でこの JSON から `assets/weakspot/lang/en_us.lang`・`ja_jp.lang` を作る（`キー=値` の 1 行ずつ）。**できる `.lang` の中身は、今のファイルと 1 文字も変わらない**ことを確かめる（並びを含めて。コメント行 2 つは消えてよい）（注: 実装では、JSON を 1 行に 1 つの `"キー": "値"` の形にし、区切りの空行も JSON の空白として残した。`generateLang` は 1 行ずつ読んで同じ並びの `.lang` を作り、全体を読んだ数と比べて同じキーの 2 回目を見つける。できた `.lang` は、コメント 2 行とその前の空行 1 つのほかは今のファイルと同じことを確かめた）（注: レビューを受けて、`generateLang` は JSON 全体を読むだけにし、同じキーの 2 回目はテスト（Gson が例外を投げる）で見つけることにした。そのため `.lang` から区切りの空行が消える（ゲームの表示には関係ない。キー・値・並びは今のファイルと同じことを確かめた）。「1 行に 1 つ」は読みやすさの決まりだけになった）
 - `mc1.12.2/src/main/resources/assets/weakspot/lang/*.lang` は消す（手で直す場所を 1 つにする）
 - 今の `.lang` の中の `\n`（バックスラッシュと n の 2 文字。Mod のコードが改行に直す）は、JSON では `"\\n"` と書き、`.lang` で同じ 2 文字に戻す
 - `.lang` の今のコメント行（2 行）に書いてあることが要るなら、`doc/development.md` に移す
@@ -69,6 +69,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   共通
   - それぞれ、`common/` の外のクラス（`WeakSpotConfig`・`ClientSettings` など）に頼っていないかを確かめ、頼っていなければ移す。頼っていれば、頼らない部分（計算・表）だけを分けて移すか、移さない（**迷ったら移さない**）
 - 上のほか、`client/`・`server/` のクラスの中にある、Minecraft のクラスを受け取らない計算（数・文字列・表だけを扱うメソッド）も、見つけた分だけ `common/` の新しいクラスか既存のクラスに移す。量は目安を決めない（この版で全部やりきらなくてよい。移植の途中で見つけたら、そのときに寄せる）
 - 移したクラスにテストがなければ、移したついでに足してよい（足さなくてもよい）
+- （注: 実装では、`TimedBoost`・`QueryThrottle`・`HitSound`・`ComboPosition`・`SettingGroups` を移し、`TimedBoost`・`QueryThrottle` にテストを足した。`TargetRecords` はクライアントの状態を持つので移さず、段階の計算だけを `TargetRules.Tier.unlocked` にした。`ServerFeatures`（`ClientSettings`）・`KindSwitches`（`WeakSpotConfig`）・`SoundPreset`（`ClientConfig`）・`AnimalStates`（通信）・`StatsScreenTab`（`StatsScreen`）は移さない。クラスの中の計算は、1.11.11 の PR の一覧のうち、この版では移していない）
 - `config/SettingGroups`（設定画面のまとめの並び）は両方の版で同じ並びにするので、特に移したい。設定の値の型（`@Config` の注釈）に頼っている所は、名前の文字列の表にして共有する
 - `doc/architecture.md` の地図（クラスの置き場所）を直す
 

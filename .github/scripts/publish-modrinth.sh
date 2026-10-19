@@ -1,14 +1,20 @@
 #!/usr/bin/env bash
-# GitHub Release（タグ v<版>）の jar を、Modrinth のプロジェクトに新しいバージョンとして上げる。
-# 使い方: publish-modrinth.sh <版>
+# GitHub Release（タグ v<版>）の、Minecraft の版の jar を、Modrinth のプロジェクトに新しいバージョンとして上げる。
+# バージョンの番号は <版>+<Minecraft の版>（例 1.11.12+1.12.2）。
+# 使い方: publish-modrinth.sh <版> <Minecraft の版>
 # 要るもの: 環境変数 MODRINTH_TOKEN（スコープ「バージョンを作成する」「バージョンを読む」「プロジェクトを読む」）・
 # MODRINTH_PROJECT_ID・GH_TOKEN。トークンか ID がなければ何もせず成功で終わる。
-# Modrinth にその版がもうあれば何もしない（何度流しても二重にならない）。
+# Modrinth にその番号がもうあれば何もしない（何度流しても二重にならない）。
 set -euo pipefail
 
 version="$1"
+mc="$2"
+# shellcheck source=SCRIPTDIR/mc-versions.sh
+source "$(dirname "$0")/mc-versions.sh"
+mc_info "$mc"
+number="$version+$mc"
 if [ -z "${MODRINTH_TOKEN:-}" ] || [ -z "${MODRINTH_PROJECT_ID:-}" ]; then
-  echo "::notice::MODRINTH_TOKEN or MODRINTH_PROJECT_ID is not set; skipped publishing $version to Modrinth."
+  echo "::notice::MODRINTH_TOKEN or MODRINTH_PROJECT_ID is not set; skipped publishing $number to Modrinth."
   exit 0
 fi
 
@@ -18,29 +24,31 @@ ua="zeusisgood/weakspot (GitHub Actions)"
 # 審査中・非公開のプロジェクトは、認証なしでは見えないので、トークンを付けて聞く
 count=$(curl -fsS -H "User-Agent: $ua" -H "Authorization: $MODRINTH_TOKEN" \
   "$api/project/$MODRINTH_PROJECT_ID/version" |
-  jq --arg v "$version" '[.[] | select(.version_number == $v)] | length')
+  jq --arg v "$number" '[.[] | select(.version_number == $v)] | length')
 if [ "$count" != "0" ]; then
-  echo "Modrinth already has $version; nothing to do."
+  echo "Modrinth already has $number; nothing to do."
   exit 0
 fi
 
 work=$(mktemp -d)
-jar="weakspot-$version.jar"
+jar="weakspot-$mc-$version.jar"
 gh release download "v$version" --pattern "$jar" --dir "$work"
 
 changelog=$(bash "$(dirname "$0")/changelog.sh" "$version")
 
 jq -n \
   --arg project "$MODRINTH_PROJECT_ID" \
-  --arg version "$version" \
+  --arg number "$number" \
   --arg changelog "$changelog" \
+  --arg mc "$mc" \
+  --arg loader "$LOADER" \
   '{
     project_id: $project,
-    name: $version,
-    version_number: $version,
+    name: $number,
+    version_number: $number,
     changelog: $changelog,
-    game_versions: ["1.12.2"],
-    loaders: ["forge"],
+    game_versions: [$mc],
+    loaders: [$loader],
     version_type: "release",
     featured: false,
     dependencies: [],
@@ -55,4 +63,4 @@ curl --fail-with-body -sS -X POST "$api/version" \
   -F "data=<$work/data.json;type=application/json" \
   -F "file=@$work/$jar;type=application/java-archive" -o "$work/response.txt" ||
   { echo "::error::Modrinth: uploading the version failed."; cat "$work/response.txt"; echo; exit 1; }
-echo "Published $version to Modrinth."
+echo "Published $number to Modrinth."

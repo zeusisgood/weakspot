@@ -1,0 +1,110 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+
+version = '1.11.12'
+group = 'io.github.zeusisgood'
+ext.mcVersion = '1.12.2'
+archivesBaseName = "weakspot-${mcVersion}"
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+minecraft {
+    mappings channel: 'snapshot', version: '20171003-1.12'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            args 'nogui'
+        }
+    }
+}
+
+// 版に依存しない計算（common）は、各版のビルドがソースで読む
+sourceSets {
+    main.java.srcDir '../common/src/main/java'
+    main.resources.srcDir "$buildDir/generated/lang"
+    test.java.srcDir '../common/src/test/java'
+}
+
+// 翻訳の正本は ../lang/*.json（新しい版はそのまま読む）。1.12.2 は「キー=値」の .lang にする（同じキーの 2 回目はテストが見つける）
+task generateLang {
+    def source = file('../lang')
+    def output = file("$buildDir/generated/lang/assets/weakspot/lang")
+    inputs.dir source
+    outputs.dir output
+    doLast {
+        output.mkdirs()
+        source.eachFileMatch(~/.*\.json/) { f ->
+            def entries = new groovy.json.JsonSlurper().parse(f, 'UTF-8')
+            new File(output, f.name.replace('.json', '.lang'))
+                    .setText(entries.collect { k, v -> "$k=$v" }.join('\n') + '\n', 'UTF-8')
+        }
+    }
+}
+processResources.dependsOn generateLang
+
+test {
+    // テストは、リポジトリ直下のファイル（翻訳・README・update.json など）を読む
+    workingDir = file('..')
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+
+    testCompile 'junit:junit:4.12'
+}
+
+processResources {
+    inputs.property 'version', project.version
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': project.version, 'mcversion': mcVersion
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+jar {
+    // MIT の条件（配布物に著作権表示を付ける）のため、jar にも LICENSE を入れる
+    from('../LICENSE') {
+        rename { 'LICENSE_weakspot' }
+    }
+    manifest {
+        attributes([
+            "Specification-Title": "weakspot",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')
