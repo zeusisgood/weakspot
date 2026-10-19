@@ -545,6 +545,7 @@
   "weakspot.breed.mate_child": "The nearest partner is a child",
   "weakspot.breed.mate_cooldown": "The partner is on cooldown",
   "weakspot.breed.mate_food": "The partner lacks food",
+  "weakspot.breed.no_bed": "No free bed (the baby needs one)",
   "weakspot.server.mining.boostmultiplier": "Mining speed multiplier",
   "weakspot.server.mining.boostmultiplier.tooltip": "In multiplayer, the server's setting takes priority.\\nMining speed multiplier after a hit (the extra part is also scaled by the combo factor)\\nFile: server.mining.boostMultiplier",
   "weakspot.server.mining.boostdurationticks": "Boost duration (ticks)",

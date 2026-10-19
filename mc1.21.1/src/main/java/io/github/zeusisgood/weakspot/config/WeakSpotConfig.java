@@ -2,6 +2,7 @@ package io.github.zeusisgood.weakspot.config;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.GrowthFilters;
+import io.github.zeusisgood.weakspot.server.SettingsSync;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -122,15 +123,31 @@ public final class WeakSpotConfig {
         if (event.getConfig().getSpec() != serverSpec && event.getConfig().getSpec() != clientSpec) {
             return;
         }
-        for (Map.Entry<Setting, ModConfigSpec.ConfigValue<?>> e : VALUES.entrySet()) {
-            ModConfigSpec.ConfigValue<?> value = e.getValue();
-            if (!isLoaded(value)) {
-                continue;
-            }
-            e.getKey().setFromFile(value.get());
-        }
+        copyFromSpecs();
         if (event.getConfig().getSpec() == serverSpec) {
             warnIfMisconfigured();
+            if (event instanceof ModConfigEvent.Reloading) {
+                // ファイルを書き換えて保存すると、NeoForge が読み直す（1.12.2 の設定画面で変えたときと同じく送り直す）
+                SettingsSync.resendToAll();
+            }
+        }
+    }
+
+    /**
+    * /weakspot reload。ファイルの読み直しそのものは、保存したときに NeoForge が済ませている（ModConfigEvent.Reloading）。
+    * ここでは今の値をフィールドへ写し直す。
+    */
+    public static boolean reloadFromFile() {
+        copyFromSpecs();
+        return serverSpec.isLoaded();
+    }
+
+    private static void copyFromSpecs() {
+        for (Map.Entry<Setting, ModConfigSpec.ConfigValue<?>> e : VALUES.entrySet()) {
+            ModConfigSpec.ConfigValue<?> value = e.getValue();
+            if (isLoaded(value)) {
+                e.getKey().setFromFile(value.get());
+            }
         }
     }
 

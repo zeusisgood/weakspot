@@ -66,4 +66,17 @@ public class VillagerBreedingTest {
         assertEquals(Mate.NO_FOOD, VillagerBreeding.mate(true, false, false, false));
         assertEquals(Mate.READY, VillagerBreeding.mate(true, false, false, true));
     }
+
+    @Test
+    public void withBedsAFreeBedReplacesTheVillageAndDoors() {
+        assertEquals(Arrays.asList(Reason.NO_BED, Reason.COOLDOWN, Reason.FOOD, Reason.NO_MATE),
+                VillagerBreeding.reasonsWithBeds(false, true, false, Mate.NONE));
+        assertTrue(VillagerBreeding.reasonsWithBeds(true, false, true, Mate.READY).isEmpty());
+    }
+
+    @Test
+    public void twelveFoodPointsAreEnough() {
+        assertFalse(VillagerBreeding.hasFoodPoints(11));
+        assertTrue(VillagerBreeding.hasFoodPoints(12));
+    }
 }

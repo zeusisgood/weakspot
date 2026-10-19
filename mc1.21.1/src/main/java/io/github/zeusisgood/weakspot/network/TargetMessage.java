@@ -44,7 +44,8 @@ public class TargetMessage extends Message {
         return this;
     }
 
-    public byte type() {
+    /** CustomPacketPayload#type と重なるので、1.12.2 の type() の名前を変えた。 */
+    public byte kind() {
         return type;
     }
 

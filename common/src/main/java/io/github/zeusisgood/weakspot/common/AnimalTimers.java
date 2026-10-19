@@ -12,7 +12,8 @@ public final class AnimalTimers {
 
     /** 並びは、足元のバーに出す順（先が優先）。 */
     public enum Timer {
-        BABY, WOOL, TRADE, BREEDING, EGG;
+        /** SCUTE はアルマジロのウロコ（1.21.1 版だけ。間隔はニワトリの卵と同じ）。 */
+        BABY, WOOL, TRADE, BREEDING, EGG, SCUTE;
 
         public int bit() {
             return 1 << ordinal();

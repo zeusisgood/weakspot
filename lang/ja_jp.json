@@ -545,6 +545,7 @@
   "weakspot.breed.mate_child": "相手が子ども",
   "weakspot.breed.mate_cooldown": "相手が待ち時間中",
   "weakspot.breed.mate_food": "相手の食べ物が足りない",
+  "weakspot.breed.no_bed": "空いているベッドがない（生まれる子どもの分が要る）",
   "weakspot.server.mining.boostmultiplier": "採掘の速さの倍率",
   "weakspot.server.mining.boostmultiplier.tooltip": "マルチプレイ時、サーバー側設定が優先されます。\\nヒット時の破壊速度の倍率\\nファイル: server.mining.boostMultiplier",
   "weakspot.server.mining.boostdurationticks": "倍率が続く時間",
