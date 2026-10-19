@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** クライアント → サーバー: 自分の統計を送ってほしい（統計画面を開いたとき）。reset なら累計を消してから送る。 */
+/** クライアント → サーバー。reset なら累計を消してから送る。 */
 public class StatsRequestMessage implements IMessage {
 
     private boolean reset;

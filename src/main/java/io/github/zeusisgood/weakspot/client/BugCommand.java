@@ -26,16 +26,12 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
 /**
- * クライアントのコマンド /weakspot。/weakspot bug だけを自分のクライアントで受け取り、不具合の報告の方法を出す
- * （サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。古いサーバーにも無い）。
- * 環境を自動で集め、GitHub の issue の画面に最初から書き込むリンクと、クリップボードへのコピーの両方で渡す。
- * skipupdate <版>は、新しい版の通知の [この版は通知しない] から動く。
- * bug・skipupdate 以外（/weakspot、stats、reset、reload）は、打った文字をそのままサーバーへ送る（サーバーのコマンドが動く）。
+ * /weakspot bug を自分のクライアントで受け取る（サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。
+ * 古いサーバーにも無い）。bug・skipupdate 以外は、打った文字をそのままサーバーへ送る。
  */
 final class BugCommand extends CommandBase {
 
     private static final String NEW_ISSUE_URL = "https://github.com/zeusisgood/weakspot/issues/new";
-    /** Mod の一覧に載せない、土台の Mod。 */
     private static final Set<String> BASE_MODS = new HashSet<>(Arrays.asList("minecraft", "mcp", "FML", "forge"));
 
     @Override
@@ -68,14 +64,14 @@ final class BugCommand extends CommandBase {
             showGuide(mc);
             return;
         }
-        // 新しい版の通知の [この版は通知しない]。クリックで動くもので、補完には出さない
+        // クリックで動くもので、補完には出さない
         if (args.length >= 1 && "skipupdate".equalsIgnoreCase(args[0])) {
             if (args.length >= 2) {
                 UpdateCheckNotice.skip(mc, args[1]);
             }
             return;
         }
-        // bug 以外は、サーバーのコマンドとして送る（チャットのパケットは、クライアントのコマンドを通らない）
+        // チャットのパケットは、クライアントのコマンドを通らない
         String line = "/weakspot" + (args.length > 0 ? " " + String.join(" ", args) : "");
         mc.player.connection.sendPacket(new CPacketChatMessage(line));
     }
@@ -116,7 +112,6 @@ final class BugCommand extends CommandBase {
         send(mc, note);
     }
 
-    /** 本文とクリップボードに入れる環境（1 行ずつ）。 */
     private static List<String> environment(Minecraft mc) {
         List<String> lines = new ArrayList<>();
         lines.add(I18n.format("weakspot.bug.env.mod", WeakSpotMod.VERSION, serverVersion(), playMode(mc)));
@@ -132,7 +127,6 @@ final class BugCommand extends CommandBase {
         return lines;
     }
 
-    /** チャットに出す、短い環境。 */
     private static String shortEnvironment(Minecraft mc, int modCount) {
         return I18n.format("weakspot.bug.env.short", WeakSpotMod.VERSION, serverVersion(), playMode(mc),
                 Loader.MC_VERSION, ForgeVersion.getVersion(), modCount);
@@ -147,7 +141,6 @@ final class BugCommand extends CommandBase {
         return I18n.format(mc.isSingleplayer() ? "weakspot.bug.env.solo" : "weakspot.bug.env.multi");
     }
 
-    /** 入れている Mod の一覧（名前 (modid) 版）。土台の Mod は除く。 */
     private static List<String> mods() {
         List<String> mods = new ArrayList<>();
         for (ModContainer mod : Loader.instance().getActiveModList()) {

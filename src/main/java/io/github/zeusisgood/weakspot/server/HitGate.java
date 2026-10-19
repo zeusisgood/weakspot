@@ -16,36 +16,29 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
-/**
- * ヒット通知の共通の前置き（論理サーバー）: 受け付けるプレイヤーか、ヒットの間隔（HitBudget）、ログアウトの後片付け。
- * 種類ごとの条件（弓を引いているか、など）は、各 *Hits に残す。
- */
+/** ヒット通知の共通の前置き（論理サーバー）。種類ごとの条件（弓を引いているか、など）は、各 *Hits に残す。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class HitGate {
 
-    /** 種類ごと・プレイヤーごとのヒットの間隔（ready / mark を使う種類だけ）。 */
+    /** ready / mark を使う種類だけ。 */
     private static final Map<HitKind, Map<UUID, HitBudget>> BUDGETS = new EnumMap<>(HitKind.class);
 
     private HitGate() {
     }
 
-    /**
-     * サーバーの設定でその種類がオンで（SyncedSettings.enabled）、プレイヤーもオンにしていて（一時オフ・
-     * 種類ごとのオフ）、観戦モードでない（クリエイティブも受け付ける）。
-     */
+    /** プレイヤーの一時オフ・種類ごとのオフも見る。観戦モードは受け付けない（クリエイティブは受け付ける）。 */
     static boolean allowed(EntityPlayerMP player, HitKind kind) {
         return SyncedSettings.server().enabled(kind) && ServerSwitches.isEnabled(player, kind)
                 && PlayerRules.canUse(player);
     }
 
-    /** 間隔が空いているか（記録はしない。受け付けたら mark）。まとめて届いても HitBudget.BURST 回分までは受け付ける。 */
+    /** 記録はしない（受け付けたら mark）。 */
     static boolean ready(EntityPlayerMP player, HitKind kind) {
         Map<UUID, HitBudget> budgets = BUDGETS.get(kind);
         HitBudget budget = budgets == null ? null : budgets.get(player.getUniqueID());
         return budget == null || budget.ok(player.world.getTotalWorldTime(), interval(kind));
     }
 
-    /** このヒットを受け付けた（間隔を 1 回分使う）。 */
     static void mark(EntityPlayerMP player, HitKind kind) {
         BUDGETS.computeIfAbsent(kind, k -> new HashMap<>())
                 .computeIfAbsent(player.getUniqueID(), id -> new HitBudget())
@@ -53,11 +46,9 @@ public final class HitGate {
     }
 
     /**
-     * ヒットを受け付けると決めたあとの共通の処理: 間隔を 1 回分使う（mark）→ 種類ごとの数と節目 → 連続ヒット →
-     * 近くの他のプレイヤーのヒット音（soundPos から）。このヒットを数えたあとのコンボ数を返す（コンボの掛け数は
-     * ComboFactor.factor(accept(...))）。採掘は、短縮した時間と一緒に ServerStats.record で数え、節目も
-     * MiningRewards.onMiningHit で見るので、種類ごとの数は数えない。
-     */
+    * このヒットを数えたあとのコンボ数を返す。採掘は、短縮した時間と一緒に ServerStats.record で数え、節目も
+    * MiningRewards.onMiningHit で見るので、種類ごとの数は数えない。
+    */
     static int accept(EntityPlayerMP player, HitKind kind, BlockPos soundPos, int streak) {
         mark(player, kind);
         if (kind != HitKind.MINING) {
@@ -68,10 +59,7 @@ public final class HitGate {
         return combo;
     }
 
-    /**
-     * 自分で HitBudget を持つ種類（採掘・右クリック・釣り・移動。ブロックや浮きごとなど持ち主が違う）向け: 間隔が空いていれば
-     * 1 回分使って true。間隔は設定の表から。
-     */
+    /** 自分で HitBudget を持つ種類（ブロックや浮きごとなど、持ち主が違う）向け。 */
     static boolean take(HitBudget budget, long now, HitKind kind) {
         return budget.tryUse(now, interval(kind));
     }
@@ -80,13 +68,10 @@ public final class HitGate {
         return SyncedSettings.server().minHitInterval(kind);
     }
 
-    /** 後片付けの理由。消すものは理由ごとに違うので、各 *Hits の forget が分ける。 */
+    /** 消すものは理由ごとに違うので、各 *Hits の forget が分ける。 */
     enum Leave {
-        /** ログアウト（プレイヤーごとの記憶をすべて消す）。 */
         LOGOUT,
-        /** 死亡から戻った。 */
         RESPAWN,
-        /** ディメンションを移動した。 */
         DIMENSION
     }
 
@@ -105,10 +90,7 @@ public final class HitGate {
         forgetAll(event.player, Leave.DIMENSION);
     }
 
-    /**
-     * プレイヤーごとの記憶の後片付けは、ここの 1 か所（ログアウト・死亡・ディメンション移動）。
-     * プレイヤーごとの記憶を持つクラスを足したら、ここに足す（付け忘れを防ぐため）。
-     */
+    /** プレイヤーごとの記憶を持つクラスを足したら、ここに足す（付け忘れを防ぐため）。 */
     private static void forgetAll(EntityPlayer player, Leave leave) {
         if (leave == Leave.LOGOUT) {
             for (Map<UUID, HitBudget> budgets : BUDGETS.values()) {

@@ -23,36 +23,29 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * ヒット音。楽器と音量は各自の設定（myHitSound / myHitVolume、othersHitSound / othersHitVolume）。
  * どれも「プレイヤー」のカテゴリで鳴らすので、バニラの「プレイヤー」音量が掛かる。
- * 自分の音と試聴は距離なし、他のプレイヤーの音は叩かれたブロックの位置から距離で小さくなる。
- * 自分のヒット音はコンボで和音が厚くなる（HitPitch.forHit。hitChordEnabled）。コンボの段階と累計の節目の音は
- * ベルで大きめに鳴らし（accent）、駆け上がりが鳴っている間は自分の通常のヒット音を小さくする（埋もれないように）。
+ * 駆け上がりが鳴っている間は、自分の通常のヒット音を小さくする（埋もれないように）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class HitSounds {
 
-    /** 予約した音。delay が 0 になった tick に鳴らす。一時停止中も進める（統計画面の試聴のため）。 */
+    /** delay が 0 になった tick に鳴らす。一時停止中も進める（統計画面の試聴のため）。 */
     private static final List<Scheduled> QUEUE = new ArrayList<>();
-    /** 重ねる音の音量（旋律に対する倍率）。 */
+    /** 旋律に対する倍率。 */
     private static final float CHORD_VOLUME = 0.6F;
-    /** sus4 の解決の音を遅らせる tick。 */
     private static final int RESOLVE_DELAY_TICKS = 2;
-    /** 300 から旋律に重ねるベルの音量（自分のヒット音の音量に掛ける）。 */
+    /** 自分のヒット音の音量に掛ける。 */
     private static final double BELL_VOLUME = 0.5;
-    /** 段階・節目の音（ベル）の音量（自分のヒット音の音量に対する倍率。上限 1.0）。 */
+    /** 自分のヒット音の音量に対する倍率。上限 1.0。 */
     private static final float ACCENT_VOLUME = 1.5F;
-    /** 駆け上がりの間の、自分の通常のヒット音の音量の倍率。 */
     private static final float DUCKED_VOLUME = 0.3F;
-    /** 駆け上がりの最後の音のあと、ヒット音を小さくしたままにする tick。 */
     private static final int DUCK_TAIL_TICKS = 2;
-    /** コンボが途切れた音の音量（自分のヒット音の音量に対する倍率）と、2 音の間の tick。 */
+    /** 自分のヒット音の音量に対する倍率と、2 音の間の tick。 */
     private static final float BREAK_VOLUME = 0.5F;
     private static final int BREAK_GAP_TICKS = 2;
 
-    /** この音の時計（予約の音と同じく一時停止中も進む）。 */
+    /** 予約の音と同じく一時停止中も進む。 */
     private static long soundTick;
-    /** この tick まで、自分の通常のヒット音を小さくする（駆け上がりの間）。 */
     private static long duckUntil;
 
     private HitSounds() {
@@ -68,7 +61,7 @@ final class HitSounds {
         }
     }
 
-    /** 自分のヒット音。streak は連続ヒット数（1 始まり）。コンボで和音が厚くなり、駆け上がりの間は小さくなる。 */
+    /** streak は 1 始まり。 */
     static void playHit(int streak) {
         double volume = WeakSpotConfig.client.sound.myHitVolume * (soundTick <= duckUntil ? DUCKED_VOLUME : 1);
         boolean chords = WeakSpotConfig.client.sound.hitChordEnabled;
@@ -89,20 +82,15 @@ final class HitSounds {
         }
     }
 
-    /** 自分のヒット音の楽器で、旋律の 1 音だけを鳴らす（試聴と、統計画面の音の確かめ）。 */
+    /** 試聴と、統計画面の音の確かめ。 */
     static void playOwn(int streak) {
         playFlat(WeakSpotConfig.client.sound.myHitSound, WeakSpotConfig.client.sound.myHitVolume, streak);
     }
 
-    /** 段階・節目の音（ベル、大きめ）。 */
     static void playAccent(float pitch) {
         playFlatPitch(HitSound.BELL, Math.min(1.0, WeakSpotConfig.client.sound.myHitVolume * ACCENT_VOLUME), pitch);
     }
 
-    /**
-     * 段階・節目の音を、startDelay tick 後から ticksPerNote ごとに鳴らす（駆け上がり・分散和音）。
-     * 鳴っている間（最後の音の少しあとまで）は、自分の通常のヒット音を小さくする。
-     */
     static void accentRun(float[] pitches, int ticksPerNote, int startDelay) {
         for (int i = 0; i < pitches.length; i++) {
             float pitch = pitches[i];
@@ -112,12 +100,11 @@ final class HitSounds {
         duckUntil = Math.max(duckUntil, end);
     }
 
-    /** 音階（下のドから上のドまで。各自の音階の種類）を、段階・節目の音で鳴らす。 */
     static void accentScale(int ticksPerNote, int startDelay) {
         accentRun(scale().oneOctave(), ticksPerNote, startDelay);
     }
 
-    /** 各自の音階の設定（hitScaleType / hitScaleDirection / hitScaleOctaves。変わったときだけ作り直す）。 */
+    /** 設定が変わったときだけ作り直す。 */
     private static HitScale cachedScale = HitScale.DEFAULT;
 
     static HitScale scale() {
@@ -131,7 +118,6 @@ final class HitSounds {
         return scale;
     }
 
-    /** 自分のコンボが途切れた音（下がる 2 音。自分のヒット音の楽器で小さめ）。 */
     static void playBreak() {
         float[] notes = scale().breakNotes();
         double volume = WeakSpotConfig.client.sound.myHitVolume * BREAK_VOLUME;
@@ -141,7 +127,6 @@ final class HitSounds {
         }
     }
 
-    /** 他のプレイヤーのヒット音。叩かれたブロックの位置から鳴らす。 */
     static void playOther(BlockPos pos, int streak) {
         float volume = (float) WeakSpotConfig.client.sound.othersHitVolume;
         if (volume <= 0 || Minecraft.getMinecraft().world == null) {
@@ -152,7 +137,7 @@ final class HitSounds {
                 scale().melody(streak), pos));
     }
 
-    /** 他のプレイヤーが的当ての ✕ に当てた: 本人と同じ低い音（音符ブロックのプリング、ピッチ 0.5）。 */
+    /** 本人と同じ低い音。 */
     static void playOtherMiss(BlockPos pos) {
         float volume = (float) WeakSpotConfig.client.sound.othersHitVolume;
         if (volume <= 0 || Minecraft.getMinecraft().world == null) {
@@ -162,7 +147,7 @@ final class HitSounds {
                 SoundEvents.BLOCK_NOTE_PLING, SoundCategory.PLAYERS, volume, TargetPlay.MISS_PITCH, pos));
     }
 
-    /** 他のプレイヤーのヒット音の試聴。実際は距離で小さくなるが、試聴は距離なしで鳴らす。 */
+    /** 実際は距離で小さくなるが、試聴は距離なしで鳴らす。 */
     static void playOtherFlat(int streak) {
         playFlat(WeakSpotConfig.client.sound.othersHitSound, WeakSpotConfig.client.sound.othersHitVolume, streak);
     }
@@ -180,15 +165,11 @@ final class HitSounds {
                 false, 0, ISound.AttenuationType.NONE, 0, 0, 0));
     }
 
-    /**
-     * 音階を 1 周（上がって戻るなら最低音から最高音まで、往復なら上がって下がるまで）ticksPerNote ごとに鳴らす。
-     * note は連続ヒット数を受け取って1音鳴らす処理。
-     */
+    /** note は連続ヒット数を受け取って 1 音鳴らす。 */
     static void playScale(IntConsumer note, int ticksPerNote, int startDelay) {
         playScale(note, ticksPerNote, startDelay, scale().cycleLength());
     }
 
-    /** 音階の始めの count 音を鳴らす（設定を切り替えたときの短い試聴）。 */
     static void playScale(IntConsumer note, int ticksPerNote, int startDelay, int count) {
         for (int i = 0; i < count; i++) {
             int streak = i + 1;

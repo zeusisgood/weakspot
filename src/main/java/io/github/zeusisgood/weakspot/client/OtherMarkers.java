@@ -21,23 +21,20 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
-/**
- * 他のプレイヤーの弱点マーク（見えるだけで、当たり判定はない）と、自分のマークの状態の送信。
- * 対象は採掘・機械・成長の弱点（ブロックのマークとして送る）と動物の弱点（釣り・弓・近接は送らない）。
- */
+/** 他のプレイヤーの弱点マーク（見えるだけで、当たり判定はない）と、自分のマークの送信。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class OtherMarkers {
 
-    /** 自分のマークが出ている間、変化がなくてもこの間隔で送り直す（受け手の時間切れを防ぐ）。 */
+    /** 受け手の時間切れを防ぐ。 */
     private static final int KEEP_ALIVE_TICKS = 20;
-    /** この間なにも届かなければ消す（送り直しの間隔より十分長く）。 */
+    /** 送り直しの間隔より十分長く。 */
     private static final int TIMEOUT_TICKS = 60;
 
     private static final MarkerSendPolicy SEND_POLICY = new MarkerSendPolicy(KEEP_ALIVE_TICKS);
-    /** 最後にサーバーへ送った自分のマーク。null なら「出ていない」を送った（または何も送っていない）。 */
+    /** null なら「出ていない」を送った（または何も送っていない）。 */
     private static MarkerData lastSent;
 
-    /** 他のプレイヤー（エンティティ ID）ごとのマーク。 */
+    /** エンティティ ID ごと。 */
     private static final Map<Integer, Received> MARKERS = new HashMap<>();
     private static long tick;
 
@@ -47,7 +44,7 @@ final class OtherMarkers {
     private static final class Received {
         final MarkerData data;
         final long receivedTick;
-        /** 描画用。受け取ったときの自分のワールドのブロックの形から作る。 */
+        /** 受け取ったときの自分のワールドのブロックの形から作る。 */
         final WeakSpot spot;
 
         Received(MarkerData data, long receivedTick, WeakSpot spot) {
@@ -57,7 +54,7 @@ final class OtherMarkers {
         }
     }
 
-    /** サーバーから届いた（クライアントのスレッドで呼ぶ）。data が null なら消えた。 */
+    /** クライアントのスレッドで呼ぶ。data が null なら消えた。 */
     static void receive(int entityId, MarkerData data) {
         Minecraft mc = Minecraft.getMinecraft();
         if (data == null || mc.world == null) {
@@ -82,15 +79,14 @@ final class OtherMarkers {
         Received previous = MARKERS.get(entityId);
         boolean sameSurface = previous != null && previous.spot.sameSurface(spot);
         if (MarkerMotion.animates(WeakSpotConfig.client.markers.weakSpotTrailEnabled, previous != null, sameSurface)) {
-            // 最後に知っている位置から、届いた位置へ動かす（間引かれて途中の移動がまとめて届いても同じ）。
-            // 同じ位置の送り直しなら動かさない
+            // 間引かれて途中の移動がまとめて届いても、最後に知っている位置から動かす。同じ位置の送り直しなら動かさない
             spot = previous.spot;
             spot.moveTo(data.u, data.v, true, Minecraft.getSystemTime());
         }
         MARKERS.put(entityId, new Received(data, tick, spot));
     }
 
-    /** 描画する他のプレイヤーのマーク（範囲の外のものは除く）。 */
+    /** 範囲の外のものは除く。 */
     static List<WeakSpot> visible(Entity camera, float partialTicks) {
         List<WeakSpot> result = new ArrayList<>();
         double range = ClientSettings.get().markerShareRange;
@@ -127,7 +123,6 @@ final class OtherMarkers {
         sendOwn();
     }
 
-    /** マークの対象（ブロックまたは動物）がなくなった。 */
     private static boolean isGone(Minecraft mc, MarkerData data) {
         if (data.isAnimal()) {
             Entity animal = mc.world.getEntityByID(data.entityId);
@@ -136,10 +131,7 @@ final class OtherMarkers {
         return mc.world.isAirBlock(data.pos);
     }
 
-    /**
-     * 自分の採掘・機械・成長・動物の弱点が出た・動いた・消えたときに、送信頻度の上限を守って送る。
-     * 機械・成長は採掘と同じブロックのマークとして送る（受け取る側は、ブロックの箱から形を決める）。
-     */
+    /** 機械・成長は採掘と同じブロックのマークとして送る（受け取る側は、ブロックの箱から形を決める）。 */
     private static void sendOwn() {
         SyncedSettings settings = ClientSettings.get();
         WeakSpot spot = ClientWeakSpotHandler.spot;

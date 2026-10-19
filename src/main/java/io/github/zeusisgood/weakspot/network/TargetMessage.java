@@ -7,11 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/**
- * サーバー → クライアント: 的当ての状態。始まった（カウントダウンから）・ヒット数が変わった・終わった・やめた、
- * と自己ベスト（ログインのとき。ご褒美の解放に使う）。終わり（END）には、結果の板のために、当てた数・✕ の数と
- * サーバーの 1 位（名前と記録）も付ける。ハンドラーは専用サーバーでもインスタンス化されるので proxy 経由。
- */
+/** サーバー → クライアント。ハンドラーは専用サーバーでもインスタンス化されるので proxy 経由。 */
 public class TargetMessage implements IMessage {
 
     public static final byte START = 0;
@@ -24,9 +20,9 @@ public class TargetMessage implements IMessage {
     private int hits;
     private long best;
     private boolean newBest;
-    /** 新しく届いたご褒美の段階（TargetRules.Tier の番号。なければ -1）。 */
+    /** TargetRules.Tier の番号。なければ -1。 */
     private byte newTier = -1;
-    /** END だけ: 当てた数・✕ に当てた数・サーバーの 1 位の名前と記録（だれもいなければ空と 0）。 */
+    /** END だけ。だれもいなければ空と 0。 */
     private int good;
     private int decoys;
     private String topName = "";
@@ -43,7 +39,6 @@ public class TargetMessage implements IMessage {
         this.newTier = (byte) newTier;
     }
 
-    /** END の結果の板の中身を足す。 */
     public TargetMessage withResult(int good, int decoys, String topName, long topScore) {
         this.good = good;
         this.decoys = decoys;

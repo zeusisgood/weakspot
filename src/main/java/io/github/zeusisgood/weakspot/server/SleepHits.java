@@ -8,11 +8,7 @@ import net.minecraft.network.play.server.SPacketTimeUpdate;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-/**
- * 寝ている間の弱点のヒット通知の検証と効果（論理サーバー）。夜にベッドで寝ているプレイヤーのヒットを受け付け、
- * ワールドの時刻を sleepHitTicks 進める（次の朝を越えない。時計の値だけで、作物などは早く動かない）。
- * 朝になれば、バニラどおり起きる。時刻はワールドの全員で共通なので、ほかのプレイヤーの時間も進む。
- */
+/** 時刻はワールドの全員で共通なので、ほかのプレイヤーの時間も進む。時計の値だけで、作物などは早く動かない。 */
 public final class SleepHits {
 
     private SleepHits() {

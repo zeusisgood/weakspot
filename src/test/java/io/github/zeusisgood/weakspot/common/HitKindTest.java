@@ -21,7 +21,7 @@ public class HitKindTest {
     }
 
     @Test
-    public void keyRoundTrip() {
+    public void keysRoundTripIgnoringCaseAndSpaces() {
         for (HitKind kind : HitKind.values()) {
             assertEquals(kind, HitKind.byKey(kind.key()));
         }
@@ -42,7 +42,7 @@ public class HitKindTest {
     }
 
     @Test
-    public void defaultColorsAndComboFactorKindsMatch188() {
+    public void blockAndBowSpotsAreOrangeRedAndHarvestIsMagenta() {
         org.junit.Assert.assertEquals(0xFF5926, HitKind.MINING.defaultColor());
         org.junit.Assert.assertEquals(0xFF5926, HitKind.BOW.defaultColor());
         org.junit.Assert.assertEquals(0xFF3DCB, HitKind.HARVEST.defaultColor());
@@ -50,6 +50,10 @@ public class HitKindTest {
         org.junit.Assert.assertEquals(0xFFD23F, HitKind.PORTAL.defaultColor());
         org.junit.Assert.assertEquals(0x2E6BFF, HitKind.SWIM.defaultColor());
         org.junit.Assert.assertEquals(0xEAF6FF, HitKind.FALL.defaultColor());
+    }
+
+    @Test
+    public void machineShowsItsSpeedInsteadOfTheComboFactor() {
         java.util.Set<HitKind> factor = java.util.EnumSet.noneOf(HitKind.class);
         for (HitKind kind : HitKind.values()) {
             if (kind.usesComboFactor()) {

@@ -14,7 +14,6 @@ import org.junit.Test;
 
 public class SoundPresetTest {
 
-    /** 「標準」は設定の初期値と同じ鳴らし方。最初から入っているものは、どれも鳴らし方が違う。 */
     @Test
     public void standardMatchesDefaultsAndBuiltInsDiffer() {
         assertTrue(SoundPreset.BUILT_IN.get(0).sameSound(SoundPreset.of(new ClientConfig().sound)));
@@ -29,7 +28,7 @@ public class SoundPresetTest {
         assertEquals(6, keys.size());
     }
 
-    /** 保存した枠は読み戻せる。ほかの枠はそのまま、番号の順に並ぶ。 */
+    /** ほかの枠はそのまま、番号の順に並ぶ。 */
     @Test
     public void saveAndReadSlots() {
         SoundPreset sparkle = SoundPreset.BUILT_IN.get(1);
@@ -48,7 +47,7 @@ public class SoundPresetTest {
         assertTrue(night.sameSound(SoundPreset.mySlot(lines, 2)));
     }
 
-    /** 読めない行は空き。小文字・空白は許す。 */
+    /** 小文字・空白は許す。 */
     @Test
     public void unreadableLinesAreEmpty() {
         String[] lines = {"1=NOPE,MAJOR,UP,1,true", "2=chime, pentatonic, up_down, 2, false", "3=PLING,MAJOR,UP,1,maybe"};
@@ -63,7 +62,6 @@ public class SoundPresetTest {
         assertEquals(1, SoundPreset.withMySlot(lines, 1, null).length);
     }
 
-    /** 適用しても、音量とほかの人の音は変えない。 */
     @Test
     public void applyKeepsVolumesAndOthers() {
         ClientConfig.Sound sound = new ClientConfig().sound;
@@ -76,7 +74,7 @@ public class SoundPresetTest {
         assertEquals(HitSound.BASS, sound.othersHitSound);
     }
 
-    /** ランダム: 打楽器は出ない。今と同じ組み合わせは出ない。音域は 1〜2。 */
+    /** 音域は 1〜2。 */
     @Test
     public void randomSkipsDrumsAndTheCurrentSound() {
         assertFalse(SoundPreset.RANDOM_SOUNDS.contains(HitSound.HAT));

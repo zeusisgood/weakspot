@@ -25,11 +25,9 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 的当てのラウンド（サーバーが正）。「弱点の的」の右クリックで始め（カウントダウン 3 秒 + 30 秒）、ヒットは
- * クライアントの知らせ（TargetActionMessage）を、ラウンド中か・間隔で確かめて数える（当たり +1、ハズレ −5、0 より下に
- * ならない）。終わったら記録（MiningStats の targetBest・targetRounds。「統計をリセット」では消さない）を残し、
- * サーバーの 1 位を上回ったら全員に知らせる。死亡・ディメンション移動・ログアウトでやめる（記録なし）。
- * 的は使い捨て（始めた時点で 1 つ使う。ItemTarget）なので、持ち替え・画面を開くではやめない。ラウンドのヒットは、いつものコンボ・統計・節目には入れない。
+ * 的当てのラウンド（サーバーが正）。ヒットはクライアントの知らせを、ラウンド中か・間隔で確かめて数える。
+ * 的は使い捨て（始めた時点で 1 つ使う）なので、持ち替え・画面を開くではやめない。死亡・ディメンション移動・ログアウトでは
+ * 記録なしでやめる。ラウンドのヒットは、いつものコンボ・統計・節目には入れない。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class TargetRounds {
@@ -37,10 +35,10 @@ public final class TargetRounds {
     private static final class Round {
         long start;
         int hits;
-        /** 当てた数と ✕ に当てた数（結果の板に出す）。 */
+        /** 結果の板に出す。 */
         int good;
         int decoys;
-        /** ラウンドの中の連続ヒット数（✕ で 0 に戻す。近くの人のヒット音の音階）。 */
+        /** ✕ で 0 に戻す（近くの人のヒット音の音階）。 */
         int streak;
         long lastHit = Long.MIN_VALUE / 2;
     }
@@ -55,9 +53,9 @@ public final class TargetRounds {
     }
 
     /**
-     * 「弱点の的」の右クリック。ラウンドがなければ始めて true（呼ぶ側が的を 1 つ使う）。ラウンド中の右クリックは無視する
-     * （押しっぱなしでも 4 tick ごとに届くため。もう 1 つ使うこともない）。自分ではやめられない（30 秒で終わる）。
-     */
+    * ラウンドがなければ始めて true（呼ぶ側が的を 1 つ使う）。ラウンド中の右クリックは無視する
+    * （押しっぱなしでも 4 tick ごとに届くため）。
+    */
     public static boolean start(EntityPlayerMP player) {
         if (ROUNDS.containsKey(player.getUniqueID())) {
             return false;
@@ -77,7 +75,7 @@ public final class TargetRounds {
         return true;
     }
 
-    /** クライアントからの知らせ（サーバースレッド）。 */
+    /** サーバースレッドで呼ぶ。 */
     public static void onAction(EntityPlayerMP player, byte action) {
         Round round = ROUNDS.get(player.getUniqueID());
         if (round == null) {
@@ -98,7 +96,7 @@ public final class TargetRounds {
             round.good++;
             round.streak++;
         }
-        // 近くの人にもヒット音（✕ なら低い音）を鳴らす。位置は遊んでいる人
+        // 位置は遊んでいる人
         ServerBoostTracker.notifyNearbyPlayers(player, new BlockPos(player), round.streak, decoy);
         send(player, new TargetMessage(TargetMessage.SCORE, round.hits, 0, false, -1));
         tellOthers(player, round.hits);
@@ -124,7 +122,6 @@ public final class TargetRounds {
         }
     }
 
-    /** 最後まで遊んだ。記録を残し、自己ベスト・新しいご褒美の段階・当てた数と ✕ の数・サーバーの 1 位を知らせる（結果の板）。 */
     private static void finish(EntityPlayerMP player, Round round, MinecraftServer server) {
         ROUNDS.remove(player.getUniqueID());
         tellOthers(player, -1);
@@ -160,9 +157,9 @@ public final class TargetRounds {
     }
 
     /**
-     * ログイン: ご褒美の解放のため、自己ベストと、取った進捗のいちばん上の段階（RECORD では newTier の欄を
-     * これに使う。しきい値を上げる前に解放した段階を残すため。古いクライアントは RECORD の newTier を読まない）を送る。
-     */
+    * 取った進捗のいちばん上の段階は、RECORD の newTier の欄で送る（しきい値を上げる前に解放した段階を残すため。
+    * 古いクライアントは RECORD の newTier を読まない）。
+    */
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.player instanceof EntityPlayerMP) {
@@ -172,7 +169,6 @@ public final class TargetRounds {
         }
     }
 
-    /** 死亡・ディメンション移動・ログアウトで、ラウンドをやめる（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (ROUNDS.remove(player.getUniqueID()) != null && player instanceof EntityPlayerMP) {
             tellOthers((EntityPlayerMP) player, -1);
@@ -186,7 +182,7 @@ public final class TargetRounds {
         WeakSpotMod.network.sendTo(message, player);
     }
 
-    /** 近く（OTHERS_RANGE 以内、同じディメンション）のほかのプレイヤーに、的当てのヒット数を知らせる（負なら終わった）。 */
+    /** hits が負なら終わった。 */
     private static void tellOthers(EntityPlayerMP player, int hits) {
         OtherTargetMessage message = new OtherTargetMessage(player.getEntityId(), hits);
         for (EntityPlayerMP other : player.getServerWorld().getPlayers(EntityPlayerMP.class,
@@ -195,6 +191,6 @@ public final class TargetRounds {
         }
     }
 
-    /** ほかの人の的当て中の表示を送る範囲（ブロック。頭の上のコンボと同じ）。 */
+    /** ブロック。頭の上のコンボと同じ。 */
     private static final double OTHERS_RANGE = 32;
 }

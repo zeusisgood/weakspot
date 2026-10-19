@@ -16,11 +16,8 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
 /**
- * 弱点の一時オフのキー（初期値 HOME。J は JourneyMap と重なるため。操作設定で変更できる）。押すたびに、自分の弱点のオンとオフが切り替わる。
- * 状態は設定 weakSpotsEnabled に保存するので、次に起動したときも引き継ぐ。
- *
- * オフの間に止める処理は ClientWeakSpotHandler.stopOwnWeakSpots と、それを呼ぶ側にある
- * （弱点の表示、ヒット判定と通知、ブースト、マークの送信、耐久バー・成長バー、右クリックの抑止）。
+ * 弱点の一時オフのキー（初期値 HOME。J は JourneyMap と重なるため）。状態は設定 weakSpotsEnabled に保存する。
+ * オフの間に止める処理は ClientWeakSpotHandler.stopOwnWeakSpots と、それを呼ぶ側にある。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ToggleKeyHandler {
@@ -28,13 +25,12 @@ public final class ToggleKeyHandler {
     private static final KeyBinding TOGGLE =
             new KeyBinding("key.weakspot.toggle", Keyboard.KEY_HOME, "key.categories.weakspot");
 
-    /** 今のワールド（サーバー）に入ってから、オフのことを知らせたか。 */
+    /** 今のワールド（サーバー）に入ってから。 */
     private static boolean reminded;
 
     private ToggleKeyHandler() {
     }
 
-    /** 弱点のオン・オフのキーの、今の割り当ての名前（「すべてオフ中（HOME キー）」の表示）。 */
     static String keyName() {
         return TOGGLE.getDisplayName();
     }
@@ -60,15 +56,12 @@ public final class ToggleKeyHandler {
                 PositionedSoundRecord.getMasterRecord(SoundEvents.UI_BUTTON_CLICK, on ? 1.2F : 0.8F));
     }
 
-    /** 最後にサーバーへ伝えた状態。null なら、このワールド（サーバー）にはまだ伝えていない。 */
+    /** null なら、このワールド（サーバー）にはまだ伝えていない。 */
     private static Boolean lastSent;
     private static Boolean lastSentParticles;
     private static Integer lastSentKinds;
 
-    /**
-     * 弱点のオン・オフを、サーバーに伝える（ワールドに入ったとき、切り替えたとき。設定画面で変えたときも）。
-     * クライアントの tick から毎 tick 呼ぶ。届く前のサーバーは、オンとして扱う。
-     */
+    /** 毎 tick 呼ぶ。届く前のサーバーは、オンとして扱う。 */
     static void syncToServer(Minecraft mc) {
         if (mc.world == null || mc.player == null || mc.getConnection() == null) {
             lastSent = null;
@@ -88,7 +81,7 @@ public final class ToggleKeyHandler {
         }
     }
 
-    /** ワールドに入った直後に、オフのままなら、アクションバーで知らせる（クライアントの tick から毎 tick 呼ぶ）。 */
+    /** 毎 tick 呼ぶ。 */
     static void remindIfOff(Minecraft mc) {
         if (mc.world == null || mc.player == null) {
             reminded = false;

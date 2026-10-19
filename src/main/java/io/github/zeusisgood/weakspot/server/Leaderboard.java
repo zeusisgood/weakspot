@@ -22,8 +22,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * サーバー内の順位の元データ（/weakspot top と、統計画面の「的当て」タブの上位 10 人）。ワールドに保存し
- * （data/weakspot_leaderboard.dat）、オフラインの人も名前と数で並べられるようにする。プレイヤーの累計（ServerStats）から、
+ * ワールドに保存し（data/weakspot_leaderboard.dat）、オフラインの人も名前と数で並べられるようにする。プレイヤーの累計（ServerStats）から、
  * ログイン・ログアウト・的当ての終わり・順位を見る直前に写す。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -31,7 +30,6 @@ public final class Leaderboard extends WorldSavedData {
 
     private static final String NAME = "weakspot_leaderboard";
 
-    /** 並べる項目。 */
     public enum Category {
         MINING, COMBO, TARGET, TOTAL;
 
@@ -49,7 +47,6 @@ public final class Leaderboard extends WorldSavedData {
         }
     }
 
-    /** 1 人分。 */
     public static final class Entry {
         public final UUID id;
         public String name = "";
@@ -82,7 +79,6 @@ public final class Leaderboard extends WorldSavedData {
         return board;
     }
 
-    /** そのプレイヤーの今の累計を写す。 */
     static void update(EntityPlayerMP player) {
         MinecraftServer server = player.getServer();
         if (server == null) {
@@ -99,7 +95,7 @@ public final class Leaderboard extends WorldSavedData {
         board.markDirty();
     }
 
-    /** オンラインの全員を写してから、その項目の上位（0 の人は除く。同じ数は名前の順）。 */
+    /** オンラインの全員を写してから並べる。0 の人は除き、同じ数は名前の順。 */
     static List<Entry> ranking(MinecraftServer server, Category category) {
         for (EntityPlayerMP player : server.getPlayerList().getPlayers()) {
             update(player);
@@ -114,7 +110,7 @@ public final class Leaderboard extends WorldSavedData {
         return list;
     }
 
-    /** その項目の今の 1 位の数（だれもいなければ 0）。写す前に読む（的当ての「1 位を更新」の判定）。 */
+    /** だれもいなければ 0。写す前に読む（的当ての「1 位を更新」の判定）。 */
     static long best(MinecraftServer server, Category category) {
         long best = 0;
         for (Entry entry : get(server).entries.values()) {

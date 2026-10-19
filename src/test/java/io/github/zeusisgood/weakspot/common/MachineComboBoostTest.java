@@ -21,7 +21,7 @@ public class MachineComboBoostTest {
     }
 
     @Test
-    public void speedLabels() {
+    public void wholeSpeedsHaveNoDecimals() {
         assertEquals("4", MachineComboBoost.speedLabel(4.0));
         assertEquals("16", MachineComboBoost.speedLabel(16.0));
         assertEquals("7.5", MachineComboBoost.speedLabel(7.5));

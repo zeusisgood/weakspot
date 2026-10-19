@@ -10,17 +10,16 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 設定画面のまとめ。ファイル（weakspot.cfg）の中は server / client のカテゴリのままで、設定画面だけを
- * 種類・用途でまとめ直す（サーバーの項目とクライアントの項目を混ぜる）。まとめの名前は翻訳キー weakspot.gui.&lt;まとめ&gt;。
- * 設定を足したら、ここにも入れる（入っていないと ConfigScreenTest が落ちる）。
+ * ファイル（weakspot.cfg）の中は server / client のカテゴリのままで、設定画面だけを種類・用途でまとめ直す。
+ * 設定を足したら、ここにも入れる（入っていないと SettingGroupsTest が落ちる）。
  */
 public final class SettingGroups {
 
-    /** 設定画面に出さない項目（Mod が書き換える。ファイルには残す）。 */
+    /** Mod が書き換える項目。ファイルには残す。 */
     public static final Set<String> HIDDEN = Collections.unmodifiableSet(
             new HashSet<>(Arrays.asList("configVersion", "lastSeenVersion")));
 
-    /** まとめ（画面に出る順）→ 項目の名前（画面に出る順）。 */
+    /** まとめも項目も、画面に出る順。 */
     public static final Map<String, List<String>> GROUPS;
 
     static {
@@ -84,7 +83,6 @@ public final class SettingGroups {
         return Collections.unmodifiableList(new ArrayList<>(Arrays.asList(names)));
     }
 
-    /** まとめの名前の翻訳キー。 */
     public static String langKey(String group) {
         return "weakspot.gui." + group;
     }

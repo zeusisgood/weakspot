@@ -13,30 +13,23 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityBoat;
 
 /**
- * 乗り物の弱点（自分だけ）と、加速の残り時間のゲージ（照準の上）。馬・豚・トロッコ・ボートに乗って動いている間、
- * 照準の近く（馬・豚は真上か真下だけ）に水色の弱点を出し、照準を合わせるだけでヒットにする。弓を引いている・
- * 何かを使っている（食べているなど）間は出さない（そちらの弱点を出す）。
- *
  * 加速はサーバーがかける（馬・豚・トロッコ）。ボートは動きをクライアントが決めるので、ここで速さを足す。
- * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。AimSpotKind（AimSpots が回す）。
+ * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。
  */
 final class VehicleSpot extends AimSpotKind {
 
-    /** 乗り物が動いているとみなす、1 tick の水平の移動（ブロック）。 */
+    /** 1 tick の水平の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
-    /** ボートに足す 1 tick の移動の上限（ブロック。サーバーの「動きが速すぎる」の判定に引っかからないように）。 */
+    /** サーバーの「動きが速すぎる」の判定に引っかからないように。 */
     private static final double MAX_BOAT_STEP = 8.0;
 
-    /**
-     * 加速のゲージの色 #55CCFF（弱点の色を変えても変わらない）。照準の下はコンボの表示と重なるので、上に出す
-     * （弓の引きゲージ（下）と上下対称）。
-     */
+    /** 弱点の色を変えても変わらない。照準の下はコンボの表示と重なるので、上に出す（弓の引きゲージ（下）と上下対称）。 */
     private static final int BAR_COLOR = 0x55CCFF;
 
-    /** 自分の側で覚えている加速（ボートの速さと、ゲージのため。弓・食事・投げる物からも onRiderHit で続ける）。 */
+    /** ボートの速さと、ゲージのため。 */
     private static final TimedBoost BOOST = new TimedBoost();
 
-    /** 前の tick のボートと、その yaw（曲がった分だけ弱点を回す）。 */
+    /** 曲がった分だけ弱点を回す。 */
     private Entity lastBoat;
     private float lastBoatYaw;
 
@@ -50,7 +43,6 @@ final class VehicleSpot extends AimSpotKind {
         BOOST.clear();
     }
 
-    /** 乗り物の弱点を出すか（乗り物が動いているとき）。 */
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
         if (VehicleTargets.kind(player) == null) {
@@ -70,7 +62,6 @@ final class VehicleSpot extends AimSpotKind {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
 
-
     @Override
     HitMessage message(EntityPlayerSP player, int streak) {
         return HitMessage.entity(HitKind.VEHICLE, player.getRidingEntity().getEntityId(), streak);
@@ -81,7 +72,7 @@ final class VehicleSpot extends AimSpotKind {
         onRiderHit(streak);
     }
 
-    /** 自分が操っているボートが曲がった分だけ、弱点を回す（ボートは乗っている人の視線も回すため）。 */
+    /** ボートは乗っている人の視線も回すため。 */
     @Override
     void beforeTick(Minecraft mc) {
         EntityPlayerSP player = mc.player;
@@ -97,7 +88,6 @@ final class VehicleSpot extends AimSpotKind {
         lastBoatYaw = vehicle.rotationYaw;
     }
 
-    /** ボートの動きはクライアントが決めるので、加速中は、その tick の移動に (倍率 − 1) 倍を足す。 */
     @Override
     void tickEnd(Minecraft mc) {
         EntityPlayerSP player = mc.player;
@@ -119,7 +109,7 @@ final class VehicleSpot extends AimSpotKind {
         }
     }
 
-    /** 乗り物・弓・食事・投げる物の弱点に当てた（乗っていれば、加速を続ける）。combo はヒット後の連続ヒット数。 */
+    /** combo はヒット後の数。 */
     static void onRiderHit(int combo) {
         Minecraft mc = Minecraft.getMinecraft();
         SyncedSettings settings = ClientSettings.get();
@@ -131,7 +121,7 @@ final class VehicleSpot extends AimSpotKind {
     }
 
     private static double remaining(float partialTicks) {
-        return BOOST.remaining(ClientWeakSpotHandler.clientTick, partialTicks);
+        return BOOST.remainingFraction(ClientWeakSpotHandler.clientTick, partialTicks);
     }
 
     @Override

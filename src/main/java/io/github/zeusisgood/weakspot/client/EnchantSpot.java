@@ -9,17 +9,12 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.inventory.ContainerEnchantment;
 
-/**
- * エンチャントの弱点。エンチャント台の画面で、候補が出ている間、画面の枠の外に紫のマーカーを出し、クリックで
- * 当てる（寝ている間の弱点と同じ。描く・当てる流れは ScreenSpots）。当てると、サーバーが 3 つの候補を引き直す
- * （EnchantHits。何も減らない）。枠の上に、引き直せることの注釈を出す。
- */
+/** 当てると、サーバーが 3 つの候補を引き直す（EnchantHits。何も減らない）。 */
 final class EnchantSpot extends ScreenSpotKind {
 
-    /** エンチャント台の画面の枠の大きさ（GuiEnchantment の xSize / ySize）。 */
+    /** GuiEnchantment の xSize / ySize。 */
     private static final int PANEL_WIDTH = 176;
     private static final int PANEL_HEIGHT = 166;
-    /** 案内の後ろの帯（黒・不透明度 50%）。 */
     private static final int HINT_BACKGROUND = 0x80000000;
     /** 枠から離す距離と、画面の端から内側に入れる距離（GUI ピクセル）。 */
     private static final int PANEL_GAP = 8;
@@ -40,8 +35,6 @@ final class EnchantSpot extends ScreenSpotKind {
         return has && hasOffers((GuiEnchantment) gui);
     }
 
-
-    /** 台に物が置いてあり、候補が 1 つ以上出ているか。 */
     private static boolean hasOffers(GuiEnchantment gui) {
         if (!hasItem(gui)) {
             return false;
@@ -58,10 +51,7 @@ final class EnchantSpot extends ScreenSpotKind {
         return !((ContainerEnchantment) gui.inventorySlots).tableInventory.getStackInSlot(0).isEmpty();
     }
 
-    /**
-     * 枠の外のランダムな位置。前の位置から画面の高さの 1/4 以上離す（取れなければ、一番離れた位置）。
-     * 置ける場所がなければ false。
-     */
+    /** 前の位置から画面の高さの 1/4 以上離す。置ける場所がなければ false。 */
     @Override
     boolean place(GuiScreen gui, double prevX, double prevY) {
         double[] panel = {
@@ -89,7 +79,6 @@ final class EnchantSpot extends ScreenSpotKind {
         return 0.9F;
     }
 
-    /** 枠の上の注釈（台が空か、引き直せるか）。 */
     @Override
     void drawExtra(Minecraft mc, GuiScreen gui) {
         String hint = I18n.format(hasItem((GuiEnchantment) gui) ? "weakspot.enchant.hint" : "weakspot.enchant.hintEmpty");

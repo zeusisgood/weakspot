@@ -20,7 +20,7 @@ public class KindMaskTest {
     }
 
     @Test
-    public void toggles() {
+    public void togglingTwiceTurnsTheKindBackOn() {
         int mask = KindMask.toggled(0, HitKind.SPRINT);
         assertTrue(KindMask.isDisabled(mask, HitKind.SPRINT));
         assertEquals(0, KindMask.toggled(mask, HitKind.SPRINT));

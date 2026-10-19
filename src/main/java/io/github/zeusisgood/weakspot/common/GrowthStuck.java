@@ -1,17 +1,14 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 成長の弱点に当てても育たないときの知らせを出すかの判定（プレイヤーごとに1つ）。
- * 暗い（原因が分かる）ときは最初のヒットで、分からないときは stuckHits 回続けて状態が変わらなかったときに知らせる。
- * 同じブロックへは SAME_BLOCK_COOLDOWN tick、どのブロックでも ANY_COOLDOWN tick に1回まで。
+ * 成長の弱点に当てても育たないときの知らせ（プレイヤーごとに 1 つ）。暗い（原因が分かる）ときは最初のヒットで、
+ * 分からないときは続けて変わらなかったときに知らせる。
  */
 public final class GrowthStuck {
 
     public enum Warning {
         NONE,
-        /** 暗くて育たない。 */
         DARK,
-        /** 何らかの外部要因で育たない。 */
         STUCK
     }
 
@@ -26,15 +23,11 @@ public final class GrowthStuck {
     private long lastWarnBlock = Long.MIN_VALUE;
 
     /**
-     * 成長のヒットを受け付けて効果をかけたあとに呼ぶ。
-     *
-     * @param blockKey ブロックの位置（BlockPos#toLong など）
-     * @param changed 効果の前後で状態が変わったか
-     * @param dark 暗くて育たない（原因が分かる）か
-     * @param stuckHits 何回続けて変わらなかったら知らせるか
-     * @param tick 今の tick
-     * @return 出す知らせ。出したことは覚える
-     */
+    * 成長のヒットを受け付けて効果をかけたあとに呼ぶ。出した知らせは覚える。
+    *
+    * @param blockKey BlockPos#toLong など
+    * @param changed 効果の前後で状態が変わったか
+    */
     public Warning onHit(long blockKey, boolean changed, boolean dark, int stuckHits, long tick) {
         if (blockKey != block) {
             block = blockKey;
@@ -55,7 +48,6 @@ public final class GrowthStuck {
         return warning;
     }
 
-    /** 今までに続けて変わらなかった回数（テスト用）。 */
     int unchangedHits() {
         return unchangedHits;
     }

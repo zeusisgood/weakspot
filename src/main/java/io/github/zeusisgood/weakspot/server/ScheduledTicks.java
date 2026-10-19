@@ -24,17 +24,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 予約された tick（スケジュール tick）で動くレッドストーンの部品の加速。MachineAccelerator が、
- * ワールドの tick の最後（バニラの予約の処理のあと）に、加速中のブロックごとに1回だけ呼ぶ。
- * 信号の部品（リピーター・コンパレーター・オブザーバー）は、予約の残り時間を余分の tick だけ前倒しし、0 以下なら今動かす。
- * ディスペンサー・ドロッパーは、予約があれば今動かし、1回の予約で複数発にする（ScheduledBoost.dispenseCount）。
- * どのブロックも、前倒しで動くのは 1 tick に1回まで（自分に信号を戻すクロックが、同じ tick の中で回り続けないように）。
- * 余分の発射は、まとめて出すと音と煙が重なって連射に見えないので、BURST_INTERVAL_TICKS ごとに1発ずつ出す。
+ * MachineAccelerator が、ワールドの tick の最後（バニラの予約の処理のあと）に、加速中のブロックごとに 1 回だけ呼ぶ。
+ * どのブロックも、前倒しで動くのは 1 tick に 1 回まで（自分に信号を戻すクロックが、同じ tick の中で回り続けないように）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ScheduledTicks {
 
-    /** ディメンションごとの、ディスペンサー・ドロッパーの残りの発射。 */
+    /** ディメンションごと。 */
     private static final Map<Integer, Map<BlockPos, Burst>> BURSTS = new HashMap<>();
 
     private static final class Burst {
@@ -49,7 +45,7 @@ public final class ScheduledTicks {
         }
     }
 
-    /** BlockDispenser#dispense(World, BlockPos)。ドロッパーは自分の dispense を持っているので、そちらが呼ばれる。 */
+    /** ドロッパーは自分の dispense を持っているので、そちらが呼ばれる。 */
     private static final Method DISPENSE = Reflect.method(BlockDispenser.class, "extra dispenser shots",
             new Class<?>[] {World.class, BlockPos.class}, "dispense", "func_176439_d");
 
@@ -57,9 +53,9 @@ public final class ScheduledTicks {
     }
 
     /**
-     * @param extra この tick に余分に進める tick（倍率 − 1。端数は MachineBoost が持ち越す）
-     * @param multiplier 今の倍率（ディスペンサーの発射の回数に使う）
-     */
+    * @param extra この tick に余分に進める tick（端数は MachineBoost が持ち越す）
+    * @param multiplier ディスペンサーの発射の回数に使う
+    */
     static void boost(World world, BlockPos pos, int extra, double multiplier) {
         if (!(world instanceof WorldServer)) {
             return;
@@ -113,7 +109,6 @@ public final class ScheduledTicks {
         }
     }
 
-    /** ワールドの tick の最後に、時間が来た余分の発射を1発ずつ出す。 */
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.world.isRemote) {
@@ -153,7 +148,6 @@ public final class ScheduledTicks {
         }
     }
 
-    /** サーバーが止まったら、残りの発射を捨てる。 */
     static void clear() {
         BURSTS.clear();
     }

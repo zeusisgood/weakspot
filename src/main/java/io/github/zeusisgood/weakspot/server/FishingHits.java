@@ -25,26 +25,19 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 釣りの弱点（論理サーバー）。浮き（EntityFishHook）の待ち時間のタイマーはサーバーだけが持ち、非公開なので、
- * 開発環境の MCP 名と実際の環境の SRG 名を順に試して読み書きする（Reflect）。読めなければ釣りの弱点は出ない。
- *
+ * 浮きの待ち時間のタイマーはサーバーだけが持ち、非公開なので Reflect で読み書きする。読めなければ釣りの弱点は出ない。
  * バニラの catchingFish は、待ち時間（ticksCaughtDelay）→ 魚が寄ってくる段階（ticksCatchableDelay）→ 食いついた段階
- * （ticksCatchable）の順に進む。待ち時間の段階は「ticksCaughtDelay が正で、あとの2つが 0」のとき。
- * 待ち時間が始まったときの長さは、進み具合のバーのために、毎 tick 見て浮きごとに覚える（メモリだけ）。
+ * （ticksCatchable）の順に進む。待ち時間が始まったときの長さは、進み具合のバーのために、浮きごとに覚える（メモリだけ）。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class FishingHits {
 
-    /** 待ち時間の残り。 */
     private static final Field WAIT = Reflect.field(EntityFishHook.class, "the fishing weak spot",
             "ticksCaughtDelay", "field_146040_ay");
-    /** 魚が寄ってくる段階の残り。 */
     private static final Field APPROACH = Reflect.field(EntityFishHook.class, "the fishing weak spot",
             "ticksCatchableDelay", "field_146038_az");
-    /** 食いついた段階の残り。 */
     private static final Field BITE = Reflect.field(EntityFishHook.class, "the fishing weak spot",
             "ticksCatchable", "field_146045_ax");
-    /** 浮きの状態（BOBBING = 水に浮いている）。 */
     private static final Field STATE = Reflect.field(EntityFishHook.class, "the fishing weak spot",
             "currentState", "field_190627_av");
 
@@ -53,7 +46,6 @@ public final class FishingHits {
     private FishingHits() {
     }
 
-    /** プレイヤーの浮きごとの、待ち時間の始まりの長さと、ヒットの間隔。 */
     private static final class Track {
         EntityFishHook hook;
         int initialWait;
@@ -73,23 +65,22 @@ public final class FishingHits {
         }
     }
 
-    /** 浮きが水に浮いていて、魚が寄ってくるのを待っている段階（弱点が出る段階）か。 */
+    /** 弱点が出る段階。 */
     static boolean isWaiting(EntityFishHook hook) {
         return waitingPhase(hook) && inWaterBlock(hook);
     }
 
     /**
-     * 浮きのいる位置のブロックが水か。バニラの EntityFishHook#onUpdate は、浮いている状態（BOBBING）でも、
-     * この条件（水で、液体の高さ &gt; 0）のときしか待ち時間を減らさない（catchingFish）。水面ぎりぎりやブロックの縁に
-     * 引っかかると、浮いている状態のまま位置が水の外になり、魚が来なくなる。
-     */
+    * バニラの EntityFishHook#onUpdate は、浮いている状態（BOBBING）でも、水で液体の高さ &gt; 0 のときしか待ち時間を減らさない。
+    * 水面ぎりぎりやブロックの縁に引っかかると、浮いている状態のまま位置が水の外になり、魚が来なくなる。
+    */
     static boolean inWaterBlock(EntityFishHook hook) {
         BlockPos pos = new BlockPos(hook);
         IBlockState state = hook.world.getBlockState(pos);
         return state.getMaterial() == Material.WATER && BlockLiquid.getBlockLiquidHeight(state, hook.world, pos) > 0;
     }
 
-    /** 浮いている状態で、魚を待つ段階の値になっているか（浮きの位置が水かは見ない）。 */
+    /** 浮きの位置が水かは見ない。 */
     private static boolean waitingPhase(EntityFishHook hook) {
         if (!available() || hook.isDead) {
             return false;
@@ -107,7 +98,7 @@ public final class FishingHits {
         return read(WAIT, hook) > 0 && read(APPROACH, hook) == 0 && read(BITE, hook) == 0;
     }
 
-    /** そのプレイヤーの、弱点を出せる浮き（自分の浮きで、釣り竿を持っている）。なければ null。 */
+    /** なければ null。 */
     private static EntityFishHook hookOf(EntityPlayer player) {
         EntityFishHook hook = player.fishEntity;
         if (hook == null || hook.isDead || hook.getAngler() != player) {
@@ -118,7 +109,7 @@ public final class FishingHits {
         return holdsRod ? hook : null;
     }
 
-    /** 毎 tick、待ち時間の段階の浮きの、待ち時間の始まりの長さを覚える（新しい待ち時間が始まると、長さが増える）。 */
+    /** 新しい待ち時間が始まると、長さが増える。 */
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.player.world.isRemote || !available()) {
@@ -147,7 +138,7 @@ public final class FishingHits {
         }
     }
 
-    /** クライアントからの状態の問い合わせ（サーバースレッド）。待ち時間の段階か、と進み具合を返す。 */
+    /** サーバースレッドで呼ぶ。 */
     public static void onQuery(EntityPlayerMP player) {
         EntityFishHook hook = hookOf(player);
         boolean waiting = hook != null && isWaiting(hook) && enabled(SyncedSettings.server());
@@ -165,7 +156,7 @@ public final class FishingHits {
         return settings.enabled(HitKind.FISHING) && settings.fishingHits > 0 && available();
     }
 
-    /** クライアントからのヒット通知（サーバースレッド）。照準の角度は確かめない（クライアントを信用する）。 */
+    /** 照準の角度は確かめない（クライアントを信用する）。 */
     public static void onHit(EntityPlayerMP player, int streak) {
         if (!HitGate.allowed(player, HitKind.FISHING)) {
             return;
@@ -189,7 +180,6 @@ public final class FishingHits {
         HitGate.accept(player, HitKind.FISHING, new BlockPos(hook), streak);
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             TRACKS.remove(player.getUniqueID());

@@ -23,30 +23,23 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
- * 釣りの弱点（自分だけ。他のプレイヤーには見せない）。浮きが水に入って魚を待っている間、浮きのまわり（半径1ブロック）の
- * 水面の上の点に弱点を出し、釣り竿を持って、照準を重ねるだけで当たり（左クリックは
- * 止めず、通常どおり掘る・攻撃する）。
- *
- * 弱点はワールドの1点（浮きからの水平の差 dx, dz。浮きが揺れても追従する）で、描くときに画面上の位置へ変換して、
- * 画面上で一定の大きさ（半径 12 GUI ピクセル）の円として描く（浮きが遠くても近くても同じ大きさ）。
- * 当たり判定は、視線と「目から弱点への向き」の角度の差が、画面上の円の半径・視野角・画面の高さから求めた角度より小さいこと。
- * 変換に使う行列は、RenderWorldLastEvent の時点の OpenGL の行列（視野角は射影行列から求める。ScreenProjection）。
- * 待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、サーバーに状態を問い合わせる（QueryMessage）。
+ * 釣りの弱点（自分だけ。他のプレイヤーには見せない）。左クリックは止めず、通常どおり掘る・攻撃する。
+ * 弱点はワールドの 1 点（浮きからの水平の差。浮きが揺れても追従する）で、画面上で一定の大きさの円として描く
+ * （浮きが遠くても近くても同じ大きさ）。待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、問い合わせる。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class FishingSpot {
 
     private static final Random RANDOM = new Random();
-    /** 問い合わせの間隔（tick）。 */
     private static final int QUERY_INTERVAL_TICKS = 5;
-    /** この tick 以上前の返事は古いので使わない。 */
+    /** これより前の返事は古いので使わない。 */
     private static final int STALE_TICKS = 30;
-    /** 弱点を水面から少し浮かせる（ブロック）。 */
+    /** ブロック。 */
     private static final double LIFT = 0.05;
 
     private static final int BAR_WIDTH = 40;
     private static final int BAR_HEIGHT = 4;
-    /** 浮きの画面上の位置から、バーの中心までの下向きの距離（GUI ピクセル）。 */
+    /** GUI ピクセル。 */
     private static final int BAR_OFFSET = 14;
 
     private static final float[] DISK = {1.0F, 0.35F, 0.15F};
@@ -54,44 +47,39 @@ final class FishingSpot {
     private static final float[] FILL = {0xFF / 255F, 0xD2 / 255F, 0x3F / 255F, 1.0F};
     private static final float[] BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
 
-    // サーバーの返事
+    // サーバーの返事。問い合わせの相手は自分の浮きだけなので、相手は区別しない
     private static boolean waiting;
     private static float progress;
     private static long receivedTick = Long.MIN_VALUE / 2;
-    /** 問い合わせの相手は自分の浮きだけなので、相手は区別しない。 */
-    /** 画面の上の半径（GUI の座標。設定 spotSize × 釣りの倍率 0.75）。 */
     private static double radius() {
         return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(HitKind.FISHING);
     }
 
     private static final QueryThrottle<Boolean> QUERIES = new QueryThrottle<>(QUERY_INTERVAL_TICKS, false);
 
-    // 弱点（浮きからの水平の差。当たり判定の位置と、表示の位置 motion）
     private static EntityFishHook spotHook;
     private static boolean hasSpot;
     private static double dx;
     private static double dz;
     private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
 
-    // 最後に描いたフレームの行列など（HUD の描画と、左クリックの判定で使う）
+    // HUD の描画と、左クリックの判定で使う
     private static final ScreenProjection SCREEN = new ScreenProjection();
     private static double hookX;
     private static double hookY;
     private static double hookZ;
-    /** このフレーム、照準が弱点に重なっているか。 */
     private static boolean aimed;
 
     private FishingSpot() {
     }
 
-    /** サーバーの返事が届いた（クライアントのスレッドで呼ぶ）。 */
+    /** クライアントのスレッドで呼ぶ。 */
     static void receive(boolean isWaiting, float newProgress) {
         waiting = isWaiting;
         progress = newProgress;
         receivedTick = ClientWeakSpotHandler.clientTick;
     }
 
-    /** 弱点の一時オフ、ワールドを出たとき。 */
     static void clear() {
         waiting = false;
         hasSpot = false;
@@ -101,7 +89,7 @@ final class FishingSpot {
         QUERIES.reset();
     }
 
-    /** 自分の、弱点を出せる浮き（釣り竿を持っていて、水に浮いている）。なければ null。 */
+    /** なければ null。 */
     private static EntityFishHook activeHook(Minecraft mc) {
         if (mc.player == null || mc.world == null || !KindSwitches.isEnabled(HitKind.FISHING)
                 || !PlayerRules.canUse(mc.player)) {
@@ -121,7 +109,7 @@ final class FishingSpot {
         return ClientWeakSpotHandler.clientTick - receivedTick <= STALE_TICKS;
     }
 
-    /** 弱点が今出ているか（浮きが待ち時間の段階だと、サーバーが最近返した）。 */
+    /** 浮きが待ち時間の段階だと、サーバーが最近返したか。 */
     private static boolean shown(Minecraft mc) {
         return activeHook(mc) != null && hasSpot && waiting && fresh();
     }
@@ -141,7 +129,6 @@ final class FishingSpot {
         }
         long tick = ClientWeakSpotHandler.clientTick;
         if (spotHook != hook) {
-            // 新しく投げた浮き
             spotHook = hook;
             hasSpot = false;
             waiting = false;
@@ -149,7 +136,6 @@ final class FishingSpot {
         }
         query(tick, false);
         if (waiting && fresh() && !hasSpot) {
-            // 待ち時間の段階に入った。浮きから離れた水面の点に出す
             double[] p = FishingMath.nextSpot(0, 0, RANDOM);
             dx = p[0];
             dz = p[1];
@@ -160,14 +146,13 @@ final class FishingSpot {
         }
     }
 
-    /** 浮きの状態を問い合わせる。間隔があいていなければ送らない（force ならすぐに送る）。 */
+    /** force ならすぐに送る。 */
     private static void query(long tick, boolean force) {
         if (QUERIES.due(Boolean.TRUE, tick, force)) {
             WeakSpotMod.network.sendToServer(QueryMessage.fishing());
         }
     }
 
-    /** 弱点の点のワールド座標（浮きのまわり。水面の少し上）。 */
     private static double[] worldPoint(double pdx, double pdz) {
         return new double[] {hookX + pdx, hookY + LIFT, hookZ + pdz};
     }
@@ -193,7 +178,6 @@ final class FishingSpot {
             double allowed = FishingMath.allowedAngle(radius() * scale, SCREEN.fovDegrees(),
                     SCREEN.viewportHeight());
             aimed = FishingMath.isAimed(p[2], allowed);
-            // 照準を重ねるだけで当たり
             if (aimed && OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
                 onHit();
             }
@@ -257,7 +241,6 @@ final class FishingSpot {
             ScreenProjection.drawMarker(gx, gy, radius, shape, look, 0.45F, 0.9F);
             ScreenProjection.drawHeadHighlight(gx, gy, radius, shape, trail ? MOTION.headHighlight(nowMs) : 0);
         }
-        // 浮きの下の、魚が寄ってくるまでの進み具合のバー
         double[] hook = SCREEN.project(hookX, hookY, hookZ);
         if (hook != null) {
             double bx = hook[0] / scale;

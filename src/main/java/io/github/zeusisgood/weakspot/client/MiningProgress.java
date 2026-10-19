@@ -7,11 +7,8 @@ import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * 自分の破壊の進み具合（PlayerControllerMP の非公開の curBlockDamageMP）と、掘っているブロック（currentBlock）を読む。
- * MCP 名 → SRG 名の順に試す（Reflect）。見つからないときは警告を1回出し、耐久バーを出さない（ゲームは止めない）。
- *
- * 進み具合は tick ごとに進むので、ClientTickEvent の START（その tick の進捗の前）で前の値を覚え、
- * フレームごとに前の値と今の値の間を補間する。
+ * PlayerControllerMP の非公開の curBlockDamageMP と currentBlock を読む。見つからなければ耐久バーを出さない（ゲームは止めない）。
+ * 進み具合は tick ごとに進むので、tick の START で前の値を覚え、フレームごとに補間する。
  */
 final class MiningProgress {
 
@@ -26,7 +23,7 @@ final class MiningProgress {
     private MiningProgress() {
     }
 
-    /** tick の START で呼ぶ。この tick の進捗が積まれる前の値を覚える。 */
+    /** tick の START で呼ぶ。 */
     static void sample(PlayerControllerMP controller) {
         if (DAMAGE == null || BLOCK == null) {
             return;
@@ -43,10 +40,7 @@ final class MiningProgress {
         prevPos = null;
     }
 
-    /**
-     * 今のフレームの、ブロック pos の破壊の進み具合（前の tick の値と今の値の補間）。
-     * 読めないとき、または今掘っているブロックが pos でないときは -1。
-     */
+    /** 読めないとき、または今掘っているブロックが pos でないときは -1。 */
     static double progress(PlayerControllerMP controller, BlockPos pos, float partialTicks) {
         if (DAMAGE == null || BLOCK == null || !controller.getIsHittingBlock()) {
             return -1;

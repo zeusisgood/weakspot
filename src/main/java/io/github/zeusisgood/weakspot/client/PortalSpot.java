@@ -6,12 +6,7 @@ import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
-/**
- * ネザーゲートの弱点（自分だけ）。ゲートの中に立っている間（紫のゆらぎ timeInPortal が 0 より大きく、
- * 減っていない）、照準から 10〜20 度の所に金の弱点を出し、照準を合わせるだけでヒットにする。当てると、サーバーが
- * 移動までの待ち時間を縮める（PortalHits）。紫のゆらぎも、同じだけ進める（1 tick に 0.0125 進むので、tick × 0.0125）。
- * AimSpotKind（AimSpots が回す）。
- */
+/** 当てると、サーバーが移動までの待ち時間を縮める（PortalHits）。紫のゆらぎも、同じだけ進める。 */
 final class PortalSpot extends AimSpotKind {
 
     /** バニラの紫のゆらぎが 1 tick に進む量。 */
@@ -21,7 +16,7 @@ final class PortalSpot extends AimSpotKind {
         super(HitKind.PORTAL, new HudSpot(HitKind.PORTAL));
     }
 
-    /** ゲートの中にいるか（紫のゆらぎが進んでいるか、1.0 で止まっているか）。 */
+    /** 紫のゆらぎが進んでいるか、1.0 で止まっているか。 */
     private static boolean inPortal(EntityPlayerSP player) {
         return player.timeInPortal > 0 && player.timeInPortal >= player.prevTimeInPortal;
     }
@@ -35,7 +30,6 @@ final class PortalSpot extends AimSpotKind {
     int placement(EntityPlayerSP player) {
         return HudSpot.FREE;
     }
-
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {

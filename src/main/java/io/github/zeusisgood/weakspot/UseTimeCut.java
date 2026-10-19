@@ -9,20 +9,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 
 /**
- * 使っている物（弓・食べ物）の残り時間を、ヒットで縮める共通の部品（両側。BowDraw と EatDraw）。
- * ヒットの時点では残り時間を直接変えず（非公開のフィールド）、縮める tick 数をプレイヤーごとに覚えておき、次の tick の
+ * ヒットの時点では残り時間（非公開のフィールド）を直接変えず、縮める tick 数をプレイヤーごとに覚えておき、次の tick の
  * LivingEntityUseItemEvent.Tick（setDuration）で減らす。使い始めたら（Start）捨てる。
  * シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
- * イベントの受け取りは、使う側のクラス（@SubscribeEvent）から onUseStart / onUseTick に渡す。
  */
 public final class UseTimeCut {
 
-    /** 縮める量の決め方。duration はこの tick に 1 減らす前の残り時間、ticks は覚えていた量。0 以下なら縮めない。 */
+    /** duration はこの tick に 1 減らす前の残り時間、ticks は覚えていた量。0 以下なら縮めない。 */
     public interface Limit {
         int cut(ItemStack stack, int duration, int ticks);
     }
 
-    /** プレイヤー → まだ反映していない、縮める tick 数。クライアントとサーバーのスレッドの両方から触る。 */
+    /** クライアントとサーバーのスレッドの両方から触る。 */
     private final Map<EntityLivingBase, Integer> pending = Collections.synchronizedMap(new WeakHashMap<>());
     private final Predicate<ItemStack> target;
     private final Limit limit;
@@ -32,20 +30,18 @@ public final class UseTimeCut {
         this.limit = limit;
     }
 
-    /** まだ反映していない量。 */
     public int pending(EntityLivingBase entity) {
         Integer ticks = pending.get(entity);
         return ticks == null ? 0 : ticks;
     }
 
-    /** ヒットで縮める量を足す。 */
     public void add(EntityLivingBase entity, int ticks) {
         if (ticks > 0) {
             pending.merge(entity, ticks, Integer::sum);
         }
     }
 
-    /** まだ反映していない量を取り出す（弓は、同じ tick に放った矢の charge に足す）。なければ null。 */
+    /** 弓は、同じ tick に放った矢の charge に足す。なければ null。 */
     public Integer take(EntityLivingBase entity) {
         return pending.remove(entity);
     }

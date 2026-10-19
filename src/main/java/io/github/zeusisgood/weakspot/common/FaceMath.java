@@ -1,12 +1,8 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * ブロック面のローカル2D座標 (u, v) とワールド座標の相互変換。
- * Minecraft のクラスに依存しない。軸は 0=X, 1=Y, 2=Z で表す。
- *
- * 法線軸ごとの (u, v) の割り当て:
- * X面 → (z, y) / Y面 → (x, z) / Z面 → (x, y)
- * 距離の比較にしか使わないので、向き（左右反転など）は気にしない。
+ * ブロック面のローカル 2D 座標 (u, v) とワールド座標の変換。軸は 0=X, 1=Y, 2=Z。
+ * (u, v) は X 面 → (z, y)、Y 面 → (x, z)、Z 面 → (x, y)。距離の比較にしか使わないので、向き（左右反転など）は気にしない。
  */
 public final class FaceMath {
 
@@ -25,13 +21,12 @@ public final class FaceMath {
         return normalAxis == AXIS_Y ? AXIS_Z : AXIS_Y;
     }
 
-    /** ワールド座標 (x, y, z) を面の (u, v) に変換する。 */
     public static double[] toFaceUV(int normalAxis, double x, double y, double z) {
         double[] p = {x, y, z};
         return new double[] {p[uAxis(normalAxis)], p[vAxis(normalAxis)]};
     }
 
-    /** 面の (u, v) と、法線軸方向の座標 plane からワールド座標を作る。 */
+    /** plane は法線軸方向の座標。 */
     public static double[] toWorld(int normalAxis, double plane, double u, double v) {
         double[] p = new double[3];
         p[normalAxis] = plane;
@@ -40,7 +35,6 @@ public final class FaceMath {
         return p;
     }
 
-    /** ブロックの AABB から、その面の (u, v) の矩形を作る。 */
     public static FaceRect faceRect(int normalAxis, double minX, double minY, double minZ,
                                     double maxX, double maxY, double maxZ) {
         double[] min = {minX, minY, minZ};
@@ -50,10 +44,7 @@ public final class FaceMath {
         return new FaceRect(min[u], min[v], max[u], max[v]);
     }
 
-    /**
-     * 大きさ dx × dy × dz の箱で、面積が一番大きい面の法線軸。
-     * 同じ大きさなら Y（上面）、次に X、Z の順に選ぶ（作物・苗木の弱点は上面に出したいため）。
-     */
+    /** 同じ大きさなら Y、X、Z の順（作物・苗木の弱点は上面に出したいため）。 */
     public static int largestFaceAxis(double dx, double dy, double dz) {
         double eps = 1e-6;
         double x = dy * dz;
@@ -65,7 +56,7 @@ public final class FaceMath {
         return x + eps >= z ? AXIS_X : AXIS_Z;
     }
 
-    /** 大きさ dx × dy × dz の箱で、法線軸 axis の面が一番大きい面（同じ大きさを含む）か。 */
+    /** 同じ大きさを含む。 */
     public static boolean isLargestFace(int axis, double dx, double dy, double dz) {
         double[] area = {dy * dz, dx * dz, dx * dy};
         double max = Math.max(area[AXIS_X], Math.max(area[AXIS_Y], area[AXIS_Z]));
@@ -73,13 +64,12 @@ public final class FaceMath {
     }
 
     /**
-     * 成長の弱点を出す面の法線軸。上面が一番大きい（同じ大きさを含む）なら、常に Y（作物・苗木）。
-     * 側面が一番大きいときは、一番大きい側面のうち、次の順に選ぶ。
-     * 1. keepAxis: 今弱点が出ていて、プレイヤーから見えている面の軸（照準が別の側面へ移っても、面を変えない）
-     * 2. aimedAxis: 照準が当たっている面の軸
-     * 3. 視点の、箱の中心からのずれ (eyeOffsetX, eyeOffsetZ) が大きいほうの軸（同じなら X）
-     * 使わない軸は -1 を渡す。
-     */
+    * 上面が一番大きければ（同じ大きさを含む）Y。側面が一番大きいときは、一番大きい側面のうち、
+    * 1. keepAxis（今弱点が出ていて見えている面。照準が別の側面へ移っても、面を変えない）
+    * 2. aimedAxis（照準が当たっている面）
+    * 3. 視点の、箱の中心からのずれが大きいほうの軸（同じなら X）
+    * の順に選ぶ。使わない軸は -1 を渡す。
+    */
     public static int growthFaceAxis(double dx, double dy, double dz, int keepAxis, int aimedAxis,
                                      double eyeOffsetX, double eyeOffsetZ) {
         int largest = largestFaceAxis(dx, dy, dz);
@@ -102,10 +92,7 @@ public final class FaceMath {
         return (axis == AXIS_X || axis == AXIS_Z) && isLargestFace(axis, dx, dy, dz);
     }
 
-    /**
-     * 箱 (min, max) の中か表面の点 p に一番近い面。{法線軸, 向き(+1 / -1)} を返す。
-     * 動物の弱点で、照準が当たっている面を選ぶのに使う（同じ距離なら Y、X、Z の順）。
-     */
+    /** p は箱の中か表面の点。{法線軸, 向き(+1 / -1)} を返す。同じ距離なら Y、X、Z の順。 */
     public static int[] nearestFace(double[] p, double[] min, double[] max) {
         int bestAxis = AXIS_Y;
         int bestSign = 1;

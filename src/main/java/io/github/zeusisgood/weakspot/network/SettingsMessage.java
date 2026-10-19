@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** サーバー → クライアント: サーバーの設定値（ログイン時と、サーバーの設定が変わったとき）。 */
+/** サーバー → クライアント。 */
 public class SettingsMessage implements IMessage {
 
     private SyncedSettings settings;

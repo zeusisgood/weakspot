@@ -14,12 +14,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/** サーバー → クライアント: そのプレイヤーの「今回」と累計の統計と、的当てのサーバー内の上位。 */
+/** サーバー → クライアント。 */
 public class StatsMessage implements IMessage {
 
     private MiningStats session;
     private MiningStats total;
-    /** 的当ての上位（名前と自己ベスト。上から）。 */
+    /** 上から。 */
     private List<String> topNames = new ArrayList<>();
     private List<Long> topScores = new ArrayList<>();
 

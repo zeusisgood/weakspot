@@ -25,17 +25,13 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.village.Village;
 
-/**
- * 村人が繁殖できない理由を、アクションバーに出す。大人の村人への動物の状態の問い合わせ（しゃがんで素手で
- * 右クリックを押しっぱなし）のたびに調べる。文は翻訳キーで送り、プレイヤーの言語で表示する（接続できるクライアントは
- * 必ずキーを持っている）。
- */
+/** 文は翻訳キーで送る（接続できるクライアントは必ずキーを持っている）。 */
 final class VillagerBreedHints {
 
-    /** 同じ文章を送り直す間隔（アクションバーは 3 秒ほどで消える）。 */
+    /** アクションバーは 3 秒ほどで消える。 */
     private static final long RESEND_TICKS = 20;
 
-    /** 前に送った案内（翻訳キーと値を並べた文字列）。同じものを続けて送らないため。 */
+    /** 同じものを続けて送らないため。 */
     private static final Map<UUID, String> LAST_TEXT = new HashMap<>();
     private static final Map<UUID, Long> LAST_TICK = new HashMap<>();
 
@@ -79,7 +75,7 @@ final class VillagerBreedHints {
                 villager.getGrowingAge() > 0, isReady(villager), mateState);
     }
 
-    /** その気か、その気になれる食べ物を持っているか。getIsWillingToMate(true) は食べ物を減らすので呼ばない。 */
+    /** getIsWillingToMate(true) は食べ物を減らすので呼ばない。 */
     private static boolean isReady(EntityVillager villager) {
         if (villager.getIsWillingToMate(false)) {
             return true;
@@ -100,7 +96,6 @@ final class VillagerBreedHints {
         return max;
     }
 
-    /** 案内の 1 つ分: 翻訳キーと値。 */
     private static final class Line {
         final String key;
         final Object[] args;
@@ -111,7 +106,7 @@ final class VillagerBreedHints {
         }
     }
 
-    /** 案内の中身。理由がなければ「繁殖できる」の 1 つ、あれば理由を並べる。 */
+    /** 理由がなければ「繁殖できる」の 1 つ。 */
     private static List<Line> lines(EntityVillager villager, List<Reason> reasons, SyncedSettings settings) {
         List<Line> lines = new ArrayList<>();
         if (reasons.isEmpty()) {
@@ -141,7 +136,6 @@ final class VillagerBreedHints {
         }
     }
 
-    /** 同じ案内かを比べるための文字列（翻訳キーと値を並べる）。 */
     private static String signature(List<Line> lines) {
         StringBuilder sb = new StringBuilder();
         for (Line line : lines) {
@@ -150,7 +144,7 @@ final class VillagerBreedHints {
         return sb.toString();
     }
 
-    /** 翻訳キーで送る形。「繁殖: 理由 / 理由」の、理由の部分も翻訳キー。 */
+    /** 理由の部分も翻訳キー。 */
     private static ITextComponent component(List<Line> lines) {
         if (lines.size() == 1 && lines.get(0).key.equals("weakspot.breed.ready")) {
             return new TextComponentTranslation("weakspot.breed.ready");

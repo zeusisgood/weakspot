@@ -16,9 +16,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
- * 1つのブロック面、または動物・敵の当たり判定の箱の面に出ている弱点。
- * ブロックの弱点の座標はワールド座標系の (u, v)。動物の弱点の (u, v) は、その面の左下の角からの位置で、
- * 動物が動いても一緒に動く（面の位置は follow で更新し、origin を足してワールド座標にする）。
+ * ブロックの弱点の (u, v) はワールド座標。動物の弱点の (u, v) は面の左下の角からの位置で、動物が動いても一緒に動く。
  * u, v は当たり判定の位置（ヒットの瞬間に移動先へ変わる）。マーカーの表示位置は motion で別に持つ（見た目だけ）。
  */
 final class WeakSpot {
@@ -27,30 +25,26 @@ final class WeakSpot {
     final BlockPos pos;
     final EnumFacing face;
     final int axis;
-    /** 動物・近接の弱点のときの動物・敵（ブロックの弱点は null）。 */
+    /** ブロックの弱点は null。 */
     final Entity entity;
     /** 面の平面の、法線軸方向のワールド座標。動物が動くと変わる。 */
     double plane;
-    /** 動物の弱点の、面の左下の角のワールド座標 (u, v)。ブロックは 0。 */
+    /** ブロックは 0。 */
     private double originU;
     private double originV;
-    /**
-     * ブロックの弱点はワールド座標の矩形。動物の弱点は、大きさだけを持つ (0, 0)〜(幅, 高さ)。
-     */
+    /** 動物の弱点は、大きさだけを持つ (0, 0)〜(幅, 高さ)。 */
     final FaceRect rect;
     final double radius;
-    /** この面での、縁の余白と最小移動距離（面の大きさに合わせて決める。WeakSpotPlacer.layout）。 */
     private final double edgeMargin;
     private final double minMoveDistance;
-    /** 出したときの当たり判定の箱（作物は育つと高さが変わるので、変わったら出し直す）。動物は、今の箱。 */
+    /** 作物は育つと高さが変わるので、変わったら出し直す。動物は、今の箱。 */
     AxisAlignedBB box;
 
     double u;
     double v;
     long lastActiveTick;
-    /** 掘る前の採掘の弱点。薄く描き、ほかのプレイヤーには送らない。掘り始めたら false。 */
+    /** 掘る前の採掘の弱点。薄く描き、ほかのプレイヤーには送らない。 */
     boolean preview;
-    /** マーカーの表示位置と残像。 */
     final MarkerMotion motion = new MarkerMotion(0, 0);
 
     private WeakSpot(HitKind kind, Entity entity, BlockPos pos, EnumFacing face, double plane, FaceRect rect,
@@ -68,10 +62,7 @@ final class WeakSpot {
         this.box = box;
     }
 
-    /**
-     * 照準位置 aim を避けて、新しい弱点を出す。面が小さすぎる（minFaceSize 未満）ときは出さずに null を返す。
-     * 成長の弱点は、作物の小さい面でも当てやすいように、growthMinRadius も下限に使う。
-     */
+    /** 面が小さすぎるときは null。成長の弱点は、作物の小さい面でも当てやすいように、growthMinRadius も下限に使う。 */
     static WeakSpot spawn(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, Vec3d aim,
                           SyncedSettings settings, Random random) {
         WeakSpot spot = create(kind, world, pos, state, face, settings);
@@ -85,10 +76,7 @@ final class WeakSpot {
         return spot;
     }
 
-    /**
-     * 他のプレイヤーから届いた位置 (u, v) に弱点を置く（描画用）。大きさは全員同じ設定値なので、自分の側で計算する。
-     * 面が小さすぎる場合は null。
-     */
+    /** 他のプレイヤーから届いた位置。大きさは全員同じ設定値なので、自分の側で計算する。面が小さすぎれば null。 */
     static WeakSpot at(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face, double u, double v,
                        SyncedSettings settings) {
         WeakSpot spot = create(kind, world, pos, state, face, settings);
@@ -98,7 +86,6 @@ final class WeakSpot {
         return spot;
     }
 
-    /** ブロックの当たり判定の箱から、その面の矩形・平面・半径を決める（位置 u, v はまだ決めない）。 */
     private static WeakSpot create(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face,
                                    SyncedSettings settings) {
         AxisAlignedBB box = state.getSelectedBoundingBox(world, pos);
@@ -120,10 +107,7 @@ final class WeakSpot {
         return new WeakSpot(kind, null, pos, face, plane, rect, layout, box);
     }
 
-    /**
-     * 動物の当たり判定の箱の、面 face に弱点を出す（kind は ANIMAL）。面が小さすぎるときは null。
-     * 小さい動物（子どものニワトリなど）は、ブロックの小さい面と同じ配置のルールに従う。
-     */
+    /** 面が小さすぎるときは null。 */
     static WeakSpot spawnOnEntity(HitKind kind, Entity entity, EnumFacing face, Vec3d aim, SyncedSettings settings,
                                   Random random) {
         WeakSpot spot = createOnEntity(kind, entity, face, settings);
@@ -137,7 +121,6 @@ final class WeakSpot {
         return spot;
     }
 
-    /** 他のプレイヤーから届いた、動物の面の中の位置 (u, v) に弱点を置く（描画用）。 */
     static WeakSpot atEntity(Entity entity, EnumFacing face, double u, double v, SyncedSettings settings) {
         WeakSpot spot = createOnEntity(HitKind.ANIMAL, entity, face, settings);
         if (spot != null) {
@@ -163,7 +146,7 @@ final class WeakSpot {
         return spot;
     }
 
-    /** 動物の今の（または描く時点の）箱に合わせて、面の位置を更新する。ブロックの弱点では何もしない。 */
+    /** ブロックの弱点では何もしない。 */
     void follow(AxisAlignedBB newBox) {
         if (entity == null) {
             return;
@@ -178,14 +161,12 @@ final class WeakSpot {
         plane = face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? max[axis] : min[axis];
     }
 
-    /** 動物の箱を、描く時点（partialTicks）の位置に合わせた箱。 */
     static AxisAlignedBB renderBox(Entity entity, float partialTicks) {
         double t = 1.0 - partialTicks;
         return entity.getEntityBoundingBox().offset((entity.lastTickPosX - entity.posX) * t,
                 (entity.lastTickPosY - entity.posY) * t, (entity.lastTickPosZ - entity.posZ) * t);
     }
 
-    /** 動物の箱の、照準の点 hit に一番近い面（照準が当たっている面）。 */
     static EnumFacing faceAt(AxisAlignedBB box, Vec3d hit) {
         int[] face = FaceMath.nearestFace(new double[] {hit.x, hit.y, hit.z},
                 new double[] {box.minX, box.minY, box.minZ}, new double[] {box.maxX, box.maxY, box.maxZ});
@@ -202,7 +183,7 @@ final class WeakSpot {
         return this.entity == null && this.kind == kind && this.pos.equals(pos) && this.face == face;
     }
 
-    /** 同じブロックの同じ面（形も同じ）か。違えば、マーカーは動かさずにその場で切り替える。 */
+    /** 違えば、マーカーは動かさずにその場で切り替える。 */
     boolean sameSurface(WeakSpot other) {
         if (other != null && entity != null) {
             return matchesEntity(other.entity, other.face);
@@ -210,11 +191,7 @@ final class WeakSpot {
         return other != null && matches(other.kind, other.pos, other.face) && box.equals(other.box);
     }
 
-    /**
-     * 成長の弱点を出す面。当たり判定の箱で一番大きい面（多くは上面）。
-     * 側面が一番大きいとき（サトウキビなど）は、見えている今の面 keep（なければ null）、照準が当たっている面 aimed、
-     * プレイヤーから見える側、の順に選ぶ（FaceMath.growthFaceAxis）。
-     */
+    /** keep は見えている今の面（なければ null）。 */
     static EnumFacing growthFace(AxisAlignedBB box, Vec3d eye, EnumFacing aimed, EnumFacing keep) {
         Vec3d center = box.getCenter();
         int axis = FaceMath.growthFaceAxis(box.maxX - box.minX, box.maxY - box.minY, box.maxZ - box.minZ,
@@ -235,7 +212,6 @@ final class WeakSpot {
                 axis == FaceMath.AXIS_X ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
     }
 
-    /** 箱の面 face が、視点 eye から見える側を向いているか（視点が面の平面より外側にある）。 */
     static boolean isFacing(AxisAlignedBB box, EnumFacing face, Vec3d eye) {
         int axis = face.getAxis().ordinal();
         double[] e = {eye.x, eye.y, eye.z};
@@ -254,13 +230,12 @@ final class WeakSpot {
         return WeakSpotPlacer.isHit(u, v, radius, a[0], a[1]);
     }
 
-    /** 今の位置から minDistance 以上離れた場所へ移動する。animate なら、マーカーは nowMs から動いて追いつく。 */
+    /** animate なら、マーカーは nowMs から動いて追いつく。 */
     void relocate(Random random, boolean animate, long nowMs) {
         double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, random);
         moveTo(p[0], p[1], animate, nowMs);
     }
 
-    /** 当たり判定の位置はすぐに変え、マーカーは animate なら動かし、そうでなければその場で切り替える。 */
     void moveTo(double newU, double newV, boolean animate, long nowMs) {
         u = newU;
         v = newV;
@@ -271,7 +246,6 @@ final class WeakSpot {
         }
     }
 
-    /** 面から lift だけ浮かせた位置のワールド座標。 */
     double[] worldPoint(double pu, double pv, double lift) {
         double sign = face.getAxisDirection().getOffset();
         return FaceMath.toWorld(axis, plane + sign * lift, pu + originU, pv + originV);

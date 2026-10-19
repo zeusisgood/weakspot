@@ -6,10 +6,7 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
-/**
- * 食事・飲み物の弱点のヒット通知の検証と効果（論理サーバー）。食べている・飲んでいる最中に受け付け、
- * 食べ終わるまでの時間を eatHitTicks 縮める（EatDraw）。乗り物に乗っていれば、加速も続ける。照準の角度は確かめない。
- */
+/** 照準の角度は確かめない。 */
 public final class EatHits {
 
     private EatHits() {

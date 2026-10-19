@@ -8,11 +8,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
-/**
- * クライアント → サーバー: 弱点を出すための状態の問い合わせ（動物・釣り・機械）。
- * 種類と相手（動物は生き物の ID、機械はブロックの位置、釣りはなし）を送り、サーバーは StateMessage で返す。
- * 問い合わせの間隔は、クライアントの QueryThrottle が決める。
- */
+/** クライアント → サーバー。サーバーは StateMessage で返す。問い合わせの間隔は、クライアントの QueryThrottle が決める。 */
 public class QueryMessage implements IMessage {
 
     private HitKind kind;
@@ -26,17 +22,14 @@ public class QueryMessage implements IMessage {
         this.target = target;
     }
 
-    /** 動物の状態（動いているタイマー）。 */
     public static QueryMessage animal(int entityId) {
         return new QueryMessage(HitKind.ANIMAL, entityId);
     }
 
-    /** 自分の浮きの状態。 */
     public static QueryMessage fishing() {
         return new QueryMessage(HitKind.FISHING, 0);
     }
 
-    /** 機械の進み具合と燃料。 */
     public static QueryMessage machine(BlockPos pos) {
         return new QueryMessage(HitKind.MACHINE, pos.toLong());
     }

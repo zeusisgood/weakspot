@@ -18,15 +18,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 他のプレイヤーの弱点マークの転送（論理サーバー）。各プレイヤーの今のマークを覚えておき、毎tick、
- * マークから markerShareRange 以内にいる他のプレイヤー（見る人）の集合を計算し直す。
- * 新しく範囲に入った人には今の状態を、マークが変わったら範囲内の全員に、範囲から出た人には「消えた」を送る。
+ * 毎 tick、マークから markerShareRange 以内にいる他のプレイヤー（見る人）の集合を計算し直す。
  * プレイヤーの追跡範囲（StartTracking）は描画距離に合わせたもので markerShareRange と合わないため、使わない。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MarkerRelay {
 
-    /** 送り手が送り直す間隔（20tick）より十分長い間なにも届かなければ、消えたものとして扱う。 */
+    /** 送り手が送り直す間隔（20 tick）より十分長く。 */
     private static final int TIMEOUT_TICKS = 60;
     /** 通知の間隔はネットワークの揺らぎで縮むので、この tick 数だけ甘く見る。 */
     private static final int INTERVAL_JITTER_TICKS = 1;
@@ -40,10 +38,8 @@ public final class MarkerRelay {
         final EntityPlayerMP owner;
         MarkerData data;
         long receivedTick;
-        /** まだ見る人へ送っていない変更がある。 */
         boolean dirty;
         long lastForwardTick = Long.MIN_VALUE / 2;
-        /** 今このマークを送っている人。 */
         final Set<EntityPlayerMP> viewers = new HashSet<>();
 
         Marker(EntityPlayerMP owner) {
@@ -51,7 +47,7 @@ public final class MarkerRelay {
         }
     }
 
-    /** クライアントから自分のマークの状態が届いた。data が null なら消えた。 */
+    /** data が null なら消えた。 */
     public static void onMarker(EntityPlayerMP player, MarkerData data) {
         if (data == null) {
             remove(player);
@@ -101,7 +97,7 @@ public final class MarkerRelay {
         }
     }
 
-    /** 同じワールドで、マーク（ブロックの中心）から range 以内にいる、持ち主以外のプレイヤー。range が 0 なら誰もいない。 */
+    /** ブロックの中心から測る。range が 0 なら誰もいない。 */
     private static Set<EntityPlayerMP> viewersInRange(Marker marker, double range) {
         Set<EntityPlayerMP> result = new HashSet<>();
         if (range <= 0) {
@@ -135,7 +131,6 @@ public final class MarkerRelay {
         marker.viewers.clear();
     }
 
-    /** ログアウト・ディメンション移動・死亡で、マークを消す（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         remove(player);
     }

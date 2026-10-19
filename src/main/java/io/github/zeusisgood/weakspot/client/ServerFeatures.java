@@ -3,8 +3,7 @@ package io.github.zeusisgood.weakspot.client;
 import io.github.zeusisgood.weakspot.common.ModVersions;
 
 /**
- * 接続しているサーバーの Mod の版で、機能を使えるかを決める。サーバーの版は SyncedSettings.serverVersion で届く。
- * 届く前やシングルプレイでは、自分の版として扱う。
+ * サーバーの版は SyncedSettings.serverVersion で届く。届く前やシングルプレイでは、自分の版として扱う。
  * <p>
  * パッチで、サーバーとクライアントの両方が要る機能（弱点の対象を増やす、操作を変えるなど）を足すときは、
  * クライアント側を {@code ServerFeatures.since("1.6.x")} で囲み、古いサーバーでは弱点を出さない
@@ -15,7 +14,6 @@ public final class ServerFeatures {
     private ServerFeatures() {
     }
 
-    /** サーバーの版が version 以上か。 */
     public static boolean since(String version) {
         String server = ClientSettings.get().serverVersion;
         return server == null || ModVersions.compare(server, version) >= 0;

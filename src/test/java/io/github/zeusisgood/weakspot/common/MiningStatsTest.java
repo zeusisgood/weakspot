@@ -40,7 +40,6 @@ public class MiningStatsTest {
         assertEquals(0, stats.savedTicks, 1e-9);
     }
 
-    /** 平均は、壊したブロックへのヒットだけで数える（壊しきらなかったブロックへのヒットは入れない）。 */
     @Test
     public void averageCountsOnlyHitsOnBrokenBlocks() {
         MiningStats stats = new MiningStats();

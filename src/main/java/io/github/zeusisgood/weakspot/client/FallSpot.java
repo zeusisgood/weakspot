@@ -22,36 +22,28 @@ import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
 /**
- * 落下の弱点（自分だけ）。高い所から落ちている間（着地したときの落下距離が fallMinDistance を超える）、足元の方向の枠
- * （下向き 40〜80 度・落ち始めの向きの ±25 度。HudSpot.FEET_WINDOW。画面にないときは矢印）に雲の白の弱点を出し、
- * 照準を合わせるだけでヒットにする。当てると、落ちた距離を fallReduceBlocks × コンボの掛け数だけ減らす
- * （ダメージはサーバーが着地のときに、サーバーの落ちた距離から決める。ここで減らすのは、見込みのダメージの表示のため）。
- * 照準の上に、着地したときの見込みのダメージを 3 段階で出す（死亡見込みは ☠ の点滅と画面の縁の赤）。当てて段階が下がったら
- * 「生存圏！」「ノーダメージ」、当てて、ダメージなしで着地したら「着地成功」の演出。見込みの計算は FallDamage（両側で同じ）。
+ * 当てると、落ちた距離を減らす。ダメージはサーバーが着地のときに、サーバーの落ちた距離から決める（ここで減らすのは、
+ * 見込みのダメージの表示のため）。見込みの計算は FallDamage（両側で同じ）。
  */
 final class FallSpot extends AimSpotKind {
 
     private static final int STREAK_PARTICLES = 8;
     private static final int LANDING_PARTICLES = 16;
     private static final int HINT_OFFSET = 22;
-    /** 見込みの 3 段階の色（死亡見込み・ダメージあり・ダメージなし）と、段階が下がったときの文字の色。 */
     private static final int LETHAL_RGB = 0xFF2020;
     private static final int HURT_RGB = 0xFFAA00;
     private static final int SAFE_RGB = 0x55FF55;
     private static final int SURVIVE_RGB = 0xAAFF55;
-    /** 死亡見込みのときの、画面の縁の赤（#B00000）と、縁の幅（画面の短い辺に対する比率）。 */
+    /** 縁の幅は、画面の短い辺に対する比率。 */
     private static final float[] EDGE_RGB = {0xB0 / 255F, 0, 0};
     private static final double EDGE_RATIO = 0.12;
-    /** 点滅の周期（ミリ秒）。 */
     private static final long FLASH_MS = 500;
-    /** 段階が下がったときの文字を出す長さ（tick）。 */
     private static final int MESSAGE_TICKS = 30;
 
-    /** この落下で当てたか、着地の直前の落ちた距離。 */
     private boolean hitThisFall;
     private float lastAirFall;
     private boolean inAir;
-    /** 段階が下がったときの文字（翻訳キー）と色、出した tick。 */
+    /** 翻訳キー。 */
     private String messageKey;
     private int messageRgb;
     private long messageTick = Long.MIN_VALUE / 2;
@@ -68,16 +60,13 @@ final class FallSpot extends AimSpotKind {
         messageKey = null;
     }
 
-    /** 落ちているか（出す条件。エリトラ・水・溶岩・はしご・乗り物・クリエイティブの飛行は除く）。 */
+    /** エリトラ・水・溶岩・はしご・乗り物・クリエイティブの飛行は除く。 */
     private static boolean falling(EntityPlayerSP player) {
         return !player.onGround && !player.isElytraFlying() && !player.isInWater() && !player.isInLava()
                 && !player.isRiding() && !player.isOnLadder() && !player.capabilities.isFlying;
     }
 
-    /**
-     * 落ち始めから出す（落下距離を超えてから出すと、当てるのが間に合わない）: 下がっていて、このまま着地したときの落下距離（今までの落下 +
-     * 地面までの高さ。FallDamage.landingFall）が fallMinDistance を超えるとき。当ててその見込みが下がれば消える。
-     */
+    /** 落ち始めから出す（落下距離を超えてから出すと、当てるのが間に合わない）。当ててその見込みが下がれば消える。 */
     @Override
     boolean wanted(EntityPlayerSP player, SyncedSettings settings) {
         return falling(player) && (player.posY < player.prevPosY || player.fallDistance != 0)
@@ -103,7 +92,7 @@ final class FallSpot extends AimSpotKind {
         }
         mc.world.playSound(player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP,
                 SoundCategory.PLAYERS, 0.4F, 1.6F, false);
-        // 段階が下がった瞬間の文字と音（死亡見込みから一気にダメージなしなら「ノーダメージ」だけ）
+        // 死亡見込みから一気にダメージなしなら「ノーダメージ」だけ
         if (after == FallMath.Outlook.SAFE && before != FallMath.Outlook.SAFE) {
             showMessage("weakspot.fall.noDamage", SAFE_RGB);
             HitSounds.accentRun(ComboEffects.pitches(new int[] {0, 2, 4}),
@@ -124,7 +113,6 @@ final class FallSpot extends AimSpotKind {
         return messageKey != null && ClientWeakSpotHandler.clientTick - messageTick < MESSAGE_TICKS;
     }
 
-    /** 着地を見て、当てていてダメージなしなら「着地成功」。 */
     @Override
     void tickEnd(Minecraft mc) {
         EntityPlayerSP player = mc.player;
@@ -152,13 +140,13 @@ final class FallSpot extends AimSpotKind {
         return WeakSpotConfig.client.hud.fallDamageHintEnabled && (spot.has() || messageShown());
     }
 
-    /** 点滅の濃さ（0.35〜1）。 */
+    /** 0.35〜1。 */
     private static double flash() {
         double t = (Minecraft.getSystemTime() % FLASH_MS) / (double) FLASH_MS;
         return 0.35 + 0.65 * (0.5 + 0.5 * Math.cos(t * 2 * Math.PI));
     }
 
-    /** 死亡見込みの間、画面の縁を赤くする（beginOverlay と endOverlay の間）。 */
+    /** beginOverlay と endOverlay の間で呼ぶ。 */
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
         if (!spot.has() || FallDamage.landingOutlook(mc.player) != FallMath.Outlook.LETHAL) {
@@ -173,7 +161,7 @@ final class FallSpot extends AimSpotKind {
         BufferBuilder buffer = tessellator.getBuffer();
         GlStateManager.shadeModel(GL11.GL_SMOOTH);
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        // 上・下・左・右の帯（外側が濃く、内側へ透明に）
+        // 外側が濃く、内側へ透明に
         quad(buffer, 0, 0, w, 0, w, edge, 0, edge, a, a, 0, 0);
         quad(buffer, 0, h - edge, w, h - edge, w, h, 0, h, 0, 0, a, a);
         quad(buffer, 0, 0, edge, 0, edge, h, 0, h, a, 0, 0, a);
@@ -190,10 +178,6 @@ final class FallSpot extends AimSpotKind {
         buffer.pos(x2, y2, 0).color(EDGE_RGB[0], EDGE_RGB[1], EDGE_RGB[2], a2).endVertex();
     }
 
-    /**
-     * 照準の上に、見込みのダメージを 3 段階で出す（死亡見込みは濃い赤で点滅する「☠」、ダメージありはオレンジ、
-     * なしは緑）。段階が下がった直後は、その上に「生存圏！」「ノーダメージ」。
-     */
     @Override
     void drawAfterOverlay(Minecraft mc, float partialTicks) {
         EntityPlayerSP player = mc.player;

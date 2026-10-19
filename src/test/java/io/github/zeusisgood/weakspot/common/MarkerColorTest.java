@@ -23,7 +23,7 @@ public class MarkerColorTest {
     }
 
     @Test
-    public void towardWhite() {
+    public void towardWhiteBlendsEachChannel() {
         assertArrayEquals(new float[] {1, 0.5F, 0.5F}, MarkerColor.towardWhite(0xFF0000, 0.5F), 1e-6F);
         assertArrayEquals(new float[] {1, 1, 1}, MarkerColor.towardWhite(0x000000, 1), 1e-6F);
     }

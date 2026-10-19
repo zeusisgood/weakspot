@@ -2,10 +2,7 @@ package io.github.zeusisgood.weakspot.client;
 
 import java.io.IOException;
 
-/**
- * 統計画面（StatsScreen）の 1 つのタブ。ボタンは init で画面に足し、見せる・隠すは
- * show。画面の共通の枠（題・タブ・下のボタン・ホイール・説明の吹き出し）は StatsScreen が持つ。
- */
+/** 画面の共通の枠（題・タブ・下のボタン・ホイール・説明の吹き出し）は StatsScreen が持つ。 */
 abstract class StatsScreenTab {
 
     final StatsScreen screen;
@@ -14,10 +11,9 @@ abstract class StatsScreenTab {
         this.screen = screen;
     }
 
-    /** 画面を作り直すたび（設定画面から戻ったときも）。ボタンを screen.add で足す。 */
+    /** 設定画面から戻ったときも、画面を作り直すたびに呼ぶ。ボタンを screen.add で足す。 */
     abstract void init();
 
-    /** このタブを出す・隠す。 */
     abstract void show(boolean shown);
 
     /** このタブのボタンなら処理して true。 */
@@ -27,11 +23,11 @@ abstract class StatsScreenTab {
 
     abstract void draw();
 
-    /** ホイール（step は 1 行ずつ。下が +1）。 */
+    /** 下が +1。 */
     void scroll(int step) {
     }
 
-    /** 文字の入力を受け取ったら true。 */
+    /** 受け取ったら true。 */
     boolean keyTyped(char typedChar, int keyCode) throws IOException {
         return false;
     }

@@ -10,7 +10,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
-/** サーバーの設定値を、ログインしたプレイヤーと、設定が変わったときは接続中の全員へ送る。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class SettingsSync {
 
@@ -24,10 +23,7 @@ public final class SettingsSync {
         }
     }
 
-    /**
-     * 設定が変わったとき（シングルプレイ・LAN のホストが Mods メニューで変えたとき）に呼ぶ。
-     * どのスレッドから呼んでもよい。この側でサーバーが動いていなければ何もしない。
-     */
+    /** シングルプレイ・LAN のホストが Mods メニューで変えたとき。どのスレッドから呼んでもよい。この側でサーバーが動いていなければ何もしない。 */
     public static void resendToAll() {
         SyncedSettings.invalidateServer();
         MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();

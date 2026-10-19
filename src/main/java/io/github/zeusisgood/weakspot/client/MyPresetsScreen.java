@@ -9,8 +9,7 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
 /**
- * マイプリセットの画面（「サウンド」タブの [保存・読み込み…] から開く）。3 つの枠を中身付きで並べ、それぞれ
- * [読み込む] [保存]（保存済みの枠は 1 回目で「上書き？」、もう一度で上書き。3 秒かほかのボタンで戻る）。下に今の設定の中身。
+ * 保存済みの枠の [保存] は、1 回目で「上書き？」、もう一度で上書き（3 秒かほかのボタンで戻る）。
  * 先例はバニラの保存したホットバーと、OptiFine のシェーダーのプロファイル。
  */
 final class MyPresetsScreen extends GuiScreen {
@@ -21,9 +20,7 @@ final class MyPresetsScreen extends GuiScreen {
     private static final int ROW_HEIGHT = 26;
     private static final int BUTTON_WIDTH = 60;
     private static final int MAX_WIDTH = 400;
-    /** 枠の名前の列の幅。 */
     private static final int NAME_WIDTH = 84;
-    /** 保存しました・読み込みました（緑 #55FF55）と、上書き？（黄 #FFFF55）。 */
     private static final int DONE_RGB = 0x55FF55;
     private static final int CONFIRM_RGB = 0xFFFF55;
     private static final long DONE_MS = 2000;
@@ -35,10 +32,9 @@ final class MyPresetsScreen extends GuiScreen {
     private int left;
     private int right;
     private int top;
-    /** 上書きの確かめ中の枠（1 始まり。0 はなし）と、その時刻。 */
+    /** 1 始まり。0 はなし。 */
     private int confirmSlot;
     private long confirmMs;
-    /** 「保存しました」「読み込みました」を出している枠と、その文字の翻訳キー・時刻。 */
     private int doneSlot;
     private String doneKey;
     private long doneMs = Long.MIN_VALUE / 2;
@@ -162,7 +158,7 @@ final class MyPresetsScreen extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
     }
 
-    /** 中身の説明（楽器・音階の種類・動き・音域。和音がオフなら「和音オフ」も）。 */
+    /** 和音がオフなら「和音オフ」も。 */
     static String describe(SoundPreset preset) {
         String text = I18n.format("weakspot.sound.preset.describe",
                 I18n.format("weakspot.sound.instrument." + preset.sound.name()),
@@ -172,7 +168,7 @@ final class MyPresetsScreen extends GuiScreen {
         return preset.chord ? text : I18n.format("weakspot.sound.preset.noChord", text);
     }
 
-    /** 幅に入りきらなければ、末尾を「…」で切る。 */
+    /** 入りきらなければ、末尾を「…」で切る。 */
     private String fit(String text, int width) {
         if (fontRenderer.getStringWidth(text) <= width) {
             return text;

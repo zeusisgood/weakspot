@@ -15,11 +15,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-/**
- * 画面の上のマーカー（ScreenSpotKind）を、まとめて回す。DrawScreenEvent.Post で描く。重ねたら当たりの種類（睡眠）は、そこでカーソルが円の中なら当てる。
- * クリックで当てる種類（エンチャント）は、MouseInputEvent.Pre で左クリックが円の中ならキャンセルして当てる
- * （当てたクリックは、ボタンやスロットに届かない）。
- */
+/** 重ねたら当たりの種類は DrawScreenEvent.Post で、クリックで当てる種類は MouseInputEvent.Pre で当てる。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class ScreenSpots {
 
@@ -37,7 +33,7 @@ final class ScreenSpots {
         Minecraft mc = Minecraft.getMinecraft();
         GuiScreen gui = event.getGui();
         // コンテナ画面（エンチャント台など）は、アイテム用のライティングを有効にしたまま Post を出すので、
-        // 切ってから描く（弱点の円・文字が暗くなっていた）。ほかの Mod のために、描き終えたら戻す
+        // 切ってから描く（弱点の円・文字が暗くなる）。ほかの Mod のために、描き終えたら戻す
         boolean lit = GL11.glIsEnabled(GL11.GL_LIGHTING);
         GlStateManager.disableLighting();
         for (ScreenSpotKind k : KINDS) {
@@ -59,7 +55,7 @@ final class ScreenSpots {
         }
     }
 
-    /** 画面が変わったら（開き直したら）、新しい位置に出す。 */
+    /** 開き直したら、新しい位置に出す。 */
     private static void ensure(ScreenSpotKind k, GuiScreen gui) {
         if (k.shownOn == gui) {
             return;
@@ -113,7 +109,7 @@ final class ScreenSpots {
         return Math.hypot(mouseX - k.x, mouseY - k.y) <= k.radius();
     }
 
-    /** 当てる（最小間隔の中なら何もしない）。当てたら次の位置へ移す。 */
+    /** 最小間隔の中なら何もしない。 */
     private static void hit(ScreenSpotKind k, GuiScreen gui) {
         if (!OwnHits.canHit(k.kind, k.minHitInterval(ClientSettings.get()))) {
             return;

@@ -21,8 +21,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
- * サーバーが記録する統計。累計はプレイヤーの永続データ（PlayerPersisted。死亡・ディメンション移動でも
- * 引き継がれる）に保存するので、ワールドごと・プレイヤーごとになる。「今回」はログインからログアウトまでで、メモリにだけ持つ。
+ * 累計はプレイヤーの永続データ（PlayerPersisted。死亡・ディメンション移動でも引き継がれる）に保存するので、
+ * ワールドごと・プレイヤーごとになる。「今回」はログインからログアウトまでで、メモリにだけ持つ。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ServerStats {
@@ -31,7 +31,7 @@ public final class ServerStats {
     private static final String TAG_TOTAL = "total";
 
     private static final Map<UUID, MiningStats> SESSIONS = new HashMap<>();
-    /** 連続ヒット（コンボ）。クライアントのコンボと同じ条件で、サーバーの tick で数える。メモリだけ。 */
+    /** クライアントのコンボと同じ条件で、サーバーの tick で数える。メモリだけ。 */
     private static final Map<UUID, HitStreak> STREAKS = new HashMap<>();
 
     private ServerStats() {
@@ -42,7 +42,7 @@ public final class ServerStats {
         SESSIONS.put(event.player.getUniqueID(), new MiningStats());
     }
 
-    /** ログアウトで今回の統計と連続ヒットを、リスポーン・ディメンション移動で連続ヒットを消す（クライアントのコンボと同じ）。 */
+    /** リスポーン・ディメンション移動では連続ヒットだけを消す（クライアントのコンボと同じ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             SESSIONS.remove(player.getUniqueID());
@@ -50,10 +50,7 @@ public final class ServerStats {
         STREAKS.remove(player.getUniqueID());
     }
 
-    /**
-     * 受け付けたヒット（採掘・成長・機械・動物・釣り・弓・近接のすべて）を、連続ヒットに数えて、最大を更新する。
-     * 種類とブロックをまたいで続き、40 tick ヒットがないと途切れる（HitStreak）。このヒットを数えたあとの数を返す。
-     */
+    /** このヒットを数えたあとの数を返す。 */
     public static int countStreak(EntityPlayerMP player) {
         long now = player.mcServer.getTickCounter();
         int count = STREAKS.computeIfAbsent(player.getUniqueID(), id -> new HitStreak()).hit(now);
@@ -67,16 +64,14 @@ public final class ServerStats {
         return count;
     }
 
-    /**
-     * このヒットを数えたら何になるか（数えない。収穫のおまけは、収穫できたときだけヒットに数えるので、先に見る）。
-     */
+    /** 数えない。収穫のおまけは、収穫できたときだけヒットに数えるので、先に見る。 */
     public static int peekStreak(EntityPlayerMP player) {
         HitStreak streak = STREAKS.get(player.getUniqueID());
         long now = player.mcServer.getTickCounter();
         return streak == null ? 1 : streak.count(now) + 1;
     }
 
-    /** そのプレイヤーの連続ヒット（まだ一度もヒットしていなければ null）。頭の上のコンボ（ComboRelay）が読む。 */
+    /** まだ一度もヒットしていなければ null。 */
     static HitStreak streak(EntityPlayer player) {
         return STREAKS.get(player.getUniqueID());
     }
@@ -89,7 +84,6 @@ public final class ServerStats {
         return read(data(player).getCompoundTag(TAG_TOTAL));
     }
 
-    /** 「今回」と累計の両方に同じ記録をする。 */
     public static void record(EntityPlayer player, Consumer<MiningStats> change) {
         change.accept(session(player));
         MiningStats total = total(player);
@@ -97,20 +91,13 @@ public final class ServerStats {
         data(player).setTag(TAG_TOTAL, write(total));
     }
 
-    /**
-     * 採掘以外の種類のヒットを、「今回」と累計に数え、種類ごと・合計の節目を判定する。
-     * 近接はクリティカルにしたときに呼ぶ。
-     */
+    /** 近接はクリティカルにしたときに呼ぶ。 */
     public static void recordKindHit(EntityPlayerMP player, HitKind kind) {
         record(player, stats -> stats.recordKindHit(kind));
         MiningRewards.onKindHit(player, kind);
     }
 
-    /**
-     * 画面の「統計をリセット」と /weakspot reset。累計と今回の両方を消す（累計だけだと、直後に今回のほうが
-     * 大きく見える）。節目も累計で数えるので、節目をもう一度受け取れる。
-     * ようこそのメッセージ（的の行を除く）も出す。
-     */
+    /** 累計と今回の両方を消す（累計だけだと、直後に今回のほうが大きく見える）。節目も累計で数えるので、もう一度受け取れる。 */
     public static void resetTotal(EntityPlayer player) {
         // 的当ての記録は消さない（ご褒美の解放が消えてしまうため）
         MiningStats before = total(player);
@@ -120,12 +107,11 @@ public final class ServerStats {
         data(player).setTag(TAG_TOTAL, write(fresh));
         SESSIONS.put(player.getUniqueID(), new MiningStats());
         if (player instanceof EntityPlayerMP) {
-            // 最初からやり直す感じを出すため、ようこそのメッセージをもう一度（的の行は除く。的は配り直さない）
+            // 最初からやり直す感じを出すため（的は配り直さない）
             GuideBookGiver.sendWelcome((EntityPlayerMP) player, false);
         }
     }
 
-    /** 統計画面に送る中身（今回・累計と、的当てのサーバー内の上位 10 人）。 */
     public static StatsMessage message(EntityPlayerMP player) {
         List<String> names = new ArrayList<>();
         List<Long> scores = new ArrayList<>();
@@ -142,10 +128,9 @@ public final class ServerStats {
         return new StatsMessage(session(player), total(player), names, scores);
     }
 
-    /** 統計画面に出す、的当ての上位の人数。 */
     private static final int TOP_SHOWN = 10;
 
-    /** この Mod の永続データ。無ければ作って付ける。 */
+    /** 無ければ作って付ける。 */
     static NBTTagCompound data(EntityPlayer player) {
         NBTTagCompound entityData = player.getEntityData();
         NBTTagCompound persisted = entityData.getCompoundTag(EntityPlayer.PERSISTED_NBT_TAG);
@@ -157,7 +142,7 @@ public final class ServerStats {
         return mine;
     }
 
-    /** 保存のキーは MiningStats#saveKey。古いワールドの近接の数（critHits）は、meleeHits がなければ読む。 */
+    /** 古いワールドの近接の数（critHits）は、meleeHits がなければ読む。 */
     private static MiningStats read(NBTTagCompound tag) {
         MiningStats stats = new MiningStats();
         stats.blocksBroken = tag.getLong("blocksBroken");

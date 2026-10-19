@@ -23,16 +23,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 投げる物の溜め（両側）。弱点に当てるたびに溜め、次の 1 投の速さを (1 + 溜め) 倍にする。
- * 溜めは持ち替える（選んでいるスロットが変わる、メインハンドの物の種類が変わる）まで残り、投げたら使い切る。
- * サーバーは、投げた瞬間（RightClickItem）に倍率を覚え、同じ tick にワールドに出たその人の投げた物（EntityThrowable）の
- * 速さに掛ける。クライアントはゲージのために同じ溜めを持つ（サーバーの返事を待たずに進める）。
- * シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
+ * 次の 1 投の速さを (1 + 溜め) 倍にする。サーバーは、投げた瞬間（RightClickItem）に倍率を覚え、同じ tick にワールドに出た
+ * その人の投げた物（EntityThrowable）の速さに掛ける。クライアントはゲージのために同じ溜めを持つ。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ThrowCharge {
 
-    /** 投げた瞬間の倍率と tick（サーバー。同じ tick に出た投げた物に掛ける）。 */
+    /** サーバー。同じ tick に出た投げた物に掛ける。 */
     private static final class Thrown {
         final double multiplier;
         final long tick;
@@ -43,14 +40,14 @@ public final class ThrowCharge {
         }
     }
 
-    /** 投げる物の溜め（上限なし。ヒットで溜めるときは max に 0 を渡す）。 */
+    /** 上限なし（ヒットで溜めるときは max に 0 を渡す）。 */
     public static final HeldCharge CHARGES = new HeldCharge(ThrowCharge::isThrowable);
     private static final Map<EntityLivingBase, Thrown> THROWN = Collections.synchronizedMap(new WeakHashMap<>());
 
     private ThrowCharge() {
     }
 
-    /** 投げる物か（エンダーパール・雪玉・卵・スプラッシュポーション・残留ポーション・エンチャントの瓶と、それを継承した物）。 */
+    /** それを継承した物も。 */
     public static boolean isThrowable(ItemStack stack) {
         Item item = stack.getItem();
         return !stack.isEmpty() && (item instanceof ItemEnderPearl || item instanceof ItemSnowball
@@ -58,7 +55,7 @@ public final class ThrowCharge {
                 || item instanceof ItemExpBottle);
     }
 
-    /** 持ち替えたら、溜めを消す（両側。毎 tick）。 */
+    /** 両側で毎 tick。 */
     @SubscribeEvent
     public static void onPlayerTick(TickEvent.PlayerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
@@ -66,9 +63,7 @@ public final class ThrowCharge {
         }
     }
 
-    /**
-     * 投げる物を右クリックした（投げる直前。クールダウン中なら、ここまで来ない）。溜めを使い切り、サーバーは倍率を覚える。
-     */
+    /** クールダウン中なら、ここまで来ない。 */
     @SubscribeEvent
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
         EntityPlayer player = event.getEntityPlayer();
@@ -84,7 +79,7 @@ public final class ThrowCharge {
         }
     }
 
-    /** 同じ tick に出た、その人の投げた物の速さに倍率を掛ける（サーバー。追跡の前なので、見た目の速さも同じになる）。 */
+    /** サーバー。追跡の前なので、見た目の速さも同じになる。 */
     @SubscribeEvent
     public static void onJoinWorld(EntityJoinWorldEvent event) {
         if (THROWN.isEmpty() || event.getWorld().isRemote || !(event.getEntity() instanceof EntityThrowable)) {

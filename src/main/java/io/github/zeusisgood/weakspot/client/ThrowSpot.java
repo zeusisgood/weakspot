@@ -9,15 +9,10 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
-/**
- * 投げる物の弱点（自分だけ）。エンダーパール・雪玉などをメインハンドに持っている間、照準から 10〜20 度
- * （馬・豚に乗っているときは真上か真下だけ）に青緑の弱点を出し、照準を合わせるだけでヒットにする。当てるたびに
- * 次の 1 投の溜めが増え（ThrowCharge。クライアントもサーバーの返事を待たずに進める）、照準の下にゲージを出す。
- * AimSpotKind（AimSpots が回す）。
- */
+/** クライアントもサーバーの返事を待たずに溜める。 */
 final class ThrowSpot extends AimSpotKind {
 
-    /** ゲージ 1 本分の溜め（倍率 ×3）。越えた分は、1 本分ごとに赤い目盛りを 1 つ足す。 */
+    /** 倍率 ×3。 */
     private static final double CHARGE_PER_BAR = 2.0;
 
     ThrowSpot() {
@@ -33,7 +28,6 @@ final class ThrowSpot extends AimSpotKind {
     int placement(EntityPlayerSP player) {
         return VehicleTargets.isSteeredByLook(player) ? HudSpot.VERTICAL : HudSpot.FREE;
     }
-
 
     @Override
     void onHit(Minecraft mc, EntityPlayerSP player, SyncedSettings settings, int streak) {

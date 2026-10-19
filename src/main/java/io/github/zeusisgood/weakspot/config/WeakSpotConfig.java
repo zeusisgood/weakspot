@@ -24,11 +24,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * config/weakspot.cfg。
  * [サーバー] はサーバーの値が正で、ログイン時と変更時にクライアントへ送る（SyncedSettings）。
- * クライアントは接続中、自分の [サーバー] の値を使わない。[クライアント] は各プレイヤーの設定のまま使う。
- * カテゴリは 2 段（server / client → 種類・用途）。項目の名前は、カテゴリを分ける前（general）と同じ。
- * 項目は {@link #server}・{@link #client} の入れ子のオブジェクトにある（例: WeakSpotConfig.server.mining.boostMultiplier）。
+ * クライアントは接続中、自分の [サーバー] の値を使わない。項目の名前は、カテゴリを分ける前（general）と同じ。
  */
 @Config(modid = WeakSpotMod.MODID, category = "")
 public final class WeakSpotConfig {
@@ -42,7 +39,7 @@ public final class WeakSpotConfig {
     @Config.Comment("各プレイヤーの設定")
     public static final ClientConfig client = new ClientConfig();
 
-    /** 共通（general）。カテゴリを分ける前の設定ファイルを見分けるため、configVersion だけを置く。 */
+    /** カテゴリを分ける前の設定ファイルを見分けるため、configVersion だけを置く。 */
     public static final class General {
 
         @Config.Comment("[内部] 設定ファイルの移行の済んだ版。書き換えないでください")
@@ -55,19 +52,18 @@ public final class WeakSpotConfig {
     private WeakSpotConfig() {
     }
 
-    /** 統計画面などから [クライアント] の値を書き換えた後に呼び、weakspot.cfg に保存する（Forge の設定画面と同じ値になる）。 */
+    /** 統計画面などから [クライアント] の値を書き換えた後に呼ぶ（Forge の設定画面と同じ値になる）。 */
     public static void save() {
         ConfigManager.sync(WeakSpotMod.MODID, Config.Type.INSTANCE);
     }
 
     /**
-     * 古い版で作った weakspot.cfg を1回だけ移行する（init とサーバーの起動時に呼ぶ。何度呼んでもよい）。
-     * 値は Configuration の Property に書いてから ConfigManager.sync でフィールドへ読み込む（preInit から init の間の sync は
-     * ファイルの値でフィールドを上書きする「読み込み」なので、フィールドに書いてから保存することはできない）。
-     * 1〜5（古い初期値の直し）は消した。
-     * 6: 今の設定にない項目（1.7.x の meleeWeakSpotScale など）を、ファイルから消す（Forge は自分では消さない）。
-     * 7: general に並んでいた項目を、server / client の下のカテゴリへ移す。今の設定にない項目は消す（6 を含む）。
-     */
+    * 古い版で作った weakspot.cfg を 1 回だけ移行する（何度呼んでもよい）。値は Configuration の Property に書いてから
+    * ConfigManager.sync でフィールドへ読み込む（preInit から init の間の sync はファイルの値でフィールドを上書きする「読み込み」
+    * なので、フィールドに書いてから保存することはできない）。
+    * 6: 今の設定にない項目を、ファイルから消す（Forge は自分では消さない）。
+    * 7: general に並んでいた項目を、server / client の下のカテゴリへ移す。今の設定にない項目は消す（6 を含む）。
+    */
     public static void migrate() {
         if (general.configVersion >= 7) {
             return;
@@ -85,10 +81,7 @@ public final class WeakSpotConfig {
         general.configVersion = 7;
     }
 
-    /**
-     * general の項目を、同じ名前の設定のカテゴリへ移す（configVersion 7）。移した先にもう項目があれば値だけを書き、
-     * なければ項目ごと移す。今の設定にない項目は消す。configVersion は general に残す。
-     */
+    /** 移した先にもう項目があれば値だけを書き、なければ項目ごと移す。今の設定にない項目は消す。configVersion は general に残す。 */
     static void moveToCategories(Configuration cfg) {
         ConfigCategory old = cfg.getCategory("general");
         for (String key : new ArrayList<>(old.keySet())) {
@@ -113,7 +106,7 @@ public final class WeakSpotConfig {
         }
     }
 
-    /** 設定の 1 項目。category は weakspot.cfg のカテゴリ（例: server.mining）。 */
+    /** category は weakspot.cfg のカテゴリ（例: server.mining）。 */
     public static final class Setting {
         public final String category;
         public final Field field;
@@ -137,12 +130,11 @@ public final class WeakSpotConfig {
             }
         }
 
-        /** 設定画面の項目の名前の翻訳キー（Forge の決まり: weakspot.カテゴリ.小文字の名前）。 */
+        /** Forge の決まり: weakspot.カテゴリ.小文字の名前。 */
         public String nameKey() {
             return WeakSpotMod.MODID + "." + category + "." + name().toLowerCase(Locale.ENGLISH);
         }
 
-        /** 設定画面の説明の翻訳キー（名前の翻訳キー + .tooltip）。 */
         public String tooltipKey() {
             return nameKey() + ".tooltip";
         }
@@ -150,7 +142,7 @@ public final class WeakSpotConfig {
 
     private static List<Setting> settings;
 
-    /** すべての設定（カテゴリの順）。 */
+    /** カテゴリの順。 */
     public static synchronized List<Setting> settings() {
         if (settings == null) {
             List<Setting> list = new ArrayList<>();
@@ -160,7 +152,7 @@ public final class WeakSpotConfig {
         return settings;
     }
 
-    /** 名前から設定を探す（なければ null）。 */
+    /** なければ null。 */
     public static Setting setting(String name) {
         for (Setting setting : settings()) {
             if (setting.name().equals(name)) {
@@ -196,11 +188,10 @@ public final class WeakSpotConfig {
     private static boolean reloadWarned;
 
     /**
-     * weakspot.cfg をファイルから読み直して、フィールドに反映する（/weakspot reload）。読み直せなければ false。
-     * 起動後の ConfigManager.sync は、「変わった」（Property#hasChanged）項目だけファイルの値をフィールドへ読み込み、
-     * ほかはフィールドの値をファイルへ書き出す。そこで ConfigManager が持っている Configuration を読み直し、
-     * すべての項目に「変わった」の印を付けてから sync する（Forge の設定画面と同じ流れ）。
-     */
+    * 読み直せなければ false。起動後の ConfigManager.sync は、「変わった」（Property#hasChanged）項目だけファイルの値を
+    * フィールドへ読み込み、ほかはフィールドの値をファイルへ書き出す。そこで ConfigManager が持っている Configuration を
+    * 読み直し、すべての項目に「変わった」の印を付けてから sync する（Forge の設定画面と同じ流れ）。
+    */
     public static boolean reloadFromFile() {
         Configuration cfg = configuration();
         if (cfg == null) {
@@ -221,10 +212,7 @@ public final class WeakSpotConfig {
         return true;
     }
 
-    /**
-     * ConfigManager が持っている weakspot.cfg（設定画面を組むためと、ファイルを読み直すため）。非公開の CONFIGS（ファイルの
-     * 絶対パス → Configuration）から取り出す。Forge のクラスなので名前は1つ。取り出せなければ null。
-     */
+    /** 非公開の CONFIGS（ファイルの絶対パス → Configuration）から取り出す。Forge のクラスなので名前は 1 つ。取り出せなければ null。 */
     @SuppressWarnings("unchecked")
     public static Configuration configuration() {
         try {
@@ -242,7 +230,7 @@ public final class WeakSpotConfig {
         }
     }
 
-    /** 節目と量の数が合っていなければ、ログに警告を出す（足りない分は 0 として扱う）。 */
+    /** 足りない分は 0 として扱う。 */
     public static void warnIfMisconfigured() {
         for (String entry : GrowthFilters.parse(Arrays.asList(server.growth.growthExtraBlocks)).invalid()) {
             LogManager.getLogger(WeakSpotMod.MODID).warn(

@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class HitHandlersTest {
 
-    /** どの種類のヒットにも、サーバーの処理がある（種類を足したときの登録忘れを防ぐ）。 */
+    /** 種類を足したときの登録忘れを防ぐ。 */
     @Test
     public void everyKindHasAHandler() {
         for (HitKind kind : HitKind.values()) {

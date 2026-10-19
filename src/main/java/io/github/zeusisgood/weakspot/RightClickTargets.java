@@ -35,30 +35,28 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
- * 右クリックの弱点（作物・苗木などの植物、機械）の対象の判定。クライアントとサーバーで同じ条件を使う。
- * しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木（しゃがんでいても、機械でなければ作物・苗木）。
- * 実った作物は収穫。しゃがんでいれば、ランダム tick を受け取るブロックも成長の対象（isAutoGrowable）。
+ * クライアントとサーバーで同じ条件を使う。しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木。
  * 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
  */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class RightClickTargets {
 
     /**
-     * 同じブロックが縦に伸びる植物（サトウキビ、サボテン）。育つのは柱の一番上の節だけなので、育てる余地（柱の高さ）を
-     * コードで判定し、効果は柱の一番上にかける。追加リスト（growthExtraBlocks）にあるときだけ対象（条件を書けば、それも満たすとき）。
-     */
+    * 育つのは柱の一番上の節だけなので、育てる余地（柱の高さ）をコードで判定し、効果は柱の一番上にかける。
+    * 追加リスト（growthExtraBlocks）にあるときだけ対象。
+    */
     private static final Set<String> COLUMN_BLOCKS = new HashSet<>(Arrays.asList("minecraft:reeds", "minecraft:cactus"));
 
     private RightClickTargets() {
     }
 
-    /** 右クリックで出る弱点の種類。対象でなければ null。 */
+    /** 対象でなければ null。 */
     public static HitKind classify(World world, EntityPlayer player, BlockPos pos, SyncedSettings settings) {
         if (!PlayerRules.canUse(player) || !HeldItems.isFree(player.getHeldItemMainhand(), settings)) {
             return null;
         }
         IBlockState state = world.getBlockState(pos);
-        // サーバーの設定で止めた種類は、対象にしない（収穫は isHarvestable の中で見る）
+        // 収穫は isHarvestable の中で見る
         if (settings.enabled(HitKind.MACHINE) && player.isSneaking()
                 && HeldItems.isFree(player.getHeldItemOffhand(), settings)
                 && isMachine(world, pos, state, settings)) {
@@ -78,10 +76,9 @@ public final class RightClickTargets {
     }
 
     /**
-     * しゃがんで右クリックで自動で拾う成長の対象か（Random Things の Time in a Bottle と同じ考え方）。
-     * ランダム tick を受け取り、対象外リストにも追加リストにもなく（追加リストのブロックは書いた条件だけで決める）、
-     * IGrowable でない（IGrowable は canGrow で決める）ブロック。
-     */
+    * Random Things の Time in a Bottle と同じ考え方。追加リストのブロックは書いた条件だけで決め、IGrowable は canGrow で決めるので、
+    * どちらも除く。
+    */
     public static boolean isAutoGrowable(IBlockState state, SyncedSettings settings) {
         Block block = state.getBlock();
         String name = String.valueOf(block.getRegistryName());
@@ -89,12 +86,12 @@ public final class RightClickTargets {
                 && !settings.growthExcludedBlocks.contains(name) && !settings.growthFilters().contains(name);
     }
 
-    /** 成長の弱点を出し続けてよいか（今の判定か、自動の対象）。出す条件（しゃがみ）は classify で見る。 */
+    /** 出す条件（しゃがみ）は classify で見る。 */
     public static boolean isGrowthTarget(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         return isGrowable(world, pos, state, settings) || isAutoGrowable(state, settings);
     }
 
-    /** 自動の対象は、サーバーとクライアントの両方が 1.11.2 以上のときだけ（古い側が右クリックを止めないので）。 */
+    /** サーバーとクライアントの両方が 1.11.2 以上のときだけ（古い側が右クリックを止めないので）。 */
     private static boolean autoGrowthSupported(World world, EntityPlayer player) {
         if (world.isRemote) {
             return WeakSpotMod.proxy.serverSince("1.11.2");
@@ -102,10 +99,7 @@ public final class RightClickTargets {
         return player instanceof EntityPlayerMP && PlayerText.clientSince((EntityPlayerMP) player, "1.11.2");
     }
 
-    /**
-     * 収穫の弱点の対象か。実った作物: BlockCrops（と、それを継承した Mod の作物）で isMaxAge、
-     * ネザーウォートの age 3、カカオ豆の age 2。
-     */
+    /** BlockCrops（と、それを継承した Mod の作物）は isMaxAge、ネザーウォートは age 3、カカオ豆は age 2。 */
     public static boolean isHarvestable(IBlockState state, SyncedSettings settings) {
         if (!settings.enabled(HitKind.HARVEST)) {
             return false;
@@ -123,11 +117,7 @@ public final class RightClickTargets {
         return false;
     }
 
-    /**
-     * 成長の弱点の対象か。対象外リスト（growthExcludedBlocks）になく、次のどちらか。
-     * 追加リスト（growthExtraBlocks）にあるブロックは、書いた状態の条件（GrowthFilters。柱の植物は育てる余地も）を満たすとき。
-     * 追加リストにない IGrowable は、成長できる状態のとき。
-     */
+    /** 追加リストのブロックは、書いた状態の条件（柱の植物は育てる余地も）を満たすとき。追加リストにない IGrowable は、成長できる状態のとき。 */
     public static boolean isGrowable(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         Block block = state.getBlock();
         String name = String.valueOf(block.getRegistryName());
@@ -147,7 +137,7 @@ public final class RightClickTargets {
         return false;
     }
 
-    /** 状態のプロパティの名前 → 値の名前（F3 の画面と同じ書き方）。 */
+    /** F3 の画面と同じ書き方。 */
     private static Map<String, String> propertyNames(IBlockState state) {
         Map<String, String> names = new HashMap<>();
         for (IProperty<?> property : state.getPropertyKeys()) {
@@ -160,7 +150,7 @@ public final class RightClickTargets {
         return property.getName(state.getValue(property));
     }
 
-    /** 柱の植物に育てる余地があるか（バニラの updateTick と同じ条件。土台はサトウキビだけ確かめる）。 */
+    /** バニラの updateTick と同じ条件。土台はサトウキビだけ確かめる。 */
     private static boolean hasColumnRoom(World world, BlockPos pos, Block block) {
         int above = blocksAbove(world, pos, block);
         int below = GrowthRoom.countRun(k -> world.getBlockState(pos.down(k)).getBlock() == block,
@@ -170,16 +160,13 @@ public final class RightClickTargets {
         return GrowthRoom.hasColumnRoom(height, world.isAirBlock(pos.up(above + 1)), baseHolds);
     }
 
-    /** pos の上に同じブロックがいくつ続くか（柱の高さの上限まで数えれば足りる）。 */
+    /** 柱の高さの上限まで数えれば足りる。 */
     private static int blocksAbove(World world, BlockPos pos, Block block) {
         return GrowthRoom.countRun(k -> world.getBlockState(pos.up(k)).getBlock() == block,
                 GrowthRoom.MAX_COLUMN_HEIGHT);
     }
 
-    /**
-     * 成長ヒットの効果をかけるブロック。柱の植物は、育つのが一番上の節だけなので、柱の一番上。
-     * それ以外は pos のまま。isGrowable が true のときに呼ぶ。
-     */
+    /** isGrowable が true のときに呼ぶ。 */
     public static BlockPos growthTarget(World world, BlockPos pos, IBlockState state) {
         Block block = state.getBlock();
         if (!COLUMN_BLOCKS.contains(String.valueOf(block.getRegistryName()))) {
@@ -188,32 +175,25 @@ public final class RightClickTargets {
         return pos.up(blocksAbove(world, pos, block));
     }
 
-    /**
-     * ITickable のタイルエンティティを持つか、予約された tick で動くレッドストーンの部品で、対象外リストにないもの。
-     */
     public static boolean isMachine(World world, BlockPos pos, IBlockState state, SyncedSettings settings) {
         return (world.getTileEntity(pos) instanceof ITickable || isScheduledMachine(state.getBlock()))
                 && !settings.excludedBlocks.contains(String.valueOf(state.getBlock().getRegistryName()));
     }
 
-    /**
-     * 予約された tick（スケジュール tick）で動く、機械の加速の対象のレッドストーンの部品。
-     * リピーター・コンパレーター、オブザーバー、ディスペンサー・ドロッパー（と、それを継承したブロック）。
-     */
+    /** リピーター・コンパレーター、オブザーバー、ディスペンサー・ドロッパー（と、それを継承したブロック）。 */
     public static boolean isScheduledMachine(Block block) {
         return block instanceof BlockRedstoneDiode || block instanceof BlockObserver || block instanceof BlockDispenser;
     }
 
-    /** この側で今使う設定値（クライアントは接続中ならサーバーの値）。 */
+    /** クライアントは接続中ならサーバーの値。 */
     public static SyncedSettings settings(World world) {
         return world.isRemote ? WeakSpotMod.proxy.clientSettings() : SyncedSettings.server();
     }
 
     /**
-     * 通常の右クリック動作を止める。クライアントで止めても、バニラは右クリックのパケットをサーバーへ送るので、
-     * サーバーでもこのイベントが発火し、そこで「直前に右クリックした」ことを記録する。
-     * メインハンドは SUCCESS で止めて、オフハンドの処理（設置など）に進ませない。
-     */
+    * クライアントで止めても、バニラは右クリックのパケットをサーバーへ送るので、サーバーでもこのイベントが発火し、
+    * そこで「直前に右クリックした」ことを記録する。メインハンドは SUCCESS で止めて、オフハンドの処理（設置など）に進ませない。
+    */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         EntityPlayer player = event.getEntityPlayer();
@@ -221,8 +201,7 @@ public final class RightClickTargets {
         HitKind kind = classify(world, player, event.getPos(), settings(world));
         if (kind == null
                 || (world.isRemote ? !WeakSpotMod.proxy.isKindEnabled(kind) : !ServerSwitches.isEnabled(player, kind))) {
-            // 弱点の一時オフ（HOME キー）、その種類のオフ: 通常の右クリックのままにする。
-            // サーバーは、クライアントから届いた状態を見る
+            // 弱点の一時オフ・その種類のオフは、通常の右クリックのまま。サーバーは、クライアントから届いた状態を見る
             return;
         }
         event.setCanceled(true);

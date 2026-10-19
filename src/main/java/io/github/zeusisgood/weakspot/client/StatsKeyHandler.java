@@ -10,7 +10,6 @@ import net.minecraftforge.fml.common.gameevent.InputEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
-/** 統計画面を開くキー（初期値 K。操作設定で変更できる）。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class StatsKeyHandler {
 

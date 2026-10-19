@@ -1,8 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
- * 1つの機械の加速の状態。記録がある間、毎tick、update() を (倍率 − 1) 回余分に呼ぶ。
- * 倍率が小数のときは端数を持ち越して、平均で (倍率 − 1) 回になるようにする。
+ * 1 つの機械の加速。毎 tick、update() を (倍率 − 1) 回余分に呼ぶ（端数は持ち越す）。
  * 複数のヒット（複数のプレイヤーを含む）が重なっても足さず、大きいほうだけを使う。
  */
 public final class MachineBoost {
@@ -12,18 +11,16 @@ public final class MachineBoost {
     private double carry;
     private double particleCarry;
 
-    /** ヒットを受け付けたときに呼ぶ。 */
     public void hit(double multiplier, int durationTicks) {
         this.multiplier = isActive() ? Math.max(this.multiplier, multiplier) : multiplier;
         this.remainingTicks = Math.max(remainingTicks, durationTicks);
     }
 
-    /** 今の倍率（重なったヒットのうち大きいほう）。 */
     public double multiplier() {
         return multiplier;
     }
 
-    /** この tick に出す粒子の数（倍率 ÷ MachineParticles.PARTICLES_DIVISOR、端数は持ち越す）。残り時間は減らさない。 */
+    /** 残り時間は減らさない。 */
     public int nextParticles() {
         if (!isActive()) {
             return 0;
@@ -38,7 +35,7 @@ public final class MachineBoost {
         return remainingTicks > 0;
     }
 
-    /** この tick に余分に呼ぶ回数を返し、残り時間を1減らす。 */
+    /** 残り時間を 1 減らす。 */
     public int nextTickCalls() {
         if (!isActive()) {
             return 0;

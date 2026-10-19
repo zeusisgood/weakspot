@@ -11,15 +11,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.math.Vec3d;
 
-/**
- * 自分のヒットの共通の処理: 連続ヒット（コンボ）、ヒット音、コンボの表示、
- * 種類ごとのヒット間隔。すべての種類の弱点が、当てたときに register を呼ぶ。
- */
+/** すべての種類の弱点が、当てたときに register を呼ぶ。 */
 final class OwnHits {
 
-    /** 種類ごとの最後のヒット（ヒット間隔の制限に使う）。 */
     private static final long[] LAST_HIT_TICK = new long[HitKind.values().length];
-    /** 連続ヒット数。ブロックや種類をまたいで続き、ヒット音のピッチとコンボの表示に使う。 */
+    /** ブロックや種類をまたいで続く。 */
     static final HitStreak STREAK = new HitStreak();
 
     static {
@@ -29,14 +25,11 @@ final class OwnHits {
     private OwnHits() {
     }
 
-    /** 前のヒットから minInterval tick あいているか。 */
     static boolean canHit(HitKind kind, int minInterval) {
         return ClientWeakSpotHandler.clientTick - LAST_HIT_TICK[kind.ordinal()] >= minInterval;
     }
 
-    /**
-     * どの種類のヒットにも共通の処理: 連続ヒット、ヒット音、コンボの表示、ヒット間隔の記録。ヒット後の連続ヒット数を返す。
-     */
+    /** ヒット後の連続ヒット数を返す。 */
     static int register(HitKind kind) {
         int hitStreak = STREAK.hit(ClientWeakSpotHandler.clientTick);
         HitSounds.playHit(hitStreak);
@@ -46,7 +39,7 @@ final class OwnHits {
         return hitStreak;
     }
 
-    /** 的当ての金のご褒美: 当てたとき、目の前に金の粒を散らす。 */
+    /** 的当ての金のご褒美。 */
     private static void goldParticles() {
         Minecraft mc = Minecraft.getMinecraft();
         if (!WeakSpotConfig.client.markers.goldHitParticles || !TargetRecords.unlocked(TargetRules.Tier.GOLD)
@@ -65,15 +58,11 @@ final class OwnHits {
     private static final int GOLD_PARTICLES = 8;
     private static final Random RANDOM = new Random();
 
-    /** ワールドを出たとき。 */
     static void clearIntervals() {
         Arrays.fill(LAST_HIT_TICK, Long.MIN_VALUE / 2);
     }
 
-    /**
-     * サーバーの数で連続ヒットを直す（ComboSync）。当て続けている間（最後のヒットから IDLE_TICKS まで）と、
-     * もう途切れているときは何もしない。数字は黙って書き換える（音・弾み・段階の演出は出さない）。
-     */
+    /** 当て続けている間と、もう途切れているときは何もしない。音・弾み・段階の演出は出さない。 */
     static void correctStreak(int serverCount) {
         long now = ClientWeakSpotHandler.clientTick;
         if (!ComboSync.canCorrect(now, STREAK.lastHitTick(), STREAK.count(now)) || serverCount == STREAK.count(now)) {
@@ -83,7 +72,7 @@ final class OwnHits {
         ComboHud.correct(serverCount);
     }
 
-    /** 連続ヒットを最初に戻す（死亡・リスポーン・ディメンション移動・ワールドを出たとき）。 */
+    /** 死亡・リスポーン・ディメンション移動・ワールドを出たとき。 */
     static void resetStreak() {
         STREAK.reset();
         ComboHud.clear();

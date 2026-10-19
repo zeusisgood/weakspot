@@ -12,10 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
-/**
- * 進捗（進捗の画面の「WeakSpot」のタブ）。定義は assets/weakspot/advancements/*.json で、条件はどれも
- * minecraft:impossible にして、ここ（サーバー）で判定して与える。1.10.x までの記録は、ログインのときに判定する。
- */
+/** 進捗の条件はどれも minecraft:impossible にして、サーバーで判定して与える。1.10.x までの記録は、ログインのときに判定する。 */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class WeakSpotAdvancements {
 
@@ -24,10 +21,10 @@ public final class WeakSpotAdvancements {
     private WeakSpotAdvancements() {
     }
 
-    /** 受け付けたヒットのたび（ServerStats.countStreak から。combo はヒット後のコンボ）。 */
+    /** combo はヒット後の数。 */
     static void onHit(EntityPlayerMP player, int combo) {
         if (!isDone(player, "root")) {
-            // 初めての弱点: 弱点の的のレシピもレシピ本に出す
+            // 弱点の的のレシピもレシピ本に出す
             GuideBookGiver.unlockTargetRecipe(player);
         }
         grant(player, "root");
@@ -42,12 +39,10 @@ public final class WeakSpotAdvancements {
         }
     }
 
-    /** 死ぬ見込みだった落下を、落下の弱点に当てて生き延びた（MoveHits）。 */
     static void grantCloseCall(EntityPlayerMP player) {
         grant(player, "close_call");
     }
 
-    /** 的当ての自己ベストが変わったかもしれない（TargetRounds の終わり）。 */
     static void onTargetBest(EntityPlayerMP player, long best) {
         TargetRules.Tier tier = TargetRules.Tier.of(best);
         for (TargetRules.Tier t : TargetRules.Tier.values()) {
@@ -57,10 +52,7 @@ public final class WeakSpotAdvancements {
         }
     }
 
-    /**
-     * 取った的当ての進捗のいちばん上の段階（しきい値を上げる前に解放した段階を残すため）。
-     * 進捗が見つからなければ数えない。
-     */
+    /** しきい値を上げる前に解放した段階を残すため。進捗が見つからなければ数えない。 */
     static TargetRules.Tier earnedTargetTier(EntityPlayerMP player) {
         TargetRules.Tier[] all = TargetRules.Tier.values();
         for (int i = all.length - 1; i > 0; i--) {

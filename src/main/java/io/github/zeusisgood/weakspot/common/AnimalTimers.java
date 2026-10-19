@@ -1,19 +1,16 @@
 package io.github.zeusisgood.weakspot.common;
 
-/**
- * 動物の弱点で進めるタイマーの計算。Minecraft に依存しない。
- * 「1ヒット = 本来の時間 ÷ 目安のヒット数」に換算する（基準は 1ヒット = 600 tick）。
- */
+/** 1 ヒット = 本来の時間 ÷ 目安のヒット数。 */
 public final class AnimalTimers {
 
-    /** 子どもが大人になるまでの本来の時間（EntityAgeable の初期値）。 */
+    /** EntityAgeable の初期値。 */
     public static final int BABY_TICKS = 24000;
-    /** 繁殖したあとの待ち時間（バニラの動物と村人）。 */
+    /** バニラの動物と村人。 */
     public static final int BREEDING_TICKS = 6000;
-    /** 次の卵までの平均の時間（バニラのニワトリは 6000〜11999 tick）。 */
+    /** 平均（バニラのニワトリは 6000〜11999 tick）。 */
     public static final int EGG_TICKS = 9000;
 
-    /** 足元のバーに出す順番（先に書いたものを優先する）: 子どもの成長 → 羊毛 → 取引上限 → 繁殖の待ち時間 → 卵。 */
+    /** 並びは、足元のバーに出す順（先が優先）。 */
     public enum Timer {
         BABY, WOOL, TRADE, BREEDING, EGG;
 
@@ -25,42 +22,40 @@ public final class AnimalTimers {
     private AnimalTimers() {
     }
 
-    /** 1ヒットで進める tick 数。ヒット数が 0 以下の設定は、その対象を無効として 0 を返す。 */
+    /** hits が 0 以下の設定は、その対象を無効として 0 を返す。 */
     public static int ticksPerHit(int fullTicks, int hits) {
         return hits <= 0 ? 0 : Math.max(1, fullTicks / hits);
     }
 
-    /** 子どもの成長の値（負）を 0 に向けて進める。0 を超えない。子どもでなければそのまま。 */
+    /** age は負（子ども）。0 を超えない。子どもでなければそのまま。 */
     public static int babyAfterHit(int age, int ticks) {
         return age < 0 ? Math.min(0, age + ticks) : age;
     }
 
-    /** 繁殖の待ち時間（正）を 0 に向けて減らす。0 を下回らない。待ち時間中でなければそのまま。 */
+    /** age は正（待ち時間中）。0 を下回らない。 */
     public static int breedingAfterHit(int age, int ticks) {
         return age > 0 ? Math.max(0, age - ticks) : age;
     }
 
-    /** 次の卵までの時間を減らす（0 以下になったら、バニラが次の tick に卵を産む）。 */
+    /** 0 以下になったら、バニラが次の tick に卵を産む。 */
     public static int eggAfterHit(int remaining, int ticks) {
         return remaining - ticks;
     }
 
-    /** 子どもの成長の進み具合（0.0〜1.0）。age は 0 未満（-24000 が始まり）。 */
+    /** 0〜1 を返す。age は -24000 が始まり。 */
     public static double babyProgress(int age) {
         return clamp(1.0 + (double) age / BABY_TICKS);
     }
 
-    /** 繁殖の待ち時間の進み具合。age は 0 より大きい（6000 が始まり）。 */
+    /** age は 6000 が始まり。 */
     public static double breedingProgress(int age) {
         return clamp(1.0 - (double) age / BREEDING_TICKS);
     }
 
-    /** 次の卵までの進み具合。remaining は次の卵までの残り tick。 */
     public static double eggProgress(int remaining) {
         return clamp(1.0 - (double) remaining / EGG_TICKS);
     }
 
-    /** 羊毛・取引上限の進み具合（ヒット数 ÷ 必要なヒット数）。 */
     public static double hitProgress(int count, int needed) {
         return needed <= 0 ? 0.0 : clamp((double) count / needed);
     }
@@ -69,10 +64,7 @@ public final class AnimalTimers {
         return Math.max(0.0, Math.min(1.0, value));
     }
 
-    /**
-     * 足元のバーに出す1本。mask（動いているタイマーの Timer#bit の合計）のうち、表示の順番が一番先のもの。
-     * 動いているものがなければ null。
-     */
+    /** mask は動いているタイマーの Timer#bit の合計。なければ null。 */
     public static Timer barTimer(int mask) {
         for (Timer timer : Timer.values()) {
             if ((mask & timer.bit()) != 0) {
@@ -82,15 +74,12 @@ public final class AnimalTimers {
         return null;
     }
 
-    /**
-     * 羊毛・取引上限のような、タイマーのない効果の、ヒット数の数え方。
-     * 必要なヒット数に達したヒットで1回だけ効果が出て、数え直しになる。
-     */
+    /** 羊毛・取引上限のような、タイマーのない効果。必要なヒット数に達したヒットで 1 回だけ効果が出て、数え直す。 */
     public static final class HitCounter {
 
         private int count;
 
-        /** ヒットした。効果が出るなら true（数え直す）。needed が 0 以下なら、効果は出ない（無効）。 */
+        /** 効果が出るなら true。needed が 0 以下なら、効果は出ない（無効）。 */
         public boolean hit(int needed) {
             if (needed <= 0) {
                 return false;
@@ -113,10 +102,9 @@ public final class AnimalTimers {
     }
 
     /**
-     * 素手の右クリックにバニラの別の動作がある動物か（しゃがみ+素手のときだけ弱点を出す）。
-     * horseLike: 馬・ロバ・ラバ・ラマなど（乗る、持ち物の画面）、tamed: 飼いならした EntityTameable（座る・立つ）、
-     * saddledPig: サドルを付けた豚（乗る）、villager: 村人（取引の画面）、listed: 設定 animalSneakRequiredEntities にある。
-     */
+    * 素手の右クリックにバニラの別の動作がある動物（乗る・座る・取引の画面）は、しゃがんで素手のときだけ弱点を出す。
+    * listed: 設定 animalSneakRequiredEntities にある。
+    */
     public static boolean requiresSneak(boolean horseLike, boolean tamed, boolean saddledPig, boolean villager,
                                         boolean listed) {
         return horseLike || tamed || saddledPig || villager || listed;

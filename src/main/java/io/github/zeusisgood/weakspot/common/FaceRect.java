@@ -1,6 +1,6 @@
 package io.github.zeusisgood.weakspot.common;
 
-/** ブロック面の (u, v) 上の矩形。単位はブロック。 */
+/** 単位はブロック。 */
 public final class FaceRect {
 
     public final double minU;

@@ -20,12 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.opengl.GL11;
 
-/**
- * 弱点の円と、ヒット時に広がって消えるリングを描く。他のプレイヤーのマークは、設定の色と濃さで同じ形に描く。
- * マーカーは表示位置（WeakSpot.motion。移動の演出と残像）に描き、当たり判定の位置（u, v）とは分けている。
- * 掘っているブロックの残りの耐久バーは、自分の採掘の弱点と同じ面の下の余白に、マーカーより先に（下に）描く。
- * 自分の動物の弱点は、体に隠れた部分も薄く透かして描く（animalSpotSeeThrough）。
- */
+/** マーカーは表示位置（WeakSpot.motion）に描き、当たり判定の位置（u, v）とは分けている。 */
 final class WeakSpotRenderer {
 
     private static final int SEGMENTS = 32;
@@ -36,18 +31,20 @@ final class WeakSpotRenderer {
     private static final float[] OWN_DISK = {1.0F, 0.35F, 0.15F};
     private static final float[] OWN_RING = {1.0F, 0.9F, 0.4F};
     private static final float[] OWN_CENTER = {1.0F, 0.95F, 0.7F};
-    /** 動いている最中のマーカーに重ねる白の濃さ（動き始め）。 */
+    /** 動き始めの濃さ。 */
     private static final double HEAD_WHITE = 0.5;
-    /** 動物の弱点の、体に隠れた部分を透かして描くときの濃さ（通常の濃さに掛ける）。 */
+    /**
+    * 自分の動物の弱点は、体の模型が当たり判定の箱より外に出ていると（ニワトリ、ゾンビの腕など）体に隠れるので、
+    * 深度テストを切って、この濃さでもう一度描く。他のプレイヤーのマークは、壁越しに見えてしまうので透かさない。
+    */
     private static final float SEE_THROUGH_ALPHA = 0.35F;
 
-    /** 耐久バーの、残りの耐久（緑 #3DDC84）と、バーの全体の背景（黒 #1E1E1E、半透明）。 */
     private static final float[] HEALTH_FILL = {0x3D / 255F, 0xDC / 255F, 0x84 / 255F, 1.0F};
     private static final float[] HEALTH_BACK = {0x1E / 255F, 0x1E / 255F, 0x1E / 255F, 0.5F};
-    /** 耐久バーはマーカー（LIFT）より少し低く浮かせる。 */
+    /** マーカー（LIFT）より少し低く。 */
     private static final double HEALTH_LIFT = 0.002;
 
-    /** 他のプレイヤーのマークの色が読めないときの色（水色 #3FA9FF）。 */
+    /** 色が読めないとき。 */
     private static final int DEFAULT_OTHER_COLOR = 0x3FA9FF;
 
     private static final List<Flash> FLASHES = new ArrayList<>();
@@ -55,7 +52,6 @@ final class WeakSpotRenderer {
     private WeakSpotRenderer() {
     }
 
-    /** ヒットした瞬間の位置を覚えておく演出。 */
     private static final class Flash {
         final WeakSpot spot;
         final double u;
@@ -82,11 +78,7 @@ final class WeakSpotRenderer {
         FLASHES.clear();
     }
 
-    /**
-     * health は耐久バーの残りの耐久（0〜1。spot の面に描く）。負ならバーを描かない。
-     * growth は作物の成長バーの進み具合（0〜1。spot のブロックの足元に描く）。負ならバーを描かない。
-     * animal は動物の足元のバーの進み具合（0〜1。spot の動物の足元に描く）。負ならバーを描かない。
-     */
+    /** health・growth・animal は 0〜1。負ならそのバーを描かない。 */
     static void render(Minecraft mc, WeakSpot spot, double health, double growth, double animal, boolean machineBar,
                        long tick, float partialTicks) {
         Entity camera = mc.getRenderViewEntity();
@@ -133,11 +125,10 @@ final class WeakSpotRenderer {
         if (spot != null) {
             float alpha = spotAlpha(spot, tick, partialTicks) * (spot.preview ? PREVIEW_ALPHA : 1);
             if (alpha > 0) {
-                // 自分の弱点の色と形は、種類ごとの設定（統計画面の「弱点マーカー」タブ）
                 float[][] look = MarkerLook.palette(spot.kind, OWN_DISK, OWN_RING, OWN_CENTER);
                 MarkerShape shape = MarkerLook.shape(spot.kind);
                 if (behindLiquid(mc, spot, partialTicks)) {
-                    // 目との間に水・溶岩がある（水の面も深度を書くので、そのままでは隠れる）
+                    // 水の面も深度を書くので、そのままでは隠れる
                     GlStateManager.disableDepth();
                     drawMarker(spot, shape, look[0], look[1], look[2], alpha, nowMs, cx, cy, cz);
                     GlStateManager.enableDepth();
@@ -193,10 +184,6 @@ final class WeakSpotRenderer {
         GlStateManager.popMatrix();
     }
 
-    /**
-     * マーカー（円、輪、中心）を表示位置に描く。移動の演出がオンなら、残像と、動いている最中の先頭の明るさも描く。
-     * 当たり判定は spot.u, spot.v（移動先）のままで、ここでは見た目だけを動かす。
-     */
     private static void drawMarker(WeakSpot spot, MarkerShape shape, float[] disk, float[] ring, float[] center,
                                    float alpha, long nowMs, double cx, double cy, double cz) {
         double u = spot.u;
@@ -224,18 +211,13 @@ final class WeakSpotRenderer {
 
     private static final float[] WHITE = {1.0F, 1.0F, 1.0F};
 
-    /**
-     * 自分の動物の弱点は、体の模型が当たり判定の箱より外に出ていると（ニワトリ、ゾンビの腕など）体に隠れるので、
-     * 深度テストを切って薄くもう一度描く。他のプレイヤーのマークは、壁越しに見えてしまうので透かさない。
-     */
-    /** 目と弱点の間を調べる刻み（ブロック）。 */
+    /** ブロック。 */
     private static final double LIQUID_STEP = 0.2;
 
     /**
-     * 自分のブロックの弱点で、目から弱点の中心までの間に水・溶岩（流れているものも）のブロックがあるか。
-     * 1.12.2 では水の面も深度を書くので、そのまま描くと水面の後ろの弱点が隠れる。照準の先のブロックは、液体のほかに
-     * さえぎる物がないことがバニラの判定（objectMouseOver）で決まっているので、このときは深度テストを切って描いてよい。
-     */
+    * 1.12.2 では水の面も深度を書くので、そのまま描くと水面の後ろの弱点が隠れる。照準の先のブロックは、液体のほかに
+    * さえぎる物がないことがバニラの判定（objectMouseOver）で決まっているので、このときは深度テストを切って描いてよい。
+    */
     private static boolean behindLiquid(Minecraft mc, WeakSpot spot, float partialTicks) {
         if (spot.entity != null || mc.world == null || mc.player == null) {
             return false;
@@ -262,7 +244,6 @@ final class WeakSpotRenderer {
         return spot.entity != null && WeakSpotConfig.client.markers.animalSpotSeeThrough;
     }
 
-    /** 形の中を塗る。RING は輪の部分（内側の半径との間）だけ塗る。 */
     private static void drawFill(WeakSpot spot, MarkerShape shape, double u, double v, double radius,
                                  double cx, double cy, double cz, float[] rgb, float a) {
         Tessellator tessellator = Tessellator.getInstance();
@@ -298,17 +279,14 @@ final class WeakSpotRenderer {
         tessellator.draw();
     }
 
-    /** 形の i 番目の頂点（面から少し浮かせる）。 */
+    /** 面から少し浮かせる。 */
     private static double[] shapePoint(WeakSpot spot, MarkerShape shape, double u, double v, double distance, int i) {
         double angle = shape.rotation + 2 * Math.PI * i / shape.sides;
         distance *= shape.pointScale(i);
         return spot.worldPoint(u + distance * Math.cos(angle), v + distance * Math.sin(angle), LIFT * 1.2);
     }
 
-    /**
-     * 面の「下」の辺に沿って、背景（バーの全体）と、左から残りの耐久の分の緑を描く。
-     * 上面・下面の「下」は、プレイヤーに一番近い辺（視点の x, z はカメラの位置と同じ）。
-     */
+    /** 上面・下面の「下」は、プレイヤーに一番近い辺（視点の x, z はカメラの位置と同じ）。 */
     private static void drawHealthBar(WeakSpot spot, double health, double cx, double cy, double cz) {
         int sign = spot.face.getAxisDirection().getOffset();
         BlockHealthBar bar = BlockHealthBar.place(spot.axis, sign, spot.rect, cx, cz);
@@ -318,7 +296,6 @@ final class WeakSpotRenderer {
         }
     }
 
-    /** 面の (u, v) の矩形 {minU, minV, maxU, maxV} を塗る。 */
     private static void drawQuad(WeakSpot spot, double[] r, double lift, double cx, double cy, double cz,
                                  float[] rgba) {
         Tessellator tessellator = Tessellator.getInstance();
@@ -331,8 +308,7 @@ final class WeakSpotRenderer {
         tessellator.draw();
     }
 
-    /** 長押しをやめた後、残り FADE_TICKS で薄くする。 */
-    /** 掘る前の採掘の弱点の濃さ（いつも出ているので控えめに）。 */
+    /** いつも出ているので控えめに。 */
     private static final float PREVIEW_ALPHA = 0.4F;
 
     private static float spotAlpha(WeakSpot spot, long tick, float partialTicks) {

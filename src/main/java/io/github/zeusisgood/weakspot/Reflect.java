@@ -5,9 +5,9 @@ import java.lang.reflect.Method;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * Minecraft の非公開のフィールド・メソッドを、名前で読む。開発環境は MCP 名、実際の環境（reobf 後）は SRG 名なので、
- * 両方の名前を順に試す。（Forge の ReflectionHelper.findField の3引数の版は、起動環境の判定で片方の名前しか試さず、
- * 非推奨でもあるので使わない。）見つからなければ警告を1回出して null を返し、呼ぶ側はその機能を止める（ゲームは止めない）。
+ * 開発環境は MCP 名、実際の環境（reobf 後）は SRG 名なので、両方の名前を順に試す（Forge の ReflectionHelper.findField の
+ * 3 引数の版は、起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない）。見つからなければ警告を 1 回出して
+ * null を返し、呼ぶ側はその機能を止める（ゲームは止めない）。
  */
 public final class Reflect {
 
@@ -29,7 +29,7 @@ public final class Reflect {
         return null;
     }
 
-    /** 引数の型を指定したメソッド（引数なしは new Class<?>[0]）。 */
+    /** 引数なしは new Class<?>[0]。 */
     public static Method method(Class<?> owner, String what, Class<?>[] parameterTypes, String... names) {
         for (String name : names) {
             try {
@@ -45,7 +45,7 @@ public final class Reflect {
         return null;
     }
 
-    /** 初めて使うときに 1 回だけ探すフィールド（ゲート・エンチャント。起動時に探さず、使わなければ警告も出さない）。 */
+    /** 起動時に探さず、使わなければ警告も出さない。 */
     public static LazyField lazyField(Class<?> owner, String what, String... names) {
         return new LazyField(owner, what, names);
     }

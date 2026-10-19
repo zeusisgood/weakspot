@@ -14,17 +14,13 @@ import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
 import org.lwjgl.input.Keyboard;
 
-/**
- * 統計画面の「弱点マーカー」タブ。種類ごとのオン・オフ（KindSwitches。サーバーにも伝わる）と、自分の弱点の色と形（MarkerLook）。
- * 入りきらない行はホイールで送る。
- */
+/** 入りきらない行はホイールで送る。 */
 final class KindsTab extends StatsScreenTab {
 
-    /** 行のボタン（+ 種類の番号）。 */
+    /** + 種類の番号。 */
     private static final int BUTTON_KIND_TOGGLE = 100;
     private static final int BUTTON_KIND_COLOR = 200;
     private static final int BUTTON_KIND_SHAPE = 300;
-    /** 色と形を 1 つ前に戻す ◀ と、形の ▶。 */
     private static final int BUTTON_KIND_COLOR_PREV = 400;
     private static final int BUTTON_KIND_SHAPE_PREV = 500;
     private static final int BUTTON_KIND_SHAPE_NEXT = 600;
@@ -72,12 +68,11 @@ final class KindsTab extends StatsScreenTab {
         layoutRows();
     }
 
-    /** 画面に入る行の数。 */
     private int visibleRows() {
         return Math.max(1, (screen.bottom() - 4 - (screen.top() + 52)) / KIND_ROW_HEIGHT);
     }
 
-    /** 行のボタンを、今の送り位置に並べる（見えない行は隠す）。 */
+    /** 見えない行は隠す。 */
     private void layoutRows() {
         int rows = visibleRows();
         scroll = Math.max(0, Math.min(scroll, HitKind.values().length - rows));
@@ -96,7 +91,6 @@ final class KindsTab extends StatsScreenTab {
                 } else if (button.id == BUTTON_KIND_COLOR + i || button.id == BUTTON_KIND_SHAPE + i
                         || button.id == BUTTON_KIND_COLOR_PREV + i || button.id == BUTTON_KIND_SHAPE_PREV + i
                         || button.id == BUTTON_KIND_SHAPE_NEXT + i) {
-                    // サーバーで無効な種類は、色と形を隠して「サーバーでオフ」と出す
                     button.visible = visible && server;
                     button.y = y;
                 }
@@ -145,11 +139,7 @@ final class KindsTab extends StatsScreenTab {
         return true;
     }
 
-    /**
-     * ▶（direction = 1）で次、◀（-1）で前の色に切り替える。「初期値」→ 12 色 →（的当てのご褒美を解放していれば）
-     * 銀のきらめき・虹 →「初期値」の輪。
-     * 今の色が輪にないとき（打ち込んだ色）は、▶ で最初、◀ で最後の色にする。
-     */
+    /** 今の色が輪にないとき（打ち込んだ色）は、▶ で最初、◀ で最後の色にする。 */
     private void stepColor(HitKind kind, int direction) {
         List<Object> ring = new ArrayList<>();
         ring.add(null);
@@ -177,7 +167,7 @@ final class KindsTab extends StatsScreenTab {
         colorInvalid[i] = false;
     }
 
-    /** 入力欄に出す色（特別な色は名前、書き換えていなければ空）。 */
+    /** 特別な色は名前、書き換えていなければ空。 */
     private static String colorText(HitKind kind) {
         String special = MarkerLook.special(kind);
         if (special != null && MarkerLook.specialUnlocked(special)) {
@@ -187,7 +177,6 @@ final class KindsTab extends StatsScreenTab {
         return custom == null ? "" : String.format("#%06X", custom);
     }
 
-    /** 形を、▶ で 円 → 輪 → ひし形 → 四角 →（銅を解放していれば）星 → 円、◀ で逆に切り替える。 */
     private void stepShape(HitKind kind, int direction) {
         MarkerShape[] shapes = MarkerShape.values();
         int next = MarkerLook.shape(kind).ordinal();
@@ -198,7 +187,7 @@ final class KindsTab extends StatsScreenTab {
         updateLabels();
     }
 
-    /** 入力欄のカラーコードを読む。空なら初期値に戻す。読めなければ受け付けず、枠を赤くする。 */
+    /** 空なら初期値に戻す。読めなければ受け付けず、枠を赤くする。 */
     private void applyTypedColor(HitKind kind) {
         int i = kind.ordinal();
         String text = colorFields[i].getText().trim();
@@ -272,7 +261,7 @@ final class KindsTab extends StatsScreenTab {
         screen.drawString(screen.font(), I18n.format("weakspot.kinds.column.color"), center - 26, top + 40, 0xAAAAAA);
         screen.drawString(screen.font(), I18n.format("weakspot.kinds.column.shape"), center + 66, top + 40, 0xAAAAAA);
         if (!WeakSpotConfig.client.markers.weakSpotsEnabled) {
-            // 題の行の右に出す（列の見出しと重ならないように）
+            // 列の見出しと重ならないように、題の行の右に出す
             screen.drawRight(I18n.format("weakspot.kinds.pausedAll", ToggleKeyHandler.keyName()), center + 154, top,
                     0xFFFF55);
         }
@@ -293,7 +282,6 @@ final class KindsTab extends StatsScreenTab {
                 continue;
             }
             int rgb = MarkerLook.color(kind);
-            // 見本（今の色）
             Gui.drawRect(center - 26, y + 5, center - 16, y + 15, 0xFF000000 | rgb);
             GuiTextField field = colorFields[kind.ordinal()];
             field.x = center;

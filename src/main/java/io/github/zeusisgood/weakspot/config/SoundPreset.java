@@ -9,16 +9,14 @@ import java.util.Locale;
 import java.util.Random;
 
 /**
- * 音のプリセット: 自分のヒット音の鳴らし方（楽器・和音・音階の動き・種類・音域）。音量とほかの人の音は入れない。
- * 最初から入っているもの（BUILT_IN。名前は翻訳キー weakspot.sound.preset.<key>）と、各自が保存するマイプリセット 1〜3
- * （設定 client.sound.soundPresets に「番号=楽器,音階の種類,動き,音域,和音」で 1 行ずつ）。
+ * 自分のヒット音の鳴らし方。音量とほかの人の音は入れない。
+ * マイプリセットは設定 client.sound.soundPresets に「番号=楽器,音階の種類,動き,音域,和音」で 1 行ずつ。
  */
 public final class SoundPreset {
 
-    /** マイプリセットの枠の数。 */
     public static final int MY_SLOTS = 3;
 
-    /** 最初から入っているプリセット（並びは「サウンド」タブのプリセットのボタンで巡る順）。 */
+    /** 並びは「サウンド」タブのプリセットのボタンで巡る順。 */
     public static final List<SoundPreset> BUILT_IN = Collections.unmodifiableList(Arrays.asList(
             new SoundPreset("standard", HitSound.PLING, true, HitScale.Direction.UP, HitScale.Type.MAJOR, 1),
             new SoundPreset("sparkle", HitSound.CHIME, true, HitScale.Direction.UP_DOWN, HitScale.Type.PENTATONIC,
@@ -30,10 +28,7 @@ public final class SoundPreset {
             new SoundPreset("quiet", HitSound.FLUTE, false, HitScale.Direction.UP_DOWN, HitScale.Type.PENTATONIC,
                     1)));
 
-    /**
-     * [ランダム] で選ぶ楽器。音の高さが分かりにくい打楽器（ハイハット・スネア・バスドラム）は、音階が
-     * 聞き取れないので外す（ベースは音階が分かるので入れる）。
-     */
+    /** 音の高さが分かりにくい打楽器（ハイハット・スネア・バスドラム）は、音階が聞き取れないので外す。 */
     public static final List<HitSound> RANDOM_SOUNDS = Collections.unmodifiableList(randomSounds());
 
     private static List<HitSound> randomSounds() {
@@ -42,7 +37,7 @@ public final class SoundPreset {
         return list;
     }
 
-    /** ランダムな鳴らし方（[ランダム]）。current と同じ組み合わせは引き直す。 */
+    /** current と同じ組み合わせは引き直す。 */
     public static SoundPreset random(SoundPreset current, Random random) {
         HitScale.Type[] types = HitScale.Type.values();
         HitScale.Direction[] directions = HitScale.Direction.values();
@@ -56,7 +51,7 @@ public final class SoundPreset {
         return preset;
     }
 
-    /** 最初から入っているものの名前のキー（マイプリセットは null）。 */
+    /** マイプリセットは null。 */
     public final String key;
     public final HitSound sound;
     public final boolean chord;
@@ -74,13 +69,12 @@ public final class SoundPreset {
         this.octaves = Math.max(HitScale.MIN_OCTAVES, Math.min(HitScale.MAX_OCTAVES, octaves));
     }
 
-    /** 今の設定の鳴らし方（名前なし）。 */
     public static SoundPreset of(ClientConfig.Sound sound) {
         return new SoundPreset(null, sound.myHitSound, sound.hitChordEnabled, sound.hitScaleDirection,
                 sound.hitScaleType, sound.hitScaleOctaves);
     }
 
-    /** 設定に書き込む（音量とほかの人の音は変えない）。 */
+    /** 音量とほかの人の音は変えない。 */
     public void applyTo(ClientConfig.Sound sound) {
         sound.myHitSound = this.sound;
         sound.hitChordEnabled = chord;
@@ -89,7 +83,7 @@ public final class SoundPreset {
         sound.hitScaleOctaves = octaves;
     }
 
-    /** 鳴らし方が同じか（名前は見ない）。 */
+    /** 名前は見ない。 */
     public boolean sameSound(SoundPreset other) {
         return other != null && sound == other.sound && chord == other.chord && direction == other.direction
                 && type == other.type && octaves == other.octaves;
@@ -100,7 +94,7 @@ public final class SoundPreset {
         return sound.name() + "," + type.name() + "," + direction.name() + "," + octaves + "," + chord;
     }
 
-    /** 設定の行の右側を読む。読めなければ null。 */
+    /** 読めなければ null。 */
     static SoundPreset parse(String value) {
         String[] parts = value.split(",");
         if (parts.length != 5) {
@@ -121,7 +115,7 @@ public final class SoundPreset {
         }
     }
 
-    /** マイプリセットの枠 slot（1 始まり）の中身。空き・読めないときは null。 */
+    /** slot は 1 始まり。空き・読めないときは null。 */
     public static SoundPreset mySlot(String[] lines, int slot) {
         if (lines == null) {
             return null;
@@ -135,7 +129,7 @@ public final class SoundPreset {
         return null;
     }
 
-    /** マイプリセットの枠 slot に preset を書いた、新しい行の配列（ほかの枠の行はそのまま。番号の順に並べる）。 */
+    /** ほかの枠の行はそのまま。番号の順に並べる。 */
     public static String[] withMySlot(String[] lines, int slot, SoundPreset preset) {
         String[] out = new String[MY_SLOTS];
         int count = 0;

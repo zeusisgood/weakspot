@@ -30,7 +30,7 @@ public class VillagerBreedingTest {
     }
 
     @Test
-    public void food() {
+    public void threeBreadOrTwelvePotatoesOrCarrotsAreEnough() {
         assertTrue(VillagerBreeding.hasFood(3, 0, 0));
         assertTrue(VillagerBreeding.hasFood(0, 12, 0));
         assertTrue(VillagerBreeding.hasFood(0, 0, 12));
@@ -38,7 +38,7 @@ public class VillagerBreedingTest {
     }
 
     @Test
-    public void clock() {
+    public void clockShowsMinutesAndSecondsRoundedUp() {
         assertEquals("5:00", VillagerBreeding.clock(6000));
         assertEquals("0:01", VillagerBreeding.clock(1));
         assertEquals("1:05", VillagerBreeding.clock(1300));
@@ -59,7 +59,7 @@ public class VillagerBreedingTest {
     }
 
     @Test
-    public void mateOrder() {
+    public void mateIsCheckedForChildThenCooldownThenFood() {
         assertEquals(Mate.NONE, VillagerBreeding.mate(false, true, true, false));
         assertEquals(Mate.CHILD, VillagerBreeding.mate(true, true, true, false));
         assertEquals(Mate.COOLDOWN, VillagerBreeding.mate(true, false, true, false));

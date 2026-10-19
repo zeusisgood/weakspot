@@ -7,23 +7,15 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
 
 /**
- * ワールドの中に浮かべる、プレイヤーの方を向いた横長のバー。位置（中心）と値を渡せば描ける汎用の部品。
- * 作物の成長バー（GrowthBar）が使い、動物の足元のバー（AnimalBar）にも使う。
- *
- * バーは垂直な平面に描き、水平にプレイヤーの方を向く。値は、プレイヤーから見て左から伸びる。
- * 描く側は、テクスチャ・ライティング・カリングを切り、ブレンドを有効にしてから呼ぶ。
- * 他のものに隠れないように、この中で深度テストを切って、戻す。
+ * プレイヤーの方を向いた、ワールドの中の横長のバー。値は、プレイヤーから見て左から伸びる。
+ * 描く側は、テクスチャ・ライティング・カリングを切り、ブレンドを有効にしてから呼ぶ。深度テストはこの中で切って、戻す。
  */
 final class WorldBar {
 
     private WorldBar() {
     }
 
-    /**
-     * 中心 (x, y, z)（ワールド座標）に、幅 width・太さ thickness のバーを描く。
-     * fraction は 0〜1（進み具合の色を塗る割合）。カメラ (cx, cy, cz) の方を向く。
-     * fill と back は {r, g, b, a}。
-     */
+    /** fraction は 0〜1。fill と back は {r, g, b, a}。 */
     static void draw(double x, double y, double z, double width, double thickness, double fraction,
                      float[] fill, float[] back, double cx, double cy, double cz) {
         double dx = cx - x;
@@ -32,7 +24,7 @@ final class WorldBar {
         if (length < 1e-6) {
             return;
         }
-        // プレイヤーから見た右向き（視線 = カメラ → バーの方向 = (-dx, -dz)。Minecraft では視線 (fx, fz) の右は (-fz, fx)）
+        // 視線 = カメラ → バーの方向 = (-dx, -dz)。Minecraft では視線 (fx, fz) の右は (-fz, fx)
         double rightX = dz / length;
         double rightZ = -dx / length;
 
@@ -45,7 +37,6 @@ final class WorldBar {
         GlStateManager.enableDepth();
     }
 
-    /** 中心から右向きに from〜to の範囲、上下に thickness / 2 の矩形を塗る。 */
     private static void quad(double x, double y, double z, double rightX, double rightZ, double from, double to,
                              double thickness, float[] rgba, double cx, double cy, double cz) {
         Tessellator tessellator = Tessellator.getInstance();
