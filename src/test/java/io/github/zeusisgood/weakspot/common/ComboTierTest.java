@@ -7,9 +7,13 @@ import org.junit.Test;
 public class ComboTierTest {
 
     @Test
-    public void tiersByCombo() {
+    public void combosBelowTwoAreNotShown() {
         assertEquals(ComboTier.NONE, ComboTier.of(0));
         assertEquals(ComboTier.NONE, ComboTier.of(1));
+    }
+
+    @Test
+    public void eachTierStartsAtItsCombo() {
         assertEquals(ComboTier.WHITE, ComboTier.of(2));
         assertEquals(ComboTier.WHITE, ComboTier.of(9));
         assertEquals(ComboTier.YELLOW, ComboTier.of(10));

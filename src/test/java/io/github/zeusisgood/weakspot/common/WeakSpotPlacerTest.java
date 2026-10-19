@@ -128,7 +128,7 @@ public class WeakSpotPlacerTest {
     }
 
     @Test
-    public void hitTest() {
+    public void hitIsInsideTheRadius() {
         assertTrue(WeakSpotPlacer.isHit(0.5, 0.5, 0.14, 0.6, 0.55));
         assertFalse(WeakSpotPlacer.isHit(0.5, 0.5, 0.14, 0.7, 0.5));
     }

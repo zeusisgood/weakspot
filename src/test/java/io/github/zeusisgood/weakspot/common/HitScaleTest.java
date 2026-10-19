@@ -11,7 +11,6 @@ public class HitScaleTest {
     private static final HitScale UP_DOWN = new HitScale(HitScale.Type.MAJOR, HitScale.Direction.UP_DOWN, 1);
     private static final HitScale TWO = new HitScale(HitScale.Type.MAJOR, HitScale.Direction.UP, 2);
 
-    /** 初期値は HitPitch の静的な関数と同じ鳴り方。 */
     @Test
     public void defaultMatchesHitPitch() {
         for (int streak = 1; streak <= 1000; streak++) {
@@ -21,7 +20,7 @@ public class HitScaleTest {
         assertEquals(8, HitScale.DEFAULT.cycleLength());
     }
 
-    /** 往復: ド → 上のド → ド（両端は 1 回）。周期は 14。 */
+    /** ド → 上のド → ド（両端は 1 回）。周期は 14。 */
     @Test
     public void upDownTurnsAtBothEnds() {
         assertEquals(14, UP_DOWN.cycleLength());
@@ -38,7 +37,7 @@ public class HitScaleTest {
         }
     }
 
-    /** 2 オクターブ: 0.5 から 2.0 まで 15 音。往復なら周期 28。 */
+    /** 0.5 から 2.0 まで 15 音。往復なら周期 28。 */
     @Test
     public void twoOctavesStartOneOctaveLower() {
         assertEquals(15, TWO.melodyLength());
@@ -51,7 +50,7 @@ public class HitScaleTest {
 
     /** ペンタトニックは 6 音（ド レ ミ ソ ラ ド）、短調はミ♭。 */
     @Test
-    public void scaleTypes() {
+    public void pentatonicAndMinorUseTheirOwnSteps() {
         HitScale penta = new HitScale(HitScale.Type.PENTATONIC, HitScale.Direction.UP, 1);
         assertEquals(6, penta.melodyLength());
         assertEquals(Math.pow(2, 7 / 12.0), penta.melody(4), 1e-6);
@@ -60,7 +59,7 @@ public class HitScaleTest {
         assertEquals(Math.pow(2, 3 / 12.0), minor.melody(3), 1e-6);
     }
 
-    /** 和音と途切れの音は、どの組み合わせでもピッチ 0.5〜2.0 に収まる。 */
+    /** 和音と途切れの音も、どの組み合わせでもピッチ 0.5〜2.0 に収まる。 */
     @Test
     public void allNotesStayInRange() {
         for (HitScale.Type type : HitScale.Type.values()) {
@@ -83,7 +82,6 @@ public class HitScaleTest {
         }
     }
 
-    /** 音域の設定が範囲の外なら、端に寄せる。 */
     @Test
     public void octavesAreClamped() {
         assertEquals(1, new HitScale(null, null, 0).octaves);

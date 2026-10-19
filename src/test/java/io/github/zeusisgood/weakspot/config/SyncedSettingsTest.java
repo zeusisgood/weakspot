@@ -12,7 +12,6 @@ import org.junit.Test;
 
 public class SyncedSettingsTest {
 
-    /** 送る一覧に、公開のフィールドがちょうど 1 回ずつ入っている（足し忘れ・重なりがない）。 */
     @Test
     public void wireListsEveryFieldOnce() {
         Set<String> fields = new HashSet<>();
@@ -25,7 +24,7 @@ public class SyncedSettingsTest {
         assertEquals(fields, new HashSet<>(Arrays.asList(SyncedSettings.WIRE)));
     }
 
-    /** serverVersion 以外は、WeakSpotConfig の server の下に同じ名前・合う型の項目がある（一覧は Set、設定は String[]）。 */
+    /** serverVersion 以外（一覧は Set、設定は String[]）。 */
     @Test
     public void everyFieldHasAConfigEntry() throws Exception {
         for (String name : SyncedSettings.WIRE) {

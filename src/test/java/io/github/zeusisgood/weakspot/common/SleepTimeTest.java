@@ -9,7 +9,7 @@ import org.junit.Test;
 public class SleepTimeTest {
 
     @Test
-    public void nightWindow() {
+    public void nightLastsFromDuskToDawnEveryDay() {
         assertFalse(SleepTime.isNight(6000));
         assertTrue(SleepTime.isNight(12541));
         assertTrue(SleepTime.isNight(18000));
