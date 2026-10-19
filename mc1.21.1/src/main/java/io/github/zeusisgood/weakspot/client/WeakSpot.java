@@ -6,11 +6,15 @@ import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MarkerMotion;
 import io.github.zeusisgood.weakspot.common.WeakSpotPlacer;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -40,6 +44,8 @@ final class WeakSpot {
     private final double minMoveDistance;
     /** 作物は育つと高さが変わるので、変わったら出し直す。動物は、今の箱。 */
     AABB box;
+    /** 置く場所から外す、面の座標の長方形（手前の隣のブロックの形）。ほかのプレイヤーの弱点・動物は空。 */
+    private List<FaceRect> blocked = Collections.emptyList();
 
     double u;
     double v;
@@ -70,9 +76,10 @@ final class WeakSpot {
         if (spot == null) {
             return null;
         }
+        spot.blocked = frontShapes(world, pos, face);
         double[] aimUV = spot.toUV(aim);
         double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, spot.edgeMargin, aimUV[0], aimUV[1],
-                spot.minMoveDistance, random);
+                spot.minMoveDistance, spot.blocked, random);
         spot.moveTo(p[0], p[1], false, 0);
         return spot;
     }
@@ -89,11 +96,10 @@ final class WeakSpot {
 
     private static WeakSpot create(HitKind kind, Level world, BlockPos pos, BlockState state, Direction face,
                                    SyncedSettings settings) {
-        VoxelShape shape = state.getShape(world, pos);
-        if (shape.isEmpty()) {
+        AABB box = outline(world, pos, state);
+        if (box == null) {
             return null;
         }
-        AABB box = shape.bounds().move(pos);
         int axis = face.getAxis().ordinal();
         FaceRect rect = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
         if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
@@ -110,6 +116,57 @@ final class WeakSpot {
         double[] max = {box.maxX, box.maxY, box.maxZ};
         double plane = face.getAxisDirection() == Direction.AxisDirection.POSITIVE ? max[axis] : min[axis];
         return new WeakSpot(kind, null, pos, face, plane, rect, layout, box);
+    }
+
+    /** ブロックの弱点を描き、当たりを決める外枠の箱（ワールド座標）。形がなければ null。 */
+    static AABB outline(Level world, BlockPos pos, BlockState state) {
+        VoxelShape shape = state.getShape(world, pos);
+        return shape.isEmpty() ? null : shape.bounds().move(pos);
+    }
+
+    /**
+     * 面の真正面の隣のブロック（パイプなど）の形を、面の座標に写した長方形。その後ろに出した弱点は、
+     * バニラの照準が手前のブロックを指すので当てられない。パイプの本体と腕を別々に避けるため、箱ごとに分ける。
+     * 空気・1 マスの立方体（面が見えない）は空。
+     */
+    private static List<FaceRect> frontShapes(Level world, BlockPos pos, Direction face) {
+        BlockPos front = pos.relative(face);
+        BlockState state = world.getBlockState(front);
+        if (state.isAir()) {
+            return Collections.emptyList();
+        }
+        VoxelShape shape = state.getShape(world, front);
+        if (shape.isEmpty() || Block.isShapeFullBlock(shape)) {
+            return Collections.emptyList();
+        }
+        int axis = face.getAxis().ordinal();
+        List<FaceRect> rects = new ArrayList<>();
+        for (AABB b : shape.toAabbs()) {
+            AABB w = b.move(front);
+            rects.add(FaceMath.faceRect(axis, w.minX, w.minY, w.minZ, w.maxX, w.maxY, w.maxZ));
+        }
+        return rects;
+    }
+
+    /** 照準の線（目 eye から向き dir）が外枠の箱に外から入る面。入らなければ null。 */
+    static Direction entryFace(AABB box, Vec3 eye, Vec3 dir) {
+        int[] face = FaceMath.rayEntryFace(new double[] {eye.x, eye.y, eye.z}, new double[] {dir.x, dir.y, dir.z},
+                new double[] {box.minX, box.minY, box.minZ}, new double[] {box.maxX, box.maxY, box.maxZ});
+        if (face == null) {
+            return null;
+        }
+        return Direction.fromAxisAndDirection(Direction.Axis.values()[face[0]],
+                face[1] > 0 ? Direction.AxisDirection.POSITIVE : Direction.AxisDirection.NEGATIVE);
+    }
+
+    /** 照準の線と、箱の face の面の平面の交点。目の後ろなら null。 */
+    static Vec3 rayPoint(AABB box, Direction face, Vec3 eye, Vec3 dir) {
+        int axis = face.getAxis().ordinal();
+        double plane = face.getAxisDirection() == Direction.AxisDirection.POSITIVE
+                ? new double[] {box.maxX, box.maxY, box.maxZ}[axis] : new double[] {box.minX, box.minY, box.minZ}[axis];
+        double[] p = FaceMath.rayPlane(new double[] {eye.x, eye.y, eye.z}, new double[] {dir.x, dir.y, dir.z}, axis,
+                plane);
+        return p == null ? null : new Vec3(p[0], p[1], p[2]);
     }
 
     /** 面が小さすぎるときは null。 */
@@ -235,7 +292,7 @@ final class WeakSpot {
 
     /** animate なら、マーカーは nowMs から動いて追いつく。 */
     void relocate(Random random, boolean animate, long nowMs) {
-        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, random);
+        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, blocked, random);
         moveTo(p[0], p[1], animate, nowMs);
     }
 

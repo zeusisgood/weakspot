@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.common;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -51,9 +52,17 @@ public final class WeakSpotPlacer {
         return Math.min(face.width(), face.height()) < minFaceSize;
     }
 
-    /** 面が小さくて余白と移動距離を取れない軸では、面の中央に置く。 */
     public static double[] place(FaceRect face, double radius, double edgeMargin, double avoidU, double avoidV,
                                  double minDistance, Random random) {
+        return place(face, radius, edgeMargin, avoidU, avoidV, minDistance, Collections.<FaceRect>emptyList(), random);
+    }
+
+    /**
+     * 面が小さくて余白と移動距離を取れない軸では、面の中央に置く。
+     * blocked（手前のパイプなど、面の座標の長方形）に円が重なる候補は使わない。全部の候補が重なるときは、blocked がないのと同じ。
+     */
+    public static double[] place(FaceRect face, double radius, double edgeMargin, double avoidU, double avoidV,
+                                 double minDistance, List<FaceRect> blocked, Random random) {
         double margin = radius + Math.max(0, edgeMargin);
         double loU = face.minU + margin;
         double hiU = face.maxU - margin;
@@ -67,9 +76,8 @@ public final class WeakSpotPlacer {
         }
 
         // 中央付近から遠ざけると角しか残らないことがあるので、範囲の四隅も候補に入れる。
-        List<double[]> valid = new ArrayList<>();
-        double[] best = null;
-        double bestDistance = -1;
+        List<double[]> candidates = new ArrayList<>();
+        List<double[]> open = new ArrayList<>();
         for (int i = 0; i < GRID * GRID + 4; i++) {
             double u;
             double v;
@@ -81,8 +89,21 @@ public final class WeakSpotPlacer {
                 u = (corner & 1) == 0 ? loU : hiU;
                 v = (corner & 2) == 0 ? loV : hiV;
             }
-            double d = FaceMath.distance(u, v, avoidU, avoidV);
             double[] candidate = {u, v};
+            candidates.add(candidate);
+            if (!overlapsAny(u, v, radius, blocked)) {
+                open.add(candidate);
+            }
+        }
+        if (open.isEmpty()) {
+            open = candidates;
+        }
+
+        List<double[]> valid = new ArrayList<>();
+        double[] best = null;
+        double bestDistance = -1;
+        for (double[] candidate : open) {
+            double d = FaceMath.distance(candidate[0], candidate[1], avoidU, avoidV);
             if (d >= minDistance) {
                 valid.add(candidate);
             }
@@ -92,6 +113,22 @@ public final class WeakSpotPlacer {
             }
         }
         return valid.isEmpty() ? best : valid.get(random.nextInt(valid.size()));
+    }
+
+    /** 縁で接するだけなら重ならない。 */
+    public static boolean overlaps(double u, double v, double radius, FaceRect rect) {
+        double du = Math.max(Math.max(rect.minU - u, 0), u - rect.maxU);
+        double dv = Math.max(Math.max(rect.minV - v, 0), v - rect.maxV);
+        return du * du + dv * dv < radius * radius;
+    }
+
+    private static boolean overlapsAny(double u, double v, double radius, List<FaceRect> rects) {
+        for (FaceRect rect : rects) {
+            if (overlaps(u, v, radius, rect)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isHit(double spotU, double spotV, double radius, double aimU, double aimV) {

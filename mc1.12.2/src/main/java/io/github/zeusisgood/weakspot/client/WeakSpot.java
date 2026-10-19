@@ -6,7 +6,11 @@ import io.github.zeusisgood.weakspot.common.FaceRect;
 import io.github.zeusisgood.weakspot.common.MarkerMotion;
 import io.github.zeusisgood.weakspot.common.WeakSpotPlacer;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
@@ -39,6 +43,8 @@ final class WeakSpot {
     private final double minMoveDistance;
     /** 作物は育つと高さが変わるので、変わったら出し直す。動物は、今の箱。 */
     AxisAlignedBB box;
+    /** 置く場所から外す、面の座標の長方形（手前の隣のブロックの形）。ほかのプレイヤーの弱点・動物は空。 */
+    private List<FaceRect> blocked = Collections.emptyList();
 
     double u;
     double v;
@@ -69,9 +75,10 @@ final class WeakSpot {
         if (spot == null) {
             return null;
         }
+        spot.blocked = frontShapes(world, pos, face);
         double[] aimUV = spot.toUV(aim);
         double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, spot.edgeMargin, aimUV[0], aimUV[1],
-                spot.minMoveDistance, random);
+                spot.minMoveDistance, spot.blocked, random);
         spot.moveTo(p[0], p[1], false, 0);
         return spot;
     }
@@ -88,7 +95,7 @@ final class WeakSpot {
 
     private static WeakSpot create(HitKind kind, World world, BlockPos pos, IBlockState state, EnumFacing face,
                                    SyncedSettings settings) {
-        AxisAlignedBB box = state.getSelectedBoundingBox(world, pos);
+        AxisAlignedBB box = outline(world, pos, state);
         int axis = face.getAxis().ordinal();
         FaceRect rect = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
         if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
@@ -105,6 +112,60 @@ final class WeakSpot {
         double[] max = {box.maxX, box.maxY, box.maxZ};
         double plane = face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? max[axis] : min[axis];
         return new WeakSpot(kind, null, pos, face, plane, rect, layout, box);
+    }
+
+    /** ブロックの弱点を描き、当たりを決める外枠の箱（ワールド座標）。 */
+    static AxisAlignedBB outline(World world, BlockPos pos, IBlockState state) {
+        return state.getSelectedBoundingBox(world, pos);
+    }
+
+    /**
+     * 面の真正面の隣のブロック（パイプなど）の形を、面の座標に写した長方形。その後ろに出した弱点は、
+     * バニラの照準が手前のブロックを指すので当てられない。パイプの本体と腕を別々に避けるため、当たり判定の箱ごとに分ける
+     * （当たり判定のない松明などは選択の枠）。空気・1 マスの立方体（面が見えない）は空。
+     */
+    private static List<FaceRect> frontShapes(World world, BlockPos pos, EnumFacing face) {
+        BlockPos front = pos.offset(face);
+        if (world.isAirBlock(front)) {
+            return Collections.emptyList();
+        }
+        IBlockState state = world.getBlockState(front);
+        List<AxisAlignedBB> boxes = new ArrayList<>();
+        state.addCollisionBoxToList(world, front, new AxisAlignedBB(front), boxes, null, false);
+        if (boxes.isEmpty()) {
+            boxes.add(state.getSelectedBoundingBox(world, front));
+        }
+        if (boxes.size() == 1 && boxes.get(0).equals(Block.FULL_BLOCK_AABB.offset(front))) {
+            return Collections.emptyList();
+        }
+        int axis = face.getAxis().ordinal();
+        List<FaceRect> rects = new ArrayList<>();
+        for (AxisAlignedBB b : boxes) {
+            rects.add(FaceMath.faceRect(axis, b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ));
+        }
+        return rects;
+    }
+
+    /** 照準の線（目 eye から向き dir）が外枠の箱に外から入る面。入らなければ null。 */
+    static EnumFacing entryFace(AxisAlignedBB box, Vec3d eye, Vec3d dir) {
+        int[] face = FaceMath.rayEntryFace(new double[] {eye.x, eye.y, eye.z}, new double[] {dir.x, dir.y, dir.z},
+                new double[] {box.minX, box.minY, box.minZ}, new double[] {box.maxX, box.maxY, box.maxZ});
+        if (face == null) {
+            return null;
+        }
+        return EnumFacing.getFacingFromAxis(
+                face[1] > 0 ? EnumFacing.AxisDirection.POSITIVE : EnumFacing.AxisDirection.NEGATIVE,
+                EnumFacing.Axis.values()[face[0]]);
+    }
+
+    /** 照準の線と、箱の face の面の平面の交点。目の後ろなら null。 */
+    static Vec3d rayPoint(AxisAlignedBB box, EnumFacing face, Vec3d eye, Vec3d dir) {
+        int axis = face.getAxis().ordinal();
+        double plane = face.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE
+                ? new double[] {box.maxX, box.maxY, box.maxZ}[axis] : new double[] {box.minX, box.minY, box.minZ}[axis];
+        double[] p = FaceMath.rayPlane(new double[] {eye.x, eye.y, eye.z}, new double[] {dir.x, dir.y, dir.z}, axis,
+                plane);
+        return p == null ? null : new Vec3d(p[0], p[1], p[2]);
     }
 
     /** 面が小さすぎるときは null。 */
@@ -232,7 +293,7 @@ final class WeakSpot {
 
     /** animate なら、マーカーは nowMs から動いて追いつく。 */
     void relocate(Random random, boolean animate, long nowMs) {
-        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, random);
+        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, blocked, random);
         moveTo(p[0], p[1], animate, nowMs);
     }
 

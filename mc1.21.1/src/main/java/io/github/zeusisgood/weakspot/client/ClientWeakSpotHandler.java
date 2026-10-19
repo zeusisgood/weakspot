@@ -24,7 +24,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -194,8 +193,9 @@ public final class ClientWeakSpotHandler {
             return;
         }
         SyncedSettings settings = ClientSettings.get();
-        if (spot == null || !spot.matches(HitKind.MINING, pos, target.getDirection())) {
-            spot = WeakSpot.spawn(HitKind.MINING, mc.level, pos, state, target.getDirection(), target.getLocation(), settings, RANDOM);
+        BlockAim aim = blockAim(mc, target, WeakSpot.outline(mc.level, pos, state));
+        if (spot == null || !spot.matches(HitKind.MINING, pos, aim.face)) {
+            spot = WeakSpot.spawn(HitKind.MINING, mc.level, pos, state, aim.face, aim.point, settings, RANDOM);
         }
         if (spot == null) {
             return;
@@ -203,7 +203,7 @@ public final class ClientWeakSpotHandler {
         spot.preview = false;
         spot.lastActiveTick = clientTick;
         MiningBoost.onDigging(pos);
-        if (spot.isHitBy(target.getLocation()) && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
+        if (spot.isHitBy(aim.point) && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
             onHit(mc);
         }
     }
@@ -219,8 +219,9 @@ public final class ClientWeakSpotHandler {
             return;
         }
         SyncedSettings settings = ClientSettings.get();
-        if (spot == null || !spot.matches(HitKind.MINING, pos, target.getDirection())) {
-            spot = WeakSpot.spawn(HitKind.MINING, mc.level, pos, state, target.getDirection(), target.getLocation(), settings, RANDOM);
+        BlockAim aim = blockAim(mc, target, WeakSpot.outline(mc.level, pos, state));
+        if (spot == null || !spot.matches(HitKind.MINING, pos, aim.face)) {
+            spot = WeakSpot.spawn(HitKind.MINING, mc.level, pos, state, aim.face, aim.point, settings, RANDOM);
         }
         if (spot == null) {
             return;
@@ -228,7 +229,7 @@ public final class ClientWeakSpotHandler {
         spot.preview = true;
         spot.lastActiveTick = clientTick;
         if (mc.screen == null && mc.options.keyAttack.isDown() && !MiningBoost.hasPreHit(pos)
-                && spot.isHitBy(target.getLocation())
+                && spot.isHitBy(aim.point)
                 && OwnHits.canHit(HitKind.MINING, settings.minHitInterval(HitKind.MINING))) {
             onHit(mc);
         }
@@ -242,23 +243,22 @@ public final class ClientWeakSpotHandler {
             return;
         }
         BlockState state = mc.level.getBlockState(pos);
-        VoxelShape shape = state.getShape(mc.level, pos);
-        if (shape.isEmpty()) {
+        AABB box = WeakSpot.outline(mc.level, pos, state);
+        if (box == null) {
             return;
         }
-        AABB box = shape.bounds().move(pos);
+        BlockAim aim = blockAim(mc, target, box);
         // 1マス全体のブロック（IC2 のゴムの木の幹など）は、上面が隠れていることが多いので、照準の面に出す
         boolean plant = kind == HitKind.GROWTH || kind == HitKind.HARVEST;
-        Direction face = plant && !isFullCube(box, pos) ? growthFace(mc, pos, box, target.getDirection())
-                : target.getDirection();
+        Direction face = plant && !isFullCube(box, pos) ? growthFace(mc, pos, box, aim.face) : aim.face;
         if (spot == null || !spot.matches(kind, pos, face) || !spot.box.equals(box)) {
-            spot = WeakSpot.spawn(kind, mc.level, pos, state, face, target.getLocation(), settings, RANDOM);
+            spot = WeakSpot.spawn(kind, mc.level, pos, state, face, aim.point, settings, RANDOM);
         }
         if (spot == null) {
             return;
         }
         spot.lastActiveTick = clientTick;
-        if (target.getDirection() == spot.face && spot.isHitBy(target.getLocation())
+        if (aim.face == spot.face && spot.isHitBy(aim.point)
                 && OwnHits.canHit(kind, settings.minHitInterval(kind))) {
             onHit(mc);
         }
@@ -294,6 +294,37 @@ public final class ClientWeakSpotHandler {
                 && OwnHits.canHit(HitKind.ANIMAL, settings.minHitInterval(HitKind.ANIMAL))) {
             onHit(mc);
         }
+    }
+
+    /** ブロックの弱点の照準の面と点。 */
+    private static final class BlockAim {
+        final Direction face;
+        final Vec3 point;
+
+        BlockAim(Direction face, Vec3 point) {
+            this.face = face;
+            this.point = point;
+        }
+    }
+
+    /**
+    * 外枠の箱と照準の線で決める（凹凸のあるブロックでは、実際に当たった面が少しの照準の動きで変わり、
+    * 採掘の弱点が飛び回り、右クリックの弱点は面が合わず外れるため）。線が箱に入らない（目が箱の中など）
+    * ときは、バニラの照準の面と点。
+    */
+    private static BlockAim blockAim(Minecraft mc, BlockHitResult target, AABB box) {
+        Entity camera = mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player;
+        if (box != null) {
+            // バニラの照準（GameRenderer.pick）と同じ、フレームの途中の目と向き
+            Vec3 eye = camera.getEyePosition(framePartialTicks);
+            Vec3 look = camera.getViewVector(framePartialTicks);
+            Direction face = WeakSpot.entryFace(box, eye, look);
+            Vec3 point = face == null ? null : WeakSpot.rayPoint(box, face, eye, look);
+            if (point != null) {
+                return new BlockAim(face, point);
+            }
+        }
+        return new BlockAim(target.getDirection(), target.getLocation());
     }
 
     /** 同じ大きさの側面が複数あるとき（サトウキビなど）は、今の弱点の面が見えている間は変えない（照準が隣の側面へ移ってもちらつかない）。 */

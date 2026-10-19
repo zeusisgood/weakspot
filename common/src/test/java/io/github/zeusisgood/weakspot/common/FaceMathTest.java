@@ -2,6 +2,7 @@ package io.github.zeusisgood.weakspot.common;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -101,5 +102,68 @@ public class FaceMathTest {
         assertArrayEquals(new int[] {FaceMath.AXIS_X, -1}, FaceMath.nearestFace(new double[] {0, 0.7, 0.3}, min, max));
         assertArrayEquals(new int[] {FaceMath.AXIS_Z, 1}, FaceMath.nearestFace(new double[] {0.3, 0.7, 0.6}, min, max));
         assertArrayEquals(new int[] {FaceMath.AXIS_Y, -1}, FaceMath.nearestFace(new double[] {0.3, 0.0, 0.3}, min, max));
+    }
+
+    private static final double[] BOX_MIN = {0, 0, 0};
+    private static final double[] BOX_MAX = {1, 1, 1};
+
+    @Test
+    public void rayFromTheFrontEntersTheFrontFace() {
+        double[] eye = {0.5, 0.5, -2};
+        assertArrayEquals(new int[] {FaceMath.AXIS_Z, -1},
+                FaceMath.rayEntryFace(eye, new double[] {0.1, -0.05, 1}, BOX_MIN, BOX_MAX));
+    }
+
+    @Test
+    public void rayFromAboveAtASteepAngleEntersTheTop() {
+        double[] eye = {0.5, 2.5, -0.5};
+        assertArrayEquals(new int[] {FaceMath.AXIS_Y, 1},
+                FaceMath.rayEntryFace(eye, new double[] {0, -1, 0.4}, BOX_MIN, BOX_MAX));
+    }
+
+    @Test
+    public void rayThatHitsARecessFromTheFrontStillEntersTheFront() {
+        // 凹んだ所の横の面（X 向き）に当たる視線でも、外枠の箱には正面から入る
+        double[] eye = {0.3, 0.5, -1};
+        assertArrayEquals(new int[] {FaceMath.AXIS_Z, -1},
+                FaceMath.rayEntryFace(eye, new double[] {0.3, 0, 1}, BOX_MIN, BOX_MAX));
+    }
+
+    @Test
+    public void rayFromInsideTheBoxEntersNoFace() {
+        assertNull(FaceMath.rayEntryFace(new double[] {0.5, 0.5, 0.5}, new double[] {0, 0, 1}, BOX_MIN, BOX_MAX));
+    }
+
+    @Test
+    public void rayThatMissesTheBoxEntersNoFace() {
+        assertNull(FaceMath.rayEntryFace(new double[] {0.5, 0.5, -2}, new double[] {1, 0, 0.2}, BOX_MIN, BOX_MAX));
+        assertNull(FaceMath.rayEntryFace(new double[] {2, 0.5, 0.5}, new double[] {0, 0, 1}, BOX_MIN, BOX_MAX));
+    }
+
+    @Test
+    public void boxBehindTheEyeEntersNoFace() {
+        assertNull(FaceMath.rayEntryFace(new double[] {0.5, 0.5, -2}, new double[] {0, 0, -1}, BOX_MIN, BOX_MAX));
+    }
+
+    @Test
+    public void rayMeetsTheFacePlane() {
+        double[] p = FaceMath.rayPlane(new double[] {0.5, 1.5, -2}, new double[] {0, -0.25, 1}, FaceMath.AXIS_Z, 0);
+        assertArrayEquals(new double[] {0.5, 1.0, 0}, p, EPS);
+    }
+
+    @Test
+    public void planeBehindTheEyeOrParallelIsAMiss() {
+        assertNull(FaceMath.rayPlane(new double[] {0.5, 0.5, 2}, new double[] {0, 0, 1}, FaceMath.AXIS_Z, 0));
+        assertNull(FaceMath.rayPlane(new double[] {0.5, 0.5, -2}, new double[] {1, 0, 0}, FaceMath.AXIS_Z, 0));
+    }
+
+    @Test
+    public void neighborBoxProjectsOntoTheFace() {
+        // 北の面（Z 向き）の手前の、太さ 0.25 のパイプ
+        FaceRect r = FaceMath.faceRect(FaceMath.AXIS_Z, 0.375, 0.375, -1, 0.625, 0.625, 0);
+        assertEquals(0.375, r.minU, EPS);
+        assertEquals(0.375, r.minV, EPS);
+        assertEquals(0.625, r.maxU, EPS);
+        assertEquals(0.625, r.maxV, EPS);
     }
 }

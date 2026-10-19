@@ -1,9 +1,13 @@
 package io.github.zeusisgood.weakspot.common;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import org.junit.Test;
 
@@ -131,5 +135,60 @@ public class WeakSpotPlacerTest {
     public void hitIsInsideTheRadius() {
         assertTrue(WeakSpotPlacer.isHit(0.5, 0.5, 0.14, 0.6, 0.55));
         assertFalse(WeakSpotPlacer.isHit(0.5, 0.5, 0.14, 0.7, 0.5));
+    }
+
+    private static final List<FaceRect> PIPE = Collections.singletonList(new FaceRect(0.375, 0.375, 0.625, 0.625));
+
+    @Test
+    public void spotNeverOverlapsTheBlockedRects() {
+        Random random = new Random(4);
+        List<FaceRect> pipeWithArm = Arrays.asList(new FaceRect(0.375, 0.375, 0.625, 0.625),
+                new FaceRect(0.375, 0.625, 0.625, 1));
+        double u = 0.5;
+        double v = 0.5;
+        for (int i = 0; i < 1000; i++) {
+            double[] p = WeakSpotPlacer.place(FULL, 0.14, 0.1, u, v, 0.4, pipeWithArm, random);
+            for (FaceRect rect : pipeWithArm) {
+                assertFalse(WeakSpotPlacer.overlaps(p[0], p[1], 0.14, rect));
+            }
+            u = p[0];
+            v = p[1];
+        }
+    }
+
+    @Test
+    public void fullyBlockedFaceFallsBackToTheUsualCandidates() {
+        List<FaceRect> covered = Collections.singletonList(new FaceRect(0, 0, 1, 1));
+        double[] blocked = WeakSpotPlacer.place(FULL, 0.14, 0.1, 0.5, 0.5, 0.4, covered, new Random(5));
+        double[] usual = WeakSpotPlacer.place(FULL, 0.14, 0.1, 0.5, 0.5, 0.4, new Random(5));
+        assertArrayEquals(usual, blocked, 1e-12);
+    }
+
+    @Test
+    public void emptyBlockedListPlacesAsBefore() {
+        for (long seed = 0; seed < 50; seed++) {
+            double[] withList = WeakSpotPlacer.place(FULL, 0.14, 0.1, 0.3, 0.6, 0.4,
+                    Collections.<FaceRect>emptyList(), new Random(seed));
+            double[] without = WeakSpotPlacer.place(FULL, 0.14, 0.1, 0.3, 0.6, 0.4, new Random(seed));
+            assertArrayEquals(without, withList, 1e-12);
+        }
+    }
+
+    @Test
+    public void blockedRectsOutsideTheFaceChangeNothing() {
+        List<FaceRect> outside = Collections.singletonList(new FaceRect(2, 2, 3, 3));
+        double[] p = WeakSpotPlacer.place(FULL, 0.14, 0.1, 0.5, 0.5, 0.4, outside, new Random(6));
+        double[] usual = WeakSpotPlacer.place(FULL, 0.14, 0.1, 0.5, 0.5, 0.4, new Random(6));
+        assertArrayEquals(usual, p, 1e-12);
+    }
+
+    @Test
+    public void circleOverlapsARectOnlyWhenItReachesInside() {
+        FaceRect pipe = PIPE.get(0);
+        assertTrue(WeakSpotPlacer.overlaps(0.5, 0.5, 0.1, pipe));
+        assertTrue(WeakSpotPlacer.overlaps(0.3, 0.5, 0.1, pipe));
+        assertFalse(WeakSpotPlacer.overlaps(0.27, 0.5, 0.1, pipe));
+        // 角の近く: 辺の延長の上では重なって見えても、角からの距離が半径より遠い
+        assertFalse(WeakSpotPlacer.overlaps(0.3, 0.3, 0.1, pipe));
     }
 }
