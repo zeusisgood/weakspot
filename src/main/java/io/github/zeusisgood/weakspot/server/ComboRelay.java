@@ -17,14 +17,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * プレイヤーのコンボ（サーバーで数えている連続ヒット数）を、近くのほかのプレイヤーに送る（頭の上の「n HIT」）。
- * 数が変わったとき（途切れたときは 0）に、RANGE ブロック以内のほかのプレイヤーへ送る。1 人あたり MIN_INTERVAL_TICKS に
- * 1 回までに間引き、間引いた分は次に送れるときに送る。弱点を一時オフにしているプレイヤーの数は送らない。
- * <p>
- * 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。ヒットのたびにクライアントが送ってきた数と
- * 比べ（checkOwn）、ずれていたら、最後のヒットから ComboSync.IDLE_TICKS たったときに今のサーバーの数を送る。
- * 送る相手は 1.11.3 以降のクライアントだけ（古いクライアントは、自分の ID を「ほかのプレイヤー」として描いてしまう）。
- */
+* 頭の上の「n HIT」。1 人あたり MIN_INTERVAL_TICKS に 1 回までに間引き、間引いた分は次に送れるときに送る。
+* 弱点を一時オフにしているプレイヤーの数は送らない。
+* <p>
+* 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。送る相手は 1.11.3 以降のクライアントだけ
+* （古いクライアントは、自分の ID を「ほかのプレイヤー」として描いてしまう）。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ComboRelay {
 
@@ -43,7 +41,6 @@ public final class ComboRelay {
     }
 
     private static final class Own {
-        /** 最後のヒットで、クライアントの数がサーバーとずれていたか。 */
         boolean mismatched;
         long lastHitTick;
         long sentTick = Long.MIN_VALUE / 2;
@@ -88,10 +85,7 @@ public final class ComboRelay {
         OWN.keySet().removeIf(id -> server.getPlayerList().getPlayerByUUID(id) == null);
     }
 
-    /**
-     * クライアントからのヒットを処理したあとに呼ぶ（HitHandlers）。clientStreak はクライアントのヒット後の数。
-     * 比べるだけで、サーバーの数をこれに合わせることはしない。
-     */
+    /** clientStreak はクライアントのヒット後の数。比べるだけで、サーバーの数をこれに合わせることはしない。 */
     static void checkOwn(EntityPlayerMP player, int clientStreak) {
         Own own = OWN.computeIfAbsent(player.getUniqueID(), id -> new Own());
         own.lastHitTick = player.mcServer.getTickCounter();
@@ -99,7 +93,7 @@ public final class ComboRelay {
                 ServerBoostTracker.hasReservation(player));
     }
 
-    /** ずれていたプレイヤーに、手が止まったら今のサーバーの数を送る。 */
+    /** 手が止まったら送る。 */
     private static void sendOwn(MinecraftServer server, long now) {
         for (Map.Entry<UUID, Own> entry : OWN.entrySet()) {
             Own own = entry.getValue();
@@ -122,7 +116,7 @@ public final class ComboRelay {
         return streak == null ? 0 : streak.count(now);
     }
 
-    /** 後片付け（HitGate から呼ぶ。本人宛ては死亡・ディメンション移動でも。両側とも 0 に戻すため）。 */
+    /** 本人宛ては死亡・ディメンション移動でも消す（両側とも 0 に戻すため）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             SENT.remove(player.getUniqueID());

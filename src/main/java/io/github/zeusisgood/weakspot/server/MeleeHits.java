@@ -14,23 +14,19 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 
-/**
- * 近接の弱点（論理サーバー）。剣か斧を持ち、近くに敵がいる間に、照準の左右の弱点に
- * 当てたヒットを受け付け、溜める（MeleeCharge。meleeChargePerHit × コンボの掛け数、上限 meleeChargeMax）。
- * 溜めた攻撃が生き物に当たったら（MeleeCharge.onCriticalHit）、耐久回復を数える。照準の角度は確かめない。
- */
+/** 溜めた攻撃が生き物に当たったら（MeleeCharge.onCriticalHit）、耐久回復を数える。照準の角度は確かめない。 */
 public final class MeleeHits {
 
     /** クライアントは 16 ブロック以内の敵で出す。サーバーは位置のずれを見込んで少し甘くする。 */
     private static final double ENEMY_RANGE = 20;
 
-    /** 耐久回復の数え方の余り（溜めた攻撃の回数）。メモリにだけ持ち、再ログインで 0 に戻る。 */
+    /** 溜めた攻撃の回数。メモリにだけ持ち、再ログインで 0 に戻る。 */
     private static final Map<UUID, Integer> REPAIR_CARRY = new HashMap<>();
 
     private MeleeHits() {
     }
 
-    /** クライアントからのヒット通知（サーバースレッド）。 */
+    /** サーバースレッドで呼ぶ。 */
     public static void onHit(EntityPlayerMP player, int streak) {
         if (!HitGate.allowed(player, HitKind.MELEE)
                 || !MeleeCharge.CHARGES.isHolding(player) || !MeleeTargets.hasEnemyNear(player, ENEMY_RANGE)
@@ -42,10 +38,7 @@ public final class MeleeHits {
                 WeakSpotConfig.server.melee.meleeChargeMax);
     }
 
-    /**
-     * 溜めた攻撃が生き物に当たった（MeleeCharge から）。critsPerRepair 回ごとに、メインハンドの物の耐久を
-     * critRepairPerStep 回復する（採掘の耐久回復と同じ精算）。このあと、バニラが攻撃の分の耐久を減らす。
-     */
+    /** 採掘の耐久回復と同じ精算。このあと、バニラが攻撃の分の耐久を減らす。 */
     public static void onChargedAttack(EntityPlayerMP player) {
         ItemStack stack = player.getHeldItemMainhand();
         int damage = !stack.isEmpty() && stack.isItemStackDamageable() ? stack.getItemDamage() : 0;
@@ -56,8 +49,6 @@ public final class MeleeHits {
         MiningRewards.repairHeldTool(player, result.repair);
     }
 
-
-    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             REPAIR_CARRY.remove(player.getUniqueID());

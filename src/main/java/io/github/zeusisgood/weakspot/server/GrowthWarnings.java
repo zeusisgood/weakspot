@@ -16,11 +16,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
-/**
- * 成長の弱点に当てても育たないときに、チャットで知らせる。
- * 暗い（作物・茎・苗木で、すぐ上の明るさが 9 未満）ときは最初のヒットで、原因が分からないときは
- * growthStuckHits 回続けて状態が変わらなかったときに知らせる。判定と回数の制限は GrowthStuck。
- */
+/** 暗い（作物・茎・苗木で、すぐ上の明るさが 9 未満）ときは最初のヒットで知らせる。判定と回数の制限は GrowthStuck。 */
 public final class GrowthWarnings {
 
     /** バニラの作物・茎・苗木が育つのに必要な、すぐ上の明るさ。 */
@@ -31,7 +27,7 @@ public final class GrowthWarnings {
     private GrowthWarnings() {
     }
 
-    /** 成長のヒットの効果をかけたあとに呼ぶ。changed は効果の前後で状態が変わったか。 */
+    /** changed は効果の前後で状態が変わったか。 */
     static void onGrowthHit(EntityPlayerMP player, World world, BlockPos pos, boolean changed) {
         if (!WeakSpotConfig.server.growth.growthWarnings) {
             return;
@@ -55,7 +51,6 @@ public final class GrowthWarnings {
         player.sendMessage(message);
     }
 
-    /** バニラの成長の判定で、すぐ上の明るさを見るブロック。 */
     private static boolean needsLight(Block block) {
         return block instanceof BlockCrops || block instanceof BlockStem || block instanceof BlockSapling;
     }

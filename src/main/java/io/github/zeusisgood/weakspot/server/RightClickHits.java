@@ -16,13 +16,12 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-/** 右クリックの弱点（作物・苗木、機械、収穫）のヒット通知の検証と効果（論理サーバー）。 */
 public final class RightClickHits {
 
     /**
-     * 右クリックを押しっぱなしにすると、バニラのクライアントは4tickごとに右クリックを送る。
-     * 最後の右クリックからこの tick 以内のヒットだけを受け付ける（ネットワークの揺らぎを見込んだ余裕）。
-     */
+    * 右クリックを押しっぱなしにすると、バニラのクライアントは 4 tick ごとに右クリックを送る。
+    * 最後の右クリックからこの tick 以内のヒットだけを受け付ける（ネットワークの揺らぎを見込んだ余裕）。
+    */
     private static final int RIGHT_CLICK_WINDOW_TICKS = 10;
 
     private static final Map<UUID, Clicking> CLICKING = new HashMap<>();
@@ -30,21 +29,20 @@ public final class RightClickHits {
     private RightClickHits() {
     }
 
-    /** プレイヤーが最後に右クリックしたブロックと、種類ごとのヒットの間隔。 */
     private static final class Clicking {
         BlockPos pos;
         long clickTick;
         final Map<HitKind, HitBudget> budgets = new EnumMap<>(HitKind.class);
     }
 
-    /** 対象のブロックを右クリックした（RightClickTargets から、サーバー側でだけ呼ばれる）。 */
+    /** RightClickTargets から、サーバー側でだけ呼ばれる。 */
     public static void onRightClick(EntityPlayer player, BlockPos pos) {
         Clicking clicking = CLICKING.computeIfAbsent(player.getUniqueID(), id -> new Clicking());
         clicking.pos = pos;
         clicking.clickTick = player.world.getTotalWorldTime();
     }
 
-    /** クライアントからのヒット通知（サーバースレッドで実行される）。streak は他のプレイヤーのヒット音の音階に使う。 */
+    /** サーバースレッドで呼ぶ。streak は他のプレイヤーのヒット音の音階に使う。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos, int streak) {
         if (!HitGate.allowed(player, kind)) {
             return;
@@ -99,10 +97,9 @@ public final class RightClickHits {
     }
 
     /**
-     * randomTick を余分に呼ぶ。成長の条件（明るさ、水分など）はブロック自身が確かめるので、骨粉のように一気には育たない。
-     * サトウキビ・サボテンは柱の一番上の節にかける（伸びると一番上が変わるので、毎回探し直す）。
-     * キノコは randomTick では広がるだけなので、代わりに確率で骨粉と同じ grow を呼ぶ（巨大キノコ）。
-     */
+    * randomTick を余分に呼ぶ。成長の条件（明るさ、水分など）はブロック自身が確かめるので、骨粉のように一気には育たない。
+    * キノコは randomTick では広がるだけなので、代わりに確率で骨粉と同じ grow を呼ぶ（巨大キノコ）。
+    */
     private static void grow(World world, BlockPos pos, SyncedSettings settings) {
         IBlockState first = world.getBlockState(pos);
         if (first.getBlock() instanceof BlockMushroom) {
@@ -130,7 +127,6 @@ public final class RightClickHits {
         }
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave != HitGate.Leave.RESPAWN) {
             CLICKING.remove(player.getUniqueID());

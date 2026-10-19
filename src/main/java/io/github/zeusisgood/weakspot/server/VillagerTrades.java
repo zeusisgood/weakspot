@@ -10,12 +10,9 @@ import net.minecraft.village.MerchantRecipeList;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * 村人の取引のロック（使用回数が上限に達した取引）の判定と、バニラの補充と同じリセット。
- * 取引の一覧（buyingList）と、新しい取引の段階を足すメソッド（populateBuyingList）は非公開なので、
- * 開発環境の MCP 名と実際の環境の SRG 名を順に試して読む（Reflect）。
- * 一覧が読めなければ、ロックはないものとして扱う（取引上限のリセットの弱点が出ないだけ）。
- * 一覧が未作成（まだ取引の画面を開いていない）の村人を、こちらから作ってしまわないように、getRecipes は呼ばない。
- */
+* 取引の一覧（buyingList）と populateBuyingList は非公開なので Reflect で読む。一覧が読めなければ、ロックはないものとして扱う。
+* 一覧が未作成（まだ取引の画面を開いていない）の村人を、こちらから作ってしまわないように、getRecipes は呼ばない。
+*/
 final class VillagerTrades {
 
     private static final Field BUYING_LIST = Reflect.field(EntityVillager.class, "villager trade reset",
@@ -37,7 +34,6 @@ final class VillagerTrades {
         }
     }
 
-    /** ロック（×印）された取引があるか。 */
     static boolean hasLockedTrade(EntityVillager villager) {
         MerchantRecipeList list = recipes(villager);
         if (list == null) {
@@ -51,10 +47,7 @@ final class VillagerTrades {
         return false;
     }
 
-    /**
-     * ロックされた取引の使用回数の上限を、バニラの補充と同じだけ増やして、ロックを解除する。
-     * unlockNewTier なら、バニラの補充と同じく、新しい取引の段階も解放する。
-     */
+    /** バニラの補充と同じだけ増やす。unlockNewTier なら、新しい取引の段階も解放する。 */
     static void reset(EntityVillager villager, boolean unlockNewTier, Random random) {
         MerchantRecipeList list = recipes(villager);
         if (list == null) {

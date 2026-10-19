@@ -14,14 +14,13 @@ import java.util.Map;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
- * サーバーで、受け取るプレイヤーの言語の文章を作る。古いクライアントは新しい翻訳キーを持っていないので、
- * 翻訳キーで送るとキーのまま出てしまう。そこで Mod の jar の中の言語ファイルを読み、プレイヤーの言語の設定で文章にする。
- * その言語のファイル・キーがなければ en_us。
- */
+* 古いクライアントは新しい翻訳キーを持っていないので、翻訳キーで送るとキーのまま出てしまう。そこで Mod の jar の中の
+* 言語ファイルを読み、プレイヤーの言語の設定で文章にする。その言語のファイル・キーがなければ en_us。
+*/
 final class ServerLang {
 
     private static final String FALLBACK = "en_us";
-    /** EntityPlayerMP#language（クライアントの言語の設定。CPacketClientSettings で届く）。 */
+    /** クライアントの言語の設定（CPacketClientSettings で届く）。 */
     private static final Field LANGUAGE = Reflect.field(EntityPlayerMP.class, "player language",
             "language", "field_71148_cg");
     private static final Map<String, Map<String, String>> CACHE = new HashMap<>();
@@ -45,7 +44,7 @@ final class ServerLang {
                     return ((String) value).toLowerCase(Locale.ROOT);
                 }
             } catch (IllegalAccessException e) {
-                // en_us にする
+                // 読めなければ en_us
             }
         }
         return FALLBACK;

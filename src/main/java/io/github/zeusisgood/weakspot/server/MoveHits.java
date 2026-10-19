@@ -20,35 +20,31 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * はしご・エリトラ・走り・泳ぎ・落下の弱点のヒット通知の検証と効果（論理サーバー）。
- * 落下は、サーバーの落ちた距離（fallDistance）を減らす。
- * はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
- * 走りは、移動速度に一時的な修正（保存しない）をかける（乗り物の馬と同じ。自分のクライアントにも届いて効く）。
- * サーバーの位置はクライアントより遅れて届くので、登っている・飛んでいる・走っていることは、直前 RECENT_TICKS の
- * どこかでそうだったかで確かめる。
- */
+* はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
+* 走りは、移動速度に一時的な修正（保存しない）をかける（自分のクライアントにも届いて効く）。
+* サーバーの位置はクライアントより遅れて届くので、登っている・飛んでいる・走っていることは、直前 RECENT_TICKS の
+* どこかでそうだったかで確かめる。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MoveHits {
 
-    /** 登っている・飛んでいる・走っていたことを認める、直前の tick 数。 */
     private static final int RECENT_TICKS = 10;
-    /** 走りの加速の修正（固定の UUID。合計に (1 + 値) を掛ける）。クライアントの視野の抑えも、この UUID で見分ける。 */
+    /** 合計に (1 + 値) を掛ける。クライアントの視野の抑えも、この UUID で見分ける。 */
     public static final UUID SPRINT_MODIFIER = UUID.fromString("5d3c2b1a-7e6f-4a8b-9c0d-1e2f3a4b5c6d");
     private static final SpeedModifier SPRINT_SPEED = new SpeedModifier(SPRINT_MODIFIER, "weakspot sprint boost");
 
-    /** プレイヤーごとの、最後にはしご・エリトラ・走りだった tick と、種類ごとの最後のヒット。 */
     private static final class State {
         long ladderTick = Long.MIN_VALUE / 2;
         long elytraTick = Long.MIN_VALUE / 2;
         long sprintTick = Long.MIN_VALUE / 2;
         long swimTick = Long.MIN_VALUE / 2;
         long fallTick = Long.MIN_VALUE / 2;
-        /** この落下で、死ぬ見込みのときに落下の弱点に当てたか（進捗「九死に一生」）。 */
+        /** 死ぬ見込みのときに落下の弱点に当てたか（進捗「九死に一生」）。 */
         boolean closeCall;
-        /** 死ぬ見込みのあと着地した tick（そのあと生きていたら進捗を与える。負ならなし）。 */
+        /** 負ならなし。 */
         long landedTick = -1;
         final Map<HitKind, HitBudget> budgets = new HashMap<>();
-        /** 走りの加速の残り tick（0 以下なら、かけていない）。 */
+        /** 0 以下なら、かけていない。 */
         int sprintRemaining;
     }
 
@@ -95,7 +91,7 @@ public final class MoveHits {
         if (state.closeCall && (player.isInWater() || player.isRiding() || player.isElytraFlying())) {
             state.closeCall = false;
         } else if (state.closeCall && player.onGround) {
-            // 着地した。すぐには与えず、しばらく生きていたら九死に一生（同じ tick の死亡の扱いの差を避ける）
+            // すぐには与えず、しばらく生きていたら九死に一生（同じ tick の死亡の扱いの差を避ける）
             state.closeCall = false;
             state.landedTick = now;
         }
@@ -110,20 +106,15 @@ public final class MoveHits {
         }
     }
 
-    /** 着地のあと、九死に一生を与えるまで生きているのを確かめる tick。 */
     private static final int CLOSE_CALL_CONFIRM_TICKS = 10;
 
-    /**
-     * 落ちているか（落下の弱点を受け付ける条件）。下がっている最中か、落下距離が 0 でない（当てて負の「貯め」に
-     * なっているときも含む）。サーバーの位置はクライアントより遅れるので、直前 RECENT_TICKS のどこかでそうなら受け付ける。
-     */
+    /** 当てて負の「貯め」になっているときも含む。 */
     private static boolean falling(EntityPlayer player) {
         return !player.onGround && (player.fallDistance != 0 || player.posY < player.lastTickPosY)
                 && !player.isElytraFlying() && !player.isInWater() && !player.isInLava() && !player.isRiding()
                 && !player.isOnLadder() && !player.capabilities.isFlying;
     }
 
-    /** 死んだら、九死に一生の確かめをやめる。 */
     @SubscribeEvent
     public static void onDeath(LivingDeathEvent event) {
         State state = STATES.get(event.getEntityLiving().getUniqueID());
@@ -133,7 +124,7 @@ public final class MoveHits {
         }
     }
 
-    /** クライアントからのヒット通知（サーバースレッド）。kind は LADDER / ELYTRA / SPRINT / SWIM / FALL。 */
+    /** サーバースレッドで呼ぶ。 */
     public static void onHit(EntityPlayerMP player, HitKind kind, int streak) {
         if (!HitGate.allowed(player, kind)) {
             return;
@@ -158,8 +149,8 @@ public final class MoveHits {
             if (FallDamage.landingOutlook(player) == FallMath.Outlook.LETHAL) {
                 state.closeCall = true;
             }
-            // 落ちた距離を減らす（着地のダメージは、サーバーがこの値から決める）。落ち始めに当てた分は
-            // 負の「貯め」として着地まで残す（0 で止めると、早く当てた分が無駄になり、クライアントの見込みともずれる）
+            // 着地のダメージは、サーバーがこの値から決める。落ち始めに当てた分は負の「貯め」として着地まで残す
+            // （0 で止めると、早く当てた分が無駄になり、クライアントの見込みともずれる）
             player.fallDistance = (float) Math.max(FallDamage.MIN_FALL, player.fallDistance
                     - WeakSpotConfig.server.fall.fallReduceBlocks * ComboFactor.factor(combo));
         }
@@ -180,7 +171,6 @@ public final class MoveHits {
         }
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forget(EntityPlayer player, HitGate.Leave leave) {
         if (leave == HitGate.Leave.LOGOUT) {
             STATES.remove(player.getUniqueID());

@@ -7,10 +7,7 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
-/**
- * 弓の弱点のヒット通知の検証と効果（論理サーバー）。弓を引いている最中に受け付け、引き切る前は弓の引きを
- * bowHitTicks 進め、引き切ったあとは過剰チャージ（矢のダメージ +10%、上限 5 回）を 1 増やす（BowDraw）。照準の角度は確かめない（クライアントを信用する。釣りと同じ程度の確認）。
- */
+/** 照準の角度は確かめない（クライアントを信用する。釣りと同じ程度の確認）。 */
 public final class BowHits {
 
     private BowHits() {
@@ -23,7 +20,6 @@ public final class BowHits {
         if (!BowDraw.isDrawing(player)) {
             return;
         }
-        // 引き切ったあとは、過剰チャージ（上限まで）
         boolean full = BowMath.isFull(BowDraw.usedTicks(player));
         if ((full && !BowMath.canOvercharge(BowDraw.overcharge(player))) || !HitGate.ready(player, HitKind.BOW)) {
             return;
@@ -34,7 +30,7 @@ public final class BowHits {
             BowDraw.add(player, WeakSpotConfig.server.bow.bowHitTicks);
         }
         int combo = HitGate.accept(player, HitKind.BOW, new BlockPos(player), streak);
-        // 乗り物に乗っていれば、加速も続ける（騎射）
+        // 乗っていれば、加速も続ける（騎射）
         VehicleHits.boostFromRider(player, combo);
     }
 

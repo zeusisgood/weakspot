@@ -19,13 +19,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 乗り物の弱点のヒット通知の検証と効果（論理サーバー）。倍率は TimedBoostMath（コンボの上乗せあり、上限は
- * 初期値で無し）、続く時間は vehicleBoostDurationTicks（ヒットのたびに戻す）。
- * 馬系・豚は移動速度に一時的な修正（保存しない）をかけ、乗っている人のクライアントにも届いて効く。
- * トロッコは、ワールドの tick の最後に onUpdate を余分に呼ぶ（レールに沿って進むので、カーブでも脱線しない）。
- * ボートは乗っている人のクライアントが動きを決めるので、クライアント（ClientVehicleBoost）が速さを足す。
- * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（boostFromRider）。
- */
+* 馬系・豚は移動速度に一時的な修正（保存しない）をかけ、乗っている人のクライアントにも届いて効く。
+* トロッコは、ワールドの tick の最後に onUpdate を余分に呼ぶ（レールに沿って進むので、カーブでも脱線しない）。
+* ボートは乗っている人のクライアントが動きを決めるので、クライアント（VehicleSpot）が速さを足す。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VehicleHits {
 
@@ -55,7 +52,7 @@ public final class VehicleHits {
         boost(vehicle, combo);
     }
 
-    /** 弓・食事の弱点のヒットを受け付けたときに呼ぶ。対象の乗り物に乗っていれば、加速を続ける（騎射）。 */
+    /** 対象の乗り物に乗っていれば、加速を続ける（騎射）。 */
     public static void boostFromRider(EntityPlayerMP player, int combo) {
         if (canBoost(player)) {
             boost(player.getRidingEntity(), combo);
@@ -77,7 +74,6 @@ public final class VehicleHits {
         }
     }
 
-    /** ワールドの tick の最後に、残り時間を減らし、トロッコを余分に進め、切れたら修正を外す。 */
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.world.isRemote || BOOSTS.isEmpty()) {
@@ -108,7 +104,6 @@ public final class VehicleHits {
         }
     }
 
-    /** サーバーが止まったら捨てる。 */
     public static void clear() {
         BOOSTS.clear();
     }

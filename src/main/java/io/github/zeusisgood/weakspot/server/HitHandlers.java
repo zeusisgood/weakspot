@@ -6,13 +6,10 @@ import java.util.Map;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
-/**
- * ヒット通知（HitMessage）の種類ごとの処理の表。種類を足すときは、ここに 1 行足す。
- * 登録のない種類は無視する。どれもサーバースレッドで呼ぶ。
- */
+/** 種類を足すときは、ここに 1 行足す。登録のない種類は無視する。どれもサーバースレッドで呼ぶ。 */
 public final class HitHandlers {
 
-    /** 1 つの種類の処理。pos はブロックの種類（採掘・成長・機械・収穫）、entityId は動物・乗り物で使う。 */
+    /** pos はブロックの種類、entityId は動物・乗り物で使う。 */
     public interface Handler {
         void onHit(EntityPlayerMP player, HitKind kind, BlockPos pos, int entityId, int streak);
     }
@@ -46,7 +43,7 @@ public final class HitHandlers {
     private HitHandlers() {
     }
 
-    /** その種類に処理が登録されているか（単体テスト用）。 */
+    /** 単体テスト用。 */
     public static boolean has(HitKind kind) {
         return HANDLERS.containsKey(kind);
     }

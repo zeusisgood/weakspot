@@ -20,17 +20,15 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.world.BlockEvent;
 
 /**
- * 収穫の弱点の効果（論理サーバー。検証は成長と同じ RightClickHits）。実った作物を収穫して植え直す。
- * 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物は、ほかの Mod も変えられるように
- * HarvestDropsEvent を通す。植え直しには収穫物の「種」（ピックしたときの物。getPickBlock）を 1 つ使い、なければ使わずに植え直す
- * （不運で畑に穴が空かないように）。種と別の収穫物は、コンボの掛け数だけ増やす（harvestComboBonus）。
- */
+* 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物は、ほかの Mod も変えられるように HarvestDropsEvent を通す。
+* 植え直しには収穫物の「種」（getPickBlock）を 1 つ使い、なければ使わずに植え直す（不運で畑に穴が空かないように）。
+*/
 final class HarvestHits {
 
     private HarvestHits() {
     }
 
-    /** 収穫して植え直す。できなければ false（ヒットにも数えない）。 */
+    /** できなければ false（ヒットにも数えない）。 */
     static boolean harvest(EntityPlayerMP player, World world, BlockPos pos, int combo) {
         IBlockState state = world.getBlockState(pos);
         IBlockState replanted = replanted(state);
@@ -49,7 +47,6 @@ final class HarvestHits {
         List<ItemStack> result = new ArrayList<>();
         boolean seedUsed = false;
         double factor = WeakSpotConfig.server.harvest.harvestComboBonus ? ComboFactor.factor(combo) : 1;
-        // 種と別の収穫物がないとき（ニンジンなど）は、種そのものが収穫物なので、植え直しに使った残りを増やす
         boolean seedIsCrop = !seed.isEmpty() && !containsOther(drops, seed);
         for (ItemStack drop : drops) {
             if (drop.isEmpty() || world.rand.nextFloat() > chance) {
@@ -76,10 +73,7 @@ final class HarvestHits {
         return true;
     }
 
-    /**
-     * 収穫物の中に、種と別の物（小麦の種に対する小麦など）があるか。なければ、種そのものが収穫物
-     * （ニンジン・ジャガイモ・ネザーウォート・カカオ豆）なので、植え直しに使った残りを増やす。
-     */
+    /** なければ、種そのものが収穫物（ニンジン・ジャガイモ・ネザーウォート・カカオ豆）。 */
     private static boolean containsOther(List<ItemStack> drops, ItemStack seed) {
         for (ItemStack drop : drops) {
             if (!drop.isEmpty() && !ItemStack.areItemsEqual(drop, seed)) {
@@ -89,7 +83,7 @@ final class HarvestHits {
         return false;
     }
 
-    /** 植え直した（年齢 0 の）状態。対象でなければ null。カカオ豆は向きを保つ。 */
+    /** 対象でなければ null。カカオ豆は向きを保つ。 */
     private static IBlockState replanted(IBlockState state) {
         Block block = state.getBlock();
         if (block instanceof BlockCrops) {

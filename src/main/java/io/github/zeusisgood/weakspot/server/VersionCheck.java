@@ -20,17 +20,15 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * サーバーとクライアントの Mod の版が違うときに、本人・OP 権限を持つほかのプレイヤー・サーバーのログに知らせる。
- * クライアントの版は、接続のときに Forge が受け取った Mod の一覧（NetworkDispatcher#getModList）から読む（通信は増やさない）。
- * ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。文は翻訳キーで送り、プレイヤーの言語で表示する
- * （接続できるクライアントは必ずキーを持っている）。
- */
+* クライアントの版は、接続のときに Forge が受け取った Mod の一覧から読む（通信は増やさない）。
+* ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VersionCheck {
 
     static final int DELAY_TICKS = 40;
 
-    /** 知らせを待っているプレイヤーと、残りの tick。 */
+    /** 残りの tick。 */
     private static final Map<UUID, Integer> PENDING = new HashMap<>();
 
     private VersionCheck() {
@@ -43,7 +41,6 @@ public final class VersionCheck {
         }
     }
 
-    /** ログアウトの後片付け（HitGate から呼ぶ）。 */
     static void forgetOnLogout(EntityPlayer player) {
         PENDING.remove(player.getUniqueID());
     }

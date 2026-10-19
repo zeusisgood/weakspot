@@ -18,23 +18,20 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
-/**
- * 動物の弱点（子どもの成長、繁殖の待ち時間、羊毛、卵、村人の取引上限）の、状態の問い合わせへの返事と、
- * ヒット通知の検証と効果（論理サーバー）。動物のタイマーはサーバーだけが持つので、弱点が出る条件もここで決める。
- */
+/** 動物のタイマーはサーバーだけが持つので、弱点が出る条件もここで決める。 */
 public final class AnimalHits {
 
-    /** バニラが動物への右クリックを受け付ける距離（NetHandlerPlayServer#processUseEntity。見えていれば 6 ブロック）。 */
+    /** NetHandlerPlayServer#processUseEntity。見えていれば 6 ブロック。 */
     private static final double REACH_SQ = 36.0;
 
-    /** 羊ごと・村人ごとのヒット数（メモリだけ。動物がいなくなれば消える）。 */
+    /** メモリだけ（動物がいなくなれば消える）。 */
     private static final Map<Entity, AnimalTimers.HitCounter> WOOL_HITS = new WeakHashMap<>();
     private static final Map<Entity, AnimalTimers.HitCounter> TRADE_HITS = new WeakHashMap<>();
 
     private AnimalHits() {
     }
 
-    /** 動いているタイマーの一覧（mask は Timer#bit の合計）と、それぞれの進み具合。 */
+    /** mask は Timer#bit の合計。 */
     public static final class State {
         public final int mask;
         public final float[] progress = new float[Timer.values().length];
@@ -44,12 +41,12 @@ public final class AnimalHits {
         }
     }
 
-    /** 弱点が出る条件（加速できるタイマーが動いている）を満たすか。 */
+    /** 加速できるタイマーが動いている。 */
     public static boolean hasActiveTimer(Entity entity, SyncedSettings settings) {
         return state(entity, settings).mask != 0;
     }
 
-    /** この動物で動いているタイマーと、進み具合。設定で無効なものは含めない。 */
+    /** 設定で無効なものは含めない。 */
     public static State state(Entity entity, SyncedSettings settings) {
         int mask = 0;
         float[] progress = new float[Timer.values().length];
@@ -97,7 +94,7 @@ public final class AnimalHits {
         return map.computeIfAbsent(entity, e -> new AnimalTimers.HitCounter());
     }
 
-    /** クライアントからの状態の問い合わせ（サーバースレッドで実行される）。動物が見つからなければ、タイマーなしを返す。 */
+    /** サーバースレッドで呼ぶ。動物が見つからなければ、タイマーなしを返す。 */
     public static void onQuery(EntityPlayerMP player, int entityId) {
         Entity entity = player.world.getEntityByID(entityId);
         State state = new State(0);
@@ -111,7 +108,7 @@ public final class AnimalHits {
         WeakSpotMod.network.sendTo(StateMessage.animal(entityId, state.mask, state.progress), player);
     }
 
-    /** クライアントからのヒット通知（サーバースレッドで実行される）。 */
+    /** サーバースレッドで呼ぶ。 */
     public static void onHit(EntityPlayerMP player, int entityId, int streak) {
         if (!HitGate.allowed(player, HitKind.ANIMAL)) {
             return;
@@ -132,7 +129,7 @@ public final class AnimalHits {
         HitGate.accept(player, HitKind.ANIMAL, new BlockPos(entity), streak);
     }
 
-    /** 動いているタイマーを、すべて同時に進める。 */
+    /** すべて同時に進める。 */
     private static void apply(Entity entity, int mask, SyncedSettings settings) {
         if ((mask & Timer.BABY.bit()) != 0) {
             EntityAgeable animal = (EntityAgeable) entity;
@@ -140,7 +137,7 @@ public final class AnimalHits {
             int next = AnimalTimers.babyAfterHit(age, AnimalTimers.ticksPerHit(AnimalTimers.BABY_TICKS,
                     settings.animalBabyHits));
             if (next == 0) {
-                // 大人になる。バニラの ageUp で、大人になったときの処理（onGrowingAdult）も呼ぶ
+                // バニラの ageUp で、大人になったときの処理（onGrowingAdult）も呼ぶ
                 animal.ageUp(-age / 20 + 1, false);
             } else {
                 animal.setGrowingAge(next);

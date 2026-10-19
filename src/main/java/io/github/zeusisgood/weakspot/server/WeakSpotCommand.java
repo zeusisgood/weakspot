@@ -19,19 +19,16 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 /**
- * 管理コマンド /weakspot（OP 以上）。オンラインのプレイヤーの統計を表示する・統計を消す・設定を読み直す。
- * /weakspot topだけは、だれでも使える（サーバー内の上位 10 人。オフラインの人も。Leaderboard）。
- * 表示は翻訳キーで出す（クライアントにも Mod が入っている前提で、クライアントが翻訳する）。
- * 「統計を消す」は統計画面の「統計をリセット」と同じ処理（ServerStats.resetTotal。今回と累計の両方）。
- */
+* 管理コマンド /weakspot（OP 以上。top だけはだれでも使える）。表示は翻訳キーで出す（クライアントにも Mod が入っている前提）。
+* 「統計を消す」は統計画面の「統計をリセット」と同じ処理（今回と累計の両方）。
+*/
 public final class WeakSpotCommand extends CommandBase {
 
     /** プレイヤーを指定するサブコマンド。 */
     private static final List<String> SUBCOMMANDS = java.util.Arrays.asList("stats", "reset");
     private static final List<String> ALL_SUBCOMMANDS = java.util.Arrays.asList("stats", "reset", "reload", "top");
-    /** 管理のサブコマンドに要る権限のレベル（OP）。 */
+    /** OP。 */
     private static final int ADMIN_LEVEL = 2;
-    /** /weakspot top で出す人数。 */
     private static final int TOP_SHOWN = 10;
 
     @Override
@@ -90,7 +87,7 @@ public final class WeakSpotCommand extends CommandBase {
         }
     }
 
-    /** /weakspot top [mining|combo|target|total]: その項目の上位 10 人。自分が 10 位より下なら、最後に自分の順位。 */
+    /** 自分が 10 位より下なら、最後に自分の順位。 */
     private static void showTop(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
         Leaderboard.Category category = args.length >= 2 ? Leaderboard.Category.byKey(args[1])
                 : Leaderboard.Category.MINING;
@@ -120,7 +117,7 @@ public final class WeakSpotCommand extends CommandBase {
         }
     }
 
-    /** weakspot.cfg を読み直し、全員に設定を送り直す（設定画面で変えたときと同じ）。 */
+    /** 設定画面で変えたときと同じく、全員に設定を送り直す。 */
     private static void reload(ICommandSender sender) throws CommandException {
         if (!WeakSpotConfig.reloadFromFile()) {
             throw new CommandException("weakspot.command.reload.failed");
@@ -136,7 +133,6 @@ public final class WeakSpotCommand extends CommandBase {
         line(sender, "weakspot.command.stats.total", ServerStats.total(player));
     }
 
-    /** 統計画面と同じ項目を1行にまとめる。 */
     private static void line(ICommandSender sender, String key, MiningStats stats) {
         double average = stats.averageHitsPerBlock();
         sender.sendMessage(new TextComponentTranslation(key,

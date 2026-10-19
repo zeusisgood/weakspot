@@ -18,22 +18,18 @@ import net.minecraft.tileentity.TileEntityMobSpawner;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-/**
- * 機械の進み具合のバーの問い合わせに答える。かまど・醸造台は IInventory#getField、スポナーは非公開の
- * spawnDelay（読めなければスポナーだけ答えない）。値の計算は MachineProgress。
- */
+/** スポナーの spawnDelay は非公開で、読めなければスポナーだけ答えない。 */
 public final class MachineStates {
 
-    /** MobSpawnerBaseLogic#spawnDelay。 */
     private static final Field SPAWN_DELAY = Reflect.field(MobSpawnerBaseLogic.class, "spawner progress bar",
             "spawnDelay", "field_98286_b");
-    /** ディメンションごと・位置ごとの、スポナーの待ち時間の始まりの値。 */
+    /** ディメンションごと・位置ごと。 */
     private static final Map<Integer, Map<BlockPos, MachineProgress.SpawnerDelay>> SPAWNERS = new HashMap<>();
 
     private MachineStates() {
     }
 
-    /** バーを出す機械か（両側。クライアントは問い合わせるかどうかに使う）。 */
+    /** 両側（クライアントは問い合わせるかどうかに使う）。 */
     public static boolean hasBar(TileEntity te) {
         return te instanceof TileEntityFurnace || te instanceof TileEntityBrewingStand
                 || te instanceof TileEntityMobSpawner;
@@ -73,13 +69,12 @@ public final class MachineStates {
         WeakSpotMod.network.sendTo(StateMessage.machine(pos, progress, fuel), player);
     }
 
-    /** バニラが右クリックを受け付ける距離と同じ（RightClickHits と同じ）。 */
+    /** バニラが右クリックを受け付ける距離と同じ。 */
     private static boolean withinReach(EntityPlayerMP player, BlockPos pos) {
         double reach = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
         return player.getDistanceSq(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < reach * reach;
     }
 
-    /** サーバーが止まったら捨てる。 */
     public static void clear() {
         SPAWNERS.clear();
     }

@@ -24,26 +24,26 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
- * 機械の加速（Random Things の Time in a Bottle と同じ方式）。ヒットした機械の位置と残り時間をメモリにだけ記録し
- * （エンティティは使わず、セーブデータにも残さない）、そのワールドの tick の最後に update() を余分に呼ぶ。
- *
- * 機械 Mod の多くは update() が1tickに1回だけ呼ばれる前提で作られているので、余分に呼ぶと不具合や例外の原因になりうる。
- * 例外はあえて捕まえない（クラッシュレポートで機械を特定し、excludedBlocks に足してもらう）。
- */
+* Random Things の Time in a Bottle と同じ方式。ヒットした機械の位置と残り時間をメモリにだけ記録し
+* （エンティティは使わず、セーブデータにも残さない）、そのワールドの tick の最後に update() を余分に呼ぶ。
+*
+* 機械 Mod の多くは update() が 1 tick に 1 回だけ呼ばれる前提で作られているので、余分に呼ぶと不具合や例外の原因になりうる。
+* 例外はあえて捕まえない（クラッシュレポートで機械を特定し、excludedBlocks に足してもらう）。
+*/
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MachineAccelerator {
 
-    /** ディメンションごとの、加速中の機械。 */
+    /** ディメンションごと。 */
     private static final Map<Integer, Map<BlockPos, MachineBoost>> BOOSTS = new HashMap<>();
-    /** 粒子を面から外側へ出す距離（ブロック）。 */
+    /** ブロック。 */
     private static final double PARTICLE_OUTSET = 0.05;
-    /** 粒子を送るプレイヤーの距離（ブロック。バニラの粒子と同じ）。 */
+    /** ブロック。バニラの粒子と同じ。 */
     private static final double PARTICLE_RANGE = 32;
 
     private MachineAccelerator() {
     }
 
-    /** サーバーが機械ヒットを受け付けたときに呼ぶ。combo はこのヒットを数えたあとの、そのプレイヤーの連続ヒット数。 */
+    /** combo はこのヒットを数えたあとの数。 */
     static void hit(World world, BlockPos pos, int combo) {
         double multiplier = MachineComboBoost.multiplier(WeakSpotConfig.server.machine.machineBoostMultiplier,
                 WeakSpotConfig.server.machine.machineBoostMaxMultiplier, combo);
@@ -52,7 +52,7 @@ public final class MachineAccelerator {
                 .hit(multiplier, WeakSpotConfig.server.machine.machineBoostDurationTicks);
     }
 
-    /** バニラのタイルエンティティの更新が終わった後（ワールドの tick の最後）に、余分に update() を呼ぶ。 */
+    /** バニラのタイルエンティティの更新が終わった後に呼ぶ。 */
     @SubscribeEvent
     public static void onWorldTick(TickEvent.WorldTickEvent event) {
         if (event.phase != TickEvent.Phase.END || event.world.isRemote) {
@@ -88,10 +88,7 @@ public final class MachineAccelerator {
         }
     }
 
-    /**
-     * 加速中の機械のまわりに、速さに合わせた色の粉の粒子を出す。数を 0 にすると、オフセットが色として届く
-     * （バニラの粉の粒子。近くのプレイヤー全員に見える）。場所は、当たり判定の箱の底面以外の面のランダムな位置の少し外側。
-     */
+    /** 数を 0 にすると、オフセットが色として届く（バニラの粉の粒子。近くのプレイヤー全員に見える）。 */
     private static void spawnParticles(World world, BlockPos pos, int count, double multiplier) {
         if (!(world instanceof WorldServer)) {
             return;
@@ -107,7 +104,6 @@ public final class MachineAccelerator {
             double x = box.minX + rand.nextDouble() * (box.maxX - box.minX);
             double y = box.minY + rand.nextDouble() * (box.maxY - box.minY);
             double z = box.minZ + rand.nextDouble() * (box.maxZ - box.minZ);
-            // 底面以外の 5 つの面のどれかに寄せて、少し外側に出す
             switch (rand.nextInt(5)) {
                 case 0:
                     y = box.maxY + PARTICLE_OUTSET;
@@ -136,7 +132,7 @@ public final class MachineAccelerator {
         }
     }
 
-    /** サーバーが止まったら記録を捨てる（シングルプレイで別のワールドに入り直したときに持ち越さない）。 */
+    /** シングルプレイで別のワールドに入り直したときに持ち越さない。 */
     public static void clear() {
         BOOSTS.clear();
         ScheduledTicks.clear();

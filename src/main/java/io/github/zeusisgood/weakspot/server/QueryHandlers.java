@@ -7,9 +7,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * QueryMessage の種類ごとの処理の表（HitHandlers と同じ形。論理サーバー）。登録のない種類は無視する。
- * 状態を問い合わせる種類を足すときは、ここに足し、返事は StateMessage で送る（パケットは足さない）。
- */
+* HitHandlers と同じ形。登録のない種類は無視する。
+* 状態を問い合わせる種類を足すときは、ここに足し、返事は StateMessage で送る（パケットは足さない）。
+*/
 public final class QueryHandlers {
 
     interface Handler {
@@ -35,7 +35,7 @@ public final class QueryHandlers {
         }
     }
 
-    /** 登録のある種類（テスト用）。 */
+    /** テスト用。 */
     public static boolean handles(HitKind kind) {
         return HANDLERS.containsKey(kind);
     }
