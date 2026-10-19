@@ -7,7 +7,7 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.21.1 のビルドは `mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方は両方の版で同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
@@ -92,7 +92,7 @@
 
 ### 通信
 
-`network/`（`WeakSpotMod.preInit` で登録。番号は登録順）。
+`network/`（1.12.2 は `WeakSpotMod.preInit` で登録し、番号は登録順。1.21.1 は `Network.register` で、ID は `weakspot:<名前>`。中身の並びは両方の版で同じ）。
 
 | 番号 | メッセージ | 向き | 中身 |
 |---|---|---|---|
@@ -107,6 +107,7 @@
 | 11 | `OtherComboMessage` | S→C | 頭の上のコンボと、本人のコンボの直し |
 | 12 / 13 | `TargetMessage` / `TargetActionMessage` | S→C / C→S | 的当て |
 | 14 | `OtherTargetMessage` | S→C | 近くのプレイヤーの的当てのヒット数 |
+| -（1.21.1 版のみ） | `HelloMessage` | C→S | 接続直後に自分の Mod の版（NeoForge は相手の Mod の版を教えてくれないため。`PlayerText.clientSince`・`VersionCheck` が使う） |
 
 ## クライアントを信じる範囲
 
@@ -133,6 +134,23 @@
 - クリックのたびにブーストを捨てる（`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`。`LeftClickBlock` は、その場で壊れるかの判定より先に来る。例外: 掘る前のヒットと、待ちを 0 にするための当てたブロックは残す）。
 - サーバーは、クリックした座標と前の座標の今の状態を、その tick の終わりに本人にだけ `SPacketBlockChange` で送り直す（`ServerBoostTracker.queueResend`）。古いクライアントや、ほかの Mod で速さがずれたときも、同じ tick のうちに戻る。
 - 保留の破壊: バニラの `blockRemoving` は、進捗が 0.7 未満で掘り終わりが届くと破壊を保留にする（`receivedFinishDiggingPacket` / `delayedDestroyPos`）。**保留は 1 枠だけ**で、埋まっていると次の不足は捨てられて STOP の返事でブロックが戻る。保留中のブロックは「今の速さ × 経過 tick ≥ 1.0」で壊れる。違うブロックを掘り始めても、保留中のブロックには追加進捗を掛け続ける（`ServerBoostTracker.DELAYED`）。保留のあとに壊れたら、統計・耐久回復に数える。
+
+## 1.21.1 版
+
+共通の考え方（上の各節）は同じで、Minecraft・NeoForge の API で違う所だけを書く。
+
+- 入口: `WeakSpotMod`（`@Mod`。設定・通信・登録・サーバーのイベント）。物理クライアントでは `client.ClientProxy` を名前で作る（専用サーバーでクライアントのクラスを読まないため。1.12.2 の `@SidedProxy` と同じ考え）。アイテムと保存データの登録は `Registration`。
+- 非公開のメンバーは `accesstransformer.cfg`（1.12.2 の `Reflect` に当たる）。読めないときの代わりの動き（1.12.2 の「読めなければ弱点を出さない」）は要らないので、`EnchantHits`・`PortalHits` の `isAvailable` はいつも true。
+- 毎フレームのヒット判定と、ワールドへの描画: `RenderLevelStageEvent` の `AFTER_WEATHER`（モデルビューにカメラの向きが入っている最後の段）。頂点はカメラ（目）からの相対座標。HUD の弱点の投影に使う行列も、ここで `ScreenProjection.onFrame` に渡す。
+- HUD は `RenderGuiEvent.Post`、GUI の上は `ScreenEvent.Render.Post`。色だけの図形は `client/Draw`（1.21 には `GL_LINE_LOOP` がないので、線の輪は最初の点に戻して閉じる）。
+- 採掘: クライアントの `MultiPlayerGameMode` とサーバーの `ServerPlayerGameMode` の判定（積算／「破壊速度 × (経過tick+1) ≥ 0.7」・保留 1 枠）は 1.12.2 と同じなので、`BoostMath` をそのまま使う。NeoForge は `LeftClickBlock` を、クライアントでは押している間毎 tick（`CLIENT_HOLD`）、サーバーでは掘り終わり・中断でも送るので、ブーストを捨てるのは `START` だけ。サーバーが状態を送り直すのは `ClientboundBlockUpdatePacket`。
+- 機械: かまどなどの ticker はサーバーにしかないので、毎 tick 動くブロックの一覧はサーバーが作って `SyncedSettings.tickingBlocks` で送る（1.21.1 版だけの項目）。加速は ticker を余分に呼ぶ。レッドストーン部品の予約は、チャンクの `LevelChunkTicks` から探して早め、同じ位置・ブロックの予約を消してから入れ直す（予約は 1 つまでのため）。
+- 動物: アルマジロのウロコは、ニワトリの卵と同じ間隔（6000〜11999 tick）なので、卵の設定と `AnimalTimers.eggAfterHit` を使い、`Timer.SCUTE` で別のバーにする。村人の繁殖の案内は、1.14 以降の条件（空いているベッド・食べ物の点数）で `VillagerBreeding.reasonsWithBeds`。取引の段階の解放は、職業レベルを 1 つ上げる。
+- ネザーゲート: 待ちは `Entity.portalProcess`（`PortalProcessor.portalTime`）。ネザーゲートだけ（エンドのゲートは待たない）。
+- 収穫: 1.21 には `HarvestDropsEvent` がないので、収穫物は `CommonHooks.handleBlockDrops`（`BlockDropsEvent`）を通す。壊すときの許可は `CommonHooks.fireBlockBreak`。
+- 保存データ: プレイヤーはデータアタッチメント `Registration.PLAYER_DATA`（死んでも残す。中身のキーは 1.12.2 の `PlayerPersisted.weakspot` と同じ）、順位はワールドの `SavedData`（`weakspot_leaderboard`）。
+- 設定: `ModConfigSpec` を、`ServerConfig`・`ClientConfig` のフィールドと注釈（`config/Config`）からリフレクションで組む（項目の名前・範囲・説明を 1.12.2 と 1 か所で揃えるため）。ファイルを保存すると NeoForge が読み直し（`ModConfigEvent.Reloading`）、サーバーの項目なら全員に送り直す。設定画面は `WeakSpotGuiFactory`（NeoForge の標準の画面はファイルのカテゴリの並びになるので、`SettingGroups` のまとめで自作）。
+- コマンド: サーバーの `/weakspot` は Brigadier。クライアントの `/weakspot bug`・`skipupdate` は `RegisterClientCommandsEvent`（クライアントに無いサブコマンドは、NeoForge がそのままサーバーへ送る）。
 
 ## 設定
 

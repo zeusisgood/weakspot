@@ -2,15 +2,22 @@
 
 [← README に戻る](../README.md)
 
-初回起動後に生成される `config/weakspot.cfg` で変更できます（サーバーの場合は、サーバーフォルダの `config/` に生成）。ゲーム内では、タイトル画面の「Mods」→「Weak Spot Mining」→「設定」、または統計画面（K キー）の「設定画面を開く」から変更できます。
+初回起動後に生成される設定ファイルで変更できます（サーバーの場合は、サーバーフォルダの `config/` に生成）。項目の名前・カテゴリ・初期値・範囲は両方の版で同じです。
+
+| 版 | ファイル |
+|---|---|
+| 1.12.2 | `config/weakspot.cfg`（サーバーとクライアントの項目を 1 つに） |
+| 1.21.1 | `config/weakspot-server.toml`（サーバーの項目）と `config/weakspot-client.toml`（クライアントの項目）。ワールドごとの `serverconfig/` には置きません |
+
+ゲーム内では、タイトル画面の「Mods」→「Weak Spot Mining」→「設定」、または統計画面（K キー）の「設定画面を開く」から変更できます。
 
 - **サーバー**の項目は、**サーバーの値が優先**されます。ログイン時にサーバーからクライアントへ送信され、接続中はその値が使われます（切断すると自分の値に戻ります）。
-  - 専用サーバーでは、`config/weakspot.cfg` を編集してから `/weakspot reload`（OP のみ）を実行するか、サーバーを再起動してください。
+  - 専用サーバーでは、設定ファイルを編集してから `/weakspot reload`（OP のみ）を実行するか、サーバーを再起動してください。1.21.1 版は、ファイルを保存すると自動で読み直し、接続中の全員に再送信します。
   - シングルプレイと LAN のホストは、Mods メニューで変更できます（変更すると、接続中の全員に再送信されます）。
   - 専用サーバーや他人の LAN に接続中は、自分の Mods メニューで変更したサーバー項目は使われません（設定画面にもその旨が表示されます）。
 - 設定画面は、種類・用途のまとめ（下の見出しの順）で表示されます。サーバーの値が優先される項目は、説明の先頭に「マルチプレイ時、サーバー側設定が優先されます。」と表示されます。説明の最後の行は、ファイルのキーです。
-- ファイルの中は 2 段のカテゴリです（上の段が `server`／`client`、その下が種類・用途）。下の表の「ファイルのキー」が `server.` で始まる項目がサーバー、`client.` で始まる項目がクライアントです。ファイルでは `server { mining { D:boostMultiplier=4.0 } }` の形です。エディタの検索（vi なら `/boostMultiplier`）で探せます。
-- `general.configVersion`（設定ファイルの移行の目印）と `client.updates.lastSeenVersion`（最後に見た更新のお知らせの版）は、Mod が書き換える項目なので、設定画面には表示されません。
+- ファイルの中は 2 段のカテゴリです（上の段が `server`／`client`、その下が種類・用途）。下の表の「ファイルのキー」が `server.` で始まる項目がサーバー、`client.` で始まる項目がクライアントです。ファイルでは、1.12.2 版は `server { mining { D:boostMultiplier=4.0 } }`、1.21.1 版は `[server.mining]` の下の `boostMultiplier = 4.0` の形です。エディタの検索（vi なら `/boostMultiplier`）で探せます。
+- `general.configVersion`（設定ファイルの移行の目印。1.12.2 版のみ）と `client.updates.lastSeenVersion`（最後に見た更新のお知らせの版）は、Mod が書き換える項目なので、設定画面には表示されません。
   - カテゴリ分けの前（1.9.x まで）の `weakspot.cfg` は、初回起動時に自動で新しい形へ移行されます（書き換えていた値はそのまま）。スクリプトなどで `general` の項目を書き換えている場合は、キーの直しが必要です。
 - **クライアント**の項目は、各自の設定として保存されます（ヒット音、他プレイヤーのマークの表示、コンボ表示、弱点の移動演出、各種バー・ゲージ、自分の弱点の種類別のオン／オフ・色・形など）。接続中も自分の値が使われます。
 
@@ -24,7 +31,7 @@
 | ガイドの本を渡す | `server.general.giveGuideBook` | true | 初回ログインのプレイヤーにガイドの本を渡すか（1 人 1 回）。**サーバー専用** |
 | 更新のときに配る的の数 | `server.general.updateGiftTargets` | 1 | Mod を更新したとき、プレイヤーに配る弱点の的の数（版が変わるたびに 1 回。0 で配らない。`giveGuideBook` がオフなら配らない）。**サーバー専用** |
 | 更新のお知らせ | `client.updates.showUpdateNotes` | true | バージョン更新後、初めてワールドに入った時にチャットで更新のお知らせを表示するか |
-| 新しい版の通知 | `client.updates.checkForUpdates` | true | 新しいバージョンが公開されていたら、ワールドに入った時にチャットで通知するか（Forge の `versionCheck` が false の時は通知なし） |
+| 新しい版の通知 | `client.updates.checkForUpdates` | true | 新しいバージョンが公開されていたら、ワールドに入った時にチャットで通知するか（Forge・NeoForge の `versionCheck` が false の時は通知なし） |
 | 通知しない版 | `client.updates.skippedUpdateVersion` | （空） | チャットの [この版は通知しない] を押したバージョン。このバージョンの通知は表示しない。空にすると再び通知 |
 
 ## 音
@@ -150,12 +157,12 @@
 | 子どもの成長 | `server.animal.animalBabyEnabled` | true | 動物の弱点で、子供の成長を早めるか |
 | 繁殖の待ち時間 | `server.animal.animalBreedingEnabled` | true | 動物の弱点で、繁殖の待ち時間を短縮するか |
 | 羊毛の再生 | `server.animal.sheepWoolEnabled` | true | 羊の弱点で、羊毛の再生を早めるか |
-| ニワトリの卵 | `server.animal.chickenEggEnabled` | true | ニワトリの弱点で、次の産卵までの時間を短縮するか |
+| ニワトリの卵 | `server.animal.chickenEggEnabled` | true | ニワトリの弱点で、次の産卵までの時間を短縮するか（1.21.1 版では、アルマジロのウロコも） |
 | 村人の取引リセット | `server.animal.villagerTradeResetEnabled` | true | 村人の弱点で、ロックされた取引の上限をリセットするか |
 | 成長までのヒット数 | `server.animal.animalBabyHits` | 40 | 子供が大人になるまでの目安のヒット数（1 ヒット = 24000 tick ÷ この数）。0 以下で無効 |
 | 繁殖までのヒット数 | `server.animal.animalBreedingHits` | 10 | 繁殖の待ち時間が終わるまでの目安のヒット数（1 ヒット = 6000 tick ÷ この数）。0 以下で無効 |
 | 羊毛までのヒット数 | `server.animal.sheepWoolHits` | 10 | 毛を刈られた羊の毛が再生するまでのヒット数。0 以下で無効 |
-| 卵までのヒット数 | `server.animal.chickenEggHits` | 15 | 次の産卵までの目安のヒット数（1 ヒット = 平均 9000 tick ÷ この数）。0 以下で無効 |
+| 卵までのヒット数 | `server.animal.chickenEggHits` | 15 | 次の産卵までの目安のヒット数（1 ヒット = 平均 9000 tick ÷ この数。1.21.1 版のアルマジロのウロコも同じ）。0 以下で無効 |
 | リセットのヒット数 | `server.animal.villagerTradeResetHits` | 10 | 村人のロックされた取引の上限がリセットされるまでのヒット数。0 以下で無効 |
 | ヒットの最小間隔 | `server.animal.animalMinHitIntervalTicks` | 6 | 動物ヒットの最小受付間隔（tick） |
 | 対象外の生き物 | `server.animal.animalExcludedEntities` | （空） | 動物の弱点の対象外とするエンティティ ID（例: `minecraft:cow`） |
@@ -313,7 +320,7 @@
 | `/weakspot stats <プレイヤー>` | そのプレイヤーの統計（今回・累計）をチャットに表示 |
 | `/weakspot reset <プレイヤー>` | そのプレイヤーの統計（今回と累計）を消去（統計画面の「統計をリセット」と同じ。節目も再度受け取り可能になる） |
 | `/weakspot top [mining\|combo\|target\|total]` | サーバー内の上位 10 人を表示（mining: 採掘ヒット数、combo: 最大コンボ、target: 的当ての自己ベスト、total: 全種類のヒット数。省略時は mining。オフラインの人も含む）。**誰でも使用可能** |
-| `/weakspot reload` | `config/weakspot.cfg` を再読み込みし、接続中の全員に設定を再送信（再起動せずに設定を反映） |
+| `/weakspot reload` | 設定ファイルを再読み込みし、接続中の全員に設定を再送信（再起動せずに設定を反映） |
 | `/weakspot bug` | 不具合の報告方法を表示（**誰でも使用可能**。クライアント側のコマンドで、サーバーには送信しない） |
 
 ## ブーストの目安

@@ -626,7 +626,7 @@
   "weakspot.server.animal.sheepwoolenabled": "Wool regrowth",
   "weakspot.server.animal.sheepwoolenabled.tooltip": "In multiplayer, the server's setting takes priority.\\nSheep weak spots regrow wool faster (no grass needed)\\nFile: server.animal.sheepWoolEnabled",
   "weakspot.server.animal.chickeneggenabled": "Chicken eggs",
-  "weakspot.server.animal.chickeneggenabled.tooltip": "In multiplayer, the server's setting takes priority.\\nChicken weak spots shorten the time to the next egg\\nFile: server.animal.chickenEggEnabled",
+  "weakspot.server.animal.chickeneggenabled.tooltip": "In multiplayer, the server's setting takes priority.\\nChicken weak spots shorten the time to the next egg (on 1.21.1, armadillo scutes too)\\nFile: server.animal.chickenEggEnabled",
   "weakspot.server.animal.villagertraderesetenabled": "Villager trade reset",
   "weakspot.server.animal.villagertraderesetenabled.tooltip": "In multiplayer, the server's setting takes priority.\\nVillager weak spots reset the limits of locked trades\\nFile: server.animal.villagerTradeResetEnabled",
   "weakspot.server.animal.animalbabyhits": "Hits to grow up",

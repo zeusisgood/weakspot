@@ -348,7 +348,7 @@ public final class ServerConfig {
         @Config.Comment("[サーバー] 羊の弱点で、羊毛の再生を早めるか（草は要らない）")
         public boolean sheepWoolEnabled = true;
 
-        @Config.Comment("[サーバー] ニワトリの弱点で、次の卵までの時間を短くするか")
+        @Config.Comment("[サーバー] ニワトリの弱点で、次の卵までの時間を短くするか（アルマジロのウロコも）")
         public boolean chickenEggEnabled = true;
 
         @Config.Comment("[サーバー] 村人の弱点で、ロックされた取引の上限をリセットするか")
