@@ -236,8 +236,9 @@ final class WeakSpotRenderer {
     private static void drawFill(WeakSpot spot, MarkerShape shape, double u, double v, double radius,
                                  double cx, double cy, double cz, float[] rgb, float a) {
         double outer = radius * shape.radiusScale;
+        BufferBuilder buffer;
         if (shape.filled) {
-            BufferBuilder buffer = Draw.begin(Draw.TRIANGLE_FAN);
+            buffer = Draw.begin(Draw.TRIANGLE_FAN);
             vertex(buffer, spot.worldPoint(u, v, LIFT), cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
             for (int i = 0; i <= shape.sides; i++) {
                 double[] p = shapePoint(spot, shape, u, v, outer, i);
@@ -245,7 +246,7 @@ final class WeakSpotRenderer {
             }
         } else {
             double inner = outer * MarkerShape.RING_INNER_RATIO;
-            BufferBuilder buffer = Draw.begin(Draw.TRIANGLE_STRIP);
+            buffer = Draw.begin(Draw.TRIANGLE_STRIP);
             for (int i = 0; i <= shape.sides; i++) {
                 vertex(buffer, shapePoint(spot, shape, u, v, outer, i), cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
                 vertex(buffer, shapePoint(spot, shape, u, v, inner, i), cx, cy, cz, rgb[0], rgb[1], rgb[2], a);
