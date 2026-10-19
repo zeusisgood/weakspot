@@ -15,9 +15,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
-* 版が変わってから初めてワールドに入ったときに 1 回だけ出す（クライアントだけで判定する）。
-* 初めて入れた人（lastSeenVersion が空で、起動した時点で weakspot.cfg がなかった）には出さない。
-*/
+ * 版が変わってから初めてワールドに入ったときに 1 回だけ出す（クライアントだけで判定する）。
+ * 初めて入れた人（lastSeenVersion が空で、起動した時点で weakspot.cfg がなかった）には出さない。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class UpdateNotes {
 

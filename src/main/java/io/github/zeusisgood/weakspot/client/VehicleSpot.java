@@ -13,9 +13,9 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityBoat;
 
 /**
-* 加速はサーバーがかける（馬・豚・トロッコ）。ボートは動きをクライアントが決めるので、ここで速さを足す。
-* 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。
-*/
+ * 加速はサーバーがかける（馬・豚・トロッコ）。ボートは動きをクライアントが決めるので、ここで速さを足す。
+ * 弓・食事の弱点のヒットでも、乗っていれば加速を続ける（onRiderHit）。
+ */
 final class VehicleSpot extends AimSpotKind {
 
     /** 1 tick の水平の移動（ブロック）。 */

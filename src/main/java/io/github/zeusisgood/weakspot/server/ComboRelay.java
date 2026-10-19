@@ -17,12 +17,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 頭の上の「n HIT」。1 人あたり MIN_INTERVAL_TICKS に 1 回までに間引き、間引いた分は次に送れるときに送る。
-* 弱点を一時オフにしているプレイヤーの数は送らない。
-* <p>
-* 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。送る相手は 1.11.3 以降のクライアントだけ
-* （古いクライアントは、自分の ID を「ほかのプレイヤー」として描いてしまう）。
-*/
+ * 頭の上の「n HIT」。1 人あたり MIN_INTERVAL_TICKS に 1 回までに間引き、間引いた分は次に送れるときに送る。
+ * 弱点を一時オフにしているプレイヤーの数は送らない。
+ * <p>
+ * 本人にも送る（クライアントとサーバーのコンボを揃える。ComboSync）。送る相手は 1.11.3 以降のクライアントだけ
+ * （古いクライアントは、自分の ID を「ほかのプレイヤー」として描いてしまう）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ComboRelay {
 

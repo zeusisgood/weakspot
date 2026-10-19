@@ -8,9 +8,9 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
-* 接続中はサーバーから届いた値、それ以外は自分の weakspot.cfg の値。
-* [クライアント] の設定（音と見た目）は WeakSpotConfig をそのまま読む。
-*/
+ * 接続中はサーバーから届いた値、それ以外は自分の weakspot.cfg の値。
+ * [クライアント] の設定（音と見た目）は WeakSpotConfig をそのまま読む。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ClientSettings {
 

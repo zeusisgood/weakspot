@@ -26,9 +26,9 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
 
 /**
-* /weakspot bug を自分のクライアントで受け取る（サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。
-* 古いサーバーにも無い）。bug・skipupdate 以外は、打った文字をそのままサーバーへ送る。
-*/
+ * /weakspot bug を自分のクライアントで受け取る（サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。
+ * 古いサーバーにも無い）。bug・skipupdate 以外は、打った文字をそのままサーバーへ送る。
+ */
 final class BugCommand extends CommandBase {
 
     private static final String NEW_ISSUE_URL = "https://github.com/zeusisgood/weakspot/issues/new";

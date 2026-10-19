@@ -23,9 +23,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
-* どれも「プレイヤー」のカテゴリで鳴らすので、バニラの「プレイヤー」音量が掛かる。
-* 駆け上がりが鳴っている間は、自分の通常のヒット音を小さくする（埋もれないように）。
-*/
+ * どれも「プレイヤー」のカテゴリで鳴らすので、バニラの「プレイヤー」音量が掛かる。
+ * 駆け上がりが鳴っている間は、自分の通常のヒット音を小さくする（埋もれないように）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class HitSounds {
 

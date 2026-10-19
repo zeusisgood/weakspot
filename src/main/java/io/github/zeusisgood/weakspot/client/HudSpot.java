@@ -15,9 +15,9 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 
 /**
-* 向き（yaw / pitch）で持つ、照準のまわりの弱点。画面上に一定の大きさで出し、照準を合わせるだけで当たる。
-* 「上下だけ」のときは pitch だけを持ち、yaw はいつも今の視線に合わせる（進む向きがぶれない）。
-*/
+ * 向き（yaw / pitch）で持つ、照準のまわりの弱点。画面上に一定の大きさで出し、照準を合わせるだけで当たる。
+ * 「上下だけ」のときは pitch だけを持ち、yaw はいつも今の視線に合わせる（進む向きがぶれない）。
+ */
 final class HudSpot {
 
     /** ブロック。向きだけが意味を持つ。 */

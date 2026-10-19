@@ -9,9 +9,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 
 /**
-* 非公開の portalCounter はゲートの中で毎 tick 1 増え、出ると 4 ずつ減る。getMaxInPortalTime()（サバイバル 80）に達すると、
-* バニラが次の tick に移動する。
-*/
+ * 非公開の portalCounter はゲートの中で毎 tick 1 増え、出ると 4 ずつ減る。getMaxInPortalTime()（サバイバル 80）に達すると、
+ * バニラが次の tick に移動する。
+ */
 public final class PortalHits {
 
     /** 読めなければ、ゲートの弱点を出さない。 */

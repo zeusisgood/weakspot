@@ -14,9 +14,9 @@ import net.minecraft.entity.Entity;
 import org.lwjgl.opengl.GL11;
 
 /**
-* RenderWorldLastEvent の時点の OpenGL の行列とカメラの位置を capture で覚え、そのフレームの HUD の描画と当たり判定に使う
-* （HUD に画面上で一定の大きさの弱点を描くため）。
-*/
+ * RenderWorldLastEvent の時点の OpenGL の行列とカメラの位置を capture で覚え、そのフレームの HUD の描画と当たり判定に使う
+ * （HUD に画面上で一定の大きさの弱点を描くため）。
+ */
 final class ScreenProjection {
 
     private static final int SEGMENTS = 32;

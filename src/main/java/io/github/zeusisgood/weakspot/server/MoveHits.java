@@ -20,11 +20,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
-* 走りは、移動速度に一時的な修正（保存しない）をかける（自分のクライアントにも届いて効く）。
-* サーバーの位置はクライアントより遅れて届くので、登っている・飛んでいる・走っていることは、直前 RECENT_TICKS の
-* どこかでそうだったかで確かめる。
-*/
+ * はしご・エリトラ・泳ぎの速さは、プレイヤーの動きを決めるクライアントが足すので、サーバーは検証とコンボ・統計・ヒット音だけ。
+ * 走りは、移動速度に一時的な修正（保存しない）をかける（自分のクライアントにも届いて効く）。
+ * サーバーの位置はクライアントより遅れて届くので、登っている・飛んでいる・走っていることは、直前 RECENT_TICKS の
+ * どこかでそうだったかで確かめる。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MoveHits {
 

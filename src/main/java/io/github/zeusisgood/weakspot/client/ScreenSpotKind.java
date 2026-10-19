@@ -8,9 +8,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 
 /**
-* 画面（GUI）の上でカーソルで当てるマーカーの種類の土台。描く・当てる流れは ScreenSpots が回す。
-* 当て方は、重ねるだけ（睡眠）か、クリック（エンチャント。重ねるだけだと、候補を選ぶ途中で引き直してしまうため）。
-*/
+ * 画面（GUI）の上でカーソルで当てるマーカーの種類の土台。描く・当てる流れは ScreenSpots が回す。
+ * 当て方は、重ねるだけ（睡眠）か、クリック（エンチャント。重ねるだけだと、候補を選ぶ途中で引き直してしまうため）。
+ */
 abstract class ScreenSpotKind {
 
     /** GUI の座標。実際の半径は radius()。 */

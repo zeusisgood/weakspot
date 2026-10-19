@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
-* ファイル（weakspot.cfg）の中は server / client のカテゴリのままで、設定画面だけを種類・用途でまとめ直す。
-* 設定を足したら、ここにも入れる（入っていないと SettingGroupsTest が落ちる）。
-*/
+ * ファイル（weakspot.cfg）の中は server / client のカテゴリのままで、設定画面だけを種類・用途でまとめ直す。
+ * 設定を足したら、ここにも入れる（入っていないと SettingGroupsTest が落ちる）。
+ */
 public final class SettingGroups {
 
     /** Mod が書き換える項目。ファイルには残す。 */

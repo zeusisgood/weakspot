@@ -13,9 +13,9 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 
 /**
-* 1.12.2 の移動速度の値は水中の移動に効かないので、はしごと同じく、その tick の移動の (倍率 − 1) 倍をクライアントで足す
-* （上下も含む）。サーバーは検証だけ（MoveHits）。
-*/
+ * 1.12.2 の移動速度の値は水中の移動に効かないので、はしごと同じく、その tick の移動の (倍率 − 1) 倍をクライアントで足す
+ * （上下も含む）。サーバーは検証だけ（MoveHits）。
+ */
 final class SwimSpot extends AimSpotKind {
 
     /** ブロック。上下も含む。 */

@@ -25,10 +25,10 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 的当てのラウンド（サーバーが正）。ヒットはクライアントの知らせを、ラウンド中か・間隔で確かめて数える。
-* 的は使い捨て（始めた時点で 1 つ使う）なので、持ち替え・画面を開くではやめない。死亡・ディメンション移動・ログアウトでは
-* 記録なしでやめる。ラウンドのヒットは、いつものコンボ・統計・節目には入れない。
-*/
+ * 的当てのラウンド（サーバーが正）。ヒットはクライアントの知らせを、ラウンド中か・間隔で確かめて数える。
+ * 的は使い捨て（始めた時点で 1 つ使う）なので、持ち替え・画面を開くではやめない。死亡・ディメンション移動・ログアウトでは
+ * 記録なしでやめる。ラウンドのヒットは、いつものコンボ・統計・節目には入れない。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class TargetRounds {
 

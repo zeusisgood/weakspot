@@ -1,9 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
-* ヒットの間隔ごとに 1 回分戻り、BURST 回分まで貯められる。ラグでヒットの通知がまとめて届いても、BURST 回分までは落とさない。
-* 平均の速さの上限は「間隔ごとに 1 回」のまま。
-*/
+ * ヒットの間隔ごとに 1 回分戻り、BURST 回分まで貯められる。ラグでヒットの通知がまとめて届いても、BURST 回分までは落とさない。
+ * 平均の速さの上限は「間隔ごとに 1 回」のまま。
+ */
 public final class HitBudget {
 
     public static final int BURST = 4;

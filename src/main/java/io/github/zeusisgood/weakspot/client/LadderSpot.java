@@ -9,9 +9,9 @@ import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.MoverType;
 
 /**
-* 照準の真上か真下だけに出す（左右に向きを変えると、はしごから外れるため）。速さはクライアントで足す
-* （プレイヤーの動きはクライアントが決める）。サーバーは検証だけ（MoveHits）。
-*/
+ * 照準の真上か真下だけに出す（左右に向きを変えると、はしごから外れるため）。速さはクライアントで足す
+ * （プレイヤーの動きはクライアントが決める）。サーバーは検証だけ（MoveHits）。
+ */
 final class LadderSpot extends AimSpotKind {
 
     /** 1 tick の縦の移動（ブロック）。 */

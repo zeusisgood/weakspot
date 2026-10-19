@@ -21,9 +21,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
-* 累計はプレイヤーの永続データ（PlayerPersisted。死亡・ディメンション移動でも引き継がれる）に保存するので、
-* ワールドごと・プレイヤーごとになる。「今回」はログインからログアウトまでで、メモリにだけ持つ。
-*/
+ * 累計はプレイヤーの永続データ（PlayerPersisted。死亡・ディメンション移動でも引き継がれる）に保存するので、
+ * ワールドごと・プレイヤーごとになる。「今回」はログインからログアウトまでで、メモリにだけ持つ。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ServerStats {
 

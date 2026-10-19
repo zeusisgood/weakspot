@@ -20,9 +20,9 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.world.BlockEvent;
 
 /**
-* 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物は、ほかの Mod も変えられるように HarvestDropsEvent を通す。
-* 植え直しには収穫物の「種」（getPickBlock）を 1 つ使い、なければ使わずに植え直す（不運で畑に穴が空かないように）。
-*/
+ * 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物は、ほかの Mod も変えられるように HarvestDropsEvent を通す。
+ * 植え直しには収穫物の「種」（getPickBlock）を 1 つ使い、なければ使わずに植え直す（不運で畑に穴が空かないように）。
+ */
 final class HarvestHits {
 
     private HarvestHits() {

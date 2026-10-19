@@ -8,9 +8,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
-* サーバー → クライアント。ヒット音を鳴らすためだけに使う。pos は鳴らす位置、miss は的当ての ✕ に当てたとき。
-* ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
-*/
+ * サーバー → クライアント。ヒット音を鳴らすためだけに使う。pos は鳴らす位置、miss は的当ての ✕ に当てたとき。
+ * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
+ */
 public class OtherHitMessage implements IMessage {
 
     private BlockPos pos;

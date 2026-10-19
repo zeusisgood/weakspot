@@ -9,9 +9,9 @@ import java.util.Locale;
 import java.util.Random;
 
 /**
-* 自分のヒット音の鳴らし方。音量とほかの人の音は入れない。
-* マイプリセットは設定 client.sound.soundPresets に「番号=楽器,音階の種類,動き,音域,和音」で 1 行ずつ。
-*/
+ * 自分のヒット音の鳴らし方。音量とほかの人の音は入れない。
+ * マイプリセットは設定 client.sound.soundPresets に「番号=楽器,音階の種類,動き,音域,和音」で 1 行ずつ。
+ */
 public final class SoundPreset {
 
     public static final int MY_SLOTS = 3;

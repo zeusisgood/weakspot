@@ -22,12 +22,12 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
-* PlayerControllerMP は tick ごとに進捗を積むので、クライアントはヒットの次の tick から boostDurationTicks の間だけ、
-* 破壊速度に倍率を掛ける。サーバーは瞬間判定なので別の計算（ServerBoostTracker・BoostMath）。
-*
-* ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
-* クリックし直したブロックがクライアントだけでその場で壊れ、ゴーストブロックになる。
-*/
+ * PlayerControllerMP は tick ごとに進捗を積むので、クライアントはヒットの次の tick から boostDurationTicks の間だけ、
+ * 破壊速度に倍率を掛ける。サーバーは瞬間判定なので別の計算（ServerBoostTracker・BoostMath）。
+ *
+ * ブロックをクリックするたびにブーストを捨てる（サーバーもクリックのたびに数え直す）。クライアントだけ速いと、
+ * クリックし直したブロックがクライアントだけでその場で壊れ、ゴーストブロックになる。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class MiningBoost {
 

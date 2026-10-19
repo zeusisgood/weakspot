@@ -22,9 +22,9 @@ import net.minecraft.util.text.TextFormatting;
 import org.lwjgl.opengl.GL11;
 
 /**
-* 当てると、落ちた距離を減らす。ダメージはサーバーが着地のときに、サーバーの落ちた距離から決める（ここで減らすのは、
-* 見込みのダメージの表示のため）。見込みの計算は FallDamage（両側で同じ）。
-*/
+ * 当てると、落ちた距離を減らす。ダメージはサーバーが着地のときに、サーバーの落ちた距離から決める（ここで減らすのは、
+ * 見込みのダメージの表示のため）。見込みの計算は FallDamage（両側で同じ）。
+ */
 final class FallSpot extends AimSpotKind {
 
     private static final int STREAK_PARTICLES = 8;

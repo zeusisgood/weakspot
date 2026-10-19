@@ -15,10 +15,10 @@ import java.util.Set;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 /**
-* クライアントは接続中この値を使う（WeakSpotConfig のフィールドには書き込まない。書き込むと
-* ConfigManager.sync でサーバーの値がクライアントの weakspot.cfg に保存されてしまうため）。
-* 作った後は読むだけにする。項目を足すと通信内容が変わる（マイナーを上げる）。
-*/
+ * クライアントは接続中この値を使う（WeakSpotConfig のフィールドには書き込まない。書き込むと
+ * ConfigManager.sync でサーバーの値がクライアントの weakspot.cfg に保存されてしまうため）。
+ * 作った後は読むだけにする。項目を足すと通信内容が変わる（マイナーを上げる）。
+ */
 public final class SyncedSettings {
 
     /** ServerFeatures が使う。自分の設定の値なら、自分の版。 */

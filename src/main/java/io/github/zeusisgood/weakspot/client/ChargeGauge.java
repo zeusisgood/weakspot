@@ -5,9 +5,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScaledResolution;
 
 /**
-* 投げる物と近接の溜めのゲージ。1 本分を越えた分は、赤い目盛りを足す（弓の過剰チャージと同じ形）。
-* 「×n」の数字はゲージの下に出さない（照準の下の中央はコンボの表示と重なるため）。右に今の倍率を出す。
-*/
+ * 投げる物と近接の溜めのゲージ。1 本分を越えた分は、赤い目盛りを足す（弓の過剰チャージと同じ形）。
+ * 「×n」の数字はゲージの下に出さない（照準の下の中央はコンボの表示と重なるため）。右に今の倍率を出す。
+ */
 final class ChargeGauge {
 
     private static final int MAX_MARKS = 5;

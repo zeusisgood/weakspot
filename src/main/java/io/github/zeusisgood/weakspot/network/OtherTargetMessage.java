@@ -7,9 +7,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
-* サーバー → クライアント。ヒット数が負なら終わった。
-* ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
-*/
+ * サーバー → クライアント。ヒット数が負なら終わった。
+ * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
+ */
 public class OtherTargetMessage implements IMessage {
 
     private int entityId;

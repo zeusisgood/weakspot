@@ -37,7 +37,6 @@ public final class ItemTarget extends Item {
         ItemStack stack = player.getHeldItem(hand);
         if (!world.isRemote && player instanceof EntityPlayerMP && TargetRounds.start((EntityPlayerMP) player)
                 && !player.capabilities.isCreativeMode) {
-            // クリエイティブでは減らさない
             stack.shrink(1);
         }
         return new ActionResult<>(EnumActionResult.SUCCESS, stack);

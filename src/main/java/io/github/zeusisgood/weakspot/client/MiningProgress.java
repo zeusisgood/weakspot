@@ -7,9 +7,9 @@ import net.minecraft.client.multiplayer.PlayerControllerMP;
 import net.minecraft.util.math.BlockPos;
 
 /**
-* PlayerControllerMP の非公開の curBlockDamageMP と currentBlock を読む。見つからなければ耐久バーを出さない（ゲームは止めない）。
-* 進み具合は tick ごとに進むので、tick の START で前の値を覚え、フレームごとに補間する。
-*/
+ * PlayerControllerMP の非公開の curBlockDamageMP と currentBlock を読む。見つからなければ耐久バーを出さない（ゲームは止めない）。
+ * 進み具合は tick ごとに進むので、tick の START で前の値を覚え、フレームごとに補間する。
+ */
 final class MiningProgress {
 
     private static final Field DAMAGE = Reflect.field(PlayerControllerMP.class, "the block health bar",

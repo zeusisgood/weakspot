@@ -9,9 +9,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
-* 値は、名前が age の整数のプロパティなら年齢 ÷ 最大の年齢、苗木は stage。サトウキビ・サボテンは、弱点の効果がかかる
-* 柱の一番上の節の年齢 ÷ 15。どれにも当たらなければバーを出さない。
-*/
+ * 値は、名前が age の整数のプロパティなら年齢 ÷ 最大の年齢、苗木は stage。サトウキビ・サボテンは、弱点の効果がかかる
+ * 柱の一番上の節の年齢 ÷ 15。どれにも当たらなければバーを出さない。
+ */
 final class GrowthBar {
 
     static final double WIDTH = 0.6;

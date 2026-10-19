@@ -17,11 +17,11 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
-* 両側で、それぞれ自分の側のプレイヤーの「使用中のアイテムの残り時間」を減らす（サーバーは矢の威力、クライアントは見た目とゲージ）。
-* ヒットの時点では残り時間を直接変えず、次の tick で減らす（UseTimeCut）。同じ tick のうちに矢を放ったとき（サーバーはパケットを
-* エンティティの tick より先に処理する）は、ArrowLooseEvent の charge に足す。
-* 放つときは Stop イベントが ArrowLooseEvent より先に来るので、Stop では消さない（残った分は、次に引き始めたときに消す）。
-*/
+ * 両側で、それぞれ自分の側のプレイヤーの「使用中のアイテムの残り時間」を減らす（サーバーは矢の威力、クライアントは見た目とゲージ）。
+ * ヒットの時点では残り時間を直接変えず、次の tick で減らす（UseTimeCut）。同じ tick のうちに矢を放ったとき（サーバーはパケットを
+ * エンティティの tick より先に処理する）は、ArrowLooseEvent の charge に足す。
+ * 放つときは Stop イベントが ArrowLooseEvent より先に来るので、Stop では消さない（残った分は、次に引き始めたときに消す）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class BowDraw {
 

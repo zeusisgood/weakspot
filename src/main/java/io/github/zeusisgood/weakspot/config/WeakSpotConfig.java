@@ -24,9 +24,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import org.apache.logging.log4j.LogManager;
 
 /**
-* [サーバー] はサーバーの値が正で、ログイン時と変更時にクライアントへ送る（SyncedSettings）。
-* クライアントは接続中、自分の [サーバー] の値を使わない。項目の名前は、カテゴリを分ける前（general）と同じ。
-*/
+ * [サーバー] はサーバーの値が正で、ログイン時と変更時にクライアントへ送る（SyncedSettings）。
+ * クライアントは接続中、自分の [サーバー] の値を使わない。項目の名前は、カテゴリを分ける前（general）と同じ。
+ */
 @Config(modid = WeakSpotMod.MODID, category = "")
 public final class WeakSpotConfig {
 

@@ -34,9 +34,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.opengl.GL11;
 
 /**
-* 的当てのクライアント側。ヒット数はサーバーの数を出す。自分ではやめられない（持ち替え・画面を開いても続く）。
-* ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
-*/
+ * 的当てのクライアント側。ヒット数はサーバーの数を出す。自分ではやめられない（持ち替え・画面を開いても続く）。
+ * ラウンドの間は、ほかの種類の弱点を出さない（KindSwitches）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class TargetPlay {
 

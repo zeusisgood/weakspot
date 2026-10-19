@@ -22,9 +22,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
-* ワールドに保存し（data/weakspot_leaderboard.dat）、オフラインの人も名前と数で並べられるようにする。プレイヤーの累計（ServerStats）から、
-* ログイン・ログアウト・的当ての終わり・順位を見る直前に写す。
-*/
+ * ワールドに保存し（data/weakspot_leaderboard.dat）、オフラインの人も名前と数で並べられるようにする。プレイヤーの累計（ServerStats）から、
+ * ログイン・ログアウト・的当ての終わり・順位を見る直前に写す。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class Leaderboard extends WorldSavedData {
 

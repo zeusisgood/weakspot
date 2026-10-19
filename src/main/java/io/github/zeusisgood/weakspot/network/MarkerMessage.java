@@ -10,9 +10,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
-* クライアント → サーバー。位置はクライアントが決めた値のまま、サーバーは検証せずに近くの他のプレイヤーへ転送する
-* （見えるだけで、破壊やヒットには影響しない）。
-*/
+ * クライアント → サーバー。位置はクライアントが決めた値のまま、サーバーは検証せずに近くの他のプレイヤーへ転送する
+ * （見えるだけで、破壊やヒットには影響しない）。
+ */
 public class MarkerMessage implements IMessage {
 
     private MarkerData marker;

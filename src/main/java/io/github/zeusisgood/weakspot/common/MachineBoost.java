@@ -1,9 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
-* 1 つの機械の加速。毎 tick、update() を (倍率 − 1) 回余分に呼ぶ（端数は持ち越す）。
-* 複数のヒット（複数のプレイヤーを含む）が重なっても足さず、大きいほうだけを使う。
-*/
+ * 1 つの機械の加速。毎 tick、update() を (倍率 − 1) 回余分に呼ぶ（端数は持ち越す）。
+ * 複数のヒット（複数のプレイヤーを含む）が重なっても足さず、大きいほうだけを使う。
+ */
 public final class MachineBoost {
 
     private double multiplier = 1;

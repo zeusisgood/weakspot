@@ -19,9 +19,9 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import net.minecraftforge.fml.client.config.GuiConfig;
 
 /**
-* ファイルのカテゴリ（server / client）ではなく、種類・用途のまとめ（SettingGroups）で組む。項目そのもの（Property）は
-* ConfigManager の Configuration のものを使うので、値の保存と反映は Forge の画面と同じ流れ（OnConfigChangedEvent → WeakSpotConfig.Sync）。
-*/
+ * ファイルのカテゴリ（server / client）ではなく、種類・用途のまとめ（SettingGroups）で組む。項目そのもの（Property）は
+ * ConfigManager の Configuration のものを使うので、値の保存と反映は Forge の画面と同じ流れ（OnConfigChangedEvent → WeakSpotConfig.Sync）。
+ */
 public final class WeakSpotGuiFactory implements IModGuiFactory {
 
     @Override

@@ -18,9 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 毎 tick、マークから markerShareRange 以内にいる他のプレイヤー（見る人）の集合を計算し直す。
-* プレイヤーの追跡範囲（StartTracking）は描画距離に合わせたもので markerShareRange と合わないため、使わない。
-*/
+ * 毎 tick、マークから markerShareRange 以内にいる他のプレイヤー（見る人）の集合を計算し直す。
+ * プレイヤーの追跡範囲（StartTracking）は描画距離に合わせたもので markerShareRange と合わないため、使わない。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MarkerRelay {
 

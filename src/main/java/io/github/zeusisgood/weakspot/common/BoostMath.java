@@ -1,11 +1,11 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
-* 1.12.2 のサーバーは破壊進捗を積算せず、「現在の破壊速度 × (経過tick + 1)」で破壊完了を判定する
-* （PlayerInteractionManager#blockRemoving / updateBlockRemoving）。そのためサーバーでは
-* ヒットで得た追加進捗を「通常速度で何tick分か」として貯めておき、判定時の速度に
-* (経過tick + 1 + 追加tick) / (経過tick + 1) を掛けて、積算した場合と同じ結果にする。
-*/
+ * 1.12.2 のサーバーは破壊進捗を積算せず、「現在の破壊速度 × (経過tick + 1)」で破壊完了を判定する
+ * （PlayerInteractionManager#blockRemoving / updateBlockRemoving）。そのためサーバーでは
+ * ヒットで得た追加進捗を「通常速度で何tick分か」として貯めておき、判定時の速度に
+ * (経過tick + 1 + 追加tick) / (経過tick + 1) を掛けて、積算した場合と同じ結果にする。
+ */
 public final class BoostMath {
 
     /** クライアントとサーバーで同じ。 */

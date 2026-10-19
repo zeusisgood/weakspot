@@ -35,9 +35,9 @@ import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 /**
-* クライアントとサーバーで同じ条件を使う。しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木。
-* 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
-*/
+ * クライアントとサーバーで同じ条件を使う。しゃがんで両手が空なら機械、そうでなくメインハンドが空なら作物・苗木。
+ * 対象のブロックを条件どおりに右クリックしたときは、そのブロックの通常の右クリック動作（GUI など）を両側で止める。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class RightClickTargets {
 

@@ -25,10 +25,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 浮きの待ち時間のタイマーはサーバーだけが持ち、非公開なので Reflect で読み書きする。読めなければ釣りの弱点は出ない。
-* バニラの catchingFish は、待ち時間（ticksCaughtDelay）→ 魚が寄ってくる段階（ticksCatchableDelay）→ 食いついた段階
-* （ticksCatchable）の順に進む。待ち時間が始まったときの長さは、進み具合のバーのために、浮きごとに覚える（メモリだけ）。
-*/
+ * 浮きの待ち時間のタイマーはサーバーだけが持ち、非公開なので Reflect で読み書きする。読めなければ釣りの弱点は出ない。
+ * バニラの catchingFish は、待ち時間（ticksCaughtDelay）→ 魚が寄ってくる段階（ticksCatchableDelay）→ 食いついた段階
+ * （ticksCatchable）の順に進む。待ち時間が始まったときの長さは、進み具合のバーのために、浮きごとに覚える（メモリだけ）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class FishingHits {
 

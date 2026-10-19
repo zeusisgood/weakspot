@@ -19,10 +19,10 @@ import net.minecraft.init.SoundEvents;
 import net.minecraftforge.fml.client.config.GuiSlider;
 
 /**
-* プリセットのボタンは OptiFine のシェーダーのプロファイルと同じ形（左クリックで次、右クリックか Shift + 左クリックで前）。
-* プリセット名は今の設定から求め（どれにも一致しなければ「カスタム」）、選んだものは保存しない。
-* 値は weakspot.cfg にそのまま保存する（Forge の設定画面と同じ値になる）。
-*/
+ * プリセットのボタンは OptiFine のシェーダーのプロファイルと同じ形（左クリックで次、右クリックか Shift + 左クリックで前）。
+ * プリセット名は今の設定から求め（どれにも一致しなければ「カスタム」）、選んだものは保存しない。
+ * 値は weakspot.cfg にそのまま保存する（Forge の設定画面と同じ値になる）。
+ */
 final class SoundTab extends StatsScreenTab {
 
     private static final int BUTTON_MY_SOUND = 20;

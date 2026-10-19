@@ -8,7 +8,7 @@ import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.List;
 import net.minecraft.util.math.BlockPos;
 
-/** 物理サーバー用。on〜 はサーバー → クライアントのパケットから呼ばれる。 */
+/** 物理サーバー用。on〜 はサーバー → クライアントのパケットから呼ばれる。serverSince・isKindEnabled は物理サーバーでは呼ばれない。 */
 public class CommonProxy {
 
     public void init() {
@@ -51,12 +51,10 @@ public class CommonProxy {
         return false;
     }
 
-    /** 物理サーバーでは呼ばれない。 */
     public boolean serverSince(String version) {
         return true;
     }
 
-    /** 物理サーバーでは呼ばれない。 */
     public boolean isKindEnabled(HitKind kind) {
         return true;
     }

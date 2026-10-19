@@ -20,9 +20,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.apache.logging.log4j.LogManager;
 
 /**
-* クライアントの版は、接続のときに Forge が受け取った Mod の一覧から読む（通信は増やさない）。
-* ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。
-*/
+ * クライアントの版は、接続のときに Forge が受け取った Mod の一覧から読む（通信は増やさない）。
+ * ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VersionCheck {
 

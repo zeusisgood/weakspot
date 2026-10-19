@@ -5,10 +5,10 @@ import java.lang.reflect.Method;
 import org.apache.logging.log4j.LogManager;
 
 /**
-* 開発環境は MCP 名、実際の環境（reobf 後）は SRG 名なので、両方の名前を順に試す（Forge の ReflectionHelper.findField の
-* 3 引数の版は、起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない）。見つからなければ警告を 1 回出して
-* null を返し、呼ぶ側はその機能を止める（ゲームは止めない）。
-*/
+ * 開発環境は MCP 名、実際の環境（reobf 後）は SRG 名なので、両方の名前を順に試す（Forge の ReflectionHelper.findField の
+ * 3 引数の版は、起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない）。見つからなければ警告を 1 回出して
+ * null を返し、呼ぶ側はその機能を止める（ゲームは止めない）。
+ */
 public final class Reflect {
 
     private Reflect() {

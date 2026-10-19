@@ -18,9 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 /**
-* 渡したことは、統計と同じ永続データの guideGiven に記録する（死亡・ディメンション移動で消えない。古い版は、このキーを無視する）。
-* 弱点の的は本とは別に targetsGiven に記録するので、前の版から遊んでいる人にも 1 回届く。
-*/
+ * 渡したことは、統計と同じ永続データの guideGiven に記録する（死亡・ディメンション移動で消えない。古い版は、このキーを無視する）。
+ * 弱点の的は本とは別に targetsGiven に記録するので、前の版から遊んでいる人にも 1 回届く。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class GuideBookGiver {
 

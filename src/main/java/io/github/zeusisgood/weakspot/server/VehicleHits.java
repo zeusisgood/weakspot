@@ -19,10 +19,10 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 馬系・豚は移動速度に一時的な修正（保存しない）をかけ、乗っている人のクライアントにも届いて効く。
-* トロッコは、ワールドの tick の最後に onUpdate を余分に呼ぶ（レールに沿って進むので、カーブでも脱線しない）。
-* ボートは乗っている人のクライアントが動きを決めるので、クライアント（VehicleSpot）が速さを足す。
-*/
+ * 馬系・豚は移動速度に一時的な修正（保存しない）をかけ、乗っている人のクライアントにも届いて効く。
+ * トロッコは、ワールドの tick の最後に onUpdate を余分に呼ぶ（レールに沿って進むので、カーブでも脱線しない）。
+ * ボートは乗っている人のクライアントが動きを決めるので、クライアント（VehicleSpot）が速さを足す。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class VehicleHits {
 

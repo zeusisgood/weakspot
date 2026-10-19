@@ -9,9 +9,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 /**
-* 溜めは持ち替える（選んでいるスロットが変わる、メインハンドの物の種類が変わる）まで残る。
-* シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
-*/
+ * 溜めは持ち替える（選んでいるスロットが変わる、メインハンドの物の種類が変わる）まで残る。
+ * シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
+ */
 public final class HeldCharge {
 
     private static final class Charge {

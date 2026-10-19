@@ -23,10 +23,10 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
-* 釣りの弱点（自分だけ。他のプレイヤーには見せない）。左クリックは止めず、通常どおり掘る・攻撃する。
-* 弱点はワールドの 1 点（浮きからの水平の差。浮きが揺れても追従する）で、画面上で一定の大きさの円として描く
-* （浮きが遠くても近くても同じ大きさ）。待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、問い合わせる。
-*/
+ * 釣りの弱点（自分だけ。他のプレイヤーには見せない）。左クリックは止めず、通常どおり掘る・攻撃する。
+ * 弱点はワールドの 1 点（浮きからの水平の差。浮きが揺れても追従する）で、画面上で一定の大きさの円として描く
+ * （浮きが遠くても近くても同じ大きさ）。待ち時間のタイマーはサーバーだけが持つので、浮きが水にある間、問い合わせる。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 final class FishingSpot {
 

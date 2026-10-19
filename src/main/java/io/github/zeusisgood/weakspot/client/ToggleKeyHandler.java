@@ -16,9 +16,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import org.lwjgl.input.Keyboard;
 
 /**
-* 弱点の一時オフのキー（初期値 HOME。J は JourneyMap と重なるため）。状態は設定 weakSpotsEnabled に保存する。
-* オフの間に止める処理は ClientWeakSpotHandler.stopOwnWeakSpots と、それを呼ぶ側にある。
-*/
+ * 弱点の一時オフのキー（初期値 HOME。J は JourneyMap と重なるため）。状態は設定 weakSpotsEnabled に保存する。
+ * オフの間に止める処理は ClientWeakSpotHandler.stopOwnWeakSpots と、それを呼ぶ側にある。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ToggleKeyHandler {
 

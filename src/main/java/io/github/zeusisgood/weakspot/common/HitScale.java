@@ -1,9 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
-* ヒット音の音階（各自の設定 hitScaleType / hitScaleDirection / hitScaleOctaves）。
-* 度数 0 がピッチ 1.0 のド（負なら下のオクターブ。ピッチの下限 0.5 は -n）。DEFAULT は HitPitch と同じ鳴り方。
-*/
+ * ヒット音の音階（各自の設定 hitScaleType / hitScaleDirection / hitScaleOctaves）。
+ * 度数 0 がピッチ 1.0 のド（負なら下のオクターブ。ピッチの下限 0.5 は -n）。DEFAULT は HitPitch と同じ鳴り方。
+ */
 public final class HitScale {
 
     /** steps は 1 オクターブの中の音の半音数（上のドを除く）。 */

@@ -23,10 +23,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 次の 1 投の速さを (1 + 溜め) 倍にする。サーバーは、投げた瞬間（RightClickItem）に倍率を覚え、同じ tick にワールドに出た
-* その人の投げた物（EntityThrowable）の速さに掛ける。クライアントはゲージのために同じ溜めを持つ。
-* シングルプレイではクライアントとサーバーのプレイヤーが別のオブジェクトなので、同じ表で別々に持てる。
-*/
+ * 次の 1 投の速さを (1 + 溜め) 倍にする。サーバーは、投げた瞬間（RightClickItem）に倍率を覚え、同じ tick にワールドに出た
+ * その人の投げた物（EntityThrowable）の速さに掛ける。クライアントはゲージのために同じ溜めを持つ。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ThrowCharge {
 

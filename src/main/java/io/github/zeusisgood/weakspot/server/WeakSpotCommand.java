@@ -19,9 +19,9 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 
 /**
-* 管理コマンド /weakspot（OP 以上。top だけはだれでも使える）。表示は翻訳キーで出す（クライアントにも Mod が入っている前提）。
-* 「統計を消す」は統計画面の「統計をリセット」と同じ処理（今回と累計の両方）。
-*/
+ * 管理コマンド /weakspot（OP 以上。top だけはだれでも使える）。表示は翻訳キーで出す（クライアントにも Mod が入っている前提）。
+ * 「統計を消す」は統計画面の「統計をリセット」と同じ処理（今回と累計の両方）。
+ */
 public final class WeakSpotCommand extends CommandBase {
 
     /** プレイヤーを指定するサブコマンド。 */

@@ -15,9 +15,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
 /**
-* ページは翻訳キーの文章なので、読む人のクライアントの言語で出る。キーの名前は、読む人の操作設定から出す。
-* 遊び方（doc/play.md）を変えたら、lang の weakspot.guide.* も合わせて直す（CLAUDE.md）。
-*/
+ * ページは翻訳キーの文章なので、読む人のクライアントの言語で出る。キーの名前は、読む人の操作設定から出す。
+ */
 public final class GuideBook {
 
     /** NBT の TAG_FORMAT。 */

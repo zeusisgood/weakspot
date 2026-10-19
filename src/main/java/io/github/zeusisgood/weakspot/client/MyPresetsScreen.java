@@ -9,9 +9,9 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
 /**
-* 保存済みの枠の [保存] は、1 回目で「上書き？」、もう一度で上書き（3 秒かほかのボタンで戻る）。
-* 先例はバニラの保存したホットバーと、OptiFine のシェーダーのプロファイル。
-*/
+ * 保存済みの枠の [保存] は、1 回目で「上書き？」、もう一度で上書き（3 秒かほかのボタンで戻る）。
+ * 先例はバニラの保存したホットバーと、OptiFine のシェーダーのプロファイル。
+ */
 final class MyPresetsScreen extends GuiScreen {
 
     private static final int BUTTON_BACK = 0;

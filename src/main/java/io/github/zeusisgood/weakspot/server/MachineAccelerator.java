@@ -24,12 +24,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* Random Things の Time in a Bottle と同じ方式。ヒットした機械の位置と残り時間をメモリにだけ記録し
-* （エンティティは使わず、セーブデータにも残さない）、そのワールドの tick の最後に update() を余分に呼ぶ。
-*
-* 機械 Mod の多くは update() が 1 tick に 1 回だけ呼ばれる前提で作られているので、余分に呼ぶと不具合や例外の原因になりうる。
-* 例外はあえて捕まえない（クラッシュレポートで機械を特定し、excludedBlocks に足してもらう）。
-*/
+ * Random Things の Time in a Bottle と同じ方式。ヒットした機械の位置と残り時間をメモリにだけ記録し
+ * （エンティティは使わず、セーブデータにも残さない）、そのワールドの tick の最後に update() を余分に呼ぶ。
+ *
+ * 機械 Mod の多くは update() が 1 tick に 1 回だけ呼ばれる前提で作られているので、余分に呼ぶと不具合や例外の原因になりうる。
+ * 例外はあえて捕まえない（クラッシュレポートで機械を特定し、excludedBlocks に足してもらう）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MachineAccelerator {
 

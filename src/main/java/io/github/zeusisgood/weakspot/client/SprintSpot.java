@@ -13,9 +13,9 @@ import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraftforge.client.event.FOVUpdateEvent;
 
 /**
-* 照準の真上か真下だけに出す（左右に向きを変えると進む向きがぶれるため）。速さはサーバーが移動速度の修正でかける
-* （MoveHits。自分のクライアントにも届いて効く）。ここでは残り時間のゲージと、視野の広がりの抑えだけを受け持つ。
-*/
+ * 照準の真上か真下だけに出す（左右に向きを変えると進む向きがぶれるため）。速さはサーバーが移動速度の修正でかける
+ * （MoveHits。自分のクライアントにも届いて効く）。ここでは残り時間のゲージと、視野の広がりの抑えだけを受け持つ。
+ */
 final class SprintSpot extends AimSpotKind {
 
     /** 1 tick の水平の移動（ブロック）。 */

@@ -7,9 +7,9 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
 
 /**
-* プレイヤーの方を向いた、ワールドの中の横長のバー。値は、プレイヤーから見て左から伸びる。
-* 描く側は、テクスチャ・ライティング・カリングを切り、ブレンドを有効にしてから呼ぶ。深度テストはこの中で切って、戻す。
-*/
+ * プレイヤーの方を向いた、ワールドの中の横長のバー。値は、プレイヤーから見て左から伸びる。
+ * 描く側は、テクスチャ・ライティング・カリングを切り、ブレンドを有効にしてから呼ぶ。深度テストはこの中で切って、戻す。
+ */
 final class WorldBar {
 
     private WorldBar() {

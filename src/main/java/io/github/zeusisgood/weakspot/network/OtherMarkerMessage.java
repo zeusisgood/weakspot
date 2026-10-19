@@ -8,9 +8,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 /**
-* サーバー → クライアント。
-* ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
-*/
+ * サーバー → クライアント。
+ * ハンドラーは専用サーバーでもインスタンス化されるので、クライアントのクラスは proxy 経由で触る。
+ */
 public class OtherMarkerMessage implements IMessage {
 
     private int playerEntityId;

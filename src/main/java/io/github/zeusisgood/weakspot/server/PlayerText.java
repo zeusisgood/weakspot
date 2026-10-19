@@ -10,10 +10,10 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 
 /**
-* 相手のクライアントがそのキーを持っていない（キーを足した版 since より古い）ときは、サーバーで文にして送る
-* （ServerLang。持っていないキーはキーのまま表示されてしまうため）。ここを通すのは、パッチで足したキーだけ。
-* 翻訳の値には %s（と %1$s の形）だけを使う（クライアントの翻訳では %d などが使えない）。
-*/
+ * 相手のクライアントがそのキーを持っていない（キーを足した版 since より古い）ときは、サーバーで文にして送る
+ * （ServerLang。持っていないキーはキーのまま表示されてしまうため）。ここを通すのは、パッチで足したキーだけ。
+ * 翻訳の値には %s（と %1$s の形）だけを使う（クライアントの翻訳では %d などが使えない）。
+ */
 public final class PlayerText {
 
     private PlayerText() {

@@ -10,9 +10,9 @@ import net.minecraft.village.MerchantRecipeList;
 import org.apache.logging.log4j.LogManager;
 
 /**
-* 取引の一覧（buyingList）と populateBuyingList は非公開なので Reflect で読む。一覧が読めなければ、ロックはないものとして扱う。
-* 一覧が未作成（まだ取引の画面を開いていない）の村人を、こちらから作ってしまわないように、getRecipes は呼ばない。
-*/
+ * 取引の一覧（buyingList）と populateBuyingList は非公開なので Reflect で読む。一覧が読めなければ、ロックはないものとして扱う。
+ * 一覧が未作成（まだ取引の画面を開いていない）の村人を、こちらから作ってしまわないように、getRecipes は呼ばない。
+ */
 final class VillagerTrades {
 
     private static final Field BUYING_LIST = Reflect.field(EntityVillager.class, "villager trade reset",

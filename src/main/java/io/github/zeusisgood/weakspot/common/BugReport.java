@@ -5,9 +5,9 @@ import java.net.URLEncoder;
 import java.util.List;
 
 /**
-* GitHub の新しい issue の画面は、リンクの title と body で最初から書き込める。
-* Mod の一覧でリンクが長くなりすぎるときは、一覧を外して「貼り付けてください」と書く。
-*/
+ * GitHub の新しい issue の画面は、リンクの title と body で最初から書き込める。
+ * Mod の一覧でリンクが長くなりすぎるときは、一覧を外して「貼り付けてください」と書く。
+ */
 public final class BugReport {
 
     /** GitHub とブラウザーが長すぎるリンクを受け付けないため。 */

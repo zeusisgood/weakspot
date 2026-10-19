@@ -24,9 +24,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* MachineAccelerator が、ワールドの tick の最後（バニラの予約の処理のあと）に、加速中のブロックごとに 1 回だけ呼ぶ。
-* どのブロックも、前倒しで動くのは 1 tick に 1 回まで（自分に信号を戻すクロックが、同じ tick の中で回り続けないように）。
-*/
+ * MachineAccelerator が、ワールドの tick の最後（バニラの予約の処理のあと）に、加速中のブロックごとに 1 回だけ呼ぶ。
+ * どのブロックも、前倒しで動くのは 1 tick に 1 回まで（自分に信号を戻すクロックが、同じ tick の中で回り続けないように）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ScheduledTicks {
 

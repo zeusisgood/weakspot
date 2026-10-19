@@ -16,9 +16,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 /**
-* ブロックの弱点の (u, v) はワールド座標。動物の弱点の (u, v) は面の左下の角からの位置で、動物が動いても一緒に動く。
-* u, v は当たり判定の位置（ヒットの瞬間に移動先へ変わる）。マーカーの表示位置は motion で別に持つ（見た目だけ）。
-*/
+ * ブロックの弱点の (u, v) はワールド座標。動物の弱点の (u, v) は面の左下の角からの位置で、動物が動いても一緒に動く。
+ * u, v は当たり判定の位置（ヒットの瞬間に移動先へ変わる）。マーカーの表示位置は motion で別に持つ（見た目だけ）。
+ */
 final class WeakSpot {
 
     final HitKind kind;

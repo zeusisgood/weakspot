@@ -21,9 +21,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
 /**
-* 次に生き物を殴った攻撃のダメージの倍率を 1.5 × (1 + 溜め) にする。溜めは持ち替えるまで残り、生き物への攻撃で使い切る
-* （空振り・ブロックでは残る）。クライアントも同じ溜めを持つ（ゲージのため）。
-*/
+ * 次に生き物を殴った攻撃のダメージの倍率を 1.5 × (1 + 溜め) にする。溜めは持ち替えるまで残り、生き物への攻撃で使い切る
+ * （空振り・ブロックでは残る）。クライアントも同じ溜めを持つ（ゲージのため）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class MeleeCharge {
 

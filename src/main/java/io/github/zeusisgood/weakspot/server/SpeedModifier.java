@@ -8,9 +8,9 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 
 /**
-* 移動速度の一時的な修正。固定の UUID で、かけ直すたびに外して付け直す。保存しない（加速中にワールドを保存・
-* ログアウトしても、速いまま残らない）。
-*/
+ * 移動速度の一時的な修正。固定の UUID で、かけ直すたびに外して付け直す。保存しない（加速中にワールドを保存・
+ * ログアウトしても、速いまま残らない）。
+ */
 final class SpeedModifier {
 
     /** 合計に (1 + 値) を掛ける。 */

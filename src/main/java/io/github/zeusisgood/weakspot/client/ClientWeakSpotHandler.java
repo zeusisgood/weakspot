@@ -29,9 +29,9 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
 /**
-* 採掘と右クリックの弱点（作物・苗木、機械、動物、収穫）。弱点の位置は自分のクライアントだけが持ち、一度に 1 つだけ。
-* ヒット判定は毎フレーム行う（素早く照準を動かしたときに、tick 単位だと取りこぼすため）。
-*/
+ * 採掘と右クリックの弱点（作物・苗木、機械、動物、収穫）。弱点の位置は自分のクライアントだけが持ち、一度に 1 つだけ。
+ * ヒット判定は毎フレーム行う（素早く照準を動かしたときに、tick 単位だと取りこぼすため）。
+ */
 @Mod.EventBusSubscriber(modid = WeakSpotMod.MODID, value = Side.CLIENT)
 public final class ClientWeakSpotHandler {
 

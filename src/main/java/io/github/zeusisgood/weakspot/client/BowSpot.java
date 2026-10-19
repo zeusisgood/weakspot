@@ -10,9 +10,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
-* 引き切ったあとは、過剰チャージが上限に届くまで弱点を出す。
-* 引きゲージは、弓の弱点や一時オフに関係なく、bowDrawBarEnabled なら照準の下に出す。
-*/
+ * 引き切ったあとは、過剰チャージが上限に届くまで弱点を出す。
+ * 引きゲージは、弓の弱点や一時オフに関係なく、bowDrawBarEnabled なら照準の下に出す。
+ */
 final class BowSpot extends AimSpotKind {
 
     /** 色を書き換えていなければ、この色のまま。 */

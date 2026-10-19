@@ -1,9 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
-* 自分の弱点マークの状態をサーバーへ送る頻度の上限（クライアント側）。変わっても、前回から minInterval tick たつまでは
-* 待って最新の状態を送る。出ている間は、受け手が時間切れで消さないように keepAliveTicks ごとに送り直す。
-*/
+ * 自分の弱点マークの状態をサーバーへ送る頻度の上限（クライアント側）。変わっても、前回から minInterval tick たつまでは
+ * 待って最新の状態を送る。出ている間は、受け手が時間切れで消さないように keepAliveTicks ごとに送り直す。
+ */
 public final class MarkerSendPolicy {
 
     private final int keepAliveTicks;

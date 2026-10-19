@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
-* 動物のタイマーはクライアントに届いていない（子どもの成長は getGrowingAge が ±1 しか返さない、卵のタイマーと村人の
-* 取引のロックは同期されない）ので、サーバーに問い合わせて覚える。
-*/
+ * 動物のタイマーはクライアントに届いていない（子どもの成長は getGrowingAge が ±1 しか返さない、卵のタイマーと村人の
+ * 取引のロックは同期されない）ので、サーバーに問い合わせて覚える。
+ */
 final class AnimalStates {
 
     static final int QUERY_INTERVAL_TICKS = 5;

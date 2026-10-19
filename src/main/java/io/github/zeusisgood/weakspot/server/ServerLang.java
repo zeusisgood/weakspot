@@ -14,9 +14,9 @@ import java.util.Map;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 /**
-* 古いクライアントは新しい翻訳キーを持っていないので、翻訳キーで送るとキーのまま出てしまう。そこで Mod の jar の中の
-* 言語ファイルを読み、プレイヤーの言語の設定で文章にする。その言語のファイル・キーがなければ en_us。
-*/
+ * 古いクライアントは新しい翻訳キーを持っていないので、翻訳キーで送るとキーのまま出てしまう。そこで Mod の jar の中の
+ * 言語ファイルを読み、プレイヤーの言語の設定で文章にする。その言語のファイル・キーがなければ en_us。
+ */
 final class ServerLang {
 
     private static final String FALLBACK = "en_us";

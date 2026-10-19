@@ -1,9 +1,9 @@
 package io.github.zeusisgood.weakspot.common;
 
 /**
-* ブロック面のローカル 2D 座標 (u, v) とワールド座標の変換。軸は 0=X, 1=Y, 2=Z。
-* (u, v) は X 面 → (z, y)、Y 面 → (x, z)、Z 面 → (x, y)。距離の比較にしか使わないので、向き（左右反転など）は気にしない。
-*/
+ * ブロック面のローカル 2D 座標 (u, v) とワールド座標の変換。軸は 0=X, 1=Y, 2=Z。
+ * (u, v) は X 面 → (z, y)、Y 面 → (x, z)、Z 面 → (x, y)。距離の比較にしか使わないので、向き（左右反転など）は気にしない。
+ */
 public final class FaceMath {
 
     public static final int AXIS_X = 0;

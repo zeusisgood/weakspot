@@ -11,9 +11,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
 
 /**
-* 照準の左右だけに出す（走りの弱点の上下と見分けるため）。馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。
-* クライアントもサーバーの返事を待たずに溜める。
-*/
+ * 照準の左右だけに出す（走りの弱点の上下と見分けるため）。馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。
+ * クライアントもサーバーの返事を待たずに溜める。
+ */
 final class MeleeSpot extends AimSpotKind {
 
     /** ブロック。 */

@@ -5,9 +5,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
-* 設定に書く 1 行。{@code modid:block} か {@code modid:block[property=pattern,property=pattern]}。
-* pattern は、数の範囲 {@code a-b}、{@code *} を含む形（{@code *} は任意の文字列）、それ以外は完全一致。
-*/
+ * 設定に書く 1 行。{@code modid:block} か {@code modid:block[property=pattern,property=pattern]}。
+ * pattern は、数の範囲 {@code a-b}、{@code *} を含む形（{@code *} は任意の文字列）、それ以外は完全一致。
+ */
 public final class BlockFilter {
 
     public final String block;

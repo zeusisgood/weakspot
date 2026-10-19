@@ -3,9 +3,9 @@ package io.github.zeusisgood.weakspot.common;
 import java.util.Random;
 
 /**
-* バニラの EntityLivingBase#fall と applyPotionDamageCalculations と同じ式。落下は防具の防御値では減らないので、
-* 耐性のポーション効果と、防具のエンチャントの保護値（落下耐性・ダメージ軽減）だけで減る。
-*/
+ * バニラの EntityLivingBase#fall と applyPotionDamageCalculations と同じ式。落下は防具の防御値では減らないので、
+ * 耐性のポーション効果と、防具のエンチャントの保護値（落下耐性・ダメージ軽減）だけで減る。
+ */
 public final class FallMath {
 
     /** ブロック。これ以下ではダメージを受けない。 */
