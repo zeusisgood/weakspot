@@ -24,7 +24,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - 1.12.2: **JDK 8**、ForgeGradle 3 + Gradle 4.9（Gradle 5 以降の構文は使えない。依存は `compile` / `testCompile`）。1.21.1: **JDK 21**、ModDevGradle 2 + Gradle 8（`implementation` / `testImplementation`）。
 - リポジトリの形: `common/`（版に依存しない計算。各版のビルドがソースで読む）・`lang/`（翻訳の正本）・`mc1.12.2/`（1.12.2 のビルド）・`mc1.21.1/`（1.21.1 のビルド）。2 つは別々の Gradle のビルド（1 つのマルチプロジェクトにできない）。`doc/` などは直下で全部の版に共通（`doc/development.md` の冒頭）。
-- ビルド + テスト（各版のディレクトリの中で）: `./gradlew build` → `mc1.12.2/build/libs/weakspot-1.12.2-<version>.jar`（reobf 済み）・`mc1.21.1/build/libs/weakspot-1.21.1-<version>.jar`。テストのみ: `./gradlew test`（作業ディレクトリはリポジトリの直下）。`common/` のテストはどちらのビルドでも流れる。
+- ビルド + テスト（各版のディレクトリの中で）: `./gradlew build` → `mc1.12.2/build/libs/weakspot-1.12.2-forge-<version>.jar`（reobf 済み）・`mc1.21.1/build/libs/weakspot-1.21.1-neoforge-<version>.jar`。テストのみ: `./gradlew test`（作業ディレクトリはリポジトリの直下）。`common/` のテストはどちらのビルドでも流れる。
 - クラウドでは JDK 8 を `apt-get install -y openjdk-8-jdk-headless` で入れ、`cd mc1.12.2 && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q`（Maven Central が 429 なら、30 秒ずつ間をあけて 5 回まで再実行）。1.21.1 は JDK 21（`openjdk-21-jdk-headless`）で `cd mc1.21.1 && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 PATH=/usr/lib/jvm/java-21-openjdk-amd64/bin:$PATH ./gradlew build -q`（初回は Minecraft の展開で数分かかる）。クラウドの環境のネットワーク設定で `maven.minecraftforge.net`・`maven.neoforged.net`・`piston-meta.mojang.com`・`piston-data.mojang.com`・`libraries.minecraft.net`・`resources.download.minecraft.net` を許可しておく（拒否されると 403。許可のしかたと、Gradle が使えないときに `common/` のテストだけ流す方法は `doc/development.md`）。
 - `runServer` の確認は devcontainer でだけ行う（クラウドでは FML の NPE で落ちるので、しなくてよい。止まる条件にも当たらない）。やり方とノイズのログは `doc/development.md`。
 - クライアントの描画・ヒット判定・体感速度は Claude が検証できない。jar をユーザーのホスト側 Minecraft で試してもらう。
@@ -37,7 +37,8 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
-- 現行は **1.12.1**、範囲は `"[1.12,1.13)"`（1.21.1 の `PROTOCOL` は `"1.12"`）。
+- jar の名前と配布サイトの表示名の形（`weakspot-1.12.2-forge-<版>.jar`・`Weak Spot Mining <版> for MC 1.12.2 (Forge)`）は `doc/development.md` の「版の表記」。Mod の版はこの節の規則だけで決め、Minecraft の版と数字が重なるかは考えない。
+- 現行は **1.12.2**、範囲は `"[1.12,1.13)"`（1.21.1 の `PROTOCOL` は `"1.12"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -103,4 +104,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.12.1（1.12.2 + Forge と 1.21.1 + NeoForge）。1.21.1 の新しい物（メイス・トライデント・クロスボウ・クラフター）と、ほかの版への対応は `doc/roadmap.md` の保留中の相談。
+現行は 1.12.2（1.12.2 + Forge と 1.21.1 + NeoForge）。1.21.1 の新しい物（メイス・トライデント・クロスボウ・クラフター）と、ほかの版への対応は `doc/roadmap.md` の保留中の相談。

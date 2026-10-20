@@ -55,12 +55,12 @@ environments=$(jq -c --slurpfile types "$work/types.json" '
 ids=$(jq -c -n --argjson a "$required" --argjson b "$environments" '$a + $b')
 echo "Game version IDs: $ids"
 
-jar="weakspot-$mc-$version.jar"
+jar=$(release_jar "$version" "$mc")
 gh release download "v$version" --pattern "$jar" --dir "$work"
 
 changelog=$(bash "$(dirname "$0")/changelog.sh" "$version")
 jq -n \
-  --arg name "Weak Spot Mining $version ($mc)" \
+  --arg name "$(display_name "$version" "$mc")" \
   --arg changelog "$changelog" \
   --argjson ids "$ids" \
   '{

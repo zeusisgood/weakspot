@@ -35,7 +35,7 @@
 - Mod の ID は `weakspot`、パッケージは `io.github.zeusisgood.weakspot`（1.12.2 と同じ）。クラスの分け方（`client/`・`server/`・`config/`・`network/`）も、できるだけ 1.12.2 と同じ名前にする（読み比べやすくするため）
 - `../common/src/main/java` と `../common/src/test/java` をソースに足す。翻訳は `../lang/*.json` をそのまま `assets/weakspot/lang/` に入れる
 - `neoforge.mods.toml`: 名前・説明・ロゴ・ライセンス（MIT）・`updateJSONURL`（1.12.2 と同じ `update.json`）・クライアントとサーバーの両方に必要
-- jar は `weakspot-1.21.1-<版>.jar`。`LICENSE` を `LICENSE_weakspot` として入れる（1.12.2 と同じ）
+- jar は `weakspot-1.21.1-<版>.jar`（注: 1.12.2 から `weakspot-1.21.1-neoforge-<版>.jar`。`doc/development.md` の「版の表記」）。`LICENSE` を `LICENSE_weakspot` として入れる（1.12.2 と同じ）
 - **非公開のフィールド・メソッド**: 1.21.1 は動いているときも Mojang の名前なので、SRG 名を探す必要がない。**アクセストランスフォーマー（`accesstransformer.cfg`）を使う**（名前の間違いがビルドで分かるため）。1.12.2 の「アクセストランスフォーマーではなくリフレクション」の決まりは 1.12.2 版だけのものにする
 - クライアントだけのクラスは `Dist.CLIENT` のイベントの購読にする。パケットのハンドラーから直接クライアントのクラスに触らない（専用サーバーで読み込まれないように。1.12.2 の `proxy.onXxx` と同じ考え）
 

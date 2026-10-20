@@ -13,12 +13,12 @@
 
 ```sh
 cd mc1.12.2
-./gradlew build        # ビルドとテスト（common/ のテストも）。成果物は mc1.12.2/build/libs/weakspot-1.12.2-<版>.jar
+./gradlew build        # ビルドとテスト（common/ のテストも）。成果物は mc1.12.2/build/libs/weakspot-1.12.2-forge-<版>.jar
 ./gradlew test         # 単体テストのみ
 ./gradlew runServer    # 開発用の専用サーバーを起動（mc1.12.2/run/ で起動。初回は run/eula.txt の同意が必要）
 
 cd mc1.21.1            # JDK 21 で
-./gradlew build        # 成果物は mc1.21.1/build/libs/weakspot-1.21.1-<版>.jar（common/ のテストも流れる）
+./gradlew build        # 成果物は mc1.21.1/build/libs/weakspot-1.21.1-neoforge-<版>.jar（common/ のテストも流れる）
 ./gradlew runServer    # mc1.21.1/run/ で起動
 ```
 
@@ -95,13 +95,27 @@ Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge 
 ## 配布サイト
 
 - どちらも、Release に付いている jar の Minecraft の版ごとに 1 回ずつ上げる。版ごとの値（ローダー・Java・CurseForge の版の種類）は `.github/scripts/mc-versions.sh` の表。
-- **Modrinth**: Release の jar を `.github/scripts/publish-modrinth.sh <版> <Minecraft の版>` で上げる（更新内容は `changelog.sh` が作る、英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク）。バージョンの番号は `<版>+<Minecraft の版>`（例 `1.11.12+1.12.2`。1.11.11 までは `<版>` だけ）。その番号がもうあれば何もしない。失敗したら Actions の「Modrinth publish」を手動で流す（Minecraft の版を空にすると、Release に付いている全部の版）。
-- **CurseForge**: `publish-curseforge.sh <版> <Minecraft の版>`（更新内容は同じ `changelog.sh`。表示名は `Weak Spot Mining <版> (<Minecraft の版>)`）。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で、失敗した Minecraft の版だけを指定して流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる）。
+- **Modrinth**: Release の jar を `.github/scripts/publish-modrinth.sh <版> <Minecraft の版>` で上げる（更新内容は `changelog.sh` が作る、英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク）。バージョンの番号は `<版>+<Minecraft の版>`（例 `1.11.12+1.12.2`。1.11.11 までは `<版>` だけ）、名前は下の「版の表記」。その番号がもうあれば何もしない。失敗したら Actions の「Modrinth publish」を手動で流す（Minecraft の版を空にすると、Release に付いている全部の版）。
+- **CurseForge**: `publish-curseforge.sh <版> <Minecraft の版>`（更新内容は同じ `changelog.sh`。表示名は下の「版の表記」）。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で、失敗した Minecraft の版だけを指定して流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる）。
 - **説明文**: 正本は `doc/store/description.md`（英語の Markdown。版の番号は書かない。リンクは `https://…` の完全な形）。
   - Modrinth は、`main` でこのファイルが変わると `.github/workflows/modrinth-description.yml` が API（`PATCH /v2/project/<ID>`）で反映する。Secrets の `MODRINTH_TOKEN`（スコープ「プロジェクトを書く」）と Variables の `MODRINTH_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる。Actions の画面から手動でも流せる）。
   - CurseForge は API で説明を変えられないので手動。このファイルを直した PR では、本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
 - **画像**: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `mc1.12.2/src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`）用）。AI 生成なので、Modrinth の開示の「資産」に入れてある。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
 - **配布サイトのページ**: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（自動化の起点のため）。ゲーム内の [変更点を見る]・[ダウンロード] は CurseForge のファイルの一覧を指す。
+
+### 版の表記
+
+Mod の版と Minecraft の版は数字が似ている（例: Mod 1.12.2 の 1.12.2 + Forge 版）ので、数字そのものではなく、名前の印で区別します。
+
+| 物 | 形 | 例 |
+|---|---|---|
+| jar の名前 | `weakspot-<Minecraft の版>-<ローダー>-<版>.jar`（ローダーは小文字。Modrinth の loaders と同じ） | `weakspot-1.12.2-forge-1.12.2.jar`・`weakspot-1.21.1-neoforge-1.12.2.jar` |
+| CurseForge の表示名・Modrinth の名前 | `Weak Spot Mining <版> for MC <Minecraft の版> (<ローダー>)`（ローダーは CurseForge の表記） | `Weak Spot Mining 1.12.2 for MC 1.12.2 (Forge)` |
+| Modrinth のバージョン番号 | `<版>+<Minecraft の版>`（重複の確認に使うので変えない） | `1.12.2+1.12.2` |
+
+- 名前を作るのは `.github/scripts/mc-versions.sh` の `display_name`（表示名）と、各版の `build.gradle` の `archivesBaseName` / `base.archivesName`（jar）。
+- Mod の版は `CLAUDE.md` の「バージョン」の規則（パッチ・マイナー）だけで決め、Minecraft の版との数字の重なりは考えません。2.0.0 に上げるなら、大きな区切り（版の対応をやめる、大きな新しい仕組みを入れるなど）に合わせます。
+- 1.11.12〜1.12.1 の Release の jar は `weakspot-<Minecraft の版>-<版>.jar`（ローダーなし）。手動で上げ直す処理（`release_jar`）は、新しい名前が無ければこちらを使います。CurseForge に上げ済みの 1.12.1 までのファイルの表示名（`Weak Spot Mining <版> (<Minecraft の版>)`）は直しません。
 
 ## ライセンスと issue
 
