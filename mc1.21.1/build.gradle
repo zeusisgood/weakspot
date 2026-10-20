@@ -5,7 +5,7 @@ plugins {
 
 version = mod_version
 group = 'io.github.zeusisgood'
-base.archivesName = "weakspot-${minecraft_version}"
+base.archivesName = "weakspot-${minecraft_version}-neoforge"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # GitHub Release（タグ v<版>）の、Minecraft の版の jar を、Modrinth のプロジェクトに新しいバージョンとして上げる。
-# バージョンの番号は <版>+<Minecraft の版>（例 1.11.12+1.12.2）。
+# バージョンの番号は <版>+<Minecraft の版>（例 1.11.12+1.12.2）。名前は display_name（mc-versions.sh）。
 # 使い方: publish-modrinth.sh <版> <Minecraft の版>
 # 要るもの: 環境変数 MODRINTH_TOKEN（スコープ「バージョンを作成する」「バージョンを読む」「プロジェクトを読む」）・
 # MODRINTH_PROJECT_ID・GH_TOKEN。トークンか ID がなければ何もせず成功で終わる。
@@ -31,7 +31,7 @@ if [ "$count" != "0" ]; then
 fi
 
 work=$(mktemp -d)
-jar="weakspot-$mc-$version.jar"
+jar=$(release_jar "$version" "$mc")
 gh release download "v$version" --pattern "$jar" --dir "$work"
 
 changelog=$(bash "$(dirname "$0")/changelog.sh" "$version")
@@ -39,12 +39,13 @@ changelog=$(bash "$(dirname "$0")/changelog.sh" "$version")
 jq -n \
   --arg project "$MODRINTH_PROJECT_ID" \
   --arg number "$number" \
+  --arg name "$(display_name "$version" "$mc")" \
   --arg changelog "$changelog" \
   --arg mc "$mc" \
   --arg loader "$LOADER" \
   '{
     project_id: $project,
-    name: $number,
+    name: $name,
     version_number: $number,
     changelog: $changelog,
     game_versions: [$mc],
