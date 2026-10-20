@@ -16,7 +16,7 @@ updateJSONURL = "https://raw.githubusercontent.com/zeusisgood/weakspot/main/upda
 [[dependencies.weakspot]]
 modId = "forge"
 mandatory = true
-versionRange = "[47.4,)"
+versionRange = "[47.1.32,)"
 ordering = "NONE"
 side = "BOTH"
 

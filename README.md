@@ -14,7 +14,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 - **[CurseForge](https://www.curseforge.com/minecraft/mc-mods/weakspot)**
 
-対応: **Minecraft Java Edition 1.12.2 + Forge**（開発・動作確認は 14.23.5.2860。古い Forge では一部の機能が動かない可能性あり）／**1.20.1 + Forge**（開発・動作確認は 47.4.28）／**1.21.1 + NeoForge**（開発・動作確認は 21.1.264）。ダウンロードのページで Minecraft の版に合う jar を選んでください。マルチプレイでは、サーバーと全員に同じマイナーバージョンが必要です（詳細は [doc/install.md](doc/install.md)）。
+対応: **Minecraft Java Edition 1.12.2 + Forge**（開発・動作確認は 14.23.5.2860。古い Forge では一部の機能が動かない可能性あり）／**1.20.1 + Forge**（47.1.32 以降。開発・動作確認は 47.1.32）／**1.21.1 + NeoForge**（開発・動作確認は 21.1.264）。ダウンロードのページで Minecraft の版に合う jar を選んでください。マルチプレイでは、サーバーと全員に同じマイナーバージョンが必要です（詳細は [doc/install.md](doc/install.md)）。
 
 ## 操作
 

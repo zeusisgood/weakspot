@@ -165,7 +165,7 @@
 - 通信: `SimpleChannel`（`Network.PROTOCOL` が同じ相手だけ。ハンドラーはメインのスレッドへ回す）。メッセージの中身は 1.21.1 と同じ。
 - イベント: tick は `TickEvent`（`phase` で前後を分ける）、設定の読み込みは `ModConfigEvent.Loading`・`Reloading`、近接の倍率は `LivingHurtEvent`（1.21.1 の `LivingIncomingDamageEvent` に当たる）。`RenderLevelStageEvent` の `AFTER_WEATHER` では、イベントのポーズスタック（カメラの向き）がモデルビューにもう掛かっているので、頂点はカメラからの相対座標のまま渡し、`ScreenProjection.onFrame` にはポーズスタックの行列を渡す。
 - 保存データ: プレイヤーの統計は `getPersistentData()` の `PlayerPersisted` の下の `weakspot`（1.12.2 と同じ。死んでも残る）。ガイドの本・クロスボウの過剰チャージ（`weakspot_overcharge`）はアイテムの NBT。
-- 届く距離: 生き物は Forge の `canReachRaw(entity, 3.0)`、ブロックは `canReach(pos, 1.5)`（どちらもバニラの右クリックの受け付けと同じ）。
+- 届く距離: 生き物は Forge の `canReach(entity, 3.0)`、ブロックは `canReach(pos, 1.5)`（どちらも Forge 47.1.32 の右クリックの受け付けと同じ。47.4 の `canReachRaw` は下限の版にないので使わない）。
 - 移動速度の修正は UUID で付け外しする（1.12.2 と同じ UUID）。
 - 収穫: 壊すときの許可は `ForgeHooks.onBlockBreakEvent`、収穫物はそのままワールドに出す（1.20.1 の Forge に `BlockDropsEvent` はない）。
 - ネザーゲート: 待ちは `Entity.portalTime`（ネザーゲートの中でだけ増える）と `getPortalWaitTime()`。

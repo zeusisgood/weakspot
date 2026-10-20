@@ -30,7 +30,7 @@ public final class GuideBookGiver {
     /** targetGiftVersion がない、的をもらったことのある人は、この版から更新したとみなす。 */
     private static final String FIRST_GIFT_FROM = "1.11.0";
     private static final int STARTER_TARGETS = 3;
-    private static final ResourceLocation TARGET_RECIPE = ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, "target");
+    private static final ResourceLocation TARGET_RECIPE = new ResourceLocation(WeakSpotMod.MODID, "target");
 
     private GuideBookGiver() {
     }

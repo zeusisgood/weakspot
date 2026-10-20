@@ -95,7 +95,7 @@ public final class WeakSpotAdvancements {
     }
 
     private static Advancement find(ServerPlayer player, String name) {
-        return player.server.getAdvancements().getAdvancement(ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, name));
+        return player.server.getAdvancements().getAdvancement(new ResourceLocation(WeakSpotMod.MODID, name));
     }
 
     private static boolean isDone(ServerPlayer player, String name) {

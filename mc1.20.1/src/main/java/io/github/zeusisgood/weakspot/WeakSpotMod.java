@@ -13,6 +13,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -33,12 +34,12 @@ public final class WeakSpotMod {
 
     public static CommonProxy proxy;
 
-    public WeakSpotMod(FMLJavaModLoadingContext context) {
-        IEventBus modBus = context.getModEventBus();
-        ModContainer container = context.getContainer();
+    public WeakSpotMod() {
+        IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        ModContainer container = ModLoadingContext.get().getActiveContainer();
         configExistedAtStart = FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toFile().exists();
         proxy = FMLEnvironment.dist.isClient() ? newClientProxy() : new CommonProxy();
-        WeakSpotConfig.register(context);
+        WeakSpotConfig.register(ModLoadingContext.get());
         modBus.addListener(WeakSpotConfig::onLoad);
         modBus.addListener(WeakSpotConfig::onReload);
         network.register();

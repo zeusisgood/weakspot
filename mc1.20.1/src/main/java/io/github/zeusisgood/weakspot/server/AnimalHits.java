@@ -94,7 +94,7 @@ public final class AnimalHits {
     public static void onQuery(ServerPlayer player, int entityId) {
         Entity entity = player.level().getEntity(entityId);
         State state = new State(0);
-        if (entity != null && AnimalTargets.isCandidate(entity) && player.canReachRaw(entity, REACH_MARGIN)) {
+        if (entity != null && AnimalTargets.isCandidate(entity) && player.canReach(entity, REACH_MARGIN)) {
             SyncedSettings settings = SyncedSettings.server();
             state = state(entity, settings);
             if (entity instanceof Villager villager) {
@@ -109,7 +109,7 @@ public final class AnimalHits {
             return;
         }
         Entity entity = player.level().getEntity(entityId);
-        if (entity == null || !player.canReachRaw(entity, REACH_MARGIN)) {
+        if (entity == null || !player.canReach(entity, REACH_MARGIN)) {
             return;
         }
         SyncedSettings settings = SyncedSettings.server();

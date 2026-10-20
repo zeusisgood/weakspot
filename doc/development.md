@@ -7,10 +7,10 @@
 | 版 | ローダー（開発・動作確認） | ビルド | JDK |
 |---|---|---|---|
 | 1.12.2 | **Forge 14.23.5.2860**（公式 MDK、ForgeGradle 3 + Gradle 4.9） | `mc1.12.2/` | 8 |
-| 1.20.1 | **Forge 47.4.28**（ForgeGradle 6 + Gradle 8。名前は Mojang の名前） | `mc1.20.1/` | 17 |
+| 1.20.1 | **Forge 47.1.32**（ForgeGradle 6 + Gradle 8。名前は Mojang の名前） | `mc1.20.1/` | 17 |
 | 1.21.1 | **NeoForge 21.1.264**（ModDevGradle 2 + Gradle 8。名前は Mojang の名前） | `mc1.21.1/` | 21 |
 
-1.12.2 版は Mod 側で Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。1.20.1 版は `mods.toml` で Forge 47.4 以上、1.21.1 版は `neoforge.mods.toml` で NeoForge 21.1.264 以上を求めます。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます（1.20.1 には JDK 17、1.21.1 には JDK 21 を足す）。
+1.12.2 版は Mod 側で Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。1.20.1 版は `mods.toml` で Forge 47.1.32 以上（左クリックの `LeftClickBlock.Action` が入った版。古い Modpack・サーバーでも使えるように、ビルドもこの版で行い、新しい API を使っていないことを確かめる）、1.21.1 版は `neoforge.mods.toml` で NeoForge 21.1.264 以上を求めます。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます（1.20.1 には JDK 17、1.21.1 には JDK 21 を足す）。
 
 ```sh
 cd mc1.12.2
@@ -79,7 +79,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 - 1.21.1: クラウドでは `apt-get install -y openjdk-21-jdk-headless`。ネットワークの許可に `maven.neoforged.net`・`piston-meta.mojang.com`・`piston-data.mojang.com`・`libraries.minecraft.net`・`resources.download.minecraft.net` も足す。初回のビルドは Minecraft の展開と再コンパイルで数分かかる。非公開のフィールド・メソッドは**アクセストランスフォーマー**（`mc1.21.1/src/main/resources/META-INF/accesstransformer.cfg`。`neoforge.mods.toml` の `[[accessTransformers]]` で読む）。名前を間違えるとビルドの「recompile」で止まる。上書きしているサブクラスがあれば、そちらも同じ公開範囲にする（例: ディスペンサーとドロッパーの `dispenseFrom`）。バニラの名前・中身は、ビルドが作るソースの jar（`~/.gradle/caches` の `neoforge-*-sources.jar`。IDE で開く）で調べる。
 - 1.20.1: クラウドでは `apt-get install -y openjdk-17-jdk-headless`。ネットワークの許可は 1.21.1 と同じ Mojang のホストと `maven.minecraftforge.net`。初回のビルドは Minecraft の展開と再コンパイルで数分かかる。クラウドでも `runServer` が起動する（`timeout` 付きで起動し、ログの `Done (` を見る）。
   - 非公開のフィールド・メソッドは**アクセストランスフォーマー**（`mc1.20.1/src/main/resources/META-INF/accesstransformer.cfg`）。Forge 1.20.1 は配布した jar が **SRG 名**（`f_9249_`・`m_6225_` など）で動くので、AT の行も SRG 名で書き、`#` の後ろに Mojang の名前を添える（開発環境では ForgeGradle が Mojang の名前に直して当てる）。名前を間違えるとビルドの「setup」で止まる。同じ理由で、名前で探すリフレクション（`HeldItems` の右クリックのメソッド）も、Mojang の名前と SRG 名の両方を書く。
-  - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client_mappings.txt`（Mojang の名前 → 難読化名）と `~/.gradle/caches/forge_gradle/mcp_repo/de/oceanlabs/mcp/mcp_config/1.20.1-*/joined/rename/config/joined.tsrg`（難読化名 → SRG 名）を突き合わせる。バニラの中身は、ビルドが作る `mc1.20.1/build/fg_cache/.../forge-1.20.1-47.4.28_mapped_official_1.20.1.jar` を `javap -p -c` で見る。
+  - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client_mappings.txt`（Mojang の名前 → 難読化名）と `~/.gradle/caches/forge_gradle/mcp_repo/de/oceanlabs/mcp/mcp_config/1.20.1-*/joined/rename/config/joined.tsrg`（難読化名 → SRG 名）を突き合わせる。バニラの中身は、ビルドが作る `mc1.20.1/build/fg_cache/.../forge-1.20.1-<Forge の版>_mapped_official_1.20.1.jar` を `javap -p -c` で見る。
 - 1.12.2: 非公開のフィールドはリフレクションで読む（アクセストランスフォーマーは使わない）。開発環境は MCP 名、reobf 後は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（`Reflect`）。Forge の 3 引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
   - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/maven_downloader/de/oceanlabs/mcp/mcp_snapshot/20171003-1.12/mcp_snapshot-20171003-1.12.zip` の `fields.csv`（`methods.csv`）、または `~/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-srg.jar` を `javap -p` で見る。
   - 画面を出さずに両方の環境で確かめるには、自分のクラスを小さなプログラムからリフレクションで呼ぶ（インスタンスは `Unsafe.allocateInstance`）。開発環境は `sourceSets.main.runtimeClasspath`（Gradle の init スクリプトで書き出す）、実際の環境はその中の `build/classes` `build/resources` と `..._mapped_snapshot_...` の jar を、`build/libs` の reobf 済み jar と上の `-srg.jar` に差し替えたクラスパスで動かす。

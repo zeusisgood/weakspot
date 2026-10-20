@@ -7,7 +7,7 @@
 | Minecraft | ローダー | jar |
 |---|---|---|
 | Java Edition **1.12.2** | Minecraft Forge（1.12.2 用。開発・動作確認は 14.23.5.2860。古い Forge では一部の機能が動かない可能性あり） | `weakspot-1.12.2-forge-<版>.jar` |
-| Java Edition **1.20.1** | Minecraft Forge（1.20.1 用の 47.4.x 以降。開発・動作確認は 47.4.28） | `weakspot-1.20.1-forge-<版>.jar` |
+| Java Edition **1.20.1** | Minecraft Forge（1.20.1 用の 47.1.32 以降。開発・動作確認は 47.1.32。1.20.1 用の NeoForge（47.1.x）でも読み込まれますが、動作は確認していません） | `weakspot-1.20.1-forge-<版>.jar` |
 | Java Edition **1.21.1** | NeoForge（1.21.1 用の 21.1.x。開発・動作確認は 21.1.264。[NeoForge](https://neoforged.net/) のインストーラーで入れる。Forge 用の Mod とは別） | `weakspot-1.21.1-neoforge-<版>.jar` |
 
 どの版も遊び方・設定の項目は同じです（新しい Minecraft で増えた乗り物などは、その物がある版でだけ対象。[遊び方](play.md)）。

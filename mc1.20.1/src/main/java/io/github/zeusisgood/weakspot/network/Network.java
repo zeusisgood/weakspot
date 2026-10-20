@@ -20,7 +20,7 @@ public final class Network {
     private static final String PROTOCOL = "1.13";
 
     private final SimpleChannel channel = NetworkRegistry.newSimpleChannel(
-            ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, "main"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
+            new ResourceLocation(WeakSpotMod.MODID, "main"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);
     private int nextId;
 
     public void register() {
