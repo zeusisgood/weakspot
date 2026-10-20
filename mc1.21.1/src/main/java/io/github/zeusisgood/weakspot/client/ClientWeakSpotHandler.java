@@ -360,14 +360,10 @@ public final class ClientWeakSpotHandler {
                 && Minecraft.getInstance().level.getBlockState(spot.pos).getBlock() instanceof DispenserBlock;
     }
 
-    /** 古いサーバーはクラフターを 1 回の信号で 1 回しか動かさない（毎 tick 動く機械として速くする）。 */
     static boolean crafterSpotActive() {
         return machineSpotActive() && Minecraft.getInstance().level != null
-                && Minecraft.getInstance().level.getBlockState(spot.pos).getBlock() instanceof CrafterBlock
-                && ServerFeatures.since(CRAFTER_SINCE);
+                && Minecraft.getInstance().level.getBlockState(spot.pos).getBlock() instanceof CrafterBlock;
     }
-
-    private static final String CRAFTER_SINCE = "1.12.3";
 
     private static void onHit(Minecraft mc) {
         HitKind kind = spot.kind;
