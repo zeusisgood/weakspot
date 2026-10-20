@@ -34,15 +34,15 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.12.1
+
+- Weak spots are easier to hit on complex blocks and piped machines
+
 ### 1.12.0
 
 - Now available for Minecraft 1.21.1 (NeoForge)
 
 ### 1.11.12
-
-- Internal cleanup (no gameplay changes)
-
-### 1.11.11
 
 - Internal cleanup (no gameplay changes)
 
