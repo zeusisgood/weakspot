@@ -10,6 +10,7 @@ import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.MaceItem;
 
 /**
  * 照準の左右だけに出す（走りの弱点の上下と見分けるため）。馬・豚に乗っているときは出さない（乗り物の弱点が上下に出ているため）。
@@ -43,7 +44,9 @@ final class MeleeSpot extends AimSpotKind {
     @Override
     boolean wanted(LocalPlayer player, SyncedSettings settings) {
         return MeleeCharge.CHARGES.isHolding(player) && enemyNear
-                && !VehicleTargets.isSteeredByLook(player);
+                && !VehicleTargets.isSteeredByLook(player)
+                && (!(player.getMainHandItem().getItem() instanceof MaceItem)
+                        || ServerFeatures.since(MeleeCharge.MACE_SINCE));
     }
 
     @Override

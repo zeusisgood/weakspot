@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.CocoaBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.CrafterBlock;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.ObserverBlock;
@@ -196,9 +197,17 @@ public final class RightClickTargets {
         return names;
     }
 
-    /** リピーター・コンパレーター、オブザーバー、ディスペンサー・ドロッパー（と、それを継承したブロック）。 */
+    /**
+     * リピーター・コンパレーター、オブザーバー、ディスペンサー・ドロッパー、クラフター（と、それを継承したブロック）。
+     * クラフターは毎 tick 動くブロックエンティティも持つが、そちらは見た目の動きだけなので、予約の部品として扱う。
+     */
     public static boolean isScheduledMachine(Block block) {
-        return block instanceof DiodeBlock || block instanceof ObserverBlock || block instanceof DispenserBlock;
+        return block instanceof DiodeBlock || block instanceof ObserverBlock || isBurstMachine(block);
+    }
+
+    /** 1 回の信号で複数回動かす部品（ディスペンサー・ドロッパー・クラフター）。 */
+    public static boolean isBurstMachine(Block block) {
+        return block instanceof DispenserBlock || block instanceof CrafterBlock;
     }
 
     /** クライアントは接続中ならサーバーの値。 */

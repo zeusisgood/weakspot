@@ -13,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.MaceItem;
 import net.minecraft.world.item.SwordItem;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,9 +39,13 @@ public final class MeleeCharge {
     private MeleeCharge() {
     }
 
-    /** それを継承した Mod の武器も。メイスは入れない（落下攻撃と重なるため。doc/roadmap.md ののちの相談）。 */
+    /** 古いサーバーはメイスを対象と判定しない。 */
+    public static final String MACE_SINCE = "1.12.3";
+
+    /** それを継承した Mod の武器も。メイスの落下で増える分にも倍率が掛かる（上乗せはクリティカルの倍率より先に足されるため）。 */
     public static boolean isWeapon(ItemStack stack) {
-        return stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem;
+        return stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem
+                || stack.getItem() instanceof MaceItem;
     }
 
     @SubscribeEvent

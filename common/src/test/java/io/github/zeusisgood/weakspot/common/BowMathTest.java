@@ -65,6 +65,44 @@ public class BowMathTest {
     }
 
     @Test
+    public void hitNeverDrawsPastTheItemsFull() {
+        assertEquals(5, BowMath.addedTicks(0, 5, 10));
+        assertEquals(2, BowMath.addedTicks(8, 5, 10));
+        assertEquals(0, BowMath.addedTicks(10, 5, 10));
+    }
+
+    @Test
+    public void scaledHitIsAQuarterOfTheFullWithTheRemainderCarried() {
+        assertEquals(5, BowMath.scaledHitTicks(5, 20, 0));
+        assertEquals(0, BowMath.nextScaledCarry(5, 20, 0));
+        int[] trident = scaledRun(5, 10, 4);
+        assertEquals(2, trident[0]);
+        assertEquals(3, trident[1]);
+        assertEquals(10, trident[0] + trident[1] + trident[2] + trident[3]);
+        int[] crossbow = scaledRun(5, 25, 4);
+        assertEquals(6, crossbow[0]);
+        assertEquals(6, crossbow[1]);
+        assertEquals(6, crossbow[2]);
+        assertEquals(7, crossbow[3]);
+    }
+
+    private static int[] scaledRun(int hitTicks, int fullTicks, int hits) {
+        int[] ticks = new int[hits];
+        int carry = 0;
+        for (int i = 0; i < hits; i++) {
+            ticks[i] = BowMath.scaledHitTicks(hitTicks, fullTicks, carry);
+            carry = BowMath.nextScaledCarry(hitTicks, fullTicks, carry);
+        }
+        return ticks;
+    }
+
+    @Test
+    public void barValueUsesTheItemsFull() {
+        assertEquals(0.5, BowMath.barValue(5, 10), 1e-9);
+        assertEquals(1.0, BowMath.barValue(30, 25), 1e-9);
+    }
+
+    @Test
     public void barValueStaysInRange() {
         assertEquals(0.0, BowMath.barValue(0), 1e-9);
         assertEquals(0.5, BowMath.barValue(10), 1e-9);

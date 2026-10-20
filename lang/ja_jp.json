@@ -214,6 +214,7 @@
   "weakspot.combo.machine": "機械 %s倍速",
   "weakspot.combo.kind": "%s ×%s",
   "weakspot.combo.shots": "発射 ×%s",
+  "weakspot.combo.crafts": "作成 ×%s",
   "weakspot.combo.title": "%s COMBO!",
   "weakspot.growth.dark": "暗くて育ちません（明るさ %s、9 以上が必要）。たいまつなどで明るくしてください（夜の屋外も暗くなります）",
   "weakspot.growth.stuck": "%s 回当てても育ちません。まわりの条件（水・光・空き・土など）を確かめてください",

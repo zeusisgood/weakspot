@@ -232,7 +232,24 @@ public final class BowMath {
     }
 
     public static int addedTicks(int used, int hitTicks) {
-        return Math.max(0, Math.min(hitTicks, FULL_DRAW_TICKS - used));
+        return addedTicks(used, hitTicks, FULL_DRAW_TICKS);
+    }
+
+    /** fullTicks は、その物を引き切る（装填し切る）までの tick。 */
+    public static int addedTicks(int used, int hitTicks, int fullTicks) {
+        return Math.max(0, Math.min(hitTicks, fullTicks - used));
+    }
+
+    /**
+     * 弓の 1 ヒット分（hitTicks）を、引き切りが fullTicks の物（トライデント・クロスボウ）に割合で直した tick。
+     * carry は前のヒットまでの端数（1 / FULL_DRAW_TICKS tick 単位）で、次の carry は nextScaledCarry。
+     */
+    public static int scaledHitTicks(int hitTicks, int fullTicks, int carry) {
+        return (hitTicks * fullTicks + carry) / FULL_DRAW_TICKS;
+    }
+
+    public static int nextScaledCarry(int hitTicks, int fullTicks, int carry) {
+        return (hitTicks * fullTicks + carry) % FULL_DRAW_TICKS;
     }
 
     public static double overchargeMultiplier(int hits) {
@@ -249,7 +266,11 @@ public final class BowMath {
 
     /** 0〜1 を返す。used は tick（フレームの途中の値でもよい）。 */
     public static double barValue(double used) {
-        return Math.max(0.0, Math.min(1.0, used / FULL_DRAW_TICKS));
+        return barValue(used, FULL_DRAW_TICKS);
+    }
+
+    public static double barValue(double used, int fullTicks) {
+        return fullTicks <= 0 ? 1.0 : Math.max(0.0, Math.min(1.0, used / fullTicks));
     }
 
     public static double wrapDegrees(double degrees) {

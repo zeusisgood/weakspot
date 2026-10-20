@@ -18,6 +18,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.CrafterBlock;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -358,6 +359,15 @@ public final class ClientWeakSpotHandler {
         return machineSpotActive() && Minecraft.getInstance().level != null
                 && Minecraft.getInstance().level.getBlockState(spot.pos).getBlock() instanceof DispenserBlock;
     }
+
+    /** 古いサーバーはクラフターを 1 回の信号で 1 回しか動かさない（毎 tick 動く機械として速くする）。 */
+    static boolean crafterSpotActive() {
+        return machineSpotActive() && Minecraft.getInstance().level != null
+                && Minecraft.getInstance().level.getBlockState(spot.pos).getBlock() instanceof CrafterBlock
+                && ServerFeatures.since(CRAFTER_SINCE);
+    }
+
+    private static final String CRAFTER_SINCE = "1.12.3";
 
     private static void onHit(Minecraft mc) {
         HitKind kind = spot.kind;
