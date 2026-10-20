@@ -2,6 +2,12 @@
 
 [← README に戻る](README.md)。版の決め方は [doc/development.md](doc/development.md#バージョンの方針)。
 
+## 1.12.2
+
+- 配布するファイルの名前を `weakspot-1.12.2-forge-1.12.2.jar` の形に変更（ローダーを名前に追加）。CurseForge・Modrinth の表示名を「Weak Spot Mining 1.12.2 for MC 1.12.2 (Forge)」の形に変更
+- 遊び方・見た目に変更なし
+- 通信内容・設定・保存データに変更なし。1.12.x 同士はそのまま接続可能
+
 ## 1.12.1
 
 - 表面の形が複雑なブロック（Mekanism の機械など）で、ブロックの弱点が当てやすくなるように修正（凹凸ではなく、ブロックの外枠で当たりを判定）
