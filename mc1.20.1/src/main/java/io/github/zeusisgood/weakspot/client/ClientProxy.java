@@ -115,11 +115,6 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public boolean serverSince(String version) {
-        return ServerFeatures.since(version);
-    }
-
-    @Override
     public boolean isKindEnabled(HitKind kind) {
         return KindSwitches.isEnabled(kind);
     }
