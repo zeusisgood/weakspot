@@ -38,7 +38,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - jar の名前と配布サイトの表示名の形（`weakspot-1.12.2-forge-<版>.jar`・`Weak Spot Mining <版> for MC 1.12.2 (Forge)`）は `doc/development.md` の「版の表記」。Mod の版はこの節の規則だけで決め、Minecraft の版と数字が重なるかは考えない。
-- 現行は **1.12.2**、範囲は `"[1.12,1.13)"`（1.21.1 の `PROTOCOL` は `"1.12"`）。
+- 現行は **1.12.3**、範囲は `"[1.12,1.13)"`（1.21.1 の `PROTOCOL` は `"1.12"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -104,4 +104,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.12.2（1.12.2 + Forge と 1.21.1 + NeoForge）。1.21.1 の新しい物（メイス・トライデント・クロスボウ・クラフター）と、ほかの版への対応は `doc/roadmap.md` の保留中の相談。
+現行は 1.12.3（1.12.2 + Forge と 1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。

@@ -8,10 +8,12 @@ import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.item.CrossbowItem;
 
 /**
- * 引き切ったあとは、過剰チャージが上限に届くまで弱点を出す。
- * 引きゲージは、弓の弱点や一時オフに関係なく、bowDrawBarEnabled なら照準の下に出す。
+ * 弓・トライデント・クロスボウ。引き切ったあとは、過剰チャージが上限に届くまで弱点を出す。
+ * 引きゲージは、弓の弱点や一時オフに関係なく、bowDrawBarEnabled なら照準の下に出す。過剰チャージを記録した装填済みの
+ * クロスボウを持っている間は、過剰チャージの目盛りだけを出す。
  */
 final class BowSpot extends AimSpotKind {
 
@@ -38,7 +40,7 @@ final class BowSpot extends AimSpotKind {
     }
 
     private static boolean spotWanted(LocalPlayer player) {
-        return !BowMath.isFull(BowDraw.usedTicks(player)) || BowMath.canOvercharge(BowDraw.overcharge(player));
+        return !BowDraw.isFull(player) || BowMath.canOvercharge(BowDraw.overcharge(player));
     }
 
     /** 馬・豚に乗っているときは、照準の真上か真下だけ（狙うたびに進む向きがぶれないように）。 */
@@ -57,7 +59,7 @@ final class BowSpot extends AimSpotKind {
         // 乗っていれば、加速も続ける（騎射）
         VehicleSpot.onRiderHit(streak);
         // サーバーの返事を待たずに、自分の側でも引きを進める（弓の見た目とゲージのため）
-        if (BowMath.isFull(BowDraw.usedTicks(player))) {
+        if (BowDraw.isFull(player)) {
             BowDraw.addOvercharge(player);
         } else {
             BowDraw.add(player, settings.bowHitTicks);
@@ -71,14 +73,28 @@ final class BowSpot extends AimSpotKind {
 
     @Override
     boolean hasGauge(Minecraft mc, float partialTicks) {
-        return WeakSpotConfig.client.hud.bowDrawBarEnabled && BowDraw.isDrawing(mc.player);
+        return WeakSpotConfig.client.hud.bowDrawBarEnabled
+                && (BowDraw.isDrawing(mc.player) || heldCrossbowOvercharge(mc.player) > 0);
+    }
+
+    /** 撃つときに使われる手の物（メインハンドが先）。 */
+    private static int heldCrossbowOvercharge(LocalPlayer player) {
+        int main = BowDraw.crossbowOvercharge(player.getMainHandItem());
+        return main > 0 || player.getMainHandItem().getItem() instanceof CrossbowItem ? main
+                : BowDraw.crossbowOvercharge(player.getOffhandItem());
     }
 
     @Override
     void drawGauge(Minecraft mc, float partialTicks) {
+        if (!BowDraw.isDrawing(mc.player)) {
+            ChargeGauge.drawMarks(mc, heldCrossbowOvercharge(mc.player), BowMath.MAX_OVERCHARGE_HITS);
+            return;
+        }
         int used = mc.player.getTicksUsingItem();
-        boolean full = BowMath.isFull(used);
-        HudSpot.gauge(mc, full ? 1.0 : BowMath.barValue(used + partialTicks), full ? BAR_FULL : BAR_DRAWING, false);
+        int fullTicks = BowDraw.fullTicks(mc.player);
+        boolean full = used >= fullTicks;
+        HudSpot.gauge(mc, full ? 1.0 : BowMath.barValue(used + partialTicks, fullTicks), full ? BAR_FULL : BAR_DRAWING,
+                false);
         int overcharge = BowDraw.overcharge(mc.player);
         if (full && (overcharge > 0 || spot.has())) {
             ChargeGauge.drawMarks(mc, overcharge, BowMath.MAX_OVERCHARGE_HITS);

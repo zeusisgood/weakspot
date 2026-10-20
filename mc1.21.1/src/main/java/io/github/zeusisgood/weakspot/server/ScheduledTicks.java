@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.server;
 
+import io.github.zeusisgood.weakspot.RightClickTargets;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.ScheduledBoost;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -47,11 +48,11 @@ public final class ScheduledTicks {
 
     /**
     * @param extra この tick に余分に進める tick（端数は MachineBoost が持ち越す）
-    * @param multiplier ディスペンサーの発射の回数に使う
+    * @param multiplier ディスペンサー・クラフターの、1 回の信号で動く回数に使う
     */
     static void boost(ServerLevel level, BlockPos pos, int extra, double multiplier) {
         Block block = level.getBlockState(pos).getBlock();
-        boolean dispenser = block instanceof DispenserBlock;
+        boolean dispenser = RightClickTargets.isBurstMachine(block);
         if ((!dispenser && extra <= 0) || !level.getBlockTicks().hasScheduledTick(pos, block)) {
             return;
         }
@@ -112,7 +113,12 @@ public final class ScheduledTicks {
                 it.remove();
                 continue;
             }
-            ((DispenserBlock) burst.block).dispenseFrom(level, state, pos);
+            if (burst.block instanceof DispenserBlock dispenser) {
+                dispenser.dispenseFrom(level, state, pos);
+            } else {
+                // クラフターの予約の処理は、作る 1 回だけ
+                state.tick(level, pos, level.random);
+            }
             burst.left--;
             burst.nextTick = now + ScheduledBoost.BURST_INTERVAL_TICKS;
             if (burst.left <= 0) {

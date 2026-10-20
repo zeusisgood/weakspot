@@ -194,9 +194,11 @@ final class ComboHud {
     /** 描いた下端を返す（描かなければ top）。 */
     private static float drawKindText(GuiGraphics g, Minecraft mc, float top, HitKind kind, double now) {
         int rgb = MarkerLook.color(kind);
-        if (kind == HitKind.MACHINE && ClientWeakSpotHandler.dispenserSpotActive()) {
+        boolean crafter = kind == HitKind.MACHINE && ClientWeakSpotHandler.crafterSpotActive();
+        if (crafter || kind == HitKind.MACHINE && ClientWeakSpotHandler.dispenserSpotActive()) {
             // 上限の設定も考える
-            return drawKindLabel(g, mc, top, I18n.get("weakspot.combo.shots", dispenseCount(combo)), rgb,
+            return drawKindLabel(g, mc, top,
+                    I18n.get(crafter ? "weakspot.combo.crafts" : "weakspot.combo.shots", dispenseCount(combo)), rgb,
                     ComboDisplay.glowAlpha(now - shotsStepTime), glowRgb(shotsStepCombo));
         } else if (kind == HitKind.MACHINE) {
             // サーバーと同じ計算

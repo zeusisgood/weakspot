@@ -19,7 +19,7 @@ public final class BowHits {
         if (!BowDraw.isDrawing(player)) {
             return;
         }
-        boolean full = BowMath.isFull(BowDraw.usedTicks(player));
+        boolean full = BowDraw.isFull(player);
         if ((full && !BowMath.canOvercharge(BowDraw.overcharge(player))) || !HitGate.ready(player, HitKind.BOW)) {
             return;
         }

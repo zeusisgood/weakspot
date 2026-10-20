@@ -24,8 +24,8 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 | Machine | Sneak and hold right click with an empty hand on a furnace or other machine | Speeds the machine up |
 | Animal | Hold right click with an empty hand on an animal (sneak for horses, villagers, etc.) | Speeds up growing up, breeding cooldown, wool, eggs (and armadillo scutes on 1.21.1) and villager trade restocking |
 | Fishing | Hold a fishing rod and aim at the spot near the bobber | Fish bite sooner |
-| Bow | Aim at the spot while drawing a bow | Draws faster; after a full draw, arrows hit harder |
-| Melee | Hold a sword or axe near enemies and aim at the spot | Charges up your next attack; with a sword, the sweep hits the whole crowd too |
+| Bow | Aim at the spot while drawing a bow (and a trident or crossbow on 1.21.1) | Draws faster; after a full draw, arrows hit harder (a crossbow keeps the bonus until it fires) |
+| Melee | Hold a sword or axe (or a mace on 1.21.1) near enemies and aim at the spot | Charges up your next attack; with a sword, the sweep hits the whole crowd too |
 | Throwing | Hold ender pearls, snowballs, etc. (and wind charges on 1.21.1) and aim at the spot | Your next throw flies faster and farther |
 | Eating | Aim at the spot while eating or drinking | Finishes sooner |
 | Vehicle | Aim at the spot while riding a horse, pig, minecart or boat (and a camel, strider, chest boat or raft on 1.21.1) | Moves faster |
