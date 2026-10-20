@@ -23,13 +23,19 @@ public class ReleaseFilesTest {
         assertEquals("WeakSpotMod.VERSION", VERSION, find(MOD_SOURCE, "String VERSION = \"([^\"]+)\""));
     }
 
-    /** いつも両方の jar を同じ番号で出す。 */
+    /** 1.12.2 のほかの版（gradle.properties の mod_version と Network.PROTOCOL を持つ）。 */
+    private static final String[] OTHER_MINECRAFT_VERSIONS = {"1.20.1", "1.21.1"};
+
+    /** いつも全部の jar を同じ番号で出す。 */
     @Test
     public void everyMinecraftVersionHasTheSameModVersion() {
-        assertEquals("mc1.21.1/gradle.properties mod_version", VERSION,
-                find(ResourceFiles.read("mc1.21.1/gradle.properties"), "(?m)^mod_version=(\\S+)"));
-        assertEquals("mc1.21.1 WeakSpotMod.VERSION", VERSION, find(ResourceFiles.read(
-                "mc1.21.1/src/main/java/io/github/zeusisgood/weakspot/WeakSpotMod.java"), "String VERSION = \"([^\"]+)\""));
+        for (String mc : OTHER_MINECRAFT_VERSIONS) {
+            assertEquals("mc" + mc + "/gradle.properties mod_version", VERSION,
+                    find(ResourceFiles.read("mc" + mc + "/gradle.properties"), "(?m)^mod_version=(\\S+)"));
+            assertEquals("mc" + mc + " WeakSpotMod.VERSION", VERSION, find(ResourceFiles.read(
+                    "mc" + mc + "/src/main/java/io/github/zeusisgood/weakspot/WeakSpotMod.java"),
+                    "String VERSION = \"([^\"]+)\""));
+        }
     }
 
     /** ACCEPTED_VERSIONS は [今のマイナー,次のマイナー)。 */
@@ -42,13 +48,15 @@ public class ReleaseFilesTest {
                 find(MOD_SOURCE, "String ACCEPTED_VERSIONS = \"([^\"]+)\""));
     }
 
-    /** 1.21.1 は、同じマイナーの印（Network.PROTOCOL）同士だけが接続できる。 */
+    /** 1.20.1・1.21.1 は、同じマイナーの印（Network.PROTOCOL）同士だけが接続できる。 */
     @Test
     public void networkProtocolIsTheCurrentMinor() {
         String[] parts = VERSION.split("\\.");
-        assertEquals("mc1.21.1 Network.PROTOCOL", parts[0] + "." + parts[1], find(ResourceFiles.read(
-                "mc1.21.1/src/main/java/io/github/zeusisgood/weakspot/network/Network.java"),
-                "String PROTOCOL = \"([^\"]+)\""));
+        for (String mc : OTHER_MINECRAFT_VERSIONS) {
+            assertEquals("mc" + mc + " Network.PROTOCOL", parts[0] + "." + parts[1], find(ResourceFiles.read(
+                    "mc" + mc + "/src/main/java/io/github/zeusisgood/weakspot/network/Network.java"),
+                    "String PROTOCOL = \"([^\"]+)\""));
+        }
     }
 
     /** README のダウンロードは配布サイトへのリンクだけ（版ごとに直さない）。「最近の更新」は版ごとに足す。 */
@@ -85,11 +93,11 @@ public class ReleaseFilesTest {
         assertTrue("ja_jp.json: " + key, ResourceFiles.lang(ResourceFiles.JA_JP).containsKey(key));
     }
 
-    /** 新しい版の通知（Forge・NeoForge の更新確認）。Minecraft の版ごとの節の両方。 */
+    /** 新しい版の通知（Forge・NeoForge の更新確認）。Minecraft の版ごとの節の全部。 */
     @Test
     public void updateJsonPointsToTheCurrentVersion() {
         String json = ResourceFiles.read("update.json");
-        for (String mc : new String[] {"1.12.2", "1.21.1"}) {
+        for (String mc : new String[] {"1.12.2", "1.20.1", "1.21.1"}) {
             String quoted = Pattern.quote(mc);
             assertEquals("update.json " + mc + "-latest", VERSION,
                     find(json, "\"" + quoted + "-latest\"\\s*:\\s*\"([^\"]+)\""));

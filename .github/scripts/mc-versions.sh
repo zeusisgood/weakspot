@@ -14,6 +14,12 @@ mc_info() {
       CF_JAVA="Java 8"
       CF_TYPE=minecraft-1-12
       ;;
+    1.20.1)
+      LOADER=forge
+      CF_LOADER=Forge
+      CF_JAVA="Java 17"
+      CF_TYPE=minecraft-1-20
+      ;;
     1.21.1)
       LOADER=neoforge
       CF_LOADER=NeoForge

@@ -1,12 +1,15 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.12.3",
-    "1.12.2-recommended": "1.12.3",
-    "1.21.1-latest": "1.12.3",
-    "1.21.1-recommended": "1.12.3"
+    "1.12.2-latest": "1.13.0",
+    "1.12.2-recommended": "1.13.0",
+    "1.20.1-latest": "1.13.0",
+    "1.20.1-recommended": "1.13.0",
+    "1.21.1-latest": "1.13.0",
+    "1.21.1-recommended": "1.13.0"
   },
   "1.12.2": {
+    "1.13.0": "Now available for Minecraft 1.20.1 (Forge)",
     "1.12.3": "1.21.1: weak spots for the mace, trident, crossbow and crafter",
     "1.12.2": "Release files now include the loader name (no gameplay changes)",
     "1.12.1": "Weak spots are easier to hit on complex blocks and piped machines",
@@ -32,7 +35,11 @@
     "1.9.3": "Internal cleanup (no gameplay changes)",
     "1.9.2": "Chat notice when a new version is out"
   },
+  "1.20.1": {
+    "1.13.0": "Now available for Minecraft 1.20.1 (Forge)"
+  },
   "1.21.1": {
+    "1.13.0": "Now available for Minecraft 1.20.1 (Forge)",
     "1.12.3": "1.21.1: weak spots for the mace, trident, crossbow and crafter",
     "1.12.2": "Release files now include the loader name (no gameplay changes)",
     "1.12.1": "Weak spots are easier to hit on complex blocks and piped machines",

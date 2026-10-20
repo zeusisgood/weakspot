@@ -1,6 +1,6 @@
 # Weak Spot Mining
 
-Brings Fortnite-style **weak spot harvesting** to Minecraft 1.12.2 (Forge) and 1.21.1 (NeoForge).
+Brings Fortnite-style **weak spot harvesting** to Minecraft 1.12.2 (Forge), 1.20.1 (Forge) and 1.21.1 (NeoForge).
 
 While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak spot** — appears. Aim at it to speed things up. Hit spots in a row to build a **combo**: the hit sound climbs the scale and the boost grows.
 
@@ -24,11 +24,11 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 | Machine | Sneak and hold right click with an empty hand on a furnace or other machine | Speeds the machine up |
 | Animal | Hold right click with an empty hand on an animal (sneak for horses, villagers, etc.) | Speeds up growing up, breeding cooldown, wool, eggs (and armadillo scutes on 1.21.1) and villager trade restocking |
 | Fishing | Hold a fishing rod and aim at the spot near the bobber | Fish bite sooner |
-| Bow | Aim at the spot while drawing a bow (and a trident or crossbow on 1.21.1) | Draws faster; after a full draw, arrows hit harder (a crossbow keeps the bonus until it fires) |
+| Bow | Aim at the spot while drawing a bow (and a trident or crossbow on 1.20.1 and 1.21.1) | Draws faster; after a full draw, arrows hit harder (a crossbow keeps the bonus until it fires) |
 | Melee | Hold a sword or axe (or a mace on 1.21.1) near enemies and aim at the spot | Charges up your next attack; with a sword, the sweep hits the whole crowd too |
 | Throwing | Hold ender pearls, snowballs, etc. (and wind charges on 1.21.1) and aim at the spot | Your next throw flies faster and farther |
 | Eating | Aim at the spot while eating or drinking | Finishes sooner |
-| Vehicle | Aim at the spot while riding a horse, pig, minecart or boat (and a camel, strider, chest boat or raft on 1.21.1) | Moves faster |
+| Vehicle | Aim at the spot while riding a horse, pig, minecart or boat (and a camel, strider, chest boat or raft on 1.20.1 and 1.21.1) | Moves faster |
 | Ladder | Aim at the spot while climbing a ladder or vines | Climbs faster |
 | Sprint | Aim at the spot while sprinting | Runs faster |
 | Elytra | Aim at the spot while flying | Launches you where you look |
@@ -52,13 +52,13 @@ Keys can be changed under Options → Controls → Weak Spot Mining.
 
 ## Installation
 
-- Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with Forge 14.23.5.2860) or **1.21.1 + NeoForge** (developed and tested with NeoForge 21.1.264). Download the file for your Minecraft version; both have the same features.
+- Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with Forge 14.23.5.2860), **1.20.1 + Forge** (developed and tested with Forge 47.4.28) or **1.21.1 + NeoForge** (developed and tested with NeoForge 21.1.264). Download the file for your Minecraft version; all of them have the same features.
 - **Single player**: install it on your client.
-- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.12.x) and the same Minecraft version.
+- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.13.x) and the same Minecraft version.
 
 ## Settings
 
-Open the Mods menu, or edit `config/weakspot.cfg` (1.12.2) / `config/weakspot-server.toml` and `config/weakspot-client.toml` (1.21.1). Settings are grouped into server and client categories, and every setting has a description in English. Server settings (such as turning off a kind) are sent to connected players automatically.
+Open the Mods menu, or edit `config/weakspot.cfg` (1.12.2) / `config/weakspot-server.toml` and `config/weakspot-client.toml` (1.20.1, 1.21.1). Settings are grouped into server and client categories, and every setting has a description in English. Server settings (such as turning off a kind) are sent to connected players automatically.
 
 ## Bug reports
 

@@ -21,6 +21,8 @@ jobs:
         include:
           - mc: '1.12.2'
             java: '8'
+          - mc: '1.20.1'
+            java: '17'
           - mc: '1.21.1'
             java: '21'
     defaults:
