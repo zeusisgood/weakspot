@@ -183,7 +183,7 @@
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
 | 弓の弱点 | `server.bow.bowWeakSpotEnabled` | true | 弓の弱点のオン／オフ |
-| 1 ヒットで進む引き | `server.bow.bowHitTicks` | 5 | 1 ヒットごとに進める弓の引き絞りの tick 数（バニラの弓は 20 tick で引き切り。引き切りは超えない）。0 で無効 |
+| 1 ヒットで進む引き | `server.bow.bowHitTicks` | 5 | 1 ヒットごとに進める弓の引き絞りの tick 数（バニラの弓は 20 tick で引き切り。引き切りは超えない）。1.21.1 版のトライデント・クロスボウは、満タンに対して同じ割合（初期値なら 1/4）。0 で無効 |
 | ヒットの最小間隔 | `server.bow.bowMinHitIntervalTicks` | 4 | 弓ヒットの最小受付間隔（tick） |
 | 引き具合のゲージ | `client.hud.bowDrawBarEnabled` | true | 弓を引いている間、照準の下に引き具合のゲージを表示するか。弓の弱点や HOME キーのオン／オフに関係なく表示 |
 

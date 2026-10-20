@@ -34,6 +34,10 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.12.3
+
+- 1.21.1: weak spots for the mace, trident, crossbow and crafter
+
 ### 1.12.2
 
 - Release files now include the loader name (no gameplay changes)
@@ -41,10 +45,6 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 ### 1.12.1
 
 - Weak spots are easier to hit on complex blocks and piped machines
-
-### 1.12.0
-
-- Now available for Minecraft 1.21.1 (NeoForge)
 
 ## More
 

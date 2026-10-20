@@ -75,7 +75,7 @@
   - `MeleeCharge.isWeapon` にメイス
   - `BowDraw`（と `client/BowSpot`・`server/BowHits`）が、弓・トライデント・クロスボウを扱う。対象の判定と「満タンの tick 数」を 1 か所にまとめる。クロスボウの記録の読み書き（`custom_data`）も `BowDraw` の近く
   - トライデントのダメージ・激流・クロスボウの矢に倍率を掛ける所は `BowDraw` の近く（弓の `ArrowLooseEvent` → 同じ tick の矢、と同じ考え）
-  - クラフターは `RightClickTargets`（対象の判定）と `server/ScheduledTicks`（待ちをなくして複数回作る。ディスペンサーの `dispenseFrom` と同じ扱い）。非公開のメソッドに触るなら `accesstransformer.cfg` に足す
+  - クラフターは `RightClickTargets`（対象の判定）と `server/ScheduledTicks`（待ちをなくして複数回作る。ディスペンサーの `dispenseFrom` と同じ扱い）。非公開のメソッドに触るなら `accesstransformer.cfg` に足す（注: 実装では、クラフターの 2 回目からは公開の `state.tick` を呼ぶので足していない。代わりに、離した tick の引きを入れるため `LivingEntity.useItemRemaining` を足した）
   - クライアントの 4 つの弱点を `ServerFeatures.since("1.12.3")` で囲む
 - 1.12.2 版: 変えない
 
@@ -90,7 +90,7 @@
   - 近接: 1.21.1 版ではメイスも対象。落下で増える分にも溜めが掛かること
   - 機械（レッドストーン部品の加速）: 1.21.1 版ではクラフターも、ディスペンサーと同じ形で対象。表示は「作成 ×3」
   - 投擲物: トライデントは弓の弱点になること
-- ガイドの本: `weakspot.guide.bow.*`（トライデント・クロスボウ）・`weakspot.guide.melee.*`（メイス）・機械のページ（クラフター）。1 ページ 14 行に収める。版の注記（1.21.1 版のみ）は短く「（1.21.1）」などで
+- ガイドの本: `weakspot.guide.bow.*`（トライデント・クロスボウ）・`weakspot.guide.melee.*`（メイス）・機械のページ（クラフター）（注: 実装では、機械のページはディスペンサーにも触れていないので、クラフターも足さなかった）。1 ページ 14 行に収める。版の注記（1.21.1 版のみ）は短く「（1.21.1）」などで
 - `doc/architecture.md`: 「照準のまわり・画面の上の弱点」の弓・近接の行、レッドストーン部品の加速（クラフター）
 - `doc/store/description.md`: 表の Bow・Melee の行に 1.21.1 の物を足す（PR の本文と報告に「CurseForge の説明文を貼り替えてください」と書き、全文を添付する）
 - `doc/roadmap.md`: 「1.21.1 の新しい物（のちの相談）」を、1.12.3 で決めたことの記録（済み）にする
