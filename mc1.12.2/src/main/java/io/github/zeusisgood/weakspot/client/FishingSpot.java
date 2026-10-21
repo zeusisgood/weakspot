@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
+import io.github.zeusisgood.weakspot.FishingWater;
 import io.github.zeusisgood.weakspot.PlayerRules;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.FishingMath;
@@ -103,7 +104,7 @@ final class FishingSpot {
         EntityFishHook hook = mc.player.fishEntity;
         boolean holdsRod = mc.player.getHeldItemMainhand().getItem() instanceof ItemFishingRod
                 || mc.player.getHeldItemOffhand().getItem() instanceof ItemFishingRod;
-        return hook != null && !hook.isDead && hook.isInWater() && holdsRod ? hook : null;
+        return hook != null && !hook.isDead && FishingWater.isFloating(hook) && holdsRod ? hook : null;
     }
 
     private static boolean fresh() {

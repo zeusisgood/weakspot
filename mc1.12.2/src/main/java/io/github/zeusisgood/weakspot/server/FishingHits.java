@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.server;
 
+import io.github.zeusisgood.weakspot.FishingWater;
 import io.github.zeusisgood.weakspot.Reflect;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.FishingMath;
@@ -12,9 +13,6 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.block.BlockLiquid;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
@@ -67,17 +65,7 @@ public final class FishingHits {
 
     /** 弱点が出る段階。 */
     static boolean isWaiting(EntityFishHook hook) {
-        return waitingPhase(hook) && inWaterBlock(hook);
-    }
-
-    /**
-    * バニラの EntityFishHook#onUpdate は、浮いている状態（BOBBING）でも、水で液体の高さ &gt; 0 のときしか待ち時間を減らさない。
-    * 水面ぎりぎりやブロックの縁に引っかかると、浮いている状態のまま位置が水の外になり、魚が来なくなる。
-    */
-    static boolean inWaterBlock(EntityFishHook hook) {
-        BlockPos pos = new BlockPos(hook);
-        IBlockState state = hook.world.getBlockState(pos);
-        return state.getMaterial() == Material.WATER && BlockLiquid.getBlockLiquidHeight(state, hook.world, pos) > 0;
+        return waitingPhase(hook) && FishingWater.isFloating(hook);
     }
 
     /** 浮きの位置が水かは見ない。 */

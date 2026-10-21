@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.server;
 
+import io.github.zeusisgood.weakspot.FishingWater;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.FishingMath;
 import io.github.zeusisgood.weakspot.common.HitBudget;
@@ -9,13 +10,10 @@ import io.github.zeusisgood.weakspot.network.StateMessage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.FishingRodItem;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -42,17 +40,7 @@ public final class FishingHits {
 
     /** 弱点が出る段階。 */
     static boolean isWaiting(FishingHook hook) {
-        return waitingPhase(hook) && inWaterBlock(hook);
-    }
-
-    /**
-    * バニラの FishingHook#tick は、浮いている状態（BOBBING）でも、水で液体の高さ &gt; 0 のときしか待ち時間を減らさない。
-    * 水面ぎりぎりやブロックの縁に引っかかると、浮いている状態のまま位置が水の外になり、魚が来なくなる。
-    */
-    static boolean inWaterBlock(FishingHook hook) {
-        BlockPos pos = hook.blockPosition();
-        FluidState fluid = hook.level().getFluidState(pos);
-        return fluid.is(FluidTags.WATER) && fluid.getHeight(hook.level(), pos) > 0;
+        return waitingPhase(hook) && FishingWater.isFloating(hook);
     }
 
     /** 浮きの位置が水かは見ない。 */
