@@ -13,7 +13,8 @@ import org.joml.Matrix4f;
 /**
  * 色だけの図形を描く（1.12.2 の Tessellator と GL11 の形に近づけた、1.20.1・1.21.1 版の部品）。
  * 1.17 からは GL_LINE_LOOP がないので、線の輪は LINE_LOOP で始めて endLoop で最初の点に戻す。
- * 頂点は pose（GUI なら GuiGraphics#pose、ワールドなら RenderLevelStageEvent#getPoseStack。カメラの向きが入っている）を掛けてから渡す。
+ * GUI の頂点は GuiGraphics#pose を掛けてから渡す。ワールドでは null（AFTER_WEATHER ではカメラの向きがモデルビューにもう入っているので、
+ * カメラからの相対座標をそのまま）。
  */
 final class Draw {
 

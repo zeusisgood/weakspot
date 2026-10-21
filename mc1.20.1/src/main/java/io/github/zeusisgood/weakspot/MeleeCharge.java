@@ -17,6 +17,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -78,7 +79,9 @@ public final class MeleeCharge {
         }
         double charge = CHARGES.take(player);
         float multiplier = (float) (CRIT_MULTIPLIER * (1 + charge));
-        boolean critical = event.isVanillaCritical();
+        // Forge がクリティカルにするのと同じ条件（ほかの Mod が ALLOW で強めたクリティカルも、倍率を置き換える）
+        boolean critical = event.getResult() == Event.Result.ALLOW
+                || (event.isVanillaCritical() && event.getResult() == Event.Result.DEFAULT);
         if (critical) {
             event.setDamageModifier(multiplier);
         }

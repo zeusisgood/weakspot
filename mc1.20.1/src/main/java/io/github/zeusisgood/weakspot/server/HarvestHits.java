@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.ForgeHooks;
 
 /**
- * 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物は、ほかの Mod も変えられるように BlockDropsEvent を通す。
+ * 保護の Mod が止められるように、壊すときの BreakEvent を出す。収穫物はそのままワールドに出す（1.20.1 の Forge に BlockDropsEvent はない）。
  * 植え直しには収穫物の「種」（getCloneItemStack）を 1 つ使い、なければ使わずに植え直す（不運で畑に穴が空かないように）。
  */
 final class HarvestHits {
