@@ -20,7 +20,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 public final class Network {
 
     /** 接続できる相手の版の印。マイナーを上げたら変える（WeakSpotMod.ACCEPTED_VERSIONS と同じ考え）。 */
-    private static final String PROTOCOL = "1.12";
+    private static final String PROTOCOL = "1.13";
 
     private static final Map<Class<?>, CustomPacketPayload.Type<?>> TYPES = new HashMap<>();
 

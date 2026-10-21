@@ -7,7 +7,7 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.21.1 のビルドは `mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方は両方の版で同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.21.1 版」にまとめる。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
@@ -17,8 +17,8 @@
 
 ### ブロックの弱点の当たりと置き場所
 
-- 採掘・成長・機械・収穫の弱点（`client/WeakSpot` のエンティティでないもの）は、外枠の箱（1.12.2 の `getSelectedBoundingBox`、1.21.1 の `getShape(...).bounds()`）の面に描き、当たりと面も、実際に当たった点・面ではなく、外枠の箱と照準の線（目から視線の向き）で決める（`ClientWeakSpotHandler.blockAim`・`common/FaceMath.rayEntryFace` / `rayPlane`）。凹凸のあるブロック（Mekanism の機械など）では、照準のわずかな動きで当たる面が変わり、採掘の弱点が出し直されて飛び回り、右クリックの弱点は面が合わず外れるため。線が箱に入らない（目が箱の中など）ときは、バニラの照準の面と点に戻す。ブロックへの照準そのもの（バニラがそのブロックを指しているか）は見るので、隣のブロックを狙って当たることはない。サーバーは面・点を見ていないので、クライアントだけの変更で済む。
-- 置く・移る場所は、面の真正面の隣のブロックの形を面に写した長方形を避ける（`common/WeakSpotPlacer.place` の `blocked`。1.21.1 は `getShape(...).toAabbs()`、1.12.2 は当たり判定の箱、なければ選択の枠。パイプの本体と腕を別々に避けるため、箱ごとに分ける）。パイプの後ろの弱点は、バニラの照準が手前のパイプを指すので当てられないため。パイプ越しでも当たりにはしない（採掘ではパイプを掘ってしまい、右クリックはパイプへ行く。サーバーの検証も変える必要がある）。空気・1 マスの立方体（面が見えない）は避けない。全部の候補が重なるときは、避けずに置く。ほかのプレイヤーから届いたマークは、届いた位置のまま描く。
+- 採掘・成長・機械・収穫の弱点（`client/WeakSpot` のエンティティでないもの）は、外枠の箱（1.12.2 の `getSelectedBoundingBox`、1.20.1・1.21.1 の `getShape(...).bounds()`）の面に描き、当たりと面も、実際に当たった点・面ではなく、外枠の箱と照準の線（目から視線の向き）で決める（`ClientWeakSpotHandler.blockAim`・`common/FaceMath.rayEntryFace` / `rayPlane`）。凹凸のあるブロック（Mekanism の機械など）では、照準のわずかな動きで当たる面が変わり、採掘の弱点が出し直されて飛び回り、右クリックの弱点は面が合わず外れるため。線が箱に入らない（目が箱の中など）ときは、バニラの照準の面と点に戻す。ブロックへの照準そのもの（バニラがそのブロックを指しているか）は見るので、隣のブロックを狙って当たることはない。サーバーは面・点を見ていないので、クライアントだけの変更で済む。
+- 置く・移る場所は、面の真正面の隣のブロックの形を面に写した長方形を避ける（`common/WeakSpotPlacer.place` の `blocked`。1.20.1・1.21.1 は `getShape(...).toAabbs()`、1.12.2 は当たり判定の箱、なければ選択の枠。パイプの本体と腕を別々に避けるため、箱ごとに分ける）。パイプの後ろの弱点は、バニラの照準が手前のパイプを指すので当てられないため。パイプ越しでも当たりにはしない（採掘ではパイプを掘ってしまい、右クリックはパイプへ行く。サーバーの検証も変える必要がある）。空気・1 マスの立方体（面が見えない）は避けない。全部の候補が重なるときは、避けずに置く。ほかのプレイヤーから届いたマークは、届いた位置のまま描く。
 
 ### 右クリックの弱点（成長・機械・収穫）
 
@@ -97,7 +97,7 @@
 
 ### 通信
 
-`network/`（1.12.2 は `WeakSpotMod.preInit` で登録し、番号は登録順。1.21.1 は `Network.register` で、ID は `weakspot:<名前>`。中身の並びは両方の版で同じ）。
+`network/`（1.12.2 は `WeakSpotMod.preInit` で登録し、番号は登録順。1.21.1 は `Network.register` で、ID は `weakspot:<名前>`。1.20.1 は `Network.register` で `SimpleChannel`（`weakspot:main`）に登録し、番号は登録順。中身の並びはどの版でも同じ）。
 
 | 番号 | メッセージ | 向き | 中身 |
 |---|---|---|---|
@@ -112,7 +112,7 @@
 | 11 | `OtherComboMessage` | S→C | 頭の上のコンボと、本人のコンボの直し |
 | 12 / 13 | `TargetMessage` / `TargetActionMessage` | S→C / C→S | 的当て |
 | 14 | `OtherTargetMessage` | S→C | 近くのプレイヤーの的当てのヒット数 |
-| -（1.21.1 版のみ） | `HelloMessage` | C→S | 接続直後に自分の Mod の版（NeoForge は相手の Mod の版を教えてくれないため。`PlayerText.clientSince`・`VersionCheck` が使う） |
+| -（1.20.1・1.21.1 版のみ） | `HelloMessage` | C→S | 接続直後に自分の Mod の版（Forge 47・NeoForge は相手の Mod の版を教えてくれないため。`PlayerText.clientSince`・`VersionCheck` が使う） |
 
 ## クライアントを信じる範囲
 
@@ -140,9 +140,9 @@
 - サーバーは、クリックした座標と前の座標の今の状態を、その tick の終わりに本人にだけ `SPacketBlockChange` で送り直す（`ServerBoostTracker.queueResend`）。古いクライアントや、ほかの Mod で速さがずれたときも、同じ tick のうちに戻る。
 - 保留の破壊: バニラの `blockRemoving` は、進捗が 0.7 未満で掘り終わりが届くと破壊を保留にする（`receivedFinishDiggingPacket` / `delayedDestroyPos`）。**保留は 1 枠だけ**で、埋まっていると次の不足は捨てられて STOP の返事でブロックが戻る。保留中のブロックは「今の速さ × 経過 tick ≥ 1.0」で壊れる。違うブロックを掘り始めても、保留中のブロックには追加進捗を掛け続ける（`ServerBoostTracker.DELAYED`）。保留のあとに壊れたら、統計・耐久回復に数える。
 
-## 1.21.1 版
+## 1.20.1 版・1.21.1 版
 
-共通の考え方（上の各節）は同じで、Minecraft・NeoForge の API で違う所だけを書く。
+共通の考え方（上の各節）は同じで、Minecraft・ローダーの API で違う所だけを書く。1.20.1 版は 1.21.1 版を手本に移したもの。下の各項目は 1.21.1 版のことで、1.20.1 版も同じ（違う所だけを、最後の「1.20.1 版で違う所」に書く）。
 
 - 入口: `WeakSpotMod`（`@Mod`。設定・通信・登録・サーバーのイベント）。物理クライアントでは `client.ClientProxy` を名前で作る（専用サーバーでクライアントのクラスを読まないため。1.12.2 の `@SidedProxy` と同じ考え）。アイテムと保存データの登録は `Registration`。
 - 非公開のメンバーは `accesstransformer.cfg`（1.12.2 の `Reflect` に当たる）。読めないときの代わりの動き（1.12.2 の「読めなければ弱点を出さない」）は要らないので、`EnchantHits`・`PortalHits` の `isAvailable` はいつも true。
@@ -150,7 +150,7 @@
 - HUD は `RenderGuiEvent.Post`、GUI の上は `ScreenEvent.Render.Post`。色だけの図形は `client/Draw`（1.21 には `GL_LINE_LOOP` がないので、線の輪は最初の点に戻して閉じる）。
 - 採掘: クライアントの `MultiPlayerGameMode` とサーバーの `ServerPlayerGameMode` の判定（積算／「破壊速度 × (経過tick+1) ≥ 0.7」・保留 1 枠）は 1.12.2 と同じなので、`BoostMath` をそのまま使う。NeoForge は `LeftClickBlock` を、クライアントでは押している間毎 tick（`CLIENT_HOLD`）、サーバーでは掘り終わり・中断でも送るので、ブーストを捨てるのは `START` だけ。サーバーが状態を送り直すのは `ClientboundBlockUpdatePacket`。
 - 機械: かまどなどの ticker はサーバーにしかないので、毎 tick 動くブロックの一覧はサーバーが作って `SyncedSettings.tickingBlocks` で送る（1.21.1 版だけの項目）。加速は ticker を余分に呼ぶ。レッドストーン部品の予約は、チャンクの `LevelChunkTicks` から探して早め、同じ位置・ブロックの予約を消してから入れ直す（予約は 1 つまでのため）。クラフターは ticker も持つが（作る見た目の動きだけ）、ディスペンサーと同じ「1 回の信号で複数回」の部品として扱う（`RightClickTargets.isBurstMachine`。2 回目からは予約の処理 `state.tick` を呼ぶ）。
-- 弓（`BowDraw`）: トライデント・クロスボウも同じ弱点。引き切りの tick は `BowDraw.fullTicks`（クロスボウは高速装填を含む）、1 ヒットの量は `BowMath.scaledHitTicks`（弓の `bowHitTicks` と同じ割合。端数は持ち越す）。どちらもバニラが離したときの残り時間で引きを決めるので、まだ減らしていない分は `LivingEntityUseItemEvent.Stop` で `useItemRemaining` に入れる。過剰チャージ: トライデントは出た `ThrownTrident`、クロスボウは撃った矢（`setBaseDamage`）・花火に掛ける。トライデント・花火は威力が baseDamage で決まらないので、persistent data に倍率を書いて `LivingIncomingDamageEvent` で掛ける。激流は、バニラが押すのと同じ向きに倍率の残りの分を両側で押す。クロスボウの過剰チャージは、装填したとき（Stop）にアイテムの `custom_data`（`weakspot_overcharge`）に書き、撃つ直前（`RightClickItem`）に読んで消す（持ち替えても残すため。バニラの欄なので、Mod を外しても読める）。
+- 弓（`BowDraw`）: トライデント・クロスボウも同じ弱点。引き切りの tick は `BowDraw.fullTicks`（クロスボウは高速装填を含む）、1 ヒットの量は `BowMath.scaledHitTicks`（弓の `bowHitTicks` と同じ割合。端数は持ち越す）。どちらもバニラが離したときの残り時間で引きを決めるので、まだ減らしていない分は `LivingEntityUseItemEvent.Stop` で `useItemRemaining` に入れる。過剰チャージ: トライデントは出た `ThrownTrident`、クロスボウは撃った矢（`setBaseDamage`）・花火に掛ける。トライデント・花火は威力が baseDamage で決まらないので、persistent data に倍率を書いて `LivingIncomingDamageEvent` で掛ける。激流は、バニラが押すのと同じ向きに倍率の残りの分を両側で押す。クロスボウの過剰チャージは、装填したとき（Stop）にアイテムの `custom_data`（`weakspot_overcharge`）に書き（矢がなく装填できないときは書かない）、撃つ直前（`RightClickItem`）に読んで消す（持ち替えても残すため。バニラの欄なので、Mod を外しても読める）。
 - 近接: メイスも対象（`MeleeCharge.isWeapon`）。落下の上乗せはバニラがクリティカルの倍率より先に足すので、溜めの倍率は落下の分にも掛かる。
 - 動物: アルマジロのウロコは、ニワトリの卵と同じ間隔（6000〜11999 tick）なので、卵の設定と `AnimalTimers.eggAfterHit` を使い、`Timer.SCUTE` で別のバーにする。村人の繁殖の案内は、1.14 以降の条件（空いているベッド・食べ物の点数）で `VillagerBreeding.reasonsWithBeds`。取引の段階の解放は、職業レベルを 1 つ上げる。
 - ネザーゲート: 待ちは `Entity.portalProcess`（`PortalProcessor.portalTime`）。ネザーゲートだけ（エンドのゲートは待たない）。
@@ -158,6 +158,19 @@
 - 保存データ: プレイヤーはデータアタッチメント `Registration.PLAYER_DATA`（死んでも残す。中身のキーは 1.12.2 の `PlayerPersisted.weakspot` と同じ）、順位はワールドの `SavedData`（`weakspot_leaderboard`）。
 - 設定: `ModConfigSpec` を、`ServerConfig`・`ClientConfig` のフィールドと注釈（`config/Config`）からリフレクションで組む（項目の名前・範囲・説明を 1.12.2 と 1 か所で揃えるため）。ファイルを保存すると NeoForge が読み直し（`ModConfigEvent.Reloading`）、サーバーの項目なら全員に送り直す。設定画面は `WeakSpotGuiFactory`（NeoForge の標準の画面はファイルのカテゴリの並びになるので、`SettingGroups` のまとめで自作）。
 - コマンド: サーバーの `/weakspot` は Brigadier。クライアントの `/weakspot bug`・`skipupdate` は `RegisterClientCommandsEvent`（クライアントに無いサブコマンドは、NeoForge がそのままサーバーへ送る）。
+
+### 1.20.1 版で違う所
+
+- ローダーは Forge 47（ForgeGradle 6）。動いているときの名前は **SRG 名**なので、`accesstransformer.cfg` は SRG 名で書き、名前で探すリフレクション（`HeldItems` の右クリックのメソッド）は Mojang の名前と SRG 名の両方を見る（1.21.1 は動いているときも Mojang の名前）。
+- 通信: `SimpleChannel`（`Network.PROTOCOL` が同じ相手だけ。ハンドラーはメインのスレッドへ回す）。メッセージの中身は 1.21.1 と同じ。
+- イベント: tick は `TickEvent`（`phase` で前後を分ける）、設定の読み込みは `ModConfigEvent.Loading`・`Reloading`、近接の倍率は `LivingHurtEvent`（1.21.1 の `LivingIncomingDamageEvent` に当たる）。`RenderLevelStageEvent` の `AFTER_WEATHER` では、イベントのポーズスタック（カメラの向き）がモデルビューにもう掛かっているので、頂点はカメラからの相対座標のまま渡し、`ScreenProjection.onFrame` にはポーズスタックの行列を渡す。
+- 保存データ: プレイヤーの統計は `getPersistentData()` の `PlayerPersisted` の下の `weakspot`（1.12.2 と同じ。死んでも残る）。ガイドの本・クロスボウの過剰チャージ（`weakspot_overcharge`）はアイテムの NBT。
+- 届く距離: 生き物は Forge の `canReach(entity, 3.0)`、ブロックは `canReach(pos, 1.5)`（どちらも Forge 47.1.32 の右クリックの受け付けと同じ。47.4 の `canReachRaw` は下限の版にないので使わない）。
+- 移動速度の修正は UUID で付け外しする（1.12.2 と同じ UUID）。
+- 収穫: 壊すときの許可は `ForgeHooks.onBlockBreakEvent`、収穫物はそのままワールドに出す（1.20.1 の Forge に `BlockDropsEvent` はない）。
+- ネザーゲート: 待ちは `Entity.portalTime`（ネザーゲートの中でだけ増える）と `getPortalWaitTime()`。
+- 1.20.1 にない物（アルマジロ・ウィンドチャージ・メイス・クラフター）の処理はない。機械の「1 回の信号で複数回」はディスペンサー・ドロッパーだけ。
+- 採掘の判定（積算／「破壊速度 × (経過tick+1) ≥ 0.7」・保留 1 枠）と `LeftClickBlock` の `START`・`CLIENT_HOLD` は 1.21.1 と同じ。
 
 ## 設定
 

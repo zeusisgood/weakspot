@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[47,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/zeusisgood/weakspot/issues"
+
+[[mods]]
+modId = "weakspot"
+version = "${version}"
+displayName = "Weak Spot Mining"
+description = '''Fortnite-style weak spots for mining, farming, travel and more. Aim at the glowing circle to speed things up.'''
+logoFile = "logo.png"
+authors = "zeusisgood"
+displayURL = "https://github.com/zeusisgood/weakspot"
+updateJSONURL = "https://raw.githubusercontent.com/zeusisgood/weakspot/main/update.json"
+
+[[dependencies.weakspot]]
+modId = "forge"
+mandatory = true
+versionRange = "[47.1.32,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.weakspot]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[${minecraft_version}]"
+ordering = "NONE"
+side = "BOTH"

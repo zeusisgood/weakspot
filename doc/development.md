@@ -7,15 +7,20 @@
 | 版 | ローダー（開発・動作確認） | ビルド | JDK |
 |---|---|---|---|
 | 1.12.2 | **Forge 14.23.5.2860**（公式 MDK、ForgeGradle 3 + Gradle 4.9） | `mc1.12.2/` | 8 |
+| 1.20.1 | **Forge 47.1.32**（ForgeGradle 6 + Gradle 8。名前は Mojang の名前） | `mc1.20.1/` | 17 |
 | 1.21.1 | **NeoForge 21.1.264**（ModDevGradle 2 + Gradle 8。名前は Mojang の名前） | `mc1.21.1/` | 21 |
 
-1.12.2 版は Mod 側で Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。1.21.1 版は `neoforge.mods.toml` で NeoForge 21.1.264 以上を求めます。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます（1.21.1 には JDK 21 を足す）。
+1.12.2 版は Mod 側で Forge の版を指定していないため、1.12.2 用の Forge であれば読み込まれますが、古いビルドでの動作は確認していません。1.20.1 版は `mods.toml` で Forge 47.1.32 以上（左クリックの `LeftClickBlock.Action` が入った版。古い Modpack・サーバーでも使えるように、ビルドもこの版で行い、新しい API を使っていないことを確かめる）、1.21.1 版は `neoforge.mods.toml` で NeoForge 21.1.264 以上を求めます。リポジトリの devcontainer を使うと、JDK 8 と Claude Code が入った環境で開発できます（1.20.1 には JDK 17、1.21.1 には JDK 21 を足す）。
 
 ```sh
 cd mc1.12.2
 ./gradlew build        # ビルドとテスト（common/ のテストも）。成果物は mc1.12.2/build/libs/weakspot-1.12.2-forge-<版>.jar
 ./gradlew test         # 単体テストのみ
 ./gradlew runServer    # 開発用の専用サーバーを起動（mc1.12.2/run/ で起動。初回は run/eula.txt の同意が必要）
+
+cd mc1.20.1            # JDK 17 で
+./gradlew build        # 成果物は mc1.20.1/build/libs/weakspot-1.20.1-forge-<版>.jar（reobf 済み。common/ のテストも流れる）
+./gradlew runServer    # mc1.20.1/run/ で起動
 
 cd mc1.21.1            # JDK 21 で
 ./gradlew build        # 成果物は mc1.21.1/build/libs/weakspot-1.21.1-neoforge-<版>.jar（common/ のテストも流れる）
@@ -30,6 +35,7 @@ cd mc1.21.1            # JDK 21 で
 common/      版に依存しない計算とそのテスト（Java 8 の書き方）。各版のビルドが ../common をソースとして読む
 lang/        翻訳の正本（en_us.json・ja_jp.json。読みやすさのため 1 行に 1 つの "キー": "値"）。1.12.2 はビルドのときに .lang を作る
 mc1.12.2/    1.12.2 + Forge のビルド（Gradle 4.9、JDK 8）
+mc1.20.1/    1.20.1 + Forge のビルド（Gradle 8、JDK 17）。翻訳は ../lang の json をそのまま jar に入れる
 mc1.21.1/    1.21.1 + NeoForge のビルド（Gradle 8、JDK 21）。翻訳は ../lang の json をそのまま jar に入れる
 doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 ```
@@ -44,7 +50,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 - テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）の確認も含まれます。配布サイトへ上げるスクリプトは、CI で `shellcheck` にかけます。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
 - ビルドは Minecraft の版ごと（`ci.yml` の matrix の `build-mc`。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。Merge に必須のチェック「`build`」は、全部の版が通ったときだけ成功するまとめのジョブ（ブランチの保護の設定は変えなくてよい）。
-- `main` に取り込まれた時、`mc1.12.2/build.gradle` の `version` がまだ Release のない版なら、全部の版のビルドが通ったときだけ、同じワークフローがタグ `vX.Y.Z` と GitHub Release を 1 つ自動で作成します（本文は `CHANGELOG.md` のその版の節、全部の版の jar `weakspot-<Minecraft の版>-<版>.jar` を添付）。版を上げない変更（文書だけなど）では作成しません。
+- `main` に取り込まれた時、`mc1.12.2/build.gradle` の `version` がまだ Release のない版なら、全部の版のビルドが通ったときだけ、同じワークフローがタグ `vX.Y.Z` と GitHub Release を 1 つ自動で作成します（本文は `CHANGELOG.md` のその版の節、全部の版の jar `weakspot-<Minecraft の版>-<ローダー>-<版>.jar` を添付）。版を上げない変更（文書だけなど）では作成しません。
 - 続けて、Release の jar を Minecraft の版ごとに Modrinth と CurseForge にも上げます（下の「配布サイト」）。
 
 ## バージョンの方針
@@ -71,6 +77,9 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
   - devcontainer が使えない環境（クラウドのセッションなど）では、FML の `NetworkRegistry.newChannel` の NPE で落ちる。そこでは `runServer` での確認はしない（ビルドとテストは通す。jar はユーザーが試す）。
   - 起動ログの `module-info.class ... IllegalArgumentException`（`Unable to read a class file correctly`）は FG3 + 1.12 でいつも出るノイズ。`Missing English translation for weakspot: .../build/classes/java/main/assets/...` の WARN も、開発環境のリソースの置き場所によるノイズ。
 - 1.21.1: クラウドでは `apt-get install -y openjdk-21-jdk-headless`。ネットワークの許可に `maven.neoforged.net`・`piston-meta.mojang.com`・`piston-data.mojang.com`・`libraries.minecraft.net`・`resources.download.minecraft.net` も足す。初回のビルドは Minecraft の展開と再コンパイルで数分かかる。非公開のフィールド・メソッドは**アクセストランスフォーマー**（`mc1.21.1/src/main/resources/META-INF/accesstransformer.cfg`。`neoforge.mods.toml` の `[[accessTransformers]]` で読む）。名前を間違えるとビルドの「recompile」で止まる。上書きしているサブクラスがあれば、そちらも同じ公開範囲にする（例: ディスペンサーとドロッパーの `dispenseFrom`）。バニラの名前・中身は、ビルドが作るソースの jar（`~/.gradle/caches` の `neoforge-*-sources.jar`。IDE で開く）で調べる。
+- 1.20.1: クラウドでは `apt-get install -y openjdk-17-jdk-headless`。ネットワークの許可は 1.21.1 と同じ Mojang のホストと `maven.minecraftforge.net`。初回のビルドは Minecraft の展開と再コンパイルで数分かかる。クラウドでも `runServer` が起動する（`timeout` 付きで起動し、ログの `Done (` を見る）。
+  - 非公開のフィールド・メソッドは**アクセストランスフォーマー**（`mc1.20.1/src/main/resources/META-INF/accesstransformer.cfg`）。Forge 1.20.1 は配布した jar が **SRG 名**（`f_9249_`・`m_6225_` など）で動くので、AT の行も SRG 名で書き、`#` の後ろに Mojang の名前を添える（開発環境では ForgeGradle が Mojang の名前に直して当てる）。名前を間違えるとビルドの「setup」で止まる。同じ理由で、名前で探すリフレクション（`HeldItems` の右クリックのメソッド）も、Mojang の名前と SRG 名の両方を書く。
+  - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/minecraft_repo/versions/1.20.1/client_mappings.txt`（Mojang の名前 → 難読化名）と `~/.gradle/caches/forge_gradle/mcp_repo/de/oceanlabs/mcp/mcp_config/1.20.1-*/joined/rename/config/joined.tsrg`（難読化名 → SRG 名）を突き合わせる。バニラの中身は、ビルドが作る `mc1.20.1/build/fg_cache/.../forge-1.20.1-<Forge の版>_mapped_official_1.20.1.jar` を `javap -p -c` で見る。
 - 1.12.2: 非公開のフィールドはリフレクションで読む（アクセストランスフォーマーは使わない）。開発環境は MCP 名、reobf 後は SRG 名なので、`getDeclaredField` で MCP 名 → SRG 名の順に試す（`Reflect`）。Forge の 3 引数の `ReflectionHelper.findField` は起動環境の判定で片方の名前しか試さず、非推奨でもあるので使わない。
   - SRG 名の調べ方: `~/.gradle/caches/forge_gradle/maven_downloader/de/oceanlabs/mcp/mcp_snapshot/20171003-1.12/mcp_snapshot-20171003-1.12.zip` の `fields.csv`（`methods.csv`）、または `~/.gradle/caches/forge_gradle/minecraft_user_repo/net/minecraftforge/forge/1.12.2-14.23.5.2860/forge-1.12.2-14.23.5.2860-srg.jar` を `javap -p` で見る。
   - 画面を出さずに両方の環境で確かめるには、自分のクラスを小さなプログラムからリフレクションで呼ぶ（インスタンスは `Unsafe.allocateInstance`）。開発環境は `sourceSets.main.runtimeClasspath`（Gradle の init スクリプトで書き出す）、実際の環境はその中の `build/classes` `build/resources` と `..._mapped_snapshot_...` の jar を、`build/libs` の reobf 済み jar と上の `-srg.jar` に差し替えたクラスパスで動かす。
@@ -80,15 +89,15 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 （直し忘れの多くは `ReleaseFilesTest` で CI が赤くなる。）
 
 1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
-2. 版を書く 4 か所（`mc1.12.2/build.gradle` の `version`・1.12.2 の `WeakSpotMod.VERSION`・`mc1.21.1/gradle.properties` の `mod_version`・1.21.1 の `WeakSpotMod.VERSION`）を揃えて上げる。片方の版だけを直したときも、両方を上げる。マイナーを上げるときは 1.12.2 の `WeakSpotMod.ACCEPTED_VERSIONS` を新しいマイナーの範囲に（例 `[1.12,1.13)`）、1.21.1 の `Network.PROTOCOL` を新しいマイナーの番号に（例 `1.12`）。あわせて、前のマイナーの仕様書を `doc/spec/` から消す（タグに残る。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移し、コードのコメントからの参照をタグのリンクに直し、`doc/spec/README.md` の表の行をタグへのリンクの 1 行にまとめる）。
+2. 版を書く 6 か所（`mc1.12.2/build.gradle` の `version`・1.12.2 の `WeakSpotMod.VERSION`・`mc1.20.1/gradle.properties` と `mc1.21.1/gradle.properties` の `mod_version`・1.20.1 と 1.21.1 の `WeakSpotMod.VERSION`）を揃えて上げる。1 つの版だけを直したときも、全部を上げる。マイナーを上げるときは 1.12.2 の `WeakSpotMod.ACCEPTED_VERSIONS` を新しいマイナーの範囲に（例 `[1.13,1.14)`）、1.20.1 と 1.21.1 の `Network.PROTOCOL` を新しいマイナーの番号に（例 `1.13`）。あわせて、前のマイナーの仕様書を `doc/spec/` から消す（タグに残る。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移し、コードのコメントからの参照をタグのリンクに直し、`doc/spec/README.md` の表の行をタグへのリンクの 1 行にまとめる）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
 4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。`README.en.md` の「Recent updates」も同じ 3 件にし、各版は英語のお知らせ（6.）の 1 行をそのまま使う。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
 5. 遊び方が変わったら `doc/play.md` と、ガイドの本（`lang/en_us.json` / `lang/ja_jp.json` の `weakspot.guide.*`。1 ページは 14 行まで）を直す。操作が変わったら `README.en.md` の操作の表も（種類の説明は `doc/store/description.md` にだけ書く）。
 6. 更新のお知らせの要約 `weakspot.news.<版>` を `lang/ja_jp.json` と `lang/en_us.json` に 1 行足す（日本語で 40 字くらいまで）。
-7. 直下の `update.json` の `promos` の 4 つ（`1.12.2-latest` / `1.12.2-recommended` / `1.21.1-latest` / `1.21.1-recommended`）を新しい版にし、`"1.12.2"` と `"1.21.1"` の両方の節に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
+7. 直下の `update.json` の `promos` の 6 つ（`<Minecraft の版>-latest` / `-recommended`）を新しい版にし、`"1.12.2"`・`"1.20.1"`・`"1.21.1"` の全部の節に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
 8. 種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md` を直す（下の「配布サイト」）。
 9. コミットは「Add the spec for X.Y.Z」→ 機能のコミット（1 つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。
-10. 両方の jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push して `main` への PR を作る。
+10. 全部の jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push して `main` への PR を作る。
 
 Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge への公開を行う（上の「ブランチとリリース」）。
 

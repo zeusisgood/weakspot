@@ -39,9 +39,6 @@ public final class MeleeCharge {
     private MeleeCharge() {
     }
 
-    /** 古いサーバーはメイスを対象と判定しない。 */
-    public static final String MACE_SINCE = "1.12.3";
-
     /** それを継承した Mod の武器も。メイスの落下で増える分にも倍率が掛かる（上乗せはクリティカルの倍率より先に足されるため）。 */
     public static boolean isWeapon(ItemStack stack) {
         return stack.getItem() instanceof SwordItem || stack.getItem() instanceof AxeItem

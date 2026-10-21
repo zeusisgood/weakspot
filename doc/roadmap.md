@@ -6,7 +6,7 @@
 
 ## 1.11.11〜1.12.0: 別の Minecraft の版への対応（済み）
 
-仕様書は [SPEC_v1.11.11.md](https://github.com/zeusisgood/weakspot/blob/v1.11.12/doc/spec/SPEC_v1.11.11.md)（コメントの整理）・[SPEC_v1.11.12.md](https://github.com/zeusisgood/weakspot/blob/v1.11.12/doc/spec/SPEC_v1.11.12.md)（下ごしらえ）はリリース済み。[spec/SPEC_v1.12.0.md](spec/SPEC_v1.12.0.md)（移植。1.12.2 + Forge と 1.21.1 + NeoForge）も 1.12.0 で実装した。
+仕様書は [SPEC_v1.11.11.md](https://github.com/zeusisgood/weakspot/blob/v1.11.12/doc/spec/SPEC_v1.11.11.md)（コメントの整理）・[SPEC_v1.11.12.md](https://github.com/zeusisgood/weakspot/blob/v1.11.12/doc/spec/SPEC_v1.11.12.md)（下ごしらえ）はリリース済み。[SPEC_v1.12.0.md](https://github.com/zeusisgood/weakspot/blob/v1.12.3/doc/spec/SPEC_v1.12.0.md)（移植。1.12.2 + Forge と 1.21.1 + NeoForge）も 1.12.0 で実装した。
 
 - **決まったこと**（1.10.2 のあと・1.11.10 のあとの相談）
   - **移植先**: 1.21.1 + NeoForge（Modpack での採用が多い版にしたい。All the Mods 10 など、上位の Modpack が 1.21.1 + NeoForge）
@@ -18,12 +18,12 @@
   - **出し方**: 全種類が揃ってから出す。PR と版は 1 つ、コミットは種類ごとに分けてよい
   - 的当ての数字（大きさ・距離・動きの速さ・ご褒美のしきい値）は今の値で決める
 - **ほかの版の候補**（1.21.1 のあと。未定）
-  - 1.20.1 + Forge 47: Modpack はまだ多い（Better MC 4 など）。1.12.3 のあとの相談で、1.13.0 で対応することに決めた（仕様書は [spec/SPEC_v1.13.0.md](spec/SPEC_v1.13.0.md)。下書き）
+  - 1.20.1 + Forge 47: Modpack はまだ多い（Better MC 4 など）。1.12.3 のあとの相談で決め、1.13.0 で対応した（済み。仕様書は [spec/SPEC_v1.13.0.md](spec/SPEC_v1.13.0.md)）。これからは 3 つの版で機能を揃え、いつも 3 つの jar を同じ番号で出す
   - 1.8（1.8.9）: API は 1.12.2 に近く、Java 8。ただし、エリトラ・近接の溜め・オフハンドがない。1.8.9 の PvP サーバーには Mod を入れられないので、遊べるのはシングルか自分で立てたサーバーだけ
 
 ### 1.21.1 の新しい物（1.12.3。済み）
 
-1.12.0 の仕様書（§2.1）の相談で見送った 4 つを、1.12.3 で今ある種類に含めた（仕様書は [spec/SPEC_v1.12.3.md](spec/SPEC_v1.12.3.md)）。1.21.1 版だけの機能。
+1.12.0 の仕様書（§2.1）の相談で見送った 4 つを、1.12.3 で今ある種類に含めた（仕様書は [SPEC_v1.12.3.md](https://github.com/zeusisgood/weakspot/blob/v1.12.3/doc/spec/SPEC_v1.12.3.md)）。1.21.1 版だけの機能（1.13.0 の 1.20.1 版では、トライデント・クロスボウだけが対象。メイス・クラフターは 1.20.1 にない）。
 
 - **決まったこと**（1.12.2 のあとの相談）
   - 新しい種類は作らない: メイス → 近接、トライデント・クロスボウ → 弓、クラフター → 機械（通信が変わらないのでパッチ）

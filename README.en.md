@@ -14,7 +14,7 @@ A Minecraft mod that brings Fortnite's "weak spot" harvesting to Minecraft. A gl
 
 - **[CurseForge](https://www.curseforge.com/minecraft/mc-mods/weakspot)**
 
-Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with 14.23.5.2860; much older Forge builds may not run every feature) or **1.21.1 + NeoForge** (developed and tested with 21.1.264). Pick the file for your Minecraft version on the download page.
+Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with 14.23.5.2860; much older Forge builds may not run every feature), **1.20.1 + Forge** (47.1.32 or later; developed and tested with 47.1.32) or **1.21.1 + NeoForge** (developed and tested with 21.1.264). Pick the file for your Minecraft version on the download page.
 
 For multiplayer, install it on the server **and** on every player's client, all on the same minor version (for example 1.12.x) and the same Minecraft version. In single player, only your client needs it.
 
@@ -34,6 +34,10 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.13.0
+
+- Now available for Minecraft 1.20.1 (Forge)
+
 ### 1.12.3
 
 - 1.21.1: weak spots for the mace, trident, crossbow and crafter
@@ -42,21 +46,17 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 - Release files now include the loader name (no gameplay changes)
 
-### 1.12.1
-
-- Weak spots are easier to hit on complex blocks and piped machines
-
 ## More
 
-- Settings: the Mods menu or `config/weakspot.cfg` (every setting has an English description).
+- Settings: the Mods menu, or `config/weakspot.cfg` (1.12.2) / `config/weakspot-server.toml` and `config/weakspot-client.toml` (1.20.1, 1.21.1). Every setting has an English description.
 - Bugs: type `/weakspot bug` in chat to get a link to a prefilled [issue](https://github.com/zeusisgood/weakspot/issues) with your environment.
 - Other documents (detailed guide, settings list) are in Japanese: [doc/](doc/).
 
 ## For developers
 
-- Requires JDK 8. Built with the official Forge MDK (Forge 14.23.5.2860, ForgeGradle 3 + Gradle 4.9).
-- `cd mc1.12.2 && ./gradlew build` builds and tests (jar in `mc1.12.2/build/libs/`). `./gradlew runServer` starts a dev server.
-- Both the server and the client need the mod. `common/` holds pure logic with no Minecraft classes (unit-tested, shared by every Minecraft version's build); `lang/` holds the translations; `mc1.12.2/` holds the 1.12.2 build with its `client/` and `server/` sides.
+- Each Minecraft version is a separate Gradle build: `mc1.12.2/` (JDK 8, ForgeGradle 3 + Gradle 4.9, Forge 14.23.5.2860), `mc1.20.1/` (JDK 17, ForgeGradle 6 + Gradle 8, Forge 47.1.32) and `mc1.21.1/` (JDK 21, ModDevGradle 2 + Gradle 8, NeoForge 21.1.264).
+- `cd mc1.12.2 && ./gradlew build` builds and tests (jar in `mc1.12.2/build/libs/`; the same for the other directories). `./gradlew runServer` starts a dev server.
+- Both the server and the client need the mod. `common/` holds pure logic with no Minecraft classes (unit-tested, shared by every Minecraft version's build); `lang/` holds the translations; `mc<version>/` holds each Minecraft version's build with its `client/` and `server/` sides.
 - Design notes and the release checklist are in Japanese: [doc/development.md](doc/development.md), [doc/architecture.md](doc/architecture.md), [doc/roadmap.md](doc/roadmap.md).
 - Issues and pull requests are welcome (in English or Japanese).
 

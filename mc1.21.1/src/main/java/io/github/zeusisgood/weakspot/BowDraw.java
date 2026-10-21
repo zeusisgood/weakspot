@@ -46,9 +46,6 @@ public final class BowDraw {
     /** トライデント・花火の persistent data。当たったときのダメージの倍率（威力が飛ぶ速さや baseDamage で決まらないため）。 */
     private static final String DAMAGE_MULTIPLIER = "weakspot_damage_multiplier";
 
-    /** トライデント・クロスボウ。古いサーバーは対象と判定しない。 */
-    private static final String NEW_ITEMS_SINCE = "1.12.3";
-
     /** 引き切り（装填し切り）を超えない。 */
     private static final UseTimeCut CUT = new UseTimeCut(BowDraw::isDrawItem,
             (entity, stack, duration, ticks) -> BowMath.addedTicks(stack.getUseDuration(entity) - duration, ticks,
@@ -86,11 +83,7 @@ public final class BowDraw {
         if (!entity.isUsingItem()) {
             return false;
         }
-        ItemStack stack = entity.getUseItem();
-        if (stack.getItem() instanceof BowItem) {
-            return true;
-        }
-        return isDrawItem(stack) && (!entity.level().isClientSide || WeakSpotMod.proxy.serverSince(NEW_ITEMS_SINCE));
+        return isDrawItem(entity.getUseItem());
     }
 
     /** 弓は 20、トライデントは 10、クロスボウは高速装填を含めた装填の時間。 */

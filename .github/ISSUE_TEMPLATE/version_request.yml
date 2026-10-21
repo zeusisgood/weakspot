@@ -1,15 +1,15 @@
 name: 別の Minecraft の版への対応 / Other Minecraft version
-description: 1.12.2 以外の版・ローダーへの対応を要望する / Ask for a port to another Minecraft version or loader
+description: 対応していない版・ローダーへの対応を要望する / Ask for a port to another Minecraft version or loader
 title: "[版の要望 / Version request] "
 labels: ["version-request"]
 body:
   - type: markdown
     attributes:
       value: |
-        今は Minecraft 1.12.2 + Forge だけに対応しています。ほかの版への移植の予定は未定ですが、要望の多さを参考にします。
+        今は Minecraft 1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge に対応しています。ほかの版・ローダーへの移植の予定は未定ですが、要望の多さを参考にします。
         同じ版・ローダーの要望が既にあれば、新しく作らずに 👍 を付けてください。
 
-        Only Minecraft 1.12.2 + Forge is supported right now. There is no plan for a port yet, but requests help decide.
+        Minecraft 1.12.2 + Forge, 1.20.1 + Forge and 1.21.1 + NeoForge are supported right now. There is no plan for other ports yet, but requests help decide.
         If someone already asked for the same version and loader, please add a 👍 there instead.
   - type: dropdown
     id: minecraft

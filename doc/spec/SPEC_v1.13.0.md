@@ -4,7 +4,7 @@
 この仕様書は `doc/spec/SPEC_v1.13.0.md`。
 
 - 対象:
-  - **Minecraft Java Edition 1.20.1 / Forge 47.4.28**（新規。`mc1.20.1/`）
+  - **Minecraft Java Edition 1.20.1 / Forge 47.4.28**（新規。`mc1.20.1/`）（注: 実装では、古い Modpack・サーバーでも使えるように、ユーザーとの相談で下限を Forge 47.1.32 に下げ、開発・ビルドも 47.1.32 で行う。47.1.32 は、見えない壁の対策に使う `LeftClickBlock.Action` が入った最初の版）
   - Minecraft Java Edition 1.12.2 / Forge 14.23.5.2860（今まで。`mc1.12.2/`）
   - Minecraft Java Edition 1.21.1 / NeoForge 21.1.264（今まで。`mc1.21.1/`）
 - 前提: 1.12.3 が `main` に取り込み済み
@@ -34,7 +34,7 @@
 - ディレクトリ `mc1.20.1/`。**Java 17**・**Gradle 8**・**ForgeGradle 6**（Forge が 1.20.1 で勧めている MDK の形）。名前は Mojang の名前（`official` のマッピング。Parchment は使わない。許可するホストを増やさないため）
 - Mod の ID・パッケージ・クラスの分け方（`client/`・`server/`・`config/`・`network/`）・クラスの名前は、1.21.1 版と同じにする（読み比べやすくするため）
 - `../common/src/main/java` と `../common/src/test/java` をソースに足す。翻訳は `../lang/*.json` をそのまま `assets/weakspot/lang/` に入れる（1.20.1 も json）
-- `META-INF/mods.toml`: 名前・説明・ロゴ・ライセンス（MIT）・`updateJSONURL`（同じ `update.json`）・クライアントとサーバーの両方に必要・Forge `[47.4,)`・Minecraft `[1.20.1]`
+- `META-INF/mods.toml`: 名前・説明・ロゴ・ライセンス（MIT）・`updateJSONURL`（同じ `update.json`）・クライアントとサーバーの両方に必要・Forge `[47.4,)`（注: 実装では `[47.1.32,)`）・Minecraft `[1.20.1]`
 - jar は `weakspot-1.20.1-forge-<版>.jar`（`doc/development.md` の「版の表記」）。`LICENSE` を `LICENSE_weakspot` として入れる
 - 非公開のフィールド・メソッドは**アクセストランスフォーマー**（`META-INF/accesstransformer.cfg`。1.21.1 版と同じ考え）
 - クライアントだけのクラスは `Dist.CLIENT` の購読にし、パケットのハンドラーから直接触らない（`proxy.onXxx`。両方の版と同じ）
