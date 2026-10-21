@@ -52,7 +52,16 @@ Keys can be changed under Options → Controls → Weak Spot Mining.
 
 ## Installation
 
-- Requires **Minecraft Java Edition 1.12.2 + Forge** (developed and tested with Forge 14.23.5.2860), **1.20.1 + Forge** (47.1.32 or later; developed and tested with Forge 47.1.32) or **1.21.1 + NeoForge** (developed and tested with NeoForge 21.1.264). Download the file for your Minecraft version; all of them have the same features.
+Supported versions (Minecraft Java Edition):
+
+| Minecraft | Loader | Developed and tested with | Notes |
+|---|---|---|---|
+| **1.12.2** | Forge | 14.23.5.2860 | Much older Forge builds may not run every feature |
+| **1.20.1** | Forge (47.1.32 or later) | 47.1.32 | |
+| **1.21.1** | NeoForge | 21.1.264 | |
+
+Download the file for your Minecraft version; all of them have the same features.
+
 - **Single player**: install it on your client.
 - **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.13.x) and the same Minecraft version.
 

@@ -41,7 +41,7 @@
 - `doc/architecture.md` の釣りの行: 「浮きが水にあるかは、サーバーとクライアントで同じ判定（浮きのブロックが水で液体の高さ > 0）を使う。`isInWater()` は浮きの揺れで約半分の tick が false になるので使わない」を足す
 - `doc/spec/README.md`: 表の一番上に 1.13.1（パッチ）
 - `update.json`・説明文などは「リリースの手順」どおり
-- README（日英）の対応する版を、文の列挙から表（Minecraft・ローダー・開発・動作確認・備考）に変える（見やすさのため。ユーザーの要望。`CLAUDE.md` の README の決まりも表に直す）
+- README（日英）の対応する版を、文の列挙から表（Minecraft・ローダー・開発・動作確認・備考）に変える（見やすさのため。ユーザーの要望。`CLAUDE.md` の README の決まりも表に直す）。CurseForge の説明文 `doc/store/description.md` の「Installation」も同じ表にする（CurseForge は手で貼り替え）
 - 直さない文書: `doc/play.md`・ガイドの本（「水に浮いていない時は出ない」はそのまま正しい）・`doc/config.md`（設定は変わらない）・`doc/roadmap.md`
 
 ## 4. `CLAUDE.md` に書くこと
