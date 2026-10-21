@@ -47,7 +47,7 @@
   - 移動の加速: はしご・泳ぎ・ボートはクライアントが `move` で足す（泳ぎは 1.12.2 の移動速度の値が水中に効かないため、ボートは乗っている人のクライアントが動きを決めるため）。馬・豚・走りはサーバーの `server/SpeedModifier`。トロッコはサーバーで `onUpdate` を余分に呼ぶ（レールの最高速度は `BlockRailBase` が決めていて上げられないため）。
 - 画面の上のマーカー（睡眠・エンチャント）: 土台は `ScreenSpotKind` / `ScreenSpots`。`DrawScreenEvent.Post` は、コンテナ画面（エンチャント台）ではアイテム用のライティングが有効のまま来るので、入口で切る（切らないと円と文字が暗くなる）。
 - HUD の図形: `HudSpot.beginOverlay` / `endOverlay`（`ScreenProjection.fill` の頂点の並びが、GUI では裏向きの面になるため）。
-- 釣り（`client/FishingSpot`・`server/FishingHits`）: 浮きの待ち時間は非公開のフィールド（`ticksCaughtDelay` など）。浮きのブロックが水で液体の高さ > 0 のときだけ待っているとみなす（浮きは一度水に入ると `BOBBING` のまま戻らないので、縁に引っかかると、減らしても魚が来ない）。
+- 釣り（`client/FishingSpot`・`server/FishingHits`）: 浮きの待ち時間は非公開のフィールド（`ticksCaughtDelay` など）。浮きのブロックが水で液体の高さ > 0 のときだけ待っているとみなす（浮きは一度水に入ると `BOBBING` のまま戻らないので、縁に引っかかると、減らしても魚が来ない）。この判定は `FishingWater.isFloating` で、クライアントが弱点を出す条件にも同じものを使う（`isInWater()` は箱の下端と水面を比べるので、水源で浮きが揺れると約半分の tick が false になり、弱点がちらつく）。
 - 弓（`BowSpot`・`BowHits`・`BowDraw`）: 残り時間は `LivingEntityUseItemEvent.Tick` の `setDuration` で減らす。放つときは Stop が ArrowLoose より先に来るので、Stop では消さない。過剰チャージは `ArrowLooseEvent` で倍率を覚え、同じ tick の `EntityJoinWorldEvent` の矢に掛ける。
 - 近接（`MeleeSpot`・`MeleeHits`・`MeleeCharge`）: 溜めを使う攻撃はクリティカルにしない（バニラの剣の薙ぎ払いは「クリティカルでない」ことが条件のため）。代わりに、その tick の同じプレイヤーのダメージ（正面と薙ぎ払いの周り）に `LivingHurtEvent` で倍率を掛ける。
 - 投げる物（`ThrowSpot`・`ThrowHits`）: 溜めは `RightClickItem` で使い、同じ tick の `EntityJoinWorldEvent` の `EntityThrowable` の `motion` に掛ける（追跡の前なので見た目も同じ）。
