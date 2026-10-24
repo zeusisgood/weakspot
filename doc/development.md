@@ -51,7 +51,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
 - ビルドは Minecraft の版ごと（`ci.yml` の matrix の `build-mc`。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。Merge に必須のチェック「`build`」は、全部の版が通ったときだけ成功するまとめのジョブ（ブランチの保護の設定は変えなくてよい）。
 - `main` に取り込まれた時、`mc1.12.2/build.gradle` の `version` がまだ Release のない版なら、全部の版のビルドが通ったときだけ、同じワークフローがタグ `vX.Y.Z` と GitHub Release を 1 つ自動で作成します（本文は `CHANGELOG.md` のその版の節、全部の版の jar `weakspot-<Minecraft の版>-<ローダー>-<版>.jar` を添付）。版を上げない変更（文書だけなど）では作成しません。
-- 続けて、Release の jar を Minecraft の版ごとに Modrinth と CurseForge にも上げます（下の「配布サイト」）。
+- 続けて、Release の jar を Minecraft の版ごとに CurseForge にも上げます（下の「配布サイト」）。
 
 ## バージョンの方針
 
@@ -99,17 +99,16 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 9. コミットは「Add the spec for X.Y.Z」→ 機能のコミット（1 つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。
 10. 全部の jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push して `main` への PR を作る。
 
-Merge のあとは、Actions がタグ・GitHub Release・Modrinth・CurseForge への公開を行う（上の「ブランチとリリース」）。
+Merge のあとは、Actions がタグ・GitHub Release・CurseForge への公開を行う（上の「ブランチとリリース」）。
 
 ## 配布サイト
 
-- どちらも、Release に付いている jar の Minecraft の版ごとに 1 回ずつ上げる。版ごとの値（ローダー・Java・CurseForge の版の種類）は `.github/scripts/mc-versions.sh` の表。
-- **Modrinth**: Release の jar を `.github/scripts/publish-modrinth.sh <版> <Minecraft の版>` で上げる（更新内容は `changelog.sh` が作る、英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク）。バージョンの番号は `<版>+<Minecraft の版>`（例 `1.11.12+1.12.2`。1.11.11 までは `<版>` だけ）、名前は下の「版の表記」。その番号がもうあれば何もしない。失敗したら Actions の「Modrinth publish」を手動で流す（Minecraft の版を空にすると、Release に付いている全部の版）。
-- **CurseForge**: `publish-curseforge.sh <版> <Minecraft の版>`（更新内容は同じ `changelog.sh`。表示名は下の「版の表記」）。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で、失敗した Minecraft の版だけを指定して流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる）。
+- Release に付いている jar の Minecraft の版ごとに 1 回ずつ上げる。版ごとの値（ローダー・Java・CurseForge の版の種類）は `.github/scripts/mc-versions.sh` の表。
+- **Modrinth**: AI 生成コンテンツの規則（6.2b）で一般公開を断られたため、上げない（プロジェクトは限定公開のまま放置し、説明文の冒頭に CurseForge への案内を手で書いた。再提出はしない。繰り返すとアカウント停止の可能性がある）。
+- **CurseForge**: `publish-curseforge.sh <版> <Minecraft の版>`（更新内容は `changelog.sh` が作る、英語のお知らせ `weakspot.news.<版>` の 1 行と Release へのリンク。表示名は下の「版の表記」）。上げ済みの版を確かめられないので、Release を今作ったときだけ流す。失敗したら、CurseForge の Files に無いことを確かめてから「CurseForge publish」を手動で、失敗した Minecraft の版だけを指定して流す。Secrets の `CURSEFORGE_TOKEN`、Variables の `CURSEFORGE_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる）。
 - **説明文**: 正本は `doc/store/description.md`（英語の Markdown。版の番号は書かない。リンクは `https://…` の完全な形）。
-  - Modrinth は、`main` でこのファイルが変わると `.github/workflows/modrinth-description.yml` が API（`PATCH /v2/project/<ID>`）で反映する。Secrets の `MODRINTH_TOKEN`（スコープ「プロジェクトを書く」）と Variables の `MODRINTH_PROJECT_ID` が要る（どちらかがなければ何もせず成功で終わる。Actions の画面から手動でも流せる）。
   - CurseForge は API で説明を変えられないので手動。このファイルを直した PR では、本文と報告に「CurseForge の説明文を貼り替えてください」と書き、新しい全文を添付する。
-- **画像**: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `mc1.12.2/src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`）用）。AI 生成なので、Modrinth の開示の「資産」に入れてある。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
+- **画像**: アイコンの正本は `doc/images/icon.png`（512×512、背景は紺 `#1E2230`。配布サイト・GitHub のソーシャルプレビュー用）と、背景を透過した `doc/images/icon-transparent.png`（README とゲーム内のロゴ `mc1.12.2/src/main/resources/logo.png`（256×256。`mcmod.info` の `logoFile`）用）。AI 生成（ChatGPT）。README の冒頭のスクショは `doc/images/mining-combo.jpg`。
 - **配布サイトのページ**: CurseForge は公開済み（https://www.curseforge.com/minecraft/mc-mods/weakspot、Project ID 1714015）。README（日英）の「⬇ ダウンロード」・冒頭のバッジ（ダウンロード数）・ライセンスの節の案内、`doc/install.md`、`update.json` の `homepage` は CurseForge を指す。GitHub の Releases は README に載せない（要る人は自分で見つける。ユーザーの判断）が、jar 付きで続ける（自動化の起点のため）。ゲーム内の [変更点を見る]・[ダウンロード] は CurseForge のファイルの一覧を指す。
 
 ### 版の表記
@@ -118,9 +117,8 @@ Mod の版と Minecraft の版は数字が似ている（例: Mod 1.12.2 の 1.1
 
 | 物 | 形 | 例 |
 |---|---|---|
-| jar の名前 | `weakspot-<Minecraft の版>-<ローダー>-<版>.jar`（ローダーは小文字。Modrinth の loaders と同じ） | `weakspot-1.12.2-forge-1.12.2.jar`・`weakspot-1.21.1-neoforge-1.12.2.jar` |
-| CurseForge の表示名・Modrinth の名前 | `Weak Spot Mining <版> for MC <Minecraft の版> (<ローダー>)`（ローダーは CurseForge の表記） | `Weak Spot Mining 1.12.2 for MC 1.12.2 (Forge)` |
-| Modrinth のバージョン番号 | `<版>+<Minecraft の版>`（重複の確認に使うので変えない） | `1.12.2+1.12.2` |
+| jar の名前 | `weakspot-<Minecraft の版>-<ローダー>-<版>.jar`（ローダーは小文字） | `weakspot-1.12.2-forge-1.12.2.jar`・`weakspot-1.21.1-neoforge-1.12.2.jar` |
+| CurseForge の表示名 | `Weak Spot Mining <版> for MC <Minecraft の版> (<ローダー>)`（ローダーは CurseForge の表記） | `Weak Spot Mining 1.12.2 for MC 1.12.2 (Forge)` |
 
 - 名前を作るのは `.github/scripts/mc-versions.sh` の `display_name`（表示名）と、各版の `build.gradle` の `archivesBaseName` / `base.archivesName`（jar）。
 - Mod の版は `CLAUDE.md` の「バージョン」の規則（パッチ・マイナー）だけで決め、Minecraft の版との数字の重なりは考えません。2.0.0 に上げるなら、大きな区切り（版の対応をやめる、大きな新しい仕組みを入れるなど）に合わせます。

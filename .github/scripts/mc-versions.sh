@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Minecraft の版ごとの配布の値（1 か所の表）。publish-*.sh が source で読む。
 # 版を足すときは、ここと ci.yml の matrix に足す。
-#   mc_info <Minecraft の版>  → LOADER（Modrinth の loaders）・CF_LOADER・CF_JAVA・CF_TYPE（CurseForge の版の種類の slug）
+#   mc_info <Minecraft の版>  → LOADER（jar の名前のローダー）・CF_LOADER・CF_JAVA・CF_TYPE（CurseForge の版の種類の slug）
 #   release_mc_versions <版>  → その版の Release に付いている jar の Minecraft の版（1 行に 1 つ）
 #   release_jar <版> <Minecraft の版>  → その Release の、その Minecraft の版の jar の名前（mc_info のあとに呼ぶ）
 #   display_name <版> <Minecraft の版>  → 配布サイトの表示名（mc_info のあとに呼ぶ）

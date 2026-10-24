@@ -94,7 +94,7 @@
 ## 7. 配布
 
 - `ci.yml` の matrix に `mc: '1.20.1', java: '17'` を足す。`.github/scripts/mc-versions.sh` に 1.20.1 の行（`LOADER=forge`・`CF_LOADER=Forge`・`CF_JAVA="Java 17"`・`CF_TYPE=minecraft-1-20`）
-- GitHub の Release に jar を 3 つ。Modrinth は `1.13.0+1.20.1`（`1.20.1`・`forge`）を足す。CurseForge も同じプロジェクトにファイルを足す
+- GitHub の Release に jar を 3 つ。Modrinth は `1.13.0+1.20.1`（`1.20.1`・`forge`）を足す。CurseForge も同じプロジェクトにファイルを足す（注: 1.13.1 のあと、Modrinth への公開はやめた。`doc/development.md` の「配布サイト」）
 - `update.json` に `"1.20.1"` の節と、`promos` の `1.20.1-latest`・`1.20.1-recommended`
 - `ReleaseFilesTest`: 版の 6 か所・`Network.PROTOCOL` の 2 か所・`update.json` の 3 つの節を確かめる
 - 説明文 `doc/store/description.md` に、1.20.1 + Forge を足す（CurseForge は手で貼り替え）。CurseForge・Modrinth のプロジェクトの「対応する版・ローダー」に 1.20.1 を足す（ユーザーが画面で行う）
