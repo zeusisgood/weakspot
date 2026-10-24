@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "category": "misc",
+    "pattern": [
+        "GGG",
+        " S ",
+        "GDG"
+    ],
+    "key": {
+        "G": {
+            "item": "minecraft:glass"
+        },
+        "S": {
+            "item": "weakspot:shard"
+        },
+        "D": {
+            "tag": "minecraft:sand"
+        }
+    },
+    "result": {
+        "id": "weakspot:combo_hourglass",
+        "count": 1
+    }
+}

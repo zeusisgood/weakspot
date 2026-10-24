@@ -32,6 +32,10 @@ public final class GuideBookGiver {
     private static final String FIRST_GIFT_FROM = "1.11.0";
     private static final int STARTER_TARGETS = 3;
     private static final ResourceLocation TARGET_RECIPE = ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, "target");
+    private static final List<ResourceLocation> SHARD_RECIPES = List.of(
+            ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, "combo_hourglass"),
+            ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, "charm"),
+            ResourceLocation.fromNamespaceAndPath(WeakSpotMod.MODID, "monocle"));
 
     private GuideBookGiver() {
     }
@@ -99,5 +103,9 @@ public final class GuideBookGiver {
 
     static void unlockTargetRecipe(ServerPlayer player) {
         player.awardRecipesByKey(List.of(TARGET_RECIPE));
+    }
+
+    static void unlockShardRecipes(ServerPlayer player) {
+        player.awardRecipesByKey(SHARD_RECIPES);
     }
 }

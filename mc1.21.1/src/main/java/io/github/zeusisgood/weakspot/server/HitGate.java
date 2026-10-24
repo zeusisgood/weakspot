@@ -55,6 +55,7 @@ public final class HitGate {
             ServerStats.recordKindHit(player, kind);
         }
         int combo = ServerStats.countStreak(player);
+        ItemRewards.onHit(player, combo);
         ServerBoostTracker.notifyNearbyPlayers(player, soundPos, streak);
         return combo;
     }

@@ -1,0 +1,25 @@
+{
+    "parent": "minecraft:item/generated",
+    "textures": {
+        "layer0": "weakspot:item/monocle"
+    },
+    "display": {
+        "head": {
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "translation": [
+                3.2,
+                -0.8,
+                -6.8
+            ],
+            "scale": [
+                0.3,
+                0.3,
+                0.3
+            ]
+        }
+    }
+}
