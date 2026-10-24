@@ -2,6 +2,7 @@ package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.FishingWater;
 import io.github.zeusisgood.weakspot.PlayerRules;
+import io.github.zeusisgood.weakspot.Trinkets;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.FishingMath;
 import io.github.zeusisgood.weakspot.common.HitKind;
@@ -55,7 +56,7 @@ final class FishingSpot {
     private static float progress;
     private static long receivedTick = Long.MIN_VALUE / 2;
     private static double radius() {
-        return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(HitKind.FISHING);
+        return FishingMath.SPOT_SCREEN_RADIUS * OwnSize.of(HitKind.FISHING);
     }
 
     private static final QueryThrottle<Boolean> QUERIES = new QueryThrottle<>(QUERY_INTERVAL_TICKS, false);
@@ -64,6 +65,8 @@ final class FishingSpot {
     private static boolean hasSpot;
     private static double dx;
     private static double dz;
+    /** 次に移る位置 {dx, dz}（片眼鏡の予告）。 */
+    private static double[] next;
     private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
 
     // HUD の描画と、左クリックの判定で使う
@@ -143,6 +146,7 @@ final class FishingSpot {
             dx = p[0];
             dz = p[1];
             MOTION.jumpTo(dx, dz);
+            next = FishingMath.nextSpot(dx, dz, RANDOM);
             hasSpot = true;
         } else if ((!waiting || !fresh()) && hasSpot) {
             hasSpot = false;
@@ -196,9 +200,10 @@ final class FishingSpot {
     private static void onHit() {
         int streak = OwnHits.register(HitKind.FISHING);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(HitKind.FISHING, streak));
-        double[] next = FishingMath.nextSpot(dx, dz, RANDOM);
-        dx = next[0];
-        dz = next[1];
+        double[] to = next != null ? next : FishingMath.nextSpot(dx, dz, RANDOM);
+        dx = to[0];
+        dz = to[1];
+        next = FishingMath.nextSpot(dx, dz, RANDOM);
         if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
             MOTION.moveTo(dx, dz, Util.getMillis());
         } else {
@@ -250,6 +255,12 @@ final class FishingSpot {
             double gy = p[1] / scale;
             ScreenProjection.drawMarker(gx, gy, radius, shape, look, 0.45F, 0.9F);
             ScreenProjection.drawHeadHighlight(gx, gy, radius, shape, trail ? MOTION.headHighlight(nowMs) : 0);
+        }
+        if (next != null && Trinkets.monocle(mc.player) && !MOTION.isMoving(nowMs)) {
+            double[] n = SCREEN.project(hookX + next[0], hookY + LIFT, hookZ + next[1]);
+            if (n != null) {
+                ScreenProjection.drawForecast(n[0] / scale, n[1] / scale, radius, shape, look);
+            }
         }
         double[] hook = SCREEN.project(hookX, hookY, hookZ);
         if (hook != null) {

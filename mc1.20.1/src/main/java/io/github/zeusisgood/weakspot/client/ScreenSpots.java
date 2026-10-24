@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
+import io.github.zeusisgood.weakspot.Trinkets;
 import io.github.zeusisgood.weakspot.common.MarkerMotion;
 import io.github.zeusisgood.weakspot.common.MarkerShape;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
@@ -56,6 +57,16 @@ final class ScreenSpots {
         k.shownOn = gui;
         k.has = k.place(gui, gui.width / 2.0, gui.height / 2.0);
         k.motion.jumpTo(k.x, k.y);
+        planNext(k, gui);
+    }
+
+    /** place は x, y を書き換えるので、今の位置を戻す。 */
+    private static void planNext(ScreenSpotKind k, Screen gui) {
+        double x = k.x;
+        double y = k.y;
+        k.next = k.has && k.place(gui, x, y) ? new double[] {k.x, k.y} : null;
+        k.x = x;
+        k.y = y;
     }
 
     private static void draw(ScreenSpotKind k, GuiGraphics graphics) {
@@ -75,6 +86,10 @@ final class ScreenSpots {
         }
         double[] p = trail ? k.motion.position(nowMs) : new double[] {k.x, k.y};
         ScreenProjection.drawMarker(p[0], p[1], radius, shape, look, 0.55F, k.outlineAlpha());
+        Minecraft mc = Minecraft.getInstance();
+        if (k.next != null && mc.player != null && Trinkets.monocle(mc.player) && !k.motion.isMoving(nowMs)) {
+            ScreenProjection.drawForecast(k.next[0], k.next[1], radius, shape, look);
+        }
         HudSpot.endOverlay();
         Draw.setPose(null);
     }
@@ -111,12 +126,21 @@ final class ScreenSpots {
         }
         int streak = OwnHits.register(k.kind);
         WeakSpotMod.network.sendToServer(HitMessage.withoutTarget(k.kind, streak));
-        if (k.place(gui, k.x, k.y)) {
+        boolean moved;
+        if (k.next != null) {
+            k.x = k.next[0];
+            k.y = k.next[1];
+            moved = true;
+        } else {
+            moved = k.place(gui, k.x, k.y);
+        }
+        if (moved) {
             if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
                 k.motion.moveTo(k.x, k.y, Util.getMillis());
             } else {
                 k.motion.jumpTo(k.x, k.y);
             }
         }
+        planNext(k, gui);
     }
 }
