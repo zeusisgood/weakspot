@@ -153,6 +153,7 @@ public class MiningStatsTest {
         stats.recordHit(3);
         stats.recordBlockBroken(4);
         stats.recordStreak(9);
+        stats.shards = 12;
         for (HitKind kind : HitKind.values()) {
             for (int i = 0; i < kind.ordinal(); i++) {
                 stats.recordKindHit(kind);
@@ -165,6 +166,7 @@ public class MiningStatsTest {
         assertEquals(0, in.available());
         assertEquals(stats.maxStreak, back.maxStreak);
         assertEquals(stats.savedTicks, back.savedTicks, 0);
+        assertEquals(12, back.shards);
         for (HitKind kind : HitKind.values()) {
             assertEquals(kind.name(), stats.count(kind), back.count(kind));
         }

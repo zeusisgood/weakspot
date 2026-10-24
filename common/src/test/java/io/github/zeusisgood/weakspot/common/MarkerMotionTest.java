@@ -148,4 +148,16 @@ public class MarkerMotionTest {
             assertTrue(image.u >= 5 - 1e-9);
         }
     }
+
+    @Test
+    public void isMovingOnlyDuringTheMove() {
+        MarkerMotion motion = new MarkerMotion(0, 0);
+        assertFalse(motion.isMoving(0));
+        motion.moveTo(1, 0, 1000);
+        assertTrue(motion.isMoving(1000));
+        assertTrue(motion.isMoving(1079));
+        assertFalse(motion.isMoving(1080));
+        motion.jumpTo(2, 0);
+        assertFalse(motion.isMoving(1001));
+    }
 }

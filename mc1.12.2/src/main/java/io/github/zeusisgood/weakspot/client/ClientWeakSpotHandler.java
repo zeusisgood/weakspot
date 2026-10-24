@@ -3,6 +3,7 @@ package io.github.zeusisgood.weakspot.client;
 import io.github.zeusisgood.weakspot.PlayerRules;
 import io.github.zeusisgood.weakspot.AnimalTargets;
 import io.github.zeusisgood.weakspot.RightClickTargets;
+import io.github.zeusisgood.weakspot.Trinkets;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.HitPitch;
@@ -70,6 +71,7 @@ public final class ClientWeakSpotHandler {
         }
         clientTick++;
         MiningProgress.sample(mc.playerController);
+        OwnHits.STREAK.setResetTicks(Trinkets.comboResetTicks(mc.player));
         int broken = OwnHits.STREAK.expire(clientTick);
         if (broken > 0) {
             ComboHud.onBreak(broken, clientTick);

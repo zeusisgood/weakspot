@@ -8,6 +8,7 @@ public final class HitStreak {
 
     private int count;
     private long lastHitTick;
+    private int resetTicks = RESET_TICKS;
 
     /** ヒット後の数を返す。 */
     public int hit(long now) {
@@ -47,12 +48,21 @@ public final class HitStreak {
         count = 0;
     }
 
+    /** 途切れるまでの tick（コンボの猶予の効果で延びる）。持ち主が効果の有無を見て、数える・確かめる前に入れる。 */
+    public void setResetTicks(int ticks) {
+        resetTicks = ticks;
+    }
+
+    public int resetTicks() {
+        return resetTicks;
+    }
+
     private boolean isExpired(long now) {
-        return now - lastHitTick > RESET_TICKS;
+        return now - lastHitTick > resetTicks;
     }
 
     /** 1（ヒットの直後）〜0。 */
-    public static double remainingFraction(double ticksSinceHit) {
-        return Math.max(0, Math.min(1, 1 - ticksSinceHit / RESET_TICKS));
+    public static double remainingFraction(double ticksSinceHit, int resetTicks) {
+        return Math.max(0, Math.min(1, 1 - ticksSinceHit / resetTicks));
     }
 }

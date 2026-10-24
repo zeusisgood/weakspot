@@ -140,7 +140,7 @@ final class ComboHud {
             double bounce = ComboDisplay.bounceScale(now - lastHitTime,
                     big ? ComboDisplay.BIG_BOUNCE_PEAK : ComboDisplay.BOUNCE_PEAK);
             float bottom = draw(g, mc, I18n.get("weakspot.combo.hit", combo), colorOf(combo), 1,
-                    bounce, HitStreak.remainingFraction(now - lastHitTime),
+                    bounce, HitStreak.remainingFraction(now - lastHitTime, OwnHits.STREAK.resetTicks()),
                     ComboDisplay.glowAlpha(now - stepTime), glowRgb(stepCombo), stepCombo >= ComboMilestones.STRONG_FROM, now);
             drawKindLabel(g, mc, bottom, now);
         } else if (combo == 1 && lastKind == HitKind.MACHINE && ClientWeakSpotHandler.machineSpotActive()) {

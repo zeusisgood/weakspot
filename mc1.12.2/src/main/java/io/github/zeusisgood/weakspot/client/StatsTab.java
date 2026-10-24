@@ -104,6 +104,7 @@ final class StatsTab extends StatsScreenTab {
         }
         rows.add(new Object[] {"weakspot.stats.maxStreak", (Function<MiningStats, String>) s -> Long.toString(s.maxStreak)});
         rows.add(new Object[] {"weakspot.stats.totalHits", (Function<MiningStats, String>) s -> Long.toString(s.totalHits())});
+        rows.add(new Object[] {"weakspot.stats.shards", (Function<MiningStats, String>) s -> Long.toString(s.shards)});
 
         int fit = Math.max(1, (screen.bottom() - 4 - y) / ROW_HEIGHT);
         scroll = Math.max(0, Math.min(scroll, rows.size() - fit));

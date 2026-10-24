@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.server;
 
+import io.github.zeusisgood.weakspot.Trinkets;
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.ComboMilestones;
 import io.github.zeusisgood.weakspot.common.HitKind;
@@ -53,7 +54,9 @@ public final class ServerStats {
     /** このヒットを数えたあとの数を返す。 */
     public static int countStreak(EntityPlayerMP player) {
         long now = player.mcServer.getTickCounter();
-        int count = STREAKS.computeIfAbsent(player.getUniqueID(), id -> new HitStreak()).hit(now);
+        HitStreak streak = STREAKS.computeIfAbsent(player.getUniqueID(), id -> new HitStreak());
+        streak.setResetTicks(Trinkets.comboResetTicks(player));
+        int count = streak.hit(now);
         long bestBefore = total(player).maxStreak;
         record(player, stats -> stats.recordStreak(count));
         if (count > bestBefore && ComboMilestones.isStep(count)) {
@@ -66,14 +69,18 @@ public final class ServerStats {
 
     /** 数えない。収穫のおまけは、収穫できたときだけヒットに数えるので、先に見る。 */
     public static int peekStreak(EntityPlayerMP player) {
-        HitStreak streak = STREAKS.get(player.getUniqueID());
+        HitStreak streak = streak(player);
         long now = player.mcServer.getTickCounter();
         return streak == null ? 1 : streak.count(now) + 1;
     }
 
-    /** まだ一度もヒットしていなければ null。 */
+    /** まだ一度もヒットしていなければ null。途切れるまでの時間は、今のコンボの猶予の効果に合わせてから返す。 */
     static HitStreak streak(EntityPlayer player) {
-        return STREAKS.get(player.getUniqueID());
+        HitStreak streak = STREAKS.get(player.getUniqueID());
+        if (streak != null) {
+            streak.setResetTicks(Trinkets.comboResetTicks(player));
+        }
+        return streak;
     }
 
     public static MiningStats session(EntityPlayer player) {
@@ -154,6 +161,7 @@ public final class ServerStats {
         stats.maxStreak = tag.getLong("maxStreak");
         stats.targetBest = tag.getLong("targetBest");
         stats.targetRounds = tag.getLong("targetRounds");
+        stats.shards = tag.getLong("shards");
         for (HitKind kind : HitKind.values()) {
             String key = MiningStats.saveKey(kind);
             String legacy = MiningStats.legacySaveKey(kind);
@@ -175,6 +183,7 @@ public final class ServerStats {
         tag.setLong("maxStreak", stats.maxStreak);
         tag.setLong("targetBest", stats.targetBest);
         tag.setLong("targetRounds", stats.targetRounds);
+        tag.setLong("shards", stats.shards);
         for (HitKind kind : HitKind.values()) {
             tag.setLong(MiningStats.saveKey(kind), stats.count(kind));
         }
