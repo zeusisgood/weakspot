@@ -65,7 +65,7 @@ Supported versions (Minecraft Java Edition):
 Download the file for your Minecraft version; all of them have the same features.
 
 - **Single player**: install it on your client.
-- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.13.x) and the same Minecraft version.
+- **Multiplayer**: install it on the server **and** on every player's client, all on the same minor version (for example 1.14.x) and the same Minecraft version.
 
 ## Settings
 
