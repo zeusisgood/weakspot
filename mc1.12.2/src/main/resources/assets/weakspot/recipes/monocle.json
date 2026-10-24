@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " S ",
+        "IGI",
+        " S "
+    ],
+    "key": {
+        "I": {"item": "minecraft:gold_ingot"},
+        "G": {"item": "minecraft:glass"},
+        "S": {"item": "weakspot:shard"}
+    },
+    "result": {"item": "weakspot:monocle"}
+}

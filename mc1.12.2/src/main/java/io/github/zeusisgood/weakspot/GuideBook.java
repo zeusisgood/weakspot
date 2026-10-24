@@ -100,6 +100,8 @@ public final class GuideBook {
             new Page("enchant", Chapter.SCREEN, s("when"), s("hit"), s("tip")),
             new Page("target", Chapter.MORE, s("how"), s("recipe")),
             new Page("targetrule", Chapter.MORE, s("rule"), s("reward")),
+            new Page("shard", Chapter.MORE, s("get"), s("craft"), s("tip")),
+            new Page("trinket", Chapter.MORE, s("hourglass"), s("charm"), s("monocle")),
             new Page("multi", Chapter.MORE, s("others"), s("together")),
             new Page("markers", Chapter.MORE, s("onoff", STATS_KEY), s("look")),
             new Page("help", Chapter.MORE, s("busy", TOGGLE_KEY), s("bug"), s("update")),

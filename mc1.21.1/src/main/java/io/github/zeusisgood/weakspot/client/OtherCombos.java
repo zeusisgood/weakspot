@@ -2,6 +2,7 @@ package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
+import io.github.zeusisgood.weakspot.common.ItemRules;
 import java.util.HashMap;
 import java.util.Map;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -22,7 +23,8 @@ import net.neoforged.neoforge.client.event.RenderPlayerEvent;
 final class OtherCombos {
 
     static final int MIN_SHOWN = 10;
-    private static final int STALE_TICKS = 60;
+    /** 途切れたらサーバーが 0 を送る。これは届かなかったときの保険なので、コンボの猶予の効果中（約 6 秒）より長くする。 */
+    private static final int STALE_TICKS = ItemRules.GRACE_RESET_TICKS + 20;
     /** 名前の表示（体の高さ + 0.5）より、さらに上に出す高さ。 */
     private static final double ABOVE_NAME = 0.3;
     private static final float TEXT_SCALE = 0.025F;

@@ -26,13 +26,15 @@ abstract class ScreenSpotKind {
     boolean has;
     double x;
     double y;
+    /** 次に移る位置 {x, y}（片眼鏡の予告）。置ける場所がなければ null。 */
+    double[] next;
 
     ScreenSpotKind(HitKind kind) {
         this.kind = kind;
     }
 
     final double radius() {
-        return RADIUS * ClientSettings.get().spotSize(kind);
+        return RADIUS * OwnSize.of(kind);
     }
 
     /** false の間は、出している画面を忘れる。 */

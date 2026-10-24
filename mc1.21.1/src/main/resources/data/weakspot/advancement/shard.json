@@ -1,0 +1,24 @@
+{
+    "display": {
+        "icon": {
+            "id": "weakspot:shard",
+            "count": 1
+        },
+        "title": {
+            "translate": "weakspot.advancement.shard.title"
+        },
+        "description": {
+            "translate": "weakspot.advancement.shard.description"
+        },
+        "frame": "task",
+        "show_toast": true,
+        "announce_to_chat": false,
+        "hidden": false
+    },
+    "parent": "weakspot:root",
+    "criteria": {
+        "done": {
+            "trigger": "minecraft:impossible"
+        }
+    }
+}

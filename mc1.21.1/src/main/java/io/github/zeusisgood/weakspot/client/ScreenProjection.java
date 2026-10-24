@@ -1,6 +1,7 @@
 package io.github.zeusisgood.weakspot.client;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
+import io.github.zeusisgood.weakspot.common.ItemRules;
 import io.github.zeusisgood.weakspot.common.MarkerColor;
 import io.github.zeusisgood.weakspot.common.MarkerShape;
 import net.minecraft.client.Minecraft;
@@ -173,6 +174,11 @@ final class ScreenProjection {
         if (shape.hasCenterDot()) {
             fill(x, y, radius * 0.3, look[2], outlineAlpha);
         }
+    }
+
+    /** 片眼鏡の予告: 輪郭だけ。 */
+    static void drawForecast(double x, double y, double radius, MarkerShape shape, float[][] look) {
+        outlineShape(x, y, radius, shape, look[0], ItemRules.FORECAST_ALPHA);
     }
 
     /** a は 0〜1。 */

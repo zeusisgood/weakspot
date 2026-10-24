@@ -1,5 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
+import io.github.zeusisgood.weakspot.Trinkets;
 import io.github.zeusisgood.weakspot.common.BowMath;
 import io.github.zeusisgood.weakspot.common.FallMath;
 import io.github.zeusisgood.weakspot.common.FishingMath;
@@ -55,6 +56,8 @@ final class HudSpot {
     private double viewPitch;
     /** 出した時点の yaw。 */
     private double anchorYaw;
+    /** 次に移る向き {yaw, pitch}（片眼鏡の予告）。 */
+    private double[] next;
 
     HudSpot(HitKind kind) {
         this(kind, kind.defaultColor());
@@ -99,15 +102,17 @@ final class HudSpot {
                     ? BowMath.isTooFarHorizontal(yaw, player.rotationYaw, player.rotationPitch)
                     : BowMath.isTooFar(yaw, pitch, player.rotationYaw, player.rotationPitch, mode != VERTICAL, true);
             if (tooFar) {
-                next(player, yaw, pitch);
+                setTo(place(player.rotationYaw, player.rotationPitch, yaw, pitch));
                 motion.jumpTo(yaw, pitch);
+                planNext();
             }
             return;
         }
         mode = newMode;
         anchorYaw = player.rotationYaw;
-        next(player, player.rotationYaw, player.rotationPitch);
+        setTo(place(player.rotationYaw, player.rotationPitch, player.rotationYaw, player.rotationPitch));
         motion.jumpTo(yaw, pitch);
+        planNext();
         has = true;
     }
 
@@ -118,41 +123,53 @@ final class HudSpot {
         }
         yaw += delta;
         motion.shift(delta, 0);
+        if (next != null) {
+            next[0] += delta;
+        }
     }
 
+    /** 予告した向きへ移り、その次を決める。 */
     void relocate(EntityPlayer player) {
-        next(player, yaw, pitch);
+        setTo(next != null ? next : place(player.rotationYaw, player.rotationPitch, yaw, pitch));
         if (WeakSpotConfig.client.markers.weakSpotTrailEnabled) {
             motion.moveTo(yaw, pitch, Minecraft.getSystemTime());
         } else {
             motion.jumpTo(yaw, pitch);
         }
+        planNext();
     }
 
-    private void next(EntityPlayer player, double prevYaw, double prevPitch) {
+    private void setTo(double[] p) {
+        yaw = p[0];
+        pitch = p[1];
+    }
+
+    /**
+    * 当てたときの視線は今の弱点に合っているので、視線を今の弱点の向きとみなして前もって決める（片眼鏡の予告。
+    * 付け外しで移り方が変わらないよう、いつも決めておく）。
+    */
+    private void planNext() {
+        next = place(yaw, pitch, yaw, pitch);
+    }
+
+    /** {yaw, pitch}。lookYaw / lookPitch は視線。 */
+    private double[] place(double lookYaw, double lookPitch, double prevYaw, double prevPitch) {
         if (mode == FEET_WINDOW) {
-            double[] n = FallMath.nextWindowSpot(anchorYaw, prevYaw, prevPitch, random);
-            yaw = n[0];
-            pitch = n[1];
+            return FallMath.nextWindowSpot(anchorYaw, prevYaw, prevPitch, random);
         } else if (mode == VERTICAL || mode == VERTICAL_FIXED) {
-            pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
-            yaw = player.rotationYaw;
-            pitch = BowMath.nextVerticalPitch(player.rotationPitch, prevPitch, pitchSide, screen.fovDegrees(),
-                    random);
+            pitchSide = BowMath.nextPitchSign(lookPitch, pitchSide, keepNearHorizon, random);
+            return new double[] {lookYaw,
+                    BowMath.nextVerticalPitch(lookPitch, prevPitch, pitchSide, screen.fovDegrees(), random)};
         } else if (mode == HORIZONTAL) {
             yawSide = BowMath.nextYawSign(yawSide, random);
             // pitch は描く時に止める
-            yaw = BowMath.nextWideHorizontalYaw(player.rotationYaw, player.rotationPitch, prevYaw, yawSide,
-                    screen.fovDegrees(), random);
-            pitch = player.rotationPitch;
-        } else {
-            pitchSide = BowMath.nextPitchSign(player.rotationPitch, pitchSide, keepNearHorizon, random);
-            yawSide = BowMath.nextYawSign(yawSide, random);
-            double[] n = BowMath.nextSpot(player.rotationYaw, player.rotationPitch, prevYaw, prevPitch, yawSide,
-                    pitchSide, screen.fovDegrees(), random);
-            yaw = n[0];
-            pitch = n[1];
+            return new double[] {BowMath.nextWideHorizontalYaw(lookYaw, lookPitch, prevYaw, yawSide,
+                    screen.fovDegrees(), random), lookPitch};
         }
+        pitchSide = BowMath.nextPitchSign(lookPitch, pitchSide, keepNearHorizon, random);
+        yawSide = BowMath.nextYawSign(yawSide, random);
+        return BowMath.nextSpot(lookYaw, lookPitch, prevYaw, prevPitch, yawSide, pitchSide, screen.fovDegrees(),
+                random);
     }
 
     /** 毎フレーム呼ぶ。行列を覚える。出ていないとき・画面を開いているときは false。 */
@@ -192,7 +209,7 @@ final class HudSpot {
 
     /** GUI の座標。 */
     private double radius() {
-        return FishingMath.SPOT_SCREEN_RADIUS * ClientSettings.get().spotSize(kind);
+        return FishingMath.SPOT_SCREEN_RADIUS * OwnSize.of(kind);
     }
 
     private static final float[] ARROW_EDGE = {0x1A / 255F, 0x1A / 255F, 0x1A / 255F};
@@ -239,6 +256,12 @@ final class HudSpot {
         double gy = p[1] / scale;
         ScreenProjection.drawMarker(gx, gy, radius, shape, look, 0.45F, 0.9F);
         ScreenProjection.drawHeadHighlight(gx, gy, radius, shape, trail ? motion.headHighlight(nowMs) : 0);
+        if (next != null && mc.player != null && Trinkets.monocle(mc.player) && !motion.isMoving(nowMs)) {
+            double[] n = projectAt(next[0], next[1]);
+            if (n != null) {
+                ScreenProjection.drawForecast(n[0] / scale, n[1] / scale, radius, shape, look);
+            }
+        }
     }
 
     /** fraction は 0〜1。beginOverlay と endOverlay の間で呼ぶ。 */

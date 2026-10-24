@@ -73,6 +73,9 @@ public final class ServerConfig {
     @Config.Comment("落下")
     public final Fall fall = new Fall();
 
+    @Config.Comment("アイテム")
+    public final Items items = new Items();
+
     public static final class General {
 
         @Config.Comment({"[サーバー] 初めてログインしたプレイヤーに、遊び方のガイドの本を渡すか（1人1回）",
@@ -723,5 +726,16 @@ public final class ServerConfig {
     }
 
     ServerConfig() {
+    }
+
+    public static final class Items {
+
+        @Config.Comment({"[サーバー] ヒット 1 回で弱点の欠片が出る確率（パーセント。コンボの掛け数を掛ける。0 で出ない）",
+                "的当ては対象外。サーバーだけが使う（クライアントには送らない）"})
+        @Config.RangeDouble(min = 0.0, max = 100.0)
+        public double shardChance = 0.5;
+
+        Items() {
+        }
     }
 }

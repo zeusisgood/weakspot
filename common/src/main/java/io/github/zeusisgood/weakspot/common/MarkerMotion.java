@@ -88,6 +88,10 @@ public final class MarkerMotion {
         return new double[] {fromU + (toU - fromU) * p, fromV + (toV - fromV) * p};
     }
 
+    public boolean isMoving(long now) {
+        return moving && now - startMs < MOVE_MS;
+    }
+
     /** 1（動き始め）〜0（止まった）。 */
     public double headHighlight(long now) {
         if (!moving || now - startMs >= MOVE_MS) {

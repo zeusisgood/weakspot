@@ -58,10 +58,31 @@ public class HitStreakTest {
 
     @Test
     public void remainingFractionShrinksFromFullToEmpty() {
-        assertEquals(1.0, HitStreak.remainingFraction(0), 1e-9);
-        assertEquals(0.5, HitStreak.remainingFraction(20), 1e-9);
-        assertEquals(0.0, HitStreak.remainingFraction(40), 1e-9);
-        assertEquals(0.0, HitStreak.remainingFraction(55), 1e-9);
-        assertEquals(1.0, HitStreak.remainingFraction(-1), 1e-9);
+        assertEquals(1.0, HitStreak.remainingFraction(0, 40), 1e-9);
+        assertEquals(0.5, HitStreak.remainingFraction(20, 40), 1e-9);
+        assertEquals(0.0, HitStreak.remainingFraction(40, 40), 1e-9);
+        assertEquals(0.0, HitStreak.remainingFraction(55, 40), 1e-9);
+        assertEquals(1.0, HitStreak.remainingFraction(-1, 40), 1e-9);
+        assertEquals(0.5, HitStreak.remainingFraction(60, 120), 1e-9);
+    }
+
+    @Test
+    public void graceKeepsTheStreakFor120Ticks() {
+        HitStreak streak = new HitStreak();
+        streak.setResetTicks(ItemRules.comboResetTicks(true));
+        assertEquals(1, streak.hit(100));
+        assertEquals(2, streak.hit(220));
+        assertEquals(2, streak.count(340));
+        assertEquals(0, streak.expire(340));
+        assertEquals(2, streak.expire(341));
+    }
+
+    @Test
+    public void graceEndingShortensTheWaitAgain() {
+        HitStreak streak = new HitStreak();
+        streak.setResetTicks(ItemRules.comboResetTicks(true));
+        streak.hit(0);
+        streak.setResetTicks(ItemRules.comboResetTicks(false));
+        assertEquals(0, streak.count(41));
     }
 }

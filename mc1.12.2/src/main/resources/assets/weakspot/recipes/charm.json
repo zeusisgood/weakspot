@@ -1,0 +1,13 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ITI",
+        "ISI"
+    ],
+    "key": {
+        "I": {"item": "minecraft:gold_ingot"},
+        "T": {"item": "minecraft:string"},
+        "S": {"item": "weakspot:shard"}
+    },
+    "result": {"item": "weakspot:charm"}
+}

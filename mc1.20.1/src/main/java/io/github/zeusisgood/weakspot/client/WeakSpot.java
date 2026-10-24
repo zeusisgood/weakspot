@@ -52,6 +52,8 @@ final class WeakSpot {
     long lastActiveTick;
     /** 掘る前の採掘の弱点。薄く描き、ほかのプレイヤーには送らない。 */
     boolean preview;
+    /** 次に移る位置 {u, v}（片眼鏡の予告）。ほかのプレイヤーのマークは null。 */
+    double[] next;
     final MarkerMotion motion = new MarkerMotion(0, 0);
 
     private WeakSpot(HitKind kind, Entity entity, BlockPos pos, Direction face, double plane, FaceRect rect,
@@ -72,7 +74,7 @@ final class WeakSpot {
     /** 面が小さすぎるときは null。成長の弱点は、作物の小さい面でも当てやすいように、growthMinRadius も下限に使う。 */
     static WeakSpot spawn(HitKind kind, Level world, BlockPos pos, BlockState state, Direction face, Vec3 aim,
                           SyncedSettings settings, Random random) {
-        WeakSpot spot = create(kind, world, pos, state, face, settings);
+        WeakSpot spot = create(kind, world, pos, state, face, settings, OwnSize.of(kind));
         if (spot == null) {
             return null;
         }
@@ -81,13 +83,14 @@ final class WeakSpot {
         double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, spot.edgeMargin, aimUV[0], aimUV[1],
                 spot.minMoveDistance, spot.blocked, random);
         spot.moveTo(p[0], p[1], false, 0);
+        spot.planNext(random);
         return spot;
     }
 
     /** 他のプレイヤーから届いた位置。大きさは全員同じ設定値なので、自分の側で計算する。面が小さすぎれば null。 */
     static WeakSpot at(HitKind kind, Level world, BlockPos pos, BlockState state, Direction face, double u, double v,
                        SyncedSettings settings) {
-        WeakSpot spot = create(kind, world, pos, state, face, settings);
+        WeakSpot spot = create(kind, world, pos, state, face, settings, settings.spotSize(kind));
         if (spot != null) {
             spot.moveTo(u, v, false, 0);
         }
@@ -95,7 +98,7 @@ final class WeakSpot {
     }
 
     private static WeakSpot create(HitKind kind, Level world, BlockPos pos, BlockState state, Direction face,
-                                   SyncedSettings settings) {
+                                   SyncedSettings settings, double size) {
         AABB box = outline(world, pos, state);
         if (box == null) {
             return null;
@@ -108,7 +111,6 @@ final class WeakSpot {
         double minRadius = kind == HitKind.GROWTH || kind == HitKind.HARVEST
                 ? Math.max(settings.weakSpotMinRadius, settings.growthMinRadius)
                 : settings.weakSpotMinRadius;
-        double size = settings.spotSize(kind);
         WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio * size,
                 minRadius * size, settings.weakSpotMaxRadiusRatio * size, settings.edgeMargin,
                 settings.minMoveDistance);
@@ -172,7 +174,7 @@ final class WeakSpot {
     /** 面が小さすぎるときは null。 */
     static WeakSpot spawnOnEntity(HitKind kind, Entity entity, Direction face, Vec3 aim, SyncedSettings settings,
                                   Random random) {
-        WeakSpot spot = createOnEntity(kind, entity, face, settings);
+        WeakSpot spot = createOnEntity(kind, entity, face, settings, OwnSize.of(kind));
         if (spot == null) {
             return null;
         }
@@ -180,18 +182,20 @@ final class WeakSpot {
         double[] p = WeakSpotPlacer.place(spot.rect, spot.radius, spot.edgeMargin, aimUV[0], aimUV[1],
                 spot.minMoveDistance, random);
         spot.moveTo(p[0], p[1], false, 0);
+        spot.planNext(random);
         return spot;
     }
 
     static WeakSpot atEntity(Entity entity, Direction face, double u, double v, SyncedSettings settings) {
-        WeakSpot spot = createOnEntity(HitKind.ANIMAL, entity, face, settings);
+        WeakSpot spot = createOnEntity(HitKind.ANIMAL, entity, face, settings, settings.spotSize(HitKind.ANIMAL));
         if (spot != null) {
             spot.moveTo(u, v, false, 0);
         }
         return spot;
     }
 
-    private static WeakSpot createOnEntity(HitKind kind, Entity entity, Direction face, SyncedSettings settings) {
+    private static WeakSpot createOnEntity(HitKind kind, Entity entity, Direction face, SyncedSettings settings,
+                                           double size) {
         AABB box = entity.getBoundingBox();
         int axis = face.getAxis().ordinal();
         FaceRect world = FaceMath.faceRect(axis, box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ);
@@ -199,7 +203,6 @@ final class WeakSpot {
         if (WeakSpotPlacer.isTooSmall(rect, settings.minFaceSize)) {
             return null;
         }
-        double size = settings.spotSize(kind);
         WeakSpotPlacer.Layout layout = WeakSpotPlacer.layout(rect, settings.weakSpotRadiusRatio * size,
                 settings.weakSpotMinRadius * size, settings.weakSpotMaxRadiusRatio * size, settings.edgeMargin,
                 settings.minMoveDistance);
@@ -290,10 +293,17 @@ final class WeakSpot {
         return WeakSpotPlacer.isHit(u, v, radius, a[0], a[1]);
     }
 
-    /** animate なら、マーカーは nowMs から動いて追いつく。 */
+    /** 予告した位置へ移り、その次を決める。animate なら、マーカーは nowMs から動いて追いつく。 */
     void relocate(Random random, boolean animate, long nowMs) {
-        double[] p = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, blocked, random);
+        double[] p = next != null ? next : WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance,
+                blocked, random);
         moveTo(p[0], p[1], animate, nowMs);
+        planNext(random);
+    }
+
+    /** 予告は片眼鏡を付けているときだけ描くが、付け外しで移り方が変わらないよう、いつも前もって決めておく。 */
+    private void planNext(Random random) {
+        next = WeakSpotPlacer.place(rect, radius, edgeMargin, u, v, minMoveDistance, blocked, random);
     }
 
     void moveTo(double newU, double newV, boolean animate, long nowMs) {

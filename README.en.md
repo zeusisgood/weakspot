@@ -33,6 +33,7 @@ For multiplayer, install it on the server **and** on every player's client, all 
 | **K** | Weak Spot menu (stats, hit sounds, per-kind on/off, colors and shapes, settings, guide book) |
 | **HOME** | Turn all weak spots on or off (for example while building) |
 | **Right click** (holding a Weak Spot Target) | 30-second target practice: aim at the red-and-white targets, avoid the yellow ✕. Your best score unlocks new marker looks |
+| **Right click** (holding a Combo Hourglass) | Combos last longer for 5 minutes |
 
 You can change the keys under Options → Controls → Weak Spot Mining.
 
@@ -40,7 +41,13 @@ You can change the keys under Options → Controls → Weak Spot Mining.
 
 There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, melee, throwing, eating, vehicle, ladder, sprint, elytra, portal, swim, fall, sleeping and enchanting. See the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) for how each one works, or the in-game guide book (the Guide button in the K menu). Hitting spots in a row builds a **combo**, and the hit sound climbs the scale.
 
+Hits sometimes drop a **Weak Spot Shard**, used to craft the **Combo Hourglass**, **Weak Spot Charm** and **Weak Spot Monocle**.
+
 ## Recent updates
+
+### 1.14.0
+
+- Added Weak Spot Shards and items made from them (hourglass, charm, monocle)
 
 ### 1.13.1
 
@@ -49,10 +56,6 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 ### 1.13.0
 
 - Now available for Minecraft 1.20.1 (Forge)
-
-### 1.12.3
-
-- 1.21.1: weak spots for the mace, trident, crossbow and crafter
 
 ## More
 

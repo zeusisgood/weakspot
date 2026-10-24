@@ -1,6 +1,8 @@
 package io.github.zeusisgood.weakspot.client;
 
+import io.github.zeusisgood.weakspot.Trinkets;
 import io.github.zeusisgood.weakspot.common.BlockHealthBar;
+import io.github.zeusisgood.weakspot.common.ItemRules;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MarkerColor;
 import io.github.zeusisgood.weakspot.common.MarkerMotion;
@@ -132,6 +134,7 @@ final class WeakSpotRenderer {
                             alpha * SEE_THROUGH_ALPHA, nowMs, cx, cy, cz);
                     RenderSystem.enableDepthTest();
                 }
+                drawForecast(mc, spot, shape, look[0], alpha, nowMs, cx, cy, cz);
             }
         }
         for (Iterator<Flash> it = FLASHES.iterator(); it.hasNext(); ) {
@@ -199,6 +202,23 @@ final class WeakSpotRenderer {
     }
 
     private static final float[] WHITE = {1.0F, 1.0F, 1.0F};
+
+    /** 片眼鏡の予告: 次に移る位置の輪郭。移動している間は出さない（どちらが今の弱点か紛れないように）。 */
+    private static void drawForecast(Minecraft mc, WeakSpot spot, MarkerShape shape, float[] rgb, float alpha,
+                                     long nowMs, double cx, double cy, double cz) {
+        if (spot.next == null || mc.player == null || !Trinkets.monocle(mc.player) || spot.motion.isMoving(nowMs)) {
+            return;
+        }
+        float a = ItemRules.FORECAST_ALPHA * alpha;
+        boolean throughDepth = behindLiquid(mc, spot, 1) || seeThrough(spot);
+        if (throughDepth) {
+            RenderSystem.disableDepthTest();
+        }
+        drawOutline(spot, shape, spot.next[0], spot.next[1], spot.radius, cx, cy, cz, rgb, a);
+        if (throughDepth) {
+            RenderSystem.enableDepthTest();
+        }
+    }
 
     /** ブロック。 */
     private static final double LIQUID_STEP = 0.2;

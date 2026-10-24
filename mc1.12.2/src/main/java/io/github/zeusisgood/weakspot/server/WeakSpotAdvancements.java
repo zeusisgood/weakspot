@@ -39,6 +39,14 @@ public final class WeakSpotAdvancements {
         }
     }
 
+    /** 欠片の作り方もレシピ本に出す。 */
+    static void onShard(EntityPlayerMP player) {
+        if (!isDone(player, "shard")) {
+            GuideBookGiver.unlockShardRecipes(player);
+        }
+        grant(player, "shard");
+    }
+
     static void grantCloseCall(EntityPlayerMP player) {
         grant(player, "close_call");
     }
@@ -82,6 +90,9 @@ public final class WeakSpotAdvancements {
         }
         if (hitEveryKind(total)) {
             grant(player, "all_kinds");
+        }
+        if (total.shards > 0) {
+            grant(player, "shard");
         }
         onTargetBest(player, total.targetBest);
     }

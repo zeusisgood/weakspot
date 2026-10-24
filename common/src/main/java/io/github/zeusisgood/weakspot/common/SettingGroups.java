@@ -73,6 +73,7 @@ public final class SettingGroups {
                 "fallDamageHintEnabled"));
         g.put("sleep", list("sleepWeakSpotEnabled", "sleepHitTicks", "sleepMinHitIntervalTicks"));
         g.put("enchant", list("enchantWeakSpotEnabled", "enchantMinHitIntervalTicks"));
+        g.put("items", list("shardChance"));
         GROUPS = Collections.unmodifiableMap(g);
     }
 

@@ -20,6 +20,9 @@ public final class MiningStats {
 
     public long maxStreak;
 
+    /** 手に入れた弱点の欠片の数。 */
+    public long shards;
+
     /** 「統計をリセット」では消さない。 */
     public long targetBest;
     public long targetRounds;
@@ -102,6 +105,7 @@ public final class MiningStats {
         maxStreak = 0;
         targetBest = 0;
         targetRounds = 0;
+        shards = 0;
         java.util.Arrays.fill(kindHits, 0);
     }
 
@@ -131,6 +135,7 @@ public final class MiningStats {
         }
         out.writeLong(targetBest);
         out.writeLong(targetRounds);
+        out.writeLong(shards);
     }
 
     public static MiningStats readFrom(DataInput in) throws IOException {
@@ -149,6 +154,7 @@ public final class MiningStats {
         }
         stats.targetBest = in.readLong();
         stats.targetRounds = in.readLong();
+        stats.shards = in.readLong();
         return stats;
     }
 }
