@@ -38,7 +38,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.20.1・1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - jar の名前と配布サイトの表示名の形（`weakspot-1.12.2-forge-<版>.jar`・`Weak Spot Mining <版> for MC 1.12.2 (Forge)`）は `doc/development.md` の「版の表記」。Mod の版はこの節の規則だけで決め、Minecraft の版と数字が重なるかは考えない。
-- 現行は **1.13.1**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
+- 現行は **1.14.0**、範囲は `"[1.14,1.15)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.14"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -64,6 +64,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（1.20.1・1.21.1 は `value = Dist.CLIENT`）。パケットのハンドラーは専用サーバーでも読み込まれるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る（全部の版）。
 - ヒット判定は `RenderWorldLastEvent`（1.20.1・1.21.1 は `RenderLevelStageEvent` の `AFTER_WEATHER`）で**毎フレーム**（tick 単位だと素早い照準移動を取りこぼす）。
 - **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。相手のクライアントの版は、1.12.2 は Forge が受け取った Mod の一覧、1.20.1・1.21.1 は接続直後にクライアントが送る `HelloMessage` で知る。
+- **アイテムの効果（お守りの大きさ・片眼鏡の予告・砂時計の猶予）は、付けているか・効果があるかをクライアントとサーバーがそれぞれ自分で見る**（持ち物と効果はバニラが同期するので、通信で送らない。`Trinkets`）。欠片を渡す・耐久を減らすのはサーバーだけ（`server/ItemRewards`）。
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。1.20.1・1.21.1 は HUD が `RenderGuiEvent.Post`、GUI の上が `ScreenEvent.Render.Post` で、図形は `client/Draw`（頂点は `GuiGraphics` の pose を掛ける）。1.20.1 の tick のイベントは `TickEvent`（`phase` で前後を分ける）、通信は `SimpleChannel`。
 - 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。1.12.2 の `.lang` はビルドのときに作る。1.20.1・1.21.1 は json をそのまま使う。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
@@ -104,4 +105,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.13.1（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。
+現行は 1.14.0（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。

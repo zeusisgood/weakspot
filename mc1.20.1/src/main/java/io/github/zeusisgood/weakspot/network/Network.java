@@ -17,7 +17,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 public final class Network {
 
     /** 接続できる相手の版の印。マイナーを上げたら変える（WeakSpotMod.ACCEPTED_VERSIONS と同じ考え）。 */
-    private static final String PROTOCOL = "1.13";
+    private static final String PROTOCOL = "1.14";
 
     private final SimpleChannel channel = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(WeakSpotMod.MODID, "main"), () -> PROTOCOL, PROTOCOL::equals, PROTOCOL::equals);

@@ -8,6 +8,7 @@ While you mine, farm, ride, draw a bow and more, a glowing circle — a **weak s
 
 - **19 kinds of weak spots**, from mining and farming to travel, combat, falling and even sleeping
 - **Target practice**: craft a Weak Spot Target and play a 30-second aiming mini-game anywhere. Your best score unlocks new marker looks (star shape, silver sparkle, gold sparks, rainbow)
+- **Weak Spot Shards**: hits sometimes drop a shard (more often at high combos). Craft a **Combo Hourglass** (combos last longer for 5 minutes), a **Weak Spot Charm** (bigger weak spots in your off hand) or a **Weak Spot Monocle** (shows where each spot moves next)
 - **Combo system** with a rising hit sound and a per-kind multiplier shown on screen
 - **Stats, milestones and advancements**: hits per kind, rewards at milestones (announced to everyone on the server), an advancement tab and a server leaderboard (`/weakspot top`)
 - **Customizable**: turn each kind on or off, change marker colors, shapes and size, pick hit sounds and scales
@@ -47,6 +48,7 @@ Growth, harvest, machine and animal spots also appear while you hold an item tha
 | **K** | Weak Spot menu (stats, hit sounds, per-kind on/off, colors and shapes, settings, guide book) |
 | **HOME** | Turn all weak spots on or off (for example while building) |
 | **Right click** (holding a Weak Spot Target) | 30-second target practice |
+| **Right click** (holding a Combo Hourglass) | Combos last longer for 5 minutes |
 
 Keys can be changed under Options → Controls → Weak Spot Mining.
 

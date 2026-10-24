@@ -9,7 +9,7 @@
 
 - ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
-- パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
+- パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、付けているアイテムの効果 `Trinkets`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、欠片で作るアイテム（下の「アイテム」）、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
 - `network/`: パケット（下の「通信」）。
@@ -83,6 +83,17 @@
 - サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする。パッチで足したキー（今は `weakspot.target.updateGift`）は `server/PlayerText.of` を通し、キーを持たない古いクライアントにだけ `server/ServerLang` が jar の言語ファイルから文章を作る。版の違いの知らせは `VersionCheck`（`common/ModVersions`）。
 - コマンド: `WeakSpotCommand`（`stats` / `reset` は権限 2、`top` はだれでも、`reload` は `WeakSpotConfig.reloadFromFile`）。
 
+### アイテム（欠片・砂時計・お守り・片眼鏡）
+
+- クラス: パッケージの直下の `ItemShard`・`ItemComboHourglass`・`ItemCharm`・`ItemMonocle`、効果 `PotionComboGrace`（1.20.1・1.21.1 は `ComboGraceEffect`）、登録 `WeakSpotItems`（1.20.1・1.21.1 は `Registration`）、付けているかを見る `Trinkets`（両側）、数 `common/ItemRules`。
+- 欠片と、お守り・片眼鏡の耐久は `server/ItemRewards`（`HitGate.accept` から。受け付けたヒットだけで、的当てのヒットは通らない。採掘の掘る前のヒットは確定したときに通る）。乱数はサーバーだけで引く。統計の保存のキーは `shards`。進捗「弱点の欠片」は渡したときとログインのときに与え、3 つのレシピをレシピ本に出す。
+- 付けているか・効果があるかは通信で送らない。持ち物と効果はバニラが同期するので、両側がそれぞれ自分で見る（`Trinkets`）。
+- コンボの猶予: `HitStreak` の途切れるまでの tick を、持ち主が効果を見て入れる（サーバーは `ServerStats.countStreak` / `streak`、クライアントは毎 tick の `expire` の前）。効果が切れる境目で両側が 1 tick ずれても、`ComboSync` が直す。
+- お守りの大きさ: `client/OwnSize`（自分の弱点だけ。ほかのプレイヤーのマークは、マークの通信に大きさがないので設定の大きさで描く）。ブロック・動物の弱点は、出したときの大きさのまま。
+- 片眼鏡の予告: 次に移る位置を、弱点を出した・移したときに前もって決めておき、当てたらそこへ移す（`WeakSpot.next`・`HudSpot.next`・`FishingSpot.next`・`ScreenSpotKind.next`）。付け外しで移り方が変わらないよう、付けていなくても決める。照準のまわりの弱点は、当てたときの視線を今の弱点の向きとみなして決める（当てた瞬間の視線は弱点の当たりの半径の中にあるので、ずれはその分だけ）。画面の上の弱点は、画面の大きさが変わると予告が外に出ることがある（当てたらそこへ移る）。
+- 片眼鏡は防具にしない（バニラは傷を受けるたびに防具の耐久を減らして壊すため。残り 1 で止める決まりが守れない）。頭の枠に付けられる普通のアイテムにする（1.12.2 は `getEquipmentSlot`、1.20.1・1.21.1 は `Equipable`）。顔の見た目は、防具でない頭の物をモデルで描くバニラの層（1.12.2 の `LayerCustomHead`、1.20.1・1.21.1 の `CustomHeadLayer`）に任せ、モデルの `display.head` で右目の前に小さく出す。
+- 耐久は残り 1 で止める（`ItemRules.usable`。エリトラと同じ）。減らすのはバニラの `attemptDamageItem`（1.12.2）／`hurtAndBreak`（1.20.1・1.21.1）で、耐久力のエンチャントが効く。残り 1 を越えて減らさないので壊れない。修理はバニラの金床（`getIsRepairable` / `isValidRepairItem`。1 個で最大耐久の 1/4）。
+
 ### 共通の部品
 
 `mc1.12.2/src/test/.../compat/WireCompatTest` が、統計・設定の送る中身と保存のキーがパッチの間に 1 バイトも変わらないことを確かめる（通信・保存の形を変えるマイナーでは、期待値を作り直す）。
@@ -104,7 +115,7 @@
 | 0 | `HitMessage` | C→S | ヒット（種類・位置・連続ヒット数・エンティティ ID） |
 | 1 | `OtherHitMessage` | S→C | 受け付けたヒットを近くのプレイヤーへ（音。的当ての ✕ は `miss`） |
 | 2 | `SettingsMessage` | S→C | `SyncedSettings`（並びは `SyncedSettings.WIRE`） |
-| 3 / 4 | `StatsRequestMessage` / `StatsMessage` | C→S / S→C | 統計の要求（リセットを含む）と統計（最後に的当ての上位） |
+| 3 / 4 | `StatsRequestMessage` / `StatsMessage` | C→S / S→C | 統計の要求（リセットを含む）と統計（欠片の数を含む。最後に的当ての上位） |
 | 5 | `MilestoneMessage` | S→C | 節目 |
 | 6 / 7 | `MarkerMessage` / `OtherMarkerMessage` | C→S / S→C | 弱点のマーク |
 | 8 | `SwitchMessage` | C→S | 一時オフ・機械の粒子・オフの種類のビット |
