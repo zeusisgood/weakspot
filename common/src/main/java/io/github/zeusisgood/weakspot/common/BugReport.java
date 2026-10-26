@@ -11,7 +11,7 @@ import java.util.List;
 public final class BugReport {
 
     /** GitHub とブラウザーが長すぎるリンクを受け付けないため。 */
-    public static final int MAX_URL_LENGTH = 6000;
+    public static final int MAX_URL_LENGTH = 4000;
 
     private BugReport() {
     }
