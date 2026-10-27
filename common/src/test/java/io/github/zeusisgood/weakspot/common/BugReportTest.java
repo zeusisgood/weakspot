@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,34 +25,15 @@ public class BugReportTest {
     }
 
     @Test
-    public void bodyHasHeadingsEnvironmentAndMods() {
-        String body = BugReport.body(TEMPLATE, ENV, "Mods (2)", Arrays.asList("A (a) 1", "B (b) 2"), true, "paste");
-        assertTrue(body.startsWith("## Summary\n\n\n## Steps\n1. \n\n## Environment\n"));
-        assertTrue(body.endsWith("</details>\n\n## Additional\n\n\n"));
-        assertTrue(body.contains("## Environment\n- Mod: 1.7.1\n"));
-        assertTrue(body.contains("<details><summary>Mods (2)</summary>"));
-        assertTrue(body.contains("- B (b) 2\n"));
-        assertFalse(body.contains("paste"));
+    public void bodyHasHeadingsEnvironmentAndPasteNote() {
+        String body = BugReport.body(TEMPLATE, ENV, "**paste**");
+        assertEquals("## Summary\n\n\n## Steps\n1. \n\n## Environment\n- Mod: 1.7.1\n"
+                + "- Minecraft 1.12.2 / Forge 14.23.5.2860\n\n**paste**\n\n## Additional\n\n\n", body);
     }
 
     @Test
-    public void keepsModsWhenShort() {
-        String url = BugReport.issueUrlFitting(BASE, "[1.7.1] ", TEMPLATE, ENV, "Mods (1)",
-                Collections.singletonList("A (a) 1"), "paste");
-        assertTrue(url.startsWith(BASE + "?title=%5B1.7.1%5D%20&body="));
-        assertTrue(url.contains(BugReport.encode("A (a) 1")));
-    }
-
-    @Test
-    public void dropsModsWhenTooLong() {
-        List<String> mods = new ArrayList<>();
-        for (int i = 0; i < 400; i++) {
-            mods.add("Some Long Mod Name " + i + " (somelongmodid" + i + ") 1.2.3");
-        }
-        String url = BugReport.issueUrlFitting(BASE, "[1.7.1] ", TEMPLATE, ENV, "Mods (400)", mods, "paste");
-        assertTrue(url.length() <= BugReport.MAX_URL_LENGTH);
-        assertTrue(url.contains("paste"));
-        assertFalse(url.contains("somelongmodid"));
+    public void issueUrlHasTitleAndBody() {
+        assertEquals(BASE + "?title=%5B1.7.1%5D%20&body=a%20b", BugReport.issueUrl(BASE, "[1.7.1] ", "a b"));
     }
 
     @Test

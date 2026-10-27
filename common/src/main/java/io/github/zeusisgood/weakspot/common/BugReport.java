@@ -6,12 +6,10 @@ import java.util.List;
 
 /**
  * GitHub の新しい issue の画面は、リンクの title と body で最初から書き込める。
- * Mod の一覧でリンクが長くなりすぎるときは、一覧を外して「貼り付けてください」と書く。
+ * Mod の一覧はリンクに入れず、クリップボードから貼ってもらう（リンクの長さを Mod の数に依らず一定にするため。
+ * GitHub にログインしていないと、戻り先としてもう一度符号化されて伸びる）。
  */
 public final class BugReport {
-
-    /** GitHub とブラウザーが長すぎるリンクを受け付けないため。 */
-    public static final int MAX_URL_LENGTH = 6000;
 
     private BugReport() {
     }
@@ -43,9 +41,8 @@ public final class BugReport {
         }
     }
 
-    /** includeMods が false なら、一覧の代わりに pasteNote を書く。 */
-    public static String body(Template template, List<String> environment, String modsSummary, List<String> mods,
-                              boolean includeMods, String pasteNote) {
+    /** pasteNote は Mod の一覧の場所に書く。 */
+    public static String body(Template template, List<String> environment, String pasteNote) {
         StringBuilder sb = new StringBuilder();
         for (Section section : template.before) {
             appendSection(sb, section);
@@ -54,16 +51,7 @@ public final class BugReport {
         for (String line : environment) {
             sb.append("- ").append(line).append("\n");
         }
-        sb.append("\n");
-        if (includeMods) {
-            sb.append("<details><summary>").append(modsSummary).append("</summary>\n\n");
-            for (String mod : mods) {
-                sb.append("- ").append(mod).append("\n");
-            }
-            sb.append("</details>\n");
-        } else {
-            sb.append(pasteNote).append("\n");
-        }
+        sb.append("\n").append(pasteNote).append("\n");
         for (Section section : template.after) {
             sb.append("\n");
             appendSection(sb, section);
@@ -110,16 +98,6 @@ public final class BugReport {
 
     public static String issueUrl(String newIssueUrl, String title, String body) {
         return newIssueUrl + "?title=" + encode(title) + "&body=" + encode(body);
-    }
-
-    public static String issueUrlFitting(String newIssueUrl, String title, Template template,
-                                         List<String> environment, String modsSummary, List<String> mods,
-                                         String pasteNote) {
-        String full = issueUrl(newIssueUrl, title, body(template, environment, modsSummary, mods, true, pasteNote));
-        if (full.length() <= MAX_URL_LENGTH) {
-            return full;
-        }
-        return issueUrl(newIssueUrl, title, body(template, environment, modsSummary, mods, false, pasteNote));
     }
 
     /** 空白は %20。 */

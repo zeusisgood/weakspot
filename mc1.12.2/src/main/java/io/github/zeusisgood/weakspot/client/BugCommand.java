@@ -2,6 +2,8 @@ package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
 import io.github.zeusisgood.weakspot.common.BugReport;
+import java.awt.Desktop;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +26,7 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * /weakspot bug を自分のクライアントで受け取る（サーバーの /weakspot は OP 権限が要り、ソロでチートがオフだと打てない。
@@ -61,7 +64,12 @@ final class BugCommand extends CommandBase {
             return;
         }
         if (args.length >= 1 && "bug".equalsIgnoreCase(args[0])) {
-            showGuide(mc);
+            // open はクリックで動くもので、補完には出さない
+            if (args.length >= 2 && "open".equalsIgnoreCase(args[1])) {
+                openIssue(mc);
+            } else {
+                showGuide(mc);
+            }
             return;
         }
         // クリックで動くもので、補完には出さない
@@ -87,6 +95,34 @@ final class BugCommand extends CommandBase {
         List<String> environment = environment(mc);
         List<String> mods = mods();
         String modsSummary = I18n.format("weakspot.bug.template.mods", mods.size());
+        GuiScreen.setClipboardString(BugReport.plain(environment, modsSummary, mods));
+
+        send(mc, gold(new TextComponentTranslation("weakspot.bug.title")));
+        // OPEN_URL の確認画面は URL を全文表示し、長いとボタンが画面の外に出るので、自分で開く
+        TextComponentTranslation open = new TextComponentTranslation("weakspot.bug.step1",
+                UpdateNotes.link(new TextComponentTranslation("weakspot.bug.openIssue"),
+                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/weakspot bug open")));
+        send(mc, white(open));
+        send(mc, white(new TextComponentTranslation("weakspot.bug.step2")));
+        send(mc, white(new TextComponentTranslation("weakspot.bug.step3", shortEnvironment(mc, mods.size()))));
+        send(mc, white(new TextComponentTranslation("weakspot.bug.step4")));
+        TextComponentTranslation note = new TextComponentTranslation("weakspot.bug.step5");
+        note.getStyle().setColor(TextFormatting.GRAY);
+        send(mc, note);
+    }
+
+    private static void openIssue(Minecraft mc) {
+        try {
+            // バニラの GuiScreen.openWebLink と同じ開き方（そちらは非公開）
+            Desktop.getDesktop().browse(new URI(issueUrl(mc)));
+        } catch (Exception | LinkageError e) {
+            LogManager.getLogger(WeakSpotMod.MODID).warn("Could not open the browser", e);
+            send(mc, new TextComponentTranslation("weakspot.bug.openFailed"));
+        }
+    }
+
+    /** URL をコマンドの引数で渡すとチャットの長さの上限に当たるので、開くときに作り直す。 */
+    private static String issueUrl(Minecraft mc) {
         // 一般的な不具合報告のテンプレートと同じ見出し
         BugReport.Template template = new BugReport.Template(Arrays.asList(
                 new BugReport.Section(I18n.format("weakspot.bug.template.summary")),
@@ -95,21 +131,8 @@ final class BugCommand extends CommandBase {
                 new BugReport.Section(I18n.format("weakspot.bug.template.expected"))),
                 I18n.format("weakspot.bug.template.environment"),
                 Collections.singletonList(new BugReport.Section(I18n.format("weakspot.bug.template.additional"))));
-        String url = BugReport.issueUrlFitting(NEW_ISSUE_URL, "[" + WeakSpotMod.VERSION + "] ", template, environment,
-                modsSummary, mods, I18n.format("weakspot.bug.template.paste"));
-        GuiScreen.setClipboardString(BugReport.plain(environment, modsSummary, mods));
-
-        send(mc, gold(new TextComponentTranslation("weakspot.bug.title")));
-        TextComponentTranslation open = new TextComponentTranslation("weakspot.bug.step1",
-                UpdateNotes.link(new TextComponentTranslation("weakspot.bug.openIssue"),
-                        new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
-        send(mc, white(open));
-        send(mc, white(new TextComponentTranslation("weakspot.bug.step2")));
-        send(mc, white(new TextComponentTranslation("weakspot.bug.step3", shortEnvironment(mc, mods.size()))));
-        send(mc, white(new TextComponentTranslation("weakspot.bug.step4")));
-        TextComponentTranslation note = new TextComponentTranslation("weakspot.bug.step5");
-        note.getStyle().setColor(TextFormatting.GRAY);
-        send(mc, note);
+        return BugReport.issueUrl(NEW_ISSUE_URL, "[" + WeakSpotMod.VERSION + "] ",
+                BugReport.body(template, environment(mc), I18n.format("weakspot.bug.template.paste")));
     }
 
     private static List<String> environment(Minecraft mc) {
