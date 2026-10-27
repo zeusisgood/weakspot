@@ -123,9 +123,6 @@ final class BugCommand extends CommandBase {
 
     /** URL をコマンドの引数で渡すとチャットの長さの上限に当たるので、開くときに作り直す。 */
     private static String issueUrl(Minecraft mc) {
-        List<String> environment = environment(mc);
-        List<String> mods = mods();
-        String modsSummary = I18n.format("weakspot.bug.template.mods", mods.size());
         // 一般的な不具合報告のテンプレートと同じ見出し
         BugReport.Template template = new BugReport.Template(Arrays.asList(
                 new BugReport.Section(I18n.format("weakspot.bug.template.summary")),
@@ -134,8 +131,8 @@ final class BugCommand extends CommandBase {
                 new BugReport.Section(I18n.format("weakspot.bug.template.expected"))),
                 I18n.format("weakspot.bug.template.environment"),
                 Collections.singletonList(new BugReport.Section(I18n.format("weakspot.bug.template.additional"))));
-        return BugReport.issueUrlFitting(NEW_ISSUE_URL, "[" + WeakSpotMod.VERSION + "] ", template, environment,
-                modsSummary, mods, I18n.format("weakspot.bug.template.paste"));
+        return BugReport.issueUrl(NEW_ISSUE_URL, "[" + WeakSpotMod.VERSION + "] ",
+                BugReport.body(template, environment(mc), I18n.format("weakspot.bug.template.paste")));
     }
 
     private static List<String> environment(Minecraft mc) {

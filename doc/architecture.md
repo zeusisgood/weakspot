@@ -71,7 +71,7 @@
 - 一時オフ（`ToggleKeyHandler`。HOME キー。J は JourneyMap と重なるため）: まとめて止めるのは `ClientWeakSpotHandler.stopOwnWeakSpots`。サーバーにも `SwitchMessage` で伝え、`ServerSwitches` が右クリックの抑止・ヒット・ブースト・マークの転送を止める。
 - 他のプレイヤー: マークは `OtherMarkers` → `MarkerRelay`（サーバーは検証せずに転送する）、音は `OtherHitMessage`、頭の上のコンボは `OtherCombos`、節目の知らせの非表示は `OthersMilestoneFilter`。
 - 統計画面（K キー）: `StatsScreen` と各タブ（`StatsTab`・`SoundTab`・`KindsTab`・`TargetTab`。土台 `StatsScreenTab`）。設定画面は `WeakSpotGuiFactory` が `common/SettingGroups` のまとめで組む（ファイルのカテゴリではなく、種類・用途で）。
-- 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。リンクは `OPEN_URL` ではなく `RUN_COMMAND` の `/weakspot bug open` で、URL を作り直して直接開く（バニラの確認画面は URL を全文表示し、長いとボタンが画面の外に出る。URL はチャットの長さの上限に当たるので引数で渡さない）。
+- 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。リンクは `OPEN_URL` ではなく `RUN_COMMAND` の `/weakspot bug open` で、URL を作り直して直接開く（バニラの確認画面は URL を全文表示し、長いとボタンが画面の外に出る。URL はチャットの長さの上限に当たるので引数で渡さない）。Mod の一覧は URL に入れず、クリップボードから貼ってもらう（URL の長さを Mod の数に依らず一定にするため。GitHub にログインしていないと、戻り先としてもう一度符号化されて伸びる）。
 - サーバーの版で機能を止める: `ServerFeatures.since("1.x.y")`（`SyncedSettings.serverVersion`）。古いサーバーにつなぐと、弱点が出るのにバニラの動作（GUI など）も起きる食い違いを防ぐ。今は使っている所がない（1.11.x の条件は、接続できる下限が 1.12 になったので消した）。
 
 ### 的当て・記録・知らせ（サーバー）
