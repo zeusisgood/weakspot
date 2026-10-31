@@ -485,6 +485,8 @@
   "weakspot.bug.template.actual": "実際の動作",
   "weakspot.bug.template.additional": "補足（ログ・スクリーンショット）",
   "weakspot.bug.openFailed": "[WeakSpot] ブラウザーを開けませんでした。GitHub の issue の画面から報告してください。",
+  "weakspot.bug.fallback": " ブラウザーが見当たらない場合: %s（環境情報はクリップボードから貼り付けてください）",
+  "weakspot.bug.fallbackLink": "[雛形だけのリンクを開く]",
   "weakspot.bug.env.osNote": "（古い Java のため OS 名が不正確な可能性あり。Windows 10・11 も 8.1 と表示される）",
   "weakspot.client.updates.showupdatenotes": "更新のお知らせ",
   "weakspot.client.updates.showupdatenotes.tooltip": "版が変わって初めてワールドに入ったときに、チャットに更新のお知らせを出すか\\nファイル: client.updates.showUpdateNotes",

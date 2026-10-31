@@ -37,6 +37,22 @@ public class BugReportTest {
     }
 
     @Test
+    public void commandsOnlyOutsideWindowsAndMac() {
+        assertTrue(BugReport.opensWithCommands("Linux"));
+        assertTrue(BugReport.opensWithCommands("FreeBSD"));
+        assertFalse(BugReport.opensWithCommands("Windows 11"));
+        assertFalse(BugReport.opensWithCommands("Mac OS X"));
+    }
+
+    @Test
+    public void triesXdgOpenFirst() {
+        List<List<String>> commands = BugReport.openCommands("https://example.com");
+        assertEquals(Arrays.asList("xdg-open", "https://example.com"), commands.get(0));
+        assertEquals(Arrays.asList("gio", "open", "https://example.com"), commands.get(1));
+        assertEquals(4, commands.size());
+    }
+
+    @Test
     public void plainTextForTheClipboard() {
         assertEquals("Mod: 1.7.1\nMinecraft 1.12.2 / Forge 14.23.5.2860\nMods (1)\n- A (a) 1\n",
                 BugReport.plain(ENV, "Mods (1)", Collections.singletonList("A (a) 1")));

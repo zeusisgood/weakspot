@@ -112,11 +112,34 @@ final class BugCommand extends CommandBase {
     }
 
     private static void openIssue(Minecraft mc) {
-        try {
-            // バニラの GuiScreen.openWebLink と同じ開き方（そちらは非公開）
-            Desktop.getDesktop().browse(new URI(issueUrl(mc)));
-        } catch (Exception | LinkageError e) {
-            LogManager.getLogger(WeakSpotMod.MODID).warn("Could not open the browser", e);
+        String url = issueUrl(mc);
+        if (BugReport.opensWithCommands(System.getProperty("os.name"))) {
+            Thread thread = new Thread(() -> {
+                if (!LinuxBrowser.open(url)) {
+                    mc.addScheduledTask(() -> sendOpenFailed(mc));
+                }
+            }, "WeakSpot browser");
+            thread.setDaemon(true);
+            thread.start();
+        } else {
+            try {
+                // バニラの GuiScreen.openWebLink と同じ開き方（そちらは非公開）
+                Desktop.getDesktop().browse(new URI(url));
+            } catch (Exception | LinkageError e) {
+                LogManager.getLogger(WeakSpotMod.MODID).warn("Could not open the browser", e);
+                sendOpenFailed(mc);
+            }
+        }
+        // ゲームの後ろで開いて気付かない場合に備え、成否に関係なく出す。短いので確認画面のボタンは押せる
+        TextComponentTranslation fallback = new TextComponentTranslation("weakspot.bug.fallback",
+                UpdateNotes.link(new TextComponentTranslation("weakspot.bug.fallbackLink"),
+                        new ClickEvent(ClickEvent.Action.OPEN_URL, BugReport.PLAIN_FORM_URL)));
+        fallback.getStyle().setColor(TextFormatting.GRAY);
+        send(mc, fallback);
+    }
+
+    private static void sendOpenFailed(Minecraft mc) {
+        if (mc.player != null) {
             send(mc, new TextComponentTranslation("weakspot.bug.openFailed"));
         }
     }

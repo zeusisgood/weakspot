@@ -81,8 +81,28 @@ final class BugCommand {
         if (mc.player == null) {
             return;
         }
-        // バニラの確認画面が「はい」のあとに使うもの（開けなくてもログに書くだけで、知る方法がない）
-        Util.getPlatform().openUri(issueUrl(mc));
+        String url = issueUrl(mc);
+        if (BugReport.opensWithCommands(System.getProperty("os.name"))) {
+            Thread thread = new Thread(() -> {
+                if (!LinuxBrowser.open(url)) {
+                    mc.execute(() -> {
+                        if (mc.player != null) {
+                            send(mc, Component.translatable("weakspot.bug.openFailed"));
+                        }
+                    });
+                }
+            }, "WeakSpot browser");
+            thread.setDaemon(true);
+            thread.start();
+        } else {
+            // バニラの確認画面が「はい」のあとに使うもの（開けなくてもログに書くだけで、知る方法がない）
+            Util.getPlatform().openUri(url);
+        }
+        // ゲームの後ろで開いて気付かない場合に備え、成否に関係なく出す。短いので確認画面のボタンは押せる
+        send(mc, Component.translatable("weakspot.bug.fallback",
+                UpdateNotes.link(Component.translatable("weakspot.bug.fallbackLink"),
+                        new ClickEvent(ClickEvent.Action.OPEN_URL, BugReport.PLAIN_FORM_URL)))
+                .withStyle(ChatFormatting.GRAY));
     }
 
     /** URL をコマンドの引数で渡すとチャットの長さの上限に当たるので、開くときに作り直す。 */

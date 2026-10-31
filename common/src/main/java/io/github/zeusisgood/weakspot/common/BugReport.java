@@ -2,7 +2,9 @@ package io.github.zeusisgood.weakspot.common;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * GitHub の新しい issue の画面は、リンクの title と body で最初から書き込める。
@@ -11,7 +13,25 @@ import java.util.List;
  */
 public final class BugReport {
 
+    /** 雛形の見出しは日英併記で、body の見出しと揃えてある。 */
+    public static final String PLAIN_FORM_URL = "https://github.com/zeusisgood/weakspot/issues/new?template=bug_report.md";
+
     private BugReport() {
+    }
+
+    /** Windows と macOS はバニラの開き方で開ける。 */
+    public static boolean opensWithCommands(String osName) {
+        String name = osName == null ? "" : osName.toLowerCase(Locale.ROOT);
+        return !name.startsWith("windows") && !name.startsWith("mac");
+    }
+
+    /** 試す順。デスクトップ環境によって入っているものが違う。 */
+    public static List<List<String>> openCommands(String url) {
+        return Arrays.asList(
+                Arrays.asList("xdg-open", url),
+                Arrays.asList("gio", "open", url),
+                Arrays.asList("kde-open5", url),
+                Arrays.asList("kde-open", url));
     }
 
     /** text が空なら空欄。 */
