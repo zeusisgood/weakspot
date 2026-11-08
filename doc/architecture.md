@@ -7,7 +7,7 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
