@@ -22,7 +22,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 | **1.20.1** | Forge（47.1.32 以降） | 47.1.32 | |
 | **1.21.1** | NeoForge | 21.1.264 | |
 
-ダウンロードのページで Minecraft の版に合う jar を選んでください。マルチプレイでは、サーバーと全員に同じマイナーバージョンが必要です（詳細は [doc/install.md](doc/install.md)）。
+ダウンロードのページで Minecraft の版に合う jar を選んでください。マルチプレイでは、サーバーと全員に同じ Mod バージョン（例: 1.13.x）が必要です（詳細は [doc/install.md](doc/install.md)）。
 
 ## 操作
 
@@ -98,3 +98,12 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 - **Modpack への同梱は自由**です。許可や連絡は不要ですが、[issue](https://github.com/zeusisgood/weakspot/issues/new/choose)（「Modpack の報告」）で教えてもらえると励みになります。
 - 紹介や共有の際は、[CurseForge のページ](https://www.curseforge.com/minecraft/mc-mods/weakspot)へのリンクで案内していただけると助かります。
+
+## 作者について
+
+VRChat向けのペットスライム「Nyaimu」も作っています。Minecraft向けには無料テクスチャパック [Nyaimu Slimeball Texture](https://www.curseforge.com/minecraft/texture-packs/nyaimu-slimeball-texture) もあります。
+
+- BOOTH: [https://booth.pm/ja/items/5036167](https://booth.pm/ja/items/5036167)
+- Jinxxy（海外向け）: [https://jinxxy.com/zeusisgood/nyaimu](https://jinxxy.com/zeusisgood/nyaimu)
+- X: [@zeus_isgood](https://x.com/zeus_isgood)
+- Website: [https://zeusisgood.dev/](https://zeusisgood.dev/)

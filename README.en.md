@@ -24,7 +24,7 @@ Supported versions (Minecraft Java Edition):
 
 Pick the file for your Minecraft version on the download page.
 
-For multiplayer, install it on the server **and** on every player's client, all on the same minor version (for example 1.12.x) and the same Minecraft version. In single player, only your client needs it.
+For multiplayer, install it on the server **and** on every player's client, all on the same mod version (for example 1.13.x) and the same Minecraft version. In single player, only your client needs it.
 
 ## Controls
 
@@ -74,3 +74,14 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 - **Modpacks are welcome.** No permission needed. If you add it to a pack, I'd love to hear about it through an [issue](https://github.com/zeusisgood/weakspot/issues/new/choose) ("Modpack notice"), but it's entirely optional.
 - When sharing the mod, a link to the [CurseForge page](https://www.curseforge.com/minecraft/mc-mods/weakspot) is appreciated.
+
+## About the author
+
+I also make VRChat accessories. My pet slime **"Nyaimu"** — also available on CurseForge as the free [Nyaimu Slimeball Texture](https://www.curseforge.com/minecraft/texture-packs/nyaimu-slimeball-texture) pack — is sold on:
+
+- **Jinxxy** (English / overseas): [https://jinxxy.com/zeusisgood/nyaimu](https://jinxxy.com/zeusisgood/nyaimu)
+- **BOOTH** (Japanese): [https://zeusisgood.booth.pm/items/5036167](https://zeusisgood.booth.pm/items/5036167)
+
+Updates are posted on X: [@zeus_isgood](https://x.com/zeus_isgood)
+
+Website: [https://zeusisgood.dev/](https://zeusisgood.dev/)
