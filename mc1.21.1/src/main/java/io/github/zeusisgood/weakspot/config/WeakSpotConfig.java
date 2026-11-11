@@ -123,7 +123,7 @@ public final class WeakSpotConfig {
         if (event.getConfig().getSpec() != serverSpec && event.getConfig().getSpec() != clientSpec) {
             return;
         }
-        copyFromSpecs();
+        copyFromSpec(event.getConfig().getSpec() == serverSpec ? "server" : "client");
         if (event.getConfig().getSpec() == serverSpec) {
             warnIfMisconfigured();
             if (event instanceof ModConfigEvent.Reloading) {
@@ -138,14 +138,19 @@ public final class WeakSpotConfig {
     * ここでは今の値をフィールドへ写し直す。
     */
     public static boolean reloadFromFile() {
-        copyFromSpecs();
+        copyFromSpec("server");
+        copyFromSpec("client");
         return serverSpec.isLoaded();
     }
 
-    private static void copyFromSpecs() {
+    /**
+     * root は server か client。読み直したファイルの値だけを写す（NeoForge は保存の中で読み直しを知らせるので、もう片方の
+     * ファイルまで写すと、設定画面で変えてまだ保存していない値が元に戻る）。
+     */
+    private static void copyFromSpec(String root) {
         for (Map.Entry<Setting, ModConfigSpec.ConfigValue<?>> e : VALUES.entrySet()) {
             ModConfigSpec.ConfigValue<?> value = e.getValue();
-            if (isLoaded(value)) {
+            if (e.getKey().category.startsWith(root) && isLoaded(value)) {
                 e.getKey().setFromFile(value.get());
             }
         }
