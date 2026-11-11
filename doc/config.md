@@ -40,7 +40,7 @@
 |---|---|---|---|
 | 自分のヒット音 | `client.sound.myHitSound` | PLING | 自分のヒット音の楽器。`XYLOPHONE` `CHIME` `BELL` `FLUTE` `GUITAR` `HARP` `BASS` `HAT` `SNARE` `BASEDRUM` `PLING` から選択 |
 | 自分のヒット音の音量 | `client.sound.myHitVolume` | 0.25 | 自分のヒット音の音量（0〜1）。0 で無音 |
-| コンボで和音にする | `client.sound.hitChordEnabled` | true | 自分のヒット音に、コンボで音を重ねるか（25 から 2 音、100 から 3 音）。オフで 1 音のまま |
+| コンボで和音にする | `client.sound.hitChordEnabled` | true | 自分のヒット音に、コンボで音を重ねるか（25 から 2 音、コンボの段階ごとに和音が厚くなる）。オフで 1 音のまま |
 | 音階の動き | `client.sound.hitScaleDirection` | UP | `UP`（上がりきったら最低音に戻る）／`UP_DOWN`（上がったら下がる往復）。他プレイヤーのヒット音にも使う |
 | 音階の種類 | `client.sound.hitScaleType` | MAJOR | `MAJOR`（長音階）／`PENTATONIC`（ペンタトニック）／`MINOR`（短調）。節目の駆け上がりと途切れの音にも使う |
 | 音域 | `client.sound.hitScaleOctaves` | 1 | 1〜2 オクターブ。2 なら 1 つ下のオクターブ（ピッチ 0.5）から |
@@ -53,7 +53,7 @@
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
 | 自分の弱点を出す | `client.markers.weakSpotsEnabled` | true | 自分の弱点のオン／オフ（HOME キーで切り替え） |
-| オフにした種類 | `client.markers.disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal`）。統計画面の「弱点マーカー」タブで変更可能 |
+| オフにした種類 | `client.markers.disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal` `swim` `fall`）。統計画面の「弱点マーカー」タブで変更可能 |
 | 自分の弱点の色 | `client.markers.myMarkerColors` | （空） | 自分の弱点の色（1 行に `種類=#RRGGBB`）。未記入の種類は初期値。「弱点マーカー」タブで変更可能 |
 | 自分の弱点の形 | `client.markers.myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`・`star`（的当ての銅で解放））。未記入の種類は円。「弱点マーカー」タブで変更可能 |
 | 金の粒 | `client.markers.goldHitParticles` | false | 弱点に当てた時に金の粒を散らすか（的当ての金で解放。届いていないワールドでは出ない）。K キーの「的当て」タブでも切り替え可能 |

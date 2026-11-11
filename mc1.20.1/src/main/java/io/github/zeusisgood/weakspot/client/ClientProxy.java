@@ -19,7 +19,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModContainer;
 
-/** パケットのハンドラーはメインのスレッドで呼ばれるが、1.12.2 と同じく execute で次の区切りに回す（描画の途中に割り込まない）。 */
+/** パケットのハンドラーはメインのスレッドで呼ばれる。execute は同じスレッドならその場で動くので、1.12.2 と形を揃えているだけ。 */
 public class ClientProxy extends CommonProxy {
 
     @Override

@@ -3,7 +3,7 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 
   "features": {
-    // Forge 1.12.2 (ForgeGradle 2.3) は JDK 8 が必須
+    // Forge 1.12.2 (ForgeGradle 3) は JDK 8 が必須
     "ghcr.io/devcontainers/features/java:1": {
       "version": "8",
       "jdkDistro": "tem",

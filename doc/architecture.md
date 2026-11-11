@@ -8,7 +8,7 @@
 ## 全体
 
 - ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
-- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
+- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
@@ -80,7 +80,7 @@
 - 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存のキーは `saveKey`。近接は古いキー `critHits` も読む）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
 - 配る物: `GuideBookGiver`（ガイドの本・的・ようこその案内。永続データの `guideGiven`・`targetsGiven`・`targetGiftVersion`（ない人は 1.11.0 とみなす））。
 - ほかのプレイヤーへの知らせ: 節目・コンボの段階・的当ての 1 位（`MiningRewards.broadcast*`・`TargetRounds`）。
-- サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする。パッチで足したキー（今は `weakspot.target.updateGift`）は `server/PlayerText.of` を通し、キーを持たない古いクライアントにだけ `server/ServerLang` が jar の言語ファイルから文章を作る。版の違いの知らせは `VersionCheck`（`common/ModVersions`）。
+- サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする。パッチで足したキーは `server/PlayerText.of` を通し、キーを持たない古いクライアントにだけ `server/ServerLang` が jar の言語ファイルから文章を作る（今は通しているキーがない。接続できる下限より前に足したキーは、そのまま翻訳キーで送る）。版の違いの知らせは `VersionCheck`（`common/ModVersions`）。
 - コマンド: `WeakSpotCommand`（`stats` / `reset` は権限 2、`top` はだれでも、`reload` は `WeakSpotConfig.reloadFromFile`）。
 
 ### 共通の部品
@@ -149,7 +149,7 @@
 - 毎フレームのヒット判定と、ワールドへの描画: `RenderLevelStageEvent` の `AFTER_WEATHER`（モデルビューにカメラの向きが入っている最後の段）。頂点はカメラ（目）からの相対座標。HUD の弱点の投影に使う行列も、ここで `ScreenProjection.onFrame` に渡す。
 - HUD は `RenderGuiEvent.Post`、GUI の上は `ScreenEvent.Render.Post`。色だけの図形は `client/Draw`（1.21 には `GL_LINE_LOOP` がないので、線の輪は最初の点に戻して閉じる）。
 - 採掘: クライアントの `MultiPlayerGameMode` とサーバーの `ServerPlayerGameMode` の判定（積算／「破壊速度 × (経過tick+1) ≥ 0.7」・保留 1 枠）は 1.12.2 と同じなので、`BoostMath` をそのまま使う。NeoForge は `LeftClickBlock` を、クライアントでは押している間毎 tick（`CLIENT_HOLD`）、サーバーでは掘り終わり・中断でも送るので、ブーストを捨てるのは `START` だけ。サーバーが状態を送り直すのは `ClientboundBlockUpdatePacket`。
-- 機械: かまどなどの ticker はサーバーにしかないので、毎 tick 動くブロックの一覧はサーバーが作って `SyncedSettings.tickingBlocks` で送る（1.21.1 版だけの項目）。加速は ticker を余分に呼ぶ。レッドストーン部品の予約は、チャンクの `LevelChunkTicks` から探して早め、同じ位置・ブロックの予約を消してから入れ直す（予約は 1 つまでのため）。クラフターは ticker も持つが（作る見た目の動きだけ）、ディスペンサーと同じ「1 回の信号で複数回」の部品として扱う（`RightClickTargets.isBurstMachine`。2 回目からは予約の処理 `state.tick` を呼ぶ）。
+- 機械: かまどなどの ticker はサーバーにしかないので、毎 tick 動くブロックの一覧はサーバーが作って `SyncedSettings.tickingBlocks` で送る（1.20.1・1.21.1 版の項目）。加速は ticker を余分に呼ぶ。レッドストーン部品の予約は、チャンクの `LevelChunkTicks` から探して早め、同じ位置・ブロックの予約を消してから入れ直す（予約は 1 つまでのため）。クラフターは ticker も持つが（作る見た目の動きだけ）、ディスペンサーと同じ「1 回の信号で複数回」の部品として扱う（`RightClickTargets.isBurstMachine`。2 回目からは予約の処理 `state.tick` を呼ぶ）。
 - 弓（`BowDraw`）: トライデント・クロスボウも同じ弱点。引き切りの tick は `BowDraw.fullTicks`（クロスボウは高速装填を含む）、1 ヒットの量は `BowMath.scaledHitTicks`（弓の `bowHitTicks` と同じ割合。端数は持ち越す）。どちらもバニラが離したときの残り時間で引きを決めるので、まだ減らしていない分は `LivingEntityUseItemEvent.Stop` で `useItemRemaining` に入れる。過剰チャージ: トライデントは出た `ThrownTrident`、クロスボウは撃った矢（`setBaseDamage`）・花火に掛ける。トライデント・花火は威力が baseDamage で決まらないので、persistent data に倍率を書いて `LivingIncomingDamageEvent` で掛ける。激流は、バニラが押すのと同じ向きに倍率の残りの分を両側で押す。クロスボウの過剰チャージは、装填したとき（Stop）にアイテムの `custom_data`（`weakspot_overcharge`）に書き（矢がなく装填できないときは書かない）、撃つ直前（`RightClickItem`）に読んで消す（持ち替えても残すため。バニラの欄なので、Mod を外しても読める）。
 - 近接: メイスも対象（`MeleeCharge.isWeapon`）。落下の上乗せはバニラがクリティカルの倍率より先に足すので、溜めの倍率は落下の分にも掛かる。
 - 動物: アルマジロのウロコは、ニワトリの卵と同じ間隔（6000〜11999 tick）なので、卵の設定と `AnimalTimers.eggAfterHit` を使い、`Timer.SCUTE` で別のバーにする。村人の繁殖の案内は、1.14 以降の条件（空いているベッド・食べ物の点数）で `VillagerBreeding.reasonsWithBeds`。取引の段階の解放は、職業レベルを 1 つ上げる。

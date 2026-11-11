@@ -142,7 +142,7 @@ public final class ClientWeakSpotHandler {
                 spot.follow(WeakSpot.renderBox(spot.entity, partialTicks));
             }
         } else {
-            // J を押した直後のフレームでも、自分の弱点を出さない
+            // オフに切り替えた直後のフレームでも、自分の弱点を出さない
             stopOwnWeakSpots();
         }
         WeakSpotRenderer.render(mc, spot, health, growth, animal, WeakSpotConfig.client.markers.weakSpotsEnabled && OwnSpotBars.machineBar(mc),

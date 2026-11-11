@@ -465,7 +465,7 @@ public final class ServerConfig {
     public static final class Sleep {
 
         @Config.Comment({"[サーバー] 寝ている間の弱点のオン・オフ",
-                "夜にベッドで寝ている間、寝ている画面にマーカーが出る。クリックで当てると、ワールドの時刻が進む（全員に共通）"})
+                "夜にベッドで寝ている間、寝ている画面にマーカーが出る。カーソルを重ねると、ワールドの時刻が進む（全員に共通）"})
         public boolean sleepWeakSpotEnabled = true;
 
         @Config.Comment({"[サーバー] 寝ている間の弱点に1回当てるごとに進めるワールドの時刻（tick）。次の朝は越えない",
