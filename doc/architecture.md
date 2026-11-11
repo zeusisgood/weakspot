@@ -7,7 +7,7 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 2 回流れるのは、両方の JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
@@ -71,7 +71,7 @@
 - 一時オフ（`ToggleKeyHandler`。HOME キー。J は JourneyMap と重なるため）: まとめて止めるのは `ClientWeakSpotHandler.stopOwnWeakSpots`。サーバーにも `SwitchMessage` で伝え、`ServerSwitches` が右クリックの抑止・ヒット・ブースト・マークの転送を止める。
 - 他のプレイヤー: マークは `OtherMarkers` → `MarkerRelay`（サーバーは検証せずに転送する）、音は `OtherHitMessage`、頭の上のコンボは `OtherCombos`、節目の知らせの非表示は `OthersMilestoneFilter`。
 - 統計画面（K キー）: `StatsScreen` と各タブ（`StatsTab`・`SoundTab`・`KindsTab`・`TargetTab`。土台 `StatsScreenTab`）。設定画面は `WeakSpotGuiFactory` が `common/SettingGroups` のまとめで組む（ファイルのカテゴリではなく、種類・用途で）。
-- 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。
+- 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。リンクは `OPEN_URL` ではなく `RUN_COMMAND` の `/weakspot bug open` で、URL を作り直して直接開く（バニラの確認画面は URL を全文表示し、長いとボタンが画面の外に出る。URL はチャットの長さの上限に当たるので引数で渡さない）。Mod の一覧は URL に入れず、クリップボードから貼ってもらう（URL の長さを Mod の数に依らず一定にするため。GitHub にログインしていないと、戻り先としてもう一度符号化されて伸びる）。Windows・macOS 以外では、バニラの開き方（失敗に気付けず、xdg-open の出力の受け口をすぐ閉じる）を使わず、`LinuxBrowser` が `BugReport.openCommands` を順に別のスレッドで試す（3 秒で終わらなければ開けたとみなす）。クリック後には、ゲームの後ろで開いて気付かない場合に備え、雛形だけの短いリンク `BugReport.PLAIN_FORM_URL` をいつも出す。
 - サーバーの版で機能を止める: `ServerFeatures.since("1.x.y")`（`SyncedSettings.serverVersion`）。古いサーバーにつなぐと、弱点が出るのにバニラの動作（GUI など）も起きる食い違いを防ぐ。今は使っている所がない（1.11.x の条件は、接続できる下限が 1.12 になったので消した）。
 
 ### 的当て・記録・知らせ（サーバー）

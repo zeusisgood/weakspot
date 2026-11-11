@@ -6,6 +6,7 @@ import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -33,6 +34,21 @@ public class LangFilesTest {
         onlyJa.removeAll(EN.keySet());
         assertTrue("only in en_us.json: " + onlyEn, onlyEn.isEmpty());
         assertTrue("only in ja_jp.json: " + onlyJa, onlyJa.isEmpty());
+    }
+
+    @Test
+    public void generatedLangHasNoKeyThatAlsoHasDotName() throws IOException {
+        for (String name : new String[] {"en_us", "ja_jp"}) {
+            Set<String> keys = new HashSet<>();
+            for (String line : Files.readAllLines(Paths.get(ResourceFiles.MC
+                    + "build/generated/lang/assets/weakspot/lang/" + name + ".lang"), StandardCharsets.UTF_8)) {
+                keys.add(line.substring(0, line.indexOf('=')));
+            }
+            assertTrue(name + ": item.weakspot.target.name", keys.contains("item.weakspot.target.name"));
+            for (String key : keys) {
+                assertTrue(name + ": " + key + " (also has .name)", !keys.contains(key + ".name"));
+            }
+        }
     }
 
     @Test

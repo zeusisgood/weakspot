@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 
-version = '1.13.1'
+version = '1.13.2'
 group = 'io.github.zeusisgood'
 ext.mcVersion = '1.12.2'
 archivesBaseName = "weakspot-${mcVersion}-forge"
@@ -62,8 +62,10 @@ task generateLang {
         output.mkdirs()
         source.eachFileMatch(~/.*\.json/) { f ->
             def entries = new groovy.json.JsonSlurper().parse(f, 'UTF-8')
+            // 1.12.2 のアイテム名は「内部名を翻訳した結果 + .name」を引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる
             new File(output, f.name.replace('.json', '.lang'))
-                    .setText(entries.collect { k, v -> "$k=$v" }.join('\n') + '\n', 'UTF-8')
+                    .setText(entries.findAll { k, v -> !entries.containsKey(k + '.name') }
+                            .collect { k, v -> "$k=$v" }.join('\n') + '\n', 'UTF-8')
         }
     }
 }
