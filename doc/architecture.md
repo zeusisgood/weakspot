@@ -167,6 +167,7 @@
 - 保存データ: プレイヤーの統計は `getPersistentData()` の `PlayerPersisted` の下の `weakspot`（1.12.2 と同じ。死んでも残る）。ガイドの本・クロスボウの過剰チャージ（`weakspot_overcharge`）はアイテムの NBT。
 - 届く距離: 生き物は Forge の `canReach(entity, 3.0)`、ブロックは `canReach(pos, 1.5)`（どちらも Forge 47.1.32 の右クリックの受け付けと同じ。47.4 の `canReachRaw` は下限の版にないので使わない）。
 - 移動速度の修正は UUID で付け外しする（1.12.2 と同じ UUID）。
+- 成長の対象外の初期値: 草の登録名は `minecraft:grass`（`short_grass` は Minecraft 1.20.3 から）。一覧に `minecraft:short_grass` があれば、`minecraft:grass` も対象外にする（`SyncedSettings.fromConfig`。新しい Minecraft の名前で書いた一覧でも草が外れるように）。
 - 収穫: 壊すときの許可は `ForgeHooks.onBlockBreakEvent`、収穫物はそのままワールドに出す（1.20.1 の Forge に `BlockDropsEvent` はない）。
 - ネザーゲート: 待ちは `Entity.portalTime`（ネザーゲートの中でだけ増える）と `getPortalWaitTime()`。
 - 1.20.1 にない物（アルマジロ・ウィンドチャージ・メイス・クラフター）の処理はない。機械の「1 回の信号で複数回」はディスペンサー・ドロッパーだけ。
