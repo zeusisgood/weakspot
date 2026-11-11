@@ -92,7 +92,6 @@
   "weakspot.sound.volume": "Volume:",
   "weakspot.sound.preview": "Preview",
   "weakspot.sound.note": "Previews play without distance. The Players volume also applies.",
-  "weakspot.sound.chord": "Stack notes with combos: %s",
   "weakspot.sound.comboNote": "Chords grow richer at each combo step; bells ring at the steps.",
   "weakspot.sound.instrument.XYLOPHONE": "Xylophone",
   "weakspot.sound.instrument.CHIME": "Chime",

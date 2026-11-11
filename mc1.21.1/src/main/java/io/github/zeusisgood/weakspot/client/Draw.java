@@ -23,8 +23,6 @@ final class Draw {
     static final VertexFormat.Mode TRIANGLES = VertexFormat.Mode.TRIANGLES;
     static final VertexFormat.Mode QUADS = VertexFormat.Mode.QUADS;
     static final VertexFormat.Mode LINE_LOOP = VertexFormat.Mode.DEBUG_LINE_STRIP;
-    static final VertexFormat.Mode LINES = VertexFormat.Mode.DEBUG_LINES;
-    static final VertexFormat.Mode LINE_STRIP = VertexFormat.Mode.DEBUG_LINE_STRIP;
 
     private static Matrix4f pose;
     private static double firstX;

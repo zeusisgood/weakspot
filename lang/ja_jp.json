@@ -91,7 +91,6 @@
   "weakspot.sound.instrument": "楽器: %s",
   "weakspot.sound.volume": "音量:",
   "weakspot.sound.preview": "試聴",
-  "weakspot.sound.chord": "コンボで音を重ねる: %s",
   "weakspot.sound.comboNote": "コンボの段階ごとに和音が厚くなり、区切りでベルが鳴ります",
   "weakspot.sound.note": "試聴は距離なしで鳴ります。「プレイヤー」の音量も掛かります",
   "weakspot.sound.instrument.XYLOPHONE": "木琴",
