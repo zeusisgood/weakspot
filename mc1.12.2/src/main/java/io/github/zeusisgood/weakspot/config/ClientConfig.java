@@ -26,7 +26,7 @@ public final class ClientConfig {
 
     public static final class Sound {
 
-        @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（採掘・成長・機械で共通）",
+        @Config.Comment({"[クライアント] 自分のヒット音に使うノートブロックの楽器（全種類で共通）",
                 "XYLOPHONE, CHIME, BELL, FLUTE, GUITAR, HARP, BASS, HAT, SNARE, BASEDRUM, PLING",
                 "統計画面（K キー）のサウンドでも変えられ、試聴できる"})
         public HitSound myHitSound = HitSound.PLING;
@@ -37,7 +37,7 @@ public final class ClientConfig {
         public double myHitVolume = 0.25;
 
         @Config.Comment({"[クライアント] 自分のヒット音に、コンボで音を重ねるか",
-                "オンなら、コンボ 25 から 2 音、100 から 3 音の和音になる。オフなら 1 音のまま"})
+                "オンなら、コンボ 25 から 2 音になり、コンボの段階ごとに和音が厚くなる。オフなら 1 音のまま"})
         public boolean hitChordEnabled = true;
 
         @Config.Comment({"[クライアント] ヒット音の音階の動き",
@@ -98,8 +98,8 @@ public final class ClientConfig {
                 "見た目だけで、当たり判定は移動先で即時。オフにすると、その場で切り替わる。他のプレイヤーのマークにも効く"})
         public boolean weakSpotTrailEnabled = true;
 
-        @Config.Comment({"[クライアント] 自分の動物・敵の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか",
-                "ニワトリやゾンビの腕など、体が当たり判定より大きいときに見やすくなる。他のプレイヤーのマークは透かさない"})
+        @Config.Comment({"[クライアント] 自分の動物の弱点が体に隠れたとき、隠れた部分を薄く透かして表示するか",
+                "ニワトリなど、体が当たり判定より大きいときに見やすくなる。他のプレイヤーのマークは透かさない"})
         public boolean animalSpotSeeThrough = true;
 
         @Config.Comment("[クライアント] 他のプレイヤーの弱点マークを表示するか")
@@ -114,7 +114,7 @@ public final class ClientConfig {
         public double otherMarkerAlpha = 0.6;
 
         @Config.Comment({"[クライアント] 他のプレイヤーの弱点マークの形",
-                "CIRCLE（塗りつぶした円）, RING（中抜きの輪）, DIAMOND（ひし形）, SQUARE（四角）。自分のマークは円のまま"})
+                "CIRCLE（塗りつぶした円）, RING（中抜きの輪）, DIAMOND（ひし形）, SQUARE（四角）。自分の弱点の形は myMarkerShapes"})
         public MarkerShape otherMarkerShape = MarkerShape.RING;
 
         Markers() {

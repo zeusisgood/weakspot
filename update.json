@@ -1,14 +1,15 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.13.2",
-    "1.12.2-recommended": "1.13.2",
-    "1.20.1-latest": "1.13.2",
-    "1.20.1-recommended": "1.13.2",
-    "1.21.1-latest": "1.13.2",
-    "1.21.1-recommended": "1.13.2"
+    "1.12.2-latest": "1.13.3",
+    "1.12.2-recommended": "1.13.3",
+    "1.20.1-latest": "1.13.3",
+    "1.20.1-recommended": "1.13.3",
+    "1.21.1-latest": "1.13.3",
+    "1.21.1-recommended": "1.13.3"
   },
   "1.12.2": {
+    "1.13.3": "Fixed settings screen changes not being saved (1.20.1/1.21.1); small fixes",
     "1.13.2": "Fixed the /weakspot bug link being unusable with many mods installed",
     "1.13.1": "Fixed the fishing weak spot flickering",
     "1.13.0": "Now available for Minecraft 1.20.1 (Forge)",
@@ -38,11 +39,13 @@
     "1.9.2": "Chat notice when a new version is out"
   },
   "1.20.1": {
+    "1.13.3": "Fixed settings screen changes not being saved (1.20.1/1.21.1); small fixes",
     "1.13.2": "Fixed the /weakspot bug link being unusable with many mods installed",
     "1.13.1": "Fixed the fishing weak spot flickering",
     "1.13.0": "Now available for Minecraft 1.20.1 (Forge)"
   },
   "1.21.1": {
+    "1.13.3": "Fixed settings screen changes not being saved (1.20.1/1.21.1); small fixes",
     "1.13.2": "Fixed the /weakspot bug link being unusable with many mods installed",
     "1.13.1": "Fixed the fishing weak spot flickering",
     "1.13.0": "Now available for Minecraft 1.20.1 (Forge)",

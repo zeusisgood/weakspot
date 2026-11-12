@@ -2,7 +2,6 @@ package io.github.zeusisgood.weakspot.server;
 
 import io.github.zeusisgood.weakspot.Reflect;
 import io.github.zeusisgood.weakspot.common.HitKind;
-import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerEnchantment;

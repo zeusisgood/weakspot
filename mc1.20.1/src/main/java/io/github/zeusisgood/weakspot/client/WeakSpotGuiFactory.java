@@ -187,6 +187,8 @@ public final class WeakSpotGuiFactory {
             }
             EditBox box = new EditBox(font, x + 1, y + 1, WIDGET_WIDTH - 2, 18, Component.translatable(setting.nameKey()));
             box.setMaxLength(4096);
+            // 作り直した欄には、最後に読めた値が入る（読めなかった印を残すと、赤いままで、完了しても保存されない）
+            invalid[i] = false;
             box.setValue(toText(values[i]));
             box.setTooltip(tooltip);
             box.setResponder(text -> {

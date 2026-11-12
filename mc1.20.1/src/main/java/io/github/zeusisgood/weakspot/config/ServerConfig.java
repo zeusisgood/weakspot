@@ -265,7 +265,7 @@ public final class ServerConfig {
                 "骨粉で育つブロックのうち、作物・苗木ではないもの（草ブロック、草など）を初期値で外している",
                 "しゃがんで右クリックで自動で対象になるブロック（ランダム tick を受け取るもの）も、ここに書けば外せる"})
         public String[] growthExcludedBlocks = {
-                "minecraft:grass_block", "minecraft:short_grass", "minecraft:fern", "minecraft:tall_grass",
+                "minecraft:grass_block", "minecraft:grass", "minecraft:fern", "minecraft:tall_grass",
                 "minecraft:large_fern", "minecraft:sunflower", "minecraft:lilac", "minecraft:rose_bush", "minecraft:peony",
                 "minecraft:moss_block", "minecraft:crimson_nylium", "minecraft:warped_nylium", "minecraft:rooted_dirt",
                 "minecraft:glow_lichen", "minecraft:seagrass", "minecraft:sea_pickle", "minecraft:pink_petals",
@@ -467,7 +467,7 @@ public final class ServerConfig {
     public static final class Sleep {
 
         @Config.Comment({"[サーバー] 寝ている間の弱点のオン・オフ",
-                "夜にベッドで寝ている間、寝ている画面にマーカーが出る。クリックで当てると、ワールドの時刻が進む（全員に共通）"})
+                "夜にベッドで寝ている間、寝ている画面にマーカーが出る。カーソルを重ねると、ワールドの時刻が進む（全員に共通）"})
         public boolean sleepWeakSpotEnabled = true;
 
         @Config.Comment({"[サーバー] 寝ている間の弱点に1回当てるごとに進めるワールドの時刻（tick）。次の朝は越えない",

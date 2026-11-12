@@ -1,7 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.BlockHealthBar;
-import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.MarkerColor;
 import io.github.zeusisgood.weakspot.common.MarkerMotion;
 import io.github.zeusisgood.weakspot.common.MarkerShape;

@@ -42,6 +42,10 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.13.3
+
+- Fixed settings screen changes not being saved (1.20.1/1.21.1); small fixes
+
 ### 1.13.2
 
 - Fixed the /weakspot bug link being unusable with many mods installed
@@ -49,10 +53,6 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 ### 1.13.1
 
 - Fixed the fishing weak spot flickering
-
-### 1.13.0
-
-- Now available for Minecraft 1.20.1 (Forge)
 
 ## More
 

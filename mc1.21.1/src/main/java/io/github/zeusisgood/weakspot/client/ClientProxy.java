@@ -19,7 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 
-/** パケットのハンドラーはメインのスレッドで呼ばれるが、1.12.2 と同じく execute で次の区切りに回す（描画の途中に割り込まない）。 */
+/** パケットのハンドラーはメインのスレッドで呼ばれる。execute は同じスレッドならその場で動くので、1.12.2 と形を揃えているだけ。 */
 public class ClientProxy extends CommonProxy {
 
     @Override
