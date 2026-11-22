@@ -100,6 +100,15 @@ public final class MarkerLook {
         return shape != null ? shape : MarkerShape.CIRCLE;
     }
 
+    /** 設定 otherMarkerShape。星は自分の弱点と同じく、的当ての銅を解放するまで初期値の輪。 */
+    static MarkerShape otherShape() {
+        MarkerShape shape = WeakSpotConfig.client.markers.otherMarkerShape;
+        if (shape == null || shape == MarkerShape.STAR && !TargetRecords.unlocked(TargetRules.Tier.BRONZE)) {
+            return MarkerShape.RING;
+        }
+        return shape;
+    }
+
     /** rgb が null なら初期値に戻す。 */
     static void setColor(HitKind kind, Integer rgb) {
         refresh();
