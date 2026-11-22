@@ -16,14 +16,14 @@ import net.minecraft.world.item.component.FireworkExplosion;
 /** 達成した本人の画面だけ。 */
 final class MilestoneEffects {
 
-    /** コンボの 1000 と同じ。 */
+    /** コンボの金の段階（ComboTier.GOLD）と同じ。 */
     private static final int GOLD_RGB = 0xFFD700;
     private static final ChatFormatting[] RAINBOW = {
             ChatFormatting.RED, ChatFormatting.GOLD, ChatFormatting.YELLOW, ChatFormatting.GREEN,
             ChatFormatting.AQUA, ChatFormatting.BLUE, ChatFormatting.LIGHT_PURPLE};
     private static final int[] RAINBOW_RGB = {0xFF5555, 0xFFAA00, 0xFFFF55, 0x55FF55, 0x55FFFF, 0x5555FF, 0xFF55FF};
 
-    /** コンボの 1000 のタイトルは、これと重ならないようにする。 */
+    /** コンボのタイトル（ComboEffects）は、これと重ならないようにする。 */
     static long lastShownTick = Long.MIN_VALUE / 2;
 
     private MilestoneEffects() {

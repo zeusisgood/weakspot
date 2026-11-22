@@ -1,7 +1,6 @@
 package io.github.zeusisgood.weakspot.client;
 
 import io.github.zeusisgood.weakspot.common.HitKind;
-import io.github.zeusisgood.weakspot.config.SyncedSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiEnchantment;

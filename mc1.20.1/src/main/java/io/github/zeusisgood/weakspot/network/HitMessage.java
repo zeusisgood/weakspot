@@ -6,13 +6,13 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.network.NetworkEvent;
 
-/** クライアント → サーバー。streak は、周りのプレイヤーのヒット音の音階を合わせるためだけに使う。 */
+/** クライアント → サーバー。streak は、周りのプレイヤーのヒット音の音階と、コンボのずれの確認（ComboRelay）にだけ使う。 */
 public class HitMessage extends Message {
 
     private HitKind kind;
     private BlockPos pos;
     private int streak;
-    /** 動物・近接のとき。それ以外は -1。 */
+    /** 動物・乗り物のとき。それ以外は -1。 */
     private int entityId = -1;
 
     public HitMessage() {
@@ -30,7 +30,7 @@ public class HitMessage extends Message {
         return message;
     }
 
-    /** 釣り・弓。位置も動物も使わない。 */
+    /** 位置もエンティティも使わない種類（釣り・弓など）。 */
     public static HitMessage withoutTarget(HitKind kind, int streak) {
         return new HitMessage(kind, BlockPos.ZERO, streak);
     }

@@ -304,6 +304,10 @@ public final class SyncedSettings {
             throw new IllegalStateException(e);
         }
         s.serverVersion = WeakSpotMod.VERSION;
+        // 1.20.1 の草の登録名は grass（short_grass は Minecraft 1.20.3 から）。新しい名前で書いた一覧でも草を外す
+        if (s.growthExcludedBlocks.contains("minecraft:short_grass")) {
+            s.growthExcludedBlocks.add("minecraft:grass");
+        }
         MinecraftServer minecraftServer = ServerLifecycleHooks.getCurrentServer();
         if (minecraftServer != null) {
             s.tickingBlocks = RightClickTargets.tickingBlocks(minecraftServer.overworld());

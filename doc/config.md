@@ -40,7 +40,7 @@
 |---|---|---|---|
 | 自分のヒット音 | `client.sound.myHitSound` | PLING | 自分のヒット音の楽器。`XYLOPHONE` `CHIME` `BELL` `FLUTE` `GUITAR` `HARP` `BASS` `HAT` `SNARE` `BASEDRUM` `PLING` から選択 |
 | 自分のヒット音の音量 | `client.sound.myHitVolume` | 0.25 | 自分のヒット音の音量（0〜1）。0 で無音 |
-| コンボで和音にする | `client.sound.hitChordEnabled` | true | 自分のヒット音に、コンボで音を重ねるか（25 から 2 音、100 から 3 音）。オフで 1 音のまま |
+| コンボで和音にする | `client.sound.hitChordEnabled` | true | 自分のヒット音に、コンボで音を重ねるか（25 から 2 音、コンボの段階ごとに和音が厚くなる）。オフで 1 音のまま |
 | 音階の動き | `client.sound.hitScaleDirection` | UP | `UP`（上がりきったら最低音に戻る）／`UP_DOWN`（上がったら下がる往復）。他プレイヤーのヒット音にも使う |
 | 音階の種類 | `client.sound.hitScaleType` | MAJOR | `MAJOR`（長音階）／`PENTATONIC`（ペンタトニック）／`MINOR`（短調）。節目の駆け上がりと途切れの音にも使う |
 | 音域 | `client.sound.hitScaleOctaves` | 1 | 1〜2 オクターブ。2 なら 1 つ下のオクターブ（ピッチ 0.5）から |
@@ -53,7 +53,7 @@
 | 名前 | ファイルのキー | 初期値 | 説明 |
 |---|---|---|---|
 | 自分の弱点を出す | `client.markers.weakSpotsEnabled` | true | 自分の弱点のオン／オフ（HOME キーで切り替え） |
-| オフにした種類 | `client.markers.disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal`）。統計画面の「弱点マーカー」タブで変更可能 |
+| オフにした種類 | `client.markers.disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal` `swim` `fall`）。統計画面の「弱点マーカー」タブで変更可能 |
 | 自分の弱点の色 | `client.markers.myMarkerColors` | （空） | 自分の弱点の色（1 行に `種類=#RRGGBB`）。未記入の種類は初期値。「弱点マーカー」タブで変更可能 |
 | 自分の弱点の形 | `client.markers.myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`・`star`（的当ての銅で解放））。未記入の種類は円。「弱点マーカー」タブで変更可能 |
 | 金の粒 | `client.markers.goldHitParticles` | false | 弱点に当てた時に金の粒を散らすか（的当ての金で解放。届いていないワールドでは出ない）。K キーの「的当て」タブでも切り替え可能 |
@@ -122,7 +122,7 @@
 | 知らせるまでのヒット数 | `server.growth.growthStuckHits` | 30 | 連続何回当てても変化がない場合に「外部要因で育たない」と通知するか（5〜1000）。**サーバー専用** |
 | ヒットの最小間隔 | `server.growth.growthMinHitIntervalTicks` | 6 | 成長ヒットの最小受付間隔（tick） |
 | 弱点の最小半径 | `server.growth.growthMinRadius` | 0.08 | 作物・苗木等の弱点の最小半径（ブロック） |
-| 対象外のブロック | `server.growth.growthExcludedBlocks` | 草ブロック、草、背の高い草花 | 成長の弱点を出さないブロックの登録名（サトウキビ・サボテン・ネザーウォート、しゃがんで右クリックで自動で対象になるブロックにも有効） |
+| 対象外のブロック | `server.growth.growthExcludedBlocks` | 草ブロック、草、背の高い草花 | 成長の弱点を出さないブロックの登録名（サトウキビ・サボテン・ネザーウォート、しゃがんで右クリックで自動で対象になるブロックにも有効）。草の登録名は Minecraft の版で違う（1.12.2 は `minecraft:tallgrass`、1.20.1 は `minecraft:grass`、1.21.1 は `minecraft:short_grass`）。1.20.1 版は、`minecraft:short_grass` と書いてあっても草を対象外にする |
 | 追加のブロック | `server.growth.growthExtraBlocks` | サトウキビ、サボテン、ネザーウォート、IC2 のゴムの木 | 成長の弱点の対象に追加するブロック（追加リスト）。1 行に「登録名」または「登録名[プロパティ=条件,...]」（書式は[成長の弱点](play.md#作物苗木の成長素手で右クリック長押し)を参照）。当てると randomTick を追加実行して成長を早める。記載しなくても、ランダム tick を受け取るブロックは、しゃがんで右クリックすれば対象になる（記載すると、しゃがまなくても出現し、状態の条件を付けられる） |
 | キノコが育つ確率 | `server.growth.mushroomGrowChance` | 0.2 | キノコへの成長ヒット 1 回で、巨大キノコへの成長を試みる確率（0〜1）。**サーバー専用** |
 | 成長のバー | `client.hud.growthBarEnabled` | true | 成長の弱点を出している作物の足元に、成長度を黄色のバーで表示するか |

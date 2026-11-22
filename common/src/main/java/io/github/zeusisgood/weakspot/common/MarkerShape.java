@@ -1,6 +1,6 @@
 package io.github.zeusisgood.weakspot.common;
 
-/** 自分のマークは CIRCLE 固定。他のプレイヤーのマークだけ設定で選べる。 */
+/** 自分の弱点は種類ごと（myMarkerShapes）、他のプレイヤーのマークは 1 つ（otherMarkerShape）を設定で選ぶ。 */
 public enum MarkerShape {
     CIRCLE(32, 0, 1.0, true),
     RING(32, 0, 1.0, false),

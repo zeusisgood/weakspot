@@ -105,8 +105,8 @@ public final class TargetPlay {
     private static double eyeY;
     private static double eyeZ;
     private static int lastCountdown;
-    /** 超えていなければ負。 */
     private static long bestAtStart;
+    /** このラウンドで自己ベストを超えた tick。超えていなければ startTick より前。 */
     private static long passedTick = Long.MIN_VALUE / 2;
     private static final int PASS_GLOW_TICKS = 12;
     private static double anchorYaw;

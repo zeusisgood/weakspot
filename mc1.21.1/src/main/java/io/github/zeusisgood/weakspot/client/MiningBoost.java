@@ -30,7 +30,7 @@ final class MiningBoost {
 
     private static BlockPos boostPos;
     private static long boostHitTick = Long.MIN_VALUE / 2;
-    /** サーバーが古ければ 1。 */
+    /** miningComboBonus がオフなら 1。 */
     private static double boostFactor = 1;
     private static boolean suppressBoost;
 

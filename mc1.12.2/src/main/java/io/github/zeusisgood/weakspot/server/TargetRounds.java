@@ -157,8 +157,7 @@ public final class TargetRounds {
     }
 
     /**
-    * 取った進捗のいちばん上の段階は、RECORD の newTier の欄で送る（しきい値を上げる前に解放した段階を残すため。
-    * 古いクライアントは RECORD の newTier を読まない）。
+    * 取った進捗のいちばん上の段階は、RECORD の newTier の欄で送る（しきい値を上げる前に解放した段階を残すため）。
     */
     @SubscribeEvent
     public static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {

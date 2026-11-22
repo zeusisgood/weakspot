@@ -7,7 +7,6 @@ import io.github.zeusisgood.weakspot.common.FishingMath;
 import io.github.zeusisgood.weakspot.common.HitBudget;
 import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.config.SyncedSettings;
-import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import io.github.zeusisgood.weakspot.network.StateMessage;
 import java.lang.reflect.Field;
 import java.util.HashMap;

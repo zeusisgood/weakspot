@@ -28,7 +28,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 @EventBusSubscriber(modid = WeakSpotMod.MODID)
 public final class ServerStats {
 
-    private static final String TAG = WeakSpotMod.MODID;
     private static final String TAG_TOTAL = "total";
 
     private static final Map<UUID, MiningStats> SESSIONS = new HashMap<>();

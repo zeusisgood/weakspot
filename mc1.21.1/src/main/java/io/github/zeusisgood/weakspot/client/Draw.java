@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import org.joml.Matrix4f;
 
 /**
- * 色だけの図形を描く（1.12.2 の Tessellator と GL11 の形に近づけた、1.21.1 版だけの部品）。
+ * 色だけの図形を描く（1.12.2 の Tessellator と GL11 の形に近づけた、1.20.1・1.21.1 版の部品）。
  * 1.21 には GL_LINE_LOOP がないので、線の輪は LINE_LOOP で始めて endLoop で最初の点に戻す。
  * 頂点は pose（GUI なら GuiGraphics#pose）を掛けてから渡す。ワールドでは null（カメラからの相対座標をそのまま）。
  */
@@ -23,8 +23,6 @@ final class Draw {
     static final VertexFormat.Mode TRIANGLES = VertexFormat.Mode.TRIANGLES;
     static final VertexFormat.Mode QUADS = VertexFormat.Mode.QUADS;
     static final VertexFormat.Mode LINE_LOOP = VertexFormat.Mode.DEBUG_LINE_STRIP;
-    static final VertexFormat.Mode LINES = VertexFormat.Mode.DEBUG_LINES;
-    static final VertexFormat.Mode LINE_STRIP = VertexFormat.Mode.DEBUG_LINE_STRIP;
 
     private static Matrix4f pose;
     private static double firstX;

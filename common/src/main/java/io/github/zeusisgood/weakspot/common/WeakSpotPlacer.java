@@ -7,7 +7,7 @@ import java.util.Random;
 
 public final class WeakSpotPlacer {
 
-    /** 条件を満たす候補がなければ、最も遠い候補を使う。 */
+    /** 候補は、範囲を GRID × GRID に分けたマスごとに 1 つと、四隅。 */
     private static final int GRID = 6;
 
     private WeakSpotPlacer() {
@@ -60,6 +60,7 @@ public final class WeakSpotPlacer {
     /**
      * 面が小さくて余白と移動距離を取れない軸では、面の中央に置く。
      * blocked（手前のパイプなど、面の座標の長方形）に円が重なる候補は使わない。全部の候補が重なるときは、blocked がないのと同じ。
+     * avoidU, avoidV から minDistance 以上離れた候補がなければ、最も遠い候補を使う。
      */
     public static double[] place(FaceRect face, double radius, double edgeMargin, double avoidU, double avoidV,
                                  double minDistance, List<FaceRect> blocked, Random random) {

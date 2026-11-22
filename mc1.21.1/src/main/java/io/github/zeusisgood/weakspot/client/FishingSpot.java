@@ -66,12 +66,11 @@ final class FishingSpot {
     private static double dz;
     private static final MarkerMotion MOTION = new MarkerMotion(0, 0);
 
-    // HUD の描画と、左クリックの判定で使う
+    // HUD の描画と、照準の判定で使う
     private static final ScreenProjection SCREEN = new ScreenProjection();
     private static double hookX;
     private static double hookY;
     private static double hookZ;
-    private static boolean aimed;
 
     private FishingSpot() {
     }
@@ -88,7 +87,6 @@ final class FishingSpot {
         hasSpot = false;
         spotHook = null;
         SCREEN.invalidate();
-        aimed = false;
         QUERIES.reset();
     }
 
@@ -164,7 +162,6 @@ final class FishingSpot {
         }
         Minecraft mc = Minecraft.getInstance();
         SCREEN.invalidate();
-        aimed = false;
         if (!shown(mc) || mc.options.hideGui || spotHook == null) {
             return;
         }
@@ -183,8 +180,8 @@ final class FishingSpot {
             double scale = mc.getWindow().getGuiScale();
             double allowed = FishingMath.allowedAngle(radius() * scale, SCREEN.fovDegrees(),
                     SCREEN.viewportHeight());
-            aimed = FishingMath.isAimed(p[2], allowed);
-            if (aimed && OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
+            if (FishingMath.isAimed(p[2], allowed)
+                    && OwnHits.canHit(HitKind.FISHING, ClientSettings.get().minHitInterval(HitKind.FISHING))) {
                 onHit();
             }
         }
@@ -203,7 +200,6 @@ final class FishingSpot {
         }
         // 待ち時間が縮んだ分の進み具合を、すぐに見に行く
         query(ClientWeakSpotHandler.clientTick, true);
-        aimed = false;
     }
 
     @SubscribeEvent

@@ -28,7 +28,7 @@ public final class SyncedSettings {
     public String serverVersion;
 
     /**
-     * 毎 tick 動くブロックエンティティを持つブロックの登録名（機械の弱点の対象。1.21.1 版だけの項目）。1.21 のかまどなどは
+     * 毎 tick 動くブロックエンティティを持つブロックの登録名（機械の弱点の対象。1.20.1・1.21.1 版の項目）。1.21 のかまどなどは
      * サーバーにしか ticker がないので、サーバーが作って送る（RightClickTargets.tickingBlocks）。
      */
     public Set<String> tickingBlocks = new HashSet<>();
