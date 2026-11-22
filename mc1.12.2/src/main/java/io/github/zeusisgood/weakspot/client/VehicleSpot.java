@@ -21,8 +21,6 @@ final class VehicleSpot extends AimSpotKind {
 
     /** 1 tick の水平の移動（ブロック）。 */
     private static final double MOVING_SPEED = 0.05;
-    /** サーバーの「動きが速すぎる」の判定に引っかからないように。 */
-    private static final double MAX_BOAT_STEP = 8.0;
 
     /** 弱点の色を変えても変わらない。照準の下はコンボの表示と重なるので、上に出す（弓の引きゲージ（下）と上下対称）。 */
     private static final int BAR_COLOR = 0x55CCFF;
@@ -100,11 +98,8 @@ final class VehicleSpot extends AimSpotKind {
         double extra = TimedBoostMath.extra(BOOST.multiplier());
         double dx = vehicle.motionX * extra;
         double dz = vehicle.motionZ * extra;
+        // 上限は付けない（速さの上限は設定だけ）。マルチプレイで 1 tick に 10 ブロックを超えると、サーバーが元の位置に戻す
         double step = Math.hypot(dx, dz);
-        if (step > MAX_BOAT_STEP) {
-            dx *= MAX_BOAT_STEP / step;
-            dz *= MAX_BOAT_STEP / step;
-        }
         if (step > 1e-4) {
             vehicle.move(MoverType.SELF, dx, 0, dz);
         }
