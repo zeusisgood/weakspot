@@ -17,14 +17,18 @@ public class MarkerShapeTest {
     }
 
     @Test
-    public void unknownValueFallsBackToRing() {
+    public void unknownValueFallsBackToCircleLikeAnUnsetKind() {
+        assertEquals(MarkerShape.CIRCLE, MarkerShape.fromName("HEXAGON"));
+        assertEquals(MarkerShape.CIRCLE, MarkerShape.fromName(""));
+        assertEquals(MarkerShape.CIRCLE, MarkerShape.fromName(null));
+    }
+
+    @Test
+    public void starHasInnerPoints() {
         assertEquals(MarkerShape.STAR, MarkerShape.fromName("star"));
-        assertEquals(MarkerShape.RING, MarkerShape.fromName("HEXAGON"));
         assertEquals(1.0, MarkerShape.STAR.pointScale(0), 0);
         assertEquals(MarkerShape.STAR_INNER_RATIO, MarkerShape.STAR.pointScale(1), 0);
         assertEquals(1.0, MarkerShape.DIAMOND.pointScale(1), 0);
-        assertEquals(MarkerShape.RING, MarkerShape.fromName(""));
-        assertEquals(MarkerShape.RING, MarkerShape.fromName(null));
     }
 
     @Test

@@ -114,8 +114,7 @@ final class WeakSpotRenderer {
             float[] disk = {(rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F};
             float[] ring = MarkerColor.towardWhite(rgb, 0.5F);
             float[] center = MarkerColor.towardWhite(rgb, 0.75F);
-            MarkerShape shape = WeakSpotConfig.client.markers.otherMarkerShape == null ? MarkerShape.RING
-                    : WeakSpotConfig.client.markers.otherMarkerShape;
+            MarkerShape shape = MarkerLook.otherShape();
             for (WeakSpot other : others) {
                 drawMarker(other, shape, disk, ring, center, (float) WeakSpotConfig.client.markers.otherMarkerAlpha, nowMs,
                         cx, cy, cz);

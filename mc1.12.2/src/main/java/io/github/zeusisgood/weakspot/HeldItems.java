@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityMooshroom;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -61,6 +62,9 @@ public final class HeldItems {
         }
         Item item = stack.getItem();
         if (entity instanceof EntityWolf && item == Items.BONE) {
+            return false;
+        }
+        if (entity instanceof EntityMooshroom && item == Items.BOWL) {
             return false;
         }
         return !(entity instanceof AbstractHorse && (item == Items.WHEAT || item == Items.SUGAR));

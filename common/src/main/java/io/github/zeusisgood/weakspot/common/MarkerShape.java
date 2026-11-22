@@ -39,7 +39,7 @@ public enum MarkerShape {
         return filled;
     }
 
-    /** null や知らない値のときは RING。 */
+    /** null や知らない値（綴り違いなど）のときは、何も書いていない種類と同じ CIRCLE。 */
     public static MarkerShape fromName(String name) {
         if (name != null) {
             for (MarkerShape shape : values()) {
@@ -48,6 +48,6 @@ public enum MarkerShape {
                 }
             }
         }
-        return RING;
+        return CIRCLE;
     }
 }
