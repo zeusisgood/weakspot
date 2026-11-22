@@ -45,8 +45,11 @@ public final class WeakSpotGuiFactory {
     private static final class GroupsScreen extends Screen {
 
         private static final int BUTTON_WIDTH = 150;
+        private static final int ROW_HEIGHT = 24;
 
         private final Screen parent;
+        /** 一覧が画面に入らないときのページ。まとめを開いて戻っても、画面の大きさを変えても残す。 */
+        private int page;
 
         GroupsScreen(Screen parent) {
             super(Component.literal(WeakSpotMod.NAME));
@@ -55,6 +58,7 @@ public final class WeakSpotGuiFactory {
 
         @Override
         protected void init() {
+            clearWidgets();
             List<String> groups = new ArrayList<>();
             for (Map.Entry<String, List<String>> group : SettingGroups.GROUPS.entrySet()) {
                 if (!settingsOf(group.getValue()).isEmpty()) {
@@ -62,18 +66,43 @@ public final class WeakSpotGuiFactory {
                 }
             }
             int rows = (groups.size() + 1) / 2;
-            int top = Math.max(40, height / 2 - rows * 12);
-            for (int i = 0; i < groups.size(); i++) {
+            int top = Math.max(40, height / 2 - rows * ROW_HEIGHT / 2);
+            if (top + rows * ROW_HEIGHT + 12 <= height - 28) {
+                page = 0;
+                addGroups(groups, 0, groups.size(), top);
+                addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
+                        .bounds(width / 2 - 100, top + rows * ROW_HEIGHT + 12, 200, 20).build());
+                return;
+            }
+            // 項目の画面（SettingsScreen）と同じ並び
+            int perPage = Math.max(1, (height - 40 - 40) / ROW_HEIGHT) * 2;
+            int pages = (groups.size() + perPage - 1) / perPage;
+            page = Math.min(page, pages - 1);
+            addGroups(groups, page * perPage, Math.min(groups.size(), (page + 1) * perPage), 40);
+            int y = height - 28;
+            addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1))
+                    .bounds(width / 2 - 154, y, 20, 20).build()).active = page > 0;
+            addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1))
+                    .bounds(width / 2 + 134, y, 20, 20).build()).active = page < pages - 1;
+            addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
+                    .bounds(width / 2 - 100, y, 200, 20).build());
+        }
+
+        private void addGroups(List<String> groups, int from, int to, int top) {
+            for (int i = from; i < to; i++) {
                 String group = groups.get(i);
                 int x = width / 2 + (i % 2 == 0 ? -BUTTON_WIDTH - 4 : 4);
-                int y = top + (i / 2) * 24;
+                int y = top + ((i - from) / 2) * ROW_HEIGHT;
                 addRenderableWidget(Button.builder(Component.translatable(SettingGroups.langKey(group)),
                         b -> minecraft.setScreen(new SettingsScreen(this, group))).bounds(x, y, BUTTON_WIDTH, 20)
                         .tooltip(Tooltip.create(Component.translatable(SettingGroups.langKey(group) + ".tooltip")))
                         .build());
             }
-            addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
-                    .bounds(width / 2 - 100, Math.min(height - 28, top + rows * 24 + 12), 200, 20).build());
+        }
+
+        private void turn(int delta) {
+            page += delta;
+            init();
         }
 
         @Override
