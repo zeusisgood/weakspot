@@ -10,7 +10,9 @@ import net.minecraft.block.BlockCocoa;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockNetherWart;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
@@ -41,8 +43,9 @@ final class HarvestHits {
         }
         Block block = state.getBlock();
         NonNullList<ItemStack> drops = NonNullList.create();
-        block.getDrops(drops, world, pos, state, 0);
-        float chance = ForgeEventFactory.fireBlockHarvesting(drops, world, pos, state, 0, 1.0F, false, player);
+        int fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, player.getHeldItemMainhand());
+        block.getDrops(drops, world, pos, state, fortune);
+        float chance = ForgeEventFactory.fireBlockHarvesting(drops, world, pos, state, fortune, 1.0F, false, player);
         ItemStack seed = block.getPickBlock(state, null, world, pos, player);
         List<ItemStack> result = new ArrayList<>();
         boolean seedUsed = false;
