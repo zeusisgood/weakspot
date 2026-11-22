@@ -58,7 +58,6 @@ public final class WeakSpotGuiFactory {
 
         @Override
         protected void init() {
-            clearWidgets();
             List<String> groups = new ArrayList<>();
             for (Map.Entry<String, List<String>> group : SettingGroups.GROUPS.entrySet()) {
                 if (!settingsOf(group.getValue()).isEmpty()) {
@@ -169,7 +168,6 @@ public final class WeakSpotGuiFactory {
 
         @Override
         protected void init() {
-            clearWidgets();
             int width = Math.min(MAX_WIDTH, this.width - 20);
             left = this.width / 2 - width / 2;
             right = left + width;
