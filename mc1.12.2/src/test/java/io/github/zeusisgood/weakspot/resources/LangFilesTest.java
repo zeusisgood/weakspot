@@ -6,11 +6,9 @@ import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -38,13 +36,9 @@ public class LangFilesTest {
     }
 
     @Test
-    public void generatedLangHasNoKeyThatAlsoHasDotName() throws IOException {
+    public void generatedLangHasNoKeyThatAlsoHasDotName() {
         for (String name : new String[] {"en_us", "ja_jp"}) {
-            Set<String> keys = new HashSet<>();
-            for (String line : Files.readAllLines(Paths.get(ResourceFiles.MC
-                    + "build/generated/lang/assets/weakspot/lang/" + name + ".lang"), StandardCharsets.UTF_8)) {
-                keys.add(line.substring(0, line.indexOf('=')));
-            }
+            Set<String> keys = ResourceFiles.generatedLang(name).keySet();
             assertTrue(name + ": item.weakspot.target.name", keys.contains("item.weakspot.target.name"));
             for (String key : keys) {
                 assertTrue(name + ": " + key + " (also has .name)", !keys.contains(key + ".name"));
@@ -63,17 +57,11 @@ public class LangFilesTest {
 
     /** 1.12.2 の Forge の設定画面は、.lang の「\」「n」の 2 文字を改行に直して説明を出す。 */
     @Test
-    public void generatedLangWritesLineBreaksAsBackslashN() throws IOException {
+    public void generatedLangWritesLineBreaksAsBackslashN() {
         String[][] files = {{"en_us", ResourceFiles.EN_US}, {"ja_jp", ResourceFiles.JA_JP}};
         for (String[] file : files) {
             Map<String, String> json = ResourceFiles.lang(file[1]);
-            Map<String, String> generated = new HashMap<>();
-            for (String line : Files.readAllLines(Paths.get(ResourceFiles.MC
-                    + "build/generated/lang/assets/weakspot/lang/" + file[0] + ".lang"), StandardCharsets.UTF_8)) {
-                int eq = line.indexOf('=');
-                assertTrue(file[0] + ": not a key=value line: " + line, eq > 0);
-                generated.put(line.substring(0, eq), line.substring(eq + 1));
-            }
+            Map<String, String> generated = ResourceFiles.generatedLang(file[0]);
             List<String> bad = new ArrayList<>();
             generated.forEach((k, v) -> { if (!v.equals(json.get(k).replace("\n", "\\n"))) bad.add(k); });
             assertTrue(file[0] + ": " + bad, bad.isEmpty());

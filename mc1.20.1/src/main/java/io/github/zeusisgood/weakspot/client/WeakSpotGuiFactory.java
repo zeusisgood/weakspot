@@ -77,12 +77,14 @@ public final class WeakSpotGuiFactory {
             // 項目の画面（SettingsScreen）と同じ並び
             int perPage = Math.max(1, (height - 40 - 40) / ROW_HEIGHT) * 2;
             int pages = (groups.size() + perPage - 1) / perPage;
-            page = Math.min(page, pages - 1);
+            page = Math.max(0, Math.min(page, pages - 1));
             addGroups(groups, page * perPage, Math.min(groups.size(), (page + 1) * perPage), 40);
             int y = height - 28;
-            addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1))
+            int previous = page - 1;
+            int next = page + 1;
+            addRenderableWidget(Button.builder(Component.literal("<"), b -> turnTo(previous))
                     .bounds(width / 2 - 154, y, 20, 20).build()).active = page > 0;
-            addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1))
+            addRenderableWidget(Button.builder(Component.literal(">"), b -> turnTo(next))
                     .bounds(width / 2 + 134, y, 20, 20).build()).active = page < pages - 1;
             addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
                     .bounds(width / 2 - 100, y, 200, 20).build());
@@ -100,9 +102,13 @@ public final class WeakSpotGuiFactory {
             }
         }
 
-        private void turn(int delta) {
-            page += delta;
-            init();
+        /**
+         * 行き先のページ番号で移る（今のページ ±1 にしない）。マウスで押すと、バニラは onPress のあとで押したボタンに
+         * フォーカスを付けるので、作り直して外した古いボタンが Enter・Space でもう一度押されることがある。
+         */
+        private void turnTo(int target) {
+            page = target;
+            rebuildWidgets();
         }
 
         @Override
@@ -170,7 +176,7 @@ public final class WeakSpotGuiFactory {
             top = 40;
             perPage = Math.max(1, (height - top - 40) / ROW_HEIGHT);
             int pages = (settings.size() + perPage - 1) / perPage;
-            page = Math.min(page, Math.max(0, pages - 1));
+            page = Math.max(0, Math.min(page, pages - 1));
             for (int row = 0; row < perPage; row++) {
                 int i = page * perPage + row;
                 if (i >= settings.size()) {
@@ -180,18 +186,24 @@ public final class WeakSpotGuiFactory {
             }
             int y = height - 28;
             if (pages > 1) {
-                addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1))
+                int previous = page - 1;
+                int next = page + 1;
+                addRenderableWidget(Button.builder(Component.literal("<"), b -> turnTo(previous))
                         .bounds(this.width / 2 - 154, y, 20, 20).build()).active = page > 0;
-                addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1))
+                addRenderableWidget(Button.builder(Component.literal(">"), b -> turnTo(next))
                         .bounds(this.width / 2 + 134, y, 20, 20).build()).active = page < pages - 1;
             }
             addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
                     .bounds(this.width / 2 - 100, y, 200, 20).build());
         }
 
-        private void turn(int delta) {
-            page += delta;
-            init();
+        /**
+         * 行き先のページ番号で移る（今のページ ±1 にしない）。マウスで押すと、バニラは onPress のあとで押したボタンに
+         * フォーカスを付けるので、作り直して外した古いボタンが Enter・Space でもう一度押されることがある。
+         */
+        private void turnTo(int target) {
+            page = target;
+            rebuildWidgets();
         }
 
         private void addWidget(int i, int x, int y) {
