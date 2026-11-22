@@ -54,8 +54,8 @@
 |---|---|---|---|
 | 自分の弱点を出す | `client.markers.weakSpotsEnabled` | true | 自分の弱点のオン／オフ（HOME キーで切り替え） |
 | オフにした種類 | `client.markers.disabledKinds` | （空） | 自分でオフにした弱点の種類（1 行に 1 つ。`mining` `growth` `machine` `animal` `fishing` `bow` `melee` `vehicle` `eat` `sleep` `ladder` `elytra` `enchant` `harvest` `throw` `sprint` `portal` `swim` `fall`）。統計画面の「弱点マーカー」タブで変更可能 |
-| 自分の弱点の色 | `client.markers.myMarkerColors` | （空） | 自分の弱点の色（1 行に `種類=#RRGGBB`）。未記入の種類は初期値。「弱点マーカー」タブで変更可能 |
-| 自分の弱点の形 | `client.markers.myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`・`star`（的当ての銅で解放））。未記入の種類は円。「弱点マーカー」タブで変更可能 |
+| 自分の弱点の色 | `client.markers.myMarkerColors` | （空） | 自分の弱点の色（1 行に `種類=#RRGGBB`、または `silver`（的当ての銀で解放）・`rainbow`（的当ての虹で解放））。未記入の種類は初期値。「弱点マーカー」タブで変更可能 |
+| 自分の弱点の形 | `client.markers.myMarkerShapes` | （空） | 自分の弱点の形（1 行に `種類=circle`・`ring`・`diamond`・`square`・`star`（的当ての銅で解放））。未記入の種類と、知らない形の名前は円。「弱点マーカー」タブで変更可能 |
 | 金の粒 | `client.markers.goldHitParticles` | false | 弱点に当てた時に金の粒を散らすか（的当ての金で解放。届いていないワールドでは出ない）。K キーの「的当て」タブでも切り替え可能 |
 | 移動の残像 | `client.markers.weakSpotTrailEnabled` | true | 弱点の移動演出（元の位置から素早く動き、残像を残す）。見た目のみで、当たり判定は即座に移動先。オフでその場で切り替わる。他プレイヤーのマークにも有効 |
 | ほかの人のマーク | `client.markers.otherMarkerEnabled` | true | 他プレイヤーの弱点マークを表示するか |
