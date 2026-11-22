@@ -45,8 +45,11 @@ public final class WeakSpotGuiFactory {
     private static final class GroupsScreen extends Screen {
 
         private static final int BUTTON_WIDTH = 150;
+        private static final int ROW_HEIGHT = 24;
 
         private final Screen parent;
+        /** 一覧が画面に入らないときのページ。まとめを開いて戻っても、画面の大きさを変えても残す。 */
+        private int page;
 
         GroupsScreen(Screen parent) {
             super(Component.literal(WeakSpotMod.NAME));
@@ -62,18 +65,49 @@ public final class WeakSpotGuiFactory {
                 }
             }
             int rows = (groups.size() + 1) / 2;
-            int top = Math.max(40, height / 2 - rows * 12);
-            for (int i = 0; i < groups.size(); i++) {
+            int top = Math.max(40, height / 2 - rows * ROW_HEIGHT / 2);
+            if (top + rows * ROW_HEIGHT + 12 <= height - 28) {
+                page = 0;
+                addGroups(groups, 0, groups.size(), top);
+                addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
+                        .bounds(width / 2 - 100, top + rows * ROW_HEIGHT + 12, 200, 20).build());
+                return;
+            }
+            // 項目の画面（SettingsScreen）と同じ並び
+            int perPage = Math.max(1, (height - 40 - 40) / ROW_HEIGHT) * 2;
+            int pages = (groups.size() + perPage - 1) / perPage;
+            page = Math.max(0, Math.min(page, pages - 1));
+            addGroups(groups, page * perPage, Math.min(groups.size(), (page + 1) * perPage), 40);
+            int y = height - 28;
+            int previous = page - 1;
+            int next = page + 1;
+            addRenderableWidget(Button.builder(Component.literal("<"), b -> turnTo(previous))
+                    .bounds(width / 2 - 154, y, 20, 20).build()).active = page > 0;
+            addRenderableWidget(Button.builder(Component.literal(">"), b -> turnTo(next))
+                    .bounds(width / 2 + 134, y, 20, 20).build()).active = page < pages - 1;
+            addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
+                    .bounds(width / 2 - 100, y, 200, 20).build());
+        }
+
+        private void addGroups(List<String> groups, int from, int to, int top) {
+            for (int i = from; i < to; i++) {
                 String group = groups.get(i);
                 int x = width / 2 + (i % 2 == 0 ? -BUTTON_WIDTH - 4 : 4);
-                int y = top + (i / 2) * 24;
+                int y = top + ((i - from) / 2) * ROW_HEIGHT;
                 addRenderableWidget(Button.builder(Component.translatable(SettingGroups.langKey(group)),
                         b -> minecraft.setScreen(new SettingsScreen(this, group))).bounds(x, y, BUTTON_WIDTH, 20)
                         .tooltip(Tooltip.create(Component.translatable(SettingGroups.langKey(group) + ".tooltip")))
                         .build());
             }
-            addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
-                    .bounds(width / 2 - 100, Math.min(height - 28, top + rows * 24 + 12), 200, 20).build());
+        }
+
+        /**
+         * 行き先のページ番号で移る（今のページ ±1 にしない）。マウスで押すと、バニラは onPress のあとで押したボタンに
+         * フォーカスを付けるので、作り直して外した古いボタンが Enter・Space でもう一度押されることがある。
+         */
+        private void turnTo(int target) {
+            page = target;
+            rebuildWidgets();
         }
 
         @Override
@@ -134,14 +168,13 @@ public final class WeakSpotGuiFactory {
 
         @Override
         protected void init() {
-            clearWidgets();
             int width = Math.min(MAX_WIDTH, this.width - 20);
             left = this.width / 2 - width / 2;
             right = left + width;
             top = 40;
             perPage = Math.max(1, (height - top - 40) / ROW_HEIGHT);
             int pages = (settings.size() + perPage - 1) / perPage;
-            page = Math.min(page, Math.max(0, pages - 1));
+            page = Math.max(0, Math.min(page, pages - 1));
             for (int row = 0; row < perPage; row++) {
                 int i = page * perPage + row;
                 if (i >= settings.size()) {
@@ -151,18 +184,24 @@ public final class WeakSpotGuiFactory {
             }
             int y = height - 28;
             if (pages > 1) {
-                addRenderableWidget(Button.builder(Component.literal("<"), b -> turn(-1))
+                int previous = page - 1;
+                int next = page + 1;
+                addRenderableWidget(Button.builder(Component.literal("<"), b -> turnTo(previous))
                         .bounds(this.width / 2 - 154, y, 20, 20).build()).active = page > 0;
-                addRenderableWidget(Button.builder(Component.literal(">"), b -> turn(1))
+                addRenderableWidget(Button.builder(Component.literal(">"), b -> turnTo(next))
                         .bounds(this.width / 2 + 134, y, 20, 20).build()).active = page < pages - 1;
             }
             addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onClose())
                     .bounds(this.width / 2 - 100, y, 200, 20).build());
         }
 
-        private void turn(int delta) {
-            page += delta;
-            init();
+        /**
+         * 行き先のページ番号で移る（今のページ ±1 にしない）。マウスで押すと、バニラは onPress のあとで押したボタンに
+         * フォーカスを付けるので、作り直して外した古いボタンが Enter・Space でもう一度押されることがある。
+         */
+        private void turnTo(int target) {
+            page = target;
+            rebuildWidgets();
         }
 
         private void addWidget(int i, int x, int y) {

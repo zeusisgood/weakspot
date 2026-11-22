@@ -7,7 +7,7 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`（改行はバニラと同じく JSON の `\n`）、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。1 行 1 キーなので値の改行は `\` と `n` の 2 文字にし、Forge の設定画面が説明を読むときに改行へ戻す。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
@@ -156,7 +156,7 @@
 - ネザーゲート: 待ちは `Entity.portalProcess`（`PortalProcessor.portalTime`）。ネザーゲートだけ（エンドのゲートは待たない）。
 - 収穫: 1.21 には `HarvestDropsEvent` がないので、収穫物は `CommonHooks.handleBlockDrops`（`BlockDropsEvent`）を通す。壊すときの許可は `CommonHooks.fireBlockBreak`。
 - 保存データ: プレイヤーはデータアタッチメント `Registration.PLAYER_DATA`（死んでも残す。中身のキーは 1.12.2 の `PlayerPersisted.weakspot` と同じ）、順位はワールドの `SavedData`（`weakspot_leaderboard`）。
-- 設定: `ModConfigSpec` を、`ServerConfig`・`ClientConfig` のフィールドと注釈（`config/Config`）からリフレクションで組む（項目の名前・範囲・説明を 1.12.2 と 1 か所で揃えるため）。ファイルを保存すると NeoForge が読み直し（`ModConfigEvent.Reloading`）、サーバーの項目なら全員に送り直す。読み直しでは、そのファイル（server／client）の値だけをフィールドへ写す（NeoForge は保存の中で読み直しを知らせるので、両方を写すと、設定画面で変えてまだ保存していないもう片方の値が元に戻る）。設定画面は `WeakSpotGuiFactory`（NeoForge の標準の画面はファイルのカテゴリの並びになるので、`SettingGroups` のまとめで自作）。
+- 設定: `ModConfigSpec` を、`ServerConfig`・`ClientConfig` のフィールドと注釈（`config/Config`）からリフレクションで組む（項目の名前・範囲・説明を 1.12.2 と 1 か所で揃えるため）。ファイルを保存すると NeoForge が読み直し（`ModConfigEvent.Reloading`）、サーバーの項目なら全員に送り直す。読み直しでは、そのファイル（server／client）の値だけをフィールドへ写す（NeoForge は保存の中で読み直しを知らせるので、両方を写すと、設定画面で変えてまだ保存していないもう片方の値が元に戻る）。設定画面は `WeakSpotGuiFactory`（NeoForge の標準の画面はファイルのカテゴリの並びになるので、`SettingGroups` のまとめで自作。1.20.1 版も同じ）。まとめの一覧も項目の画面も、画面に入らないときはページに分ける（Forge 1.12.2 の画面と違ってスクロールしないので、GUI の大きさが大きいと下の段が「完了」と重なる）。説明はバニラの `Tooltip` で、本当の改行で行が分かれる。
 - コマンド: サーバーの `/weakspot` は Brigadier。クライアントの `/weakspot bug`・`skipupdate` は `RegisterClientCommandsEvent`（クライアントに無いサブコマンドは、NeoForge がそのままサーバーへ送る）。
 
 ### 1.20.1 版で違う所

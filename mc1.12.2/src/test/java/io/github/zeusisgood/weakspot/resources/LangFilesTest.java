@@ -6,7 +6,6 @@ import io.github.zeusisgood.weakspot.common.HitKind;
 import io.github.zeusisgood.weakspot.common.SettingGroups;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,17 +36,37 @@ public class LangFilesTest {
     }
 
     @Test
-    public void generatedLangHasNoKeyThatAlsoHasDotName() throws IOException {
+    public void generatedLangHasNoKeyThatAlsoHasDotName() {
         for (String name : new String[] {"en_us", "ja_jp"}) {
-            Set<String> keys = new HashSet<>();
-            for (String line : Files.readAllLines(Paths.get(ResourceFiles.MC
-                    + "build/generated/lang/assets/weakspot/lang/" + name + ".lang"), StandardCharsets.UTF_8)) {
-                keys.add(line.substring(0, line.indexOf('=')));
-            }
+            Set<String> keys = ResourceFiles.generatedLang(name).keySet();
             assertTrue(name + ": item.weakspot.target.name", keys.contains("item.weakspot.target.name"));
             for (String key : keys) {
                 assertTrue(name + ": " + key + " (also has .name)", !keys.contains(key + ".name"));
             }
+        }
+    }
+
+    /** 1.20.1・1.21.1 は json をそのまま読み、バニラと同じく本当の改行でしか行を分けない。 */
+    @Test
+    public void lineBreaksAreRealNewlines() {
+        List<String> bad = new ArrayList<>();
+        EN.forEach((k, v) -> { if (v.contains("\\n")) bad.add("en_us " + k); });
+        JA.forEach((k, v) -> { if (v.contains("\\n")) bad.add("ja_jp " + k); });
+        assertTrue("write line breaks as \\n in JSON (a real newline), not \\\\n: " + bad, bad.isEmpty());
+    }
+
+    /** 1.12.2 の Forge の設定画面は、.lang の「\」「n」の 2 文字を改行に直して説明を出す。 */
+    @Test
+    public void generatedLangWritesLineBreaksAsBackslashN() {
+        String[][] files = {{"en_us", ResourceFiles.EN_US}, {"ja_jp", ResourceFiles.JA_JP}};
+        for (String[] file : files) {
+            Map<String, String> json = ResourceFiles.lang(file[1]);
+            Map<String, String> generated = ResourceFiles.generatedLang(file[0]);
+            List<String> bad = new ArrayList<>();
+            generated.forEach((k, v) -> { if (!v.equals(json.get(k).replace("\n", "\\n"))) bad.add(k); });
+            assertTrue(file[0] + ": " + bad, bad.isEmpty());
+            String key = WeakSpotConfig.settings().get(0).tooltipKey();
+            assertTrue(file[0] + ": " + key, generated.get(key).contains("\\n"));
         }
     }
 
@@ -105,10 +124,10 @@ public class LangFilesTest {
         List<String> bad = new ArrayList<>();
         for (WeakSpotConfig.Setting setting : WeakSpotConfig.settings()) {
             String file = setting.category + "." + setting.name();
-            check(bad, setting, JA.get(setting.tooltipKey()), "マルチプレイ時、サーバー側設定が優先されます。\\n",
-                    "[クライアント]", "\\nファイル: " + file);
-            check(bad, setting, EN.get(setting.tooltipKey()), "In multiplayer, the server's setting takes priority.\\n",
-                    "[Client]", "\\nFile: " + file);
+            check(bad, setting, JA.get(setting.tooltipKey()), "マルチプレイ時、サーバー側設定が優先されます。\n",
+                    "[クライアント]", "\nファイル: " + file);
+            check(bad, setting, EN.get(setting.tooltipKey()), "In multiplayer, the server's setting takes priority.\n",
+                    "[Client]", "\nFile: " + file);
         }
         assertTrue("tooltips not following the rules: " + bad, bad.isEmpty());
     }
