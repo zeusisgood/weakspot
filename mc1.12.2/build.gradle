@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 
-version = '1.13.3'
+version = '1.13.4'
 group = 'io.github.zeusisgood'
 ext.mcVersion = '1.12.2'
 archivesBaseName = "weakspot-${mcVersion}-forge"
@@ -53,6 +53,7 @@ sourceSets {
 }
 
 // 翻訳の正本は ../lang/*.json（新しい版はそのまま読む）。1.12.2 は「キー=値」の .lang にする（同じキーの 2 回目はテストが見つける）
+// .lang は 1 行 1 キーなので、値の改行は「\」「n」の 2 文字で書く（Forge の設定画面が説明を読むときに改行へ戻す）
 task generateLang {
     def source = file('../lang')
     def output = file("$buildDir/generated/lang/assets/weakspot/lang")
@@ -65,7 +66,7 @@ task generateLang {
             // 1.12.2 のアイテム名は「内部名を翻訳した結果 + .name」を引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる
             new File(output, f.name.replace('.json', '.lang'))
                     .setText(entries.findAll { k, v -> !entries.containsKey(k + '.name') }
-                            .collect { k, v -> "$k=$v" }.join('\n') + '\n', 'UTF-8')
+                            .collect { k, v -> "$k=${v.replace('\n', '\\n')}" }.join('\n') + '\n', 'UTF-8')
         }
     }
 }
