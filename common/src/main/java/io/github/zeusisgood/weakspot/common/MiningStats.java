@@ -92,19 +92,6 @@ public final class MiningStats {
         return savedTicks / 20.0;
     }
 
-    public void reset() {
-        hits = 0;
-        blocksBroken = 0;
-        blocksBrokenWithHit = 0;
-        hitsOnBrokenBlocks = 0;
-        maxHitsOnBlock = 0;
-        savedTicks = 0;
-        maxStreak = 0;
-        targetBest = 0;
-        targetRounds = 0;
-        java.util.Arrays.fill(kindHits, 0);
-    }
-
     /** 近接は meleeHits（古いワールドは critHits）。 */
     public static String saveKey(HitKind kind) {
         return kind == HitKind.MINING ? "hits" : kind.key() + "Hits";

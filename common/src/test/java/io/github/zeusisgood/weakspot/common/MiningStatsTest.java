@@ -59,30 +59,12 @@ public class MiningStatsTest {
     }
 
     @Test
-    public void resetClearsEverything() {
-        MiningStats stats = new MiningStats();
-        stats.recordHit(12);
-        stats.recordBlockBroken(1);
-        stats.recordKindHit(HitKind.GROWTH);
-        stats.recordKindHit(HitKind.MACHINE);
-        stats.reset();
-        assertEquals(0, stats.hits);
-        assertEquals(0, stats.blocksBroken);
-        assertEquals(0, stats.maxHitsOnBlock);
-        assertEquals(0, stats.savedTicks, 1e-9);
-        assertEquals(0, stats.count(HitKind.GROWTH));
-        assertEquals(0, stats.count(HitKind.MACHINE));
-    }
-
-    @Test
-    public void maxStreakKeepsTheLargestAndResets() {
+    public void maxStreakKeepsTheLargest() {
         MiningStats stats = new MiningStats();
         stats.recordStreak(3);
         stats.recordStreak(12);
         stats.recordStreak(1);
         assertEquals(12, stats.maxStreak);
-        stats.reset();
-        assertEquals(0, stats.maxStreak);
     }
 
     @Test
@@ -98,24 +80,20 @@ public class MiningStatsTest {
     }
 
     @Test
-    public void animalHitsAreCountedSeparatelyAndReset() {
+    public void animalHitsAreCountedSeparately() {
         MiningStats stats = new MiningStats();
         stats.recordKindHit(HitKind.ANIMAL);
         stats.recordKindHit(HitKind.ANIMAL);
         assertEquals(2, stats.count(HitKind.ANIMAL));
         assertEquals(0, stats.hits);
-        stats.reset();
-        assertEquals(0, stats.count(HitKind.ANIMAL));
     }
 
     @Test
-    public void fishingHitsAreCountedSeparatelyAndReset() {
+    public void fishingHitsAreCountedSeparately() {
         MiningStats stats = new MiningStats();
         stats.recordKindHit(HitKind.FISHING);
         assertEquals(1, stats.count(HitKind.FISHING));
         assertEquals(0, stats.hits);
-        stats.reset();
-        assertEquals(0, stats.count(HitKind.FISHING));
     }
 
     @Test
@@ -133,8 +111,6 @@ public class MiningStatsTest {
         }
         assertEquals(1, stats.count(HitKind.MELEE));
         assertEquals(HitKind.values().length + 1, stats.totalHits());
-        stats.reset();
-        assertEquals(0, stats.totalHits());
     }
 
     @Test
