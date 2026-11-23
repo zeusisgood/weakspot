@@ -8,7 +8,7 @@
 ## 全体
 
 - ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`（改行はバニラと同じく JSON の `\n`）、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。1 行 1 キーなので値の改行は `\` と `n` の 2 文字にし、Forge の設定画面が説明を読むときに改行へ戻す。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
-- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。
+- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。設定の一覧の正本 `common/settings.txt`（「`ServerConfig.Mining.boostMultiplier`」の形）は、3 つの版の `config/SettingNamesTest`（同じ中身）が、自分の版の `ServerConfig`・`ClientConfig` と集合として一致するかを確かめる。翻訳の確かめは 1.12.2 の `LangFilesTest` だけなので、名前が揃っていれば 3 つの版の分を見たことになる（1.20.1・1.21.1 の設定のクラスはローダーに依存しないので、Minecraft なしで流せる）。設定を足す・消すときは、正本も直す。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
@@ -72,7 +72,7 @@
 - 他のプレイヤー: マークは `OtherMarkers` → `MarkerRelay`（サーバーは検証せずに転送する）、音は `OtherHitMessage`、頭の上のコンボは `OtherCombos`、節目の知らせの非表示は `OthersMilestoneFilter`。
 - 統計画面（K キー）: `StatsScreen` と各タブ（`StatsTab`・`SoundTab`・`KindsTab`・`TargetTab`。土台 `StatsScreenTab`）。設定画面は `WeakSpotGuiFactory` が `common/SettingGroups` のまとめで組む（ファイルのカテゴリではなく、種類・用途で）。
 - 更新のお知らせ `UpdateNotes`（`weakspot.news.<版>`）と、新しい版の通知 `UpdateCheckNotice`（Forge の `updateJSON`。`main` の `update.json`）。`/weakspot bug` は `BugCommand`・`common/BugReport`（`ClientCommandHandler` で受ける。サーバーの `/weakspot` は OP 権限が要り、ソロでチートがオフだと打てないため。古い Java は Windows 10・11 を「Windows 8.1」と答えるので注記する）。リンクは `OPEN_URL` ではなく `RUN_COMMAND` の `/weakspot bug open` で、URL を作り直して直接開く（バニラの確認画面は URL を全文表示し、長いとボタンが画面の外に出る。URL はチャットの長さの上限に当たるので引数で渡さない）。Mod の一覧は URL に入れず、クリップボードから貼ってもらう（URL の長さを Mod の数に依らず一定にするため。GitHub にログインしていないと、戻り先としてもう一度符号化されて伸びる）。Windows・macOS 以外では、バニラの開き方（失敗に気付けず、xdg-open の出力の受け口をすぐ閉じる）を使わず、`LinuxBrowser` が `BugReport.openCommands` を順に別のスレッドで試す（3 秒で終わらなければ開けたとみなす）。クリック後には、ゲームの後ろで開いて気付かない場合に備え、雛形だけの短いリンク `BugReport.PLAIN_FORM_URL` をいつも出す。
-- サーバーの版で機能を止める: `ServerFeatures.since("1.x.y")`（`SyncedSettings.serverVersion`）。古いサーバーにつなぐと、弱点が出るのにバニラの動作（GUI など）も起きる食い違いを防ぐ。今は使っている所がない（1.11.x の条件は、接続できる下限が 1.12 になったので消した）。
+- 版の違い: 接続できるのは同じマイナー同士（1.12.2 は `acceptableRemoteVersions`、1.20.1・1.21.1 は `Network.PROTOCOL`）。サーバーとクライアントの両方が要る機能、サーバーから送る文の新しい翻訳キー、メッセージの種類や送り先の追加はマイナーで足すので、同じマイナーの中で版を確かめて機能を切り替える仕組みは持たない。パッチの違いは `server/VersionCheck` が知らせるだけ（ログインの少しあと、本人とオペレーターに。比べ方は `common/ModVersions`）。クライアントの版は、1.12.2 は Forge が接続のときに受け取った Mod の一覧から、1.20.1・1.21.1 は接続直後にクライアントが送る `HelloMessage` から、`VersionCheck` が覚える。サーバーの版は `SyncedSettings.serverVersion` で届き、`/weakspot bug` の環境の欄に書く。
 
 ### 的当て・記録・知らせ（サーバー）
 
@@ -80,7 +80,7 @@
 - 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存のキーは `saveKey`。近接は古いキー `critHits` も読む）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
 - 配る物: `GuideBookGiver`（ガイドの本・的・ようこその案内。永続データの `guideGiven`・`targetsGiven`・`targetGiftVersion`（ない人は 1.11.0 とみなす））。
 - ほかのプレイヤーへの知らせ: 節目・コンボの段階・的当ての 1 位（`MiningRewards.broadcast*`・`TargetRounds`）。
-- サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする。パッチで足したキーは `server/PlayerText.of` を通し、キーを持たない古いクライアントにだけ `server/ServerLang` が jar の言語ファイルから文章を作る（今は通しているキーがない。接続できる下限より前に足したキーは、そのまま翻訳キーで送る）。版の違いの知らせは `VersionCheck`（`common/ModVersions`）。
+- サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする（新しいキーはマイナーで足すので、相手のクライアントは必ずキーを持っている）。翻訳の値は `%s`／`%1$s` の形だけ（クライアントの翻訳がこの形しか扱えない。`LangFilesTest` が確かめる）。
 - コマンド: `WeakSpotCommand`（`stats` / `reset` は権限 2、`top` はだれでも、`reload` は `WeakSpotConfig.reloadFromFile`）。
 
 ### 共通の部品
@@ -112,7 +112,7 @@
 | 11 | `OtherComboMessage` | S→C | 頭の上のコンボと、本人のコンボの直し |
 | 12 / 13 | `TargetMessage` / `TargetActionMessage` | S→C / C→S | 的当て |
 | 14 | `OtherTargetMessage` | S→C | 近くのプレイヤーの的当てのヒット数 |
-| -（1.20.1・1.21.1 版のみ） | `HelloMessage` | C→S | 接続直後に自分の Mod の版（Forge 47・NeoForge は相手の Mod の版を教えてくれないため。`PlayerText.clientSince`・`VersionCheck` が使う） |
+| -（1.20.1・1.21.1 版のみ） | `HelloMessage` | C→S | 接続直後に自分の Mod の版（Forge 47・NeoForge は相手の Mod の版を教えてくれないため。`VersionCheck` が使う） |
 
 ## クライアントを信じる範囲
 
@@ -122,7 +122,7 @@
 - **クライアントを信じている所**: 「照準が弱点に合った」こと（全種類）。改造クライアントなら、合わせずに当てたと送れる。ただし間隔と条件はサーバーが確かめるので（間隔は 4 回分まで貯められる `HitBudget`）、得られるのは普通に当て続けたときと同じまで（最初の 4 回分を一度に使える程度）で、バニラ用のチートツールでもできる程度。**塞がない**。
 - **的当て**: 当てた・✕ もクライアントの申告なので、ハズレを無視して記録・順位・告知を荒らせる。対策（弱点の位置をサーバーが決めて向きを確かめる。[roadmap.md](roadmap.md) の案 A）は、公開サーバーで遊ぶ予定が出るまで保留。
 - サーバーからクライアントへ送るものは間引く（1 人あたりの送信の間隔を決める）。でたらめな通知を大量に送られても、サーバーの送信が増えないように。
-- 接続のときの Mod の一覧の版（`PlayerText.clientVersion`）は改造クライアントなら書き換えられる。これで機能を切り替えてよいのは、ごまかしても本人だけが困るものに限る。
+- クライアントの版（`VersionCheck` が覚える、Mod の一覧・`HelloMessage` の版）は改造クライアントなら書き換えられる。これで機能を切り替えてよいのは、ごまかしても本人だけが困るものに限る。
 
 ## 重要: サーバー側のブーストは時間枠ではない
 

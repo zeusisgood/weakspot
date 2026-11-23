@@ -62,6 +62,10 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 ## 最近の更新
 
+### 1.13.6
+
+- 内部の整理（遊び方・見た目に変更なし）。通信内容に変更なし。1.13.x 同士は接続可能
+
 ### 1.13.5
 
 - ボートの加速の上限を廃止。繁殖の待ち時間中のムーシュルームからシチューが取れなかった不具合を修正（3 つの版）
@@ -71,12 +75,6 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 - 1.20.1・1.21.1 版: 設定画面の説明に `\n` の文字が表示されていた不具合と、最初の一覧のボタンが「完了」と重なっていた不具合を修正（入らないときはページ送り）
 - 通信内容に変更なし。1.13.x 同士は接続可能
-
-### 1.13.3
-
-- 1.21.1 版: 設定画面でクライアントとサーバーの項目を同時に変更すると、サーバーの項目が保存されなかった不具合を修正（1.20.1 版も同じ形を修正）
-- 1.20.1 版: 草に成長の弱点が出ていた不具合を修正
-- 設定の説明の誤りを修正（3 つの版）。通信内容に変更なし。1.13.x 同士は接続可能
 
 ## もっと詳しく
 
@@ -104,7 +102,7 @@ Fortnite の資材集めにある「弱点（クリティカル）を叩くと�
 
 VRChat向けのペットスライム「Nyaimu」も作っています。Minecraft向けには無料テクスチャパック [Nyaimu Slimeball Texture](https://www.curseforge.com/minecraft/texture-packs/nyaimu-slimeball-texture) もあります。
 
-- BOOTH: [https://booth.pm/ja/items/5036167](https://booth.pm/ja/items/5036167)
+- BOOTH: [https://zeusisgood.booth.pm/items/5036167](https://zeusisgood.booth.pm/items/5036167)
 - Jinxxy（海外向け）: [https://jinxxy.com/zeusisgood/nyaimu](https://jinxxy.com/zeusisgood/nyaimu)
 - X: [@zeus_isgood](https://x.com/zeus_isgood)
 - Website: [https://zeusisgood.dev/](https://zeusisgood.dev/)

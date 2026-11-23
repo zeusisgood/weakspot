@@ -34,11 +34,11 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 - 版は `mc1.12.2/build.gradle` の `version`・1.12.2 の `WeakSpotMod.VERSION`・`mc1.20.1/gradle.properties` と `mc1.21.1/gradle.properties` の `mod_version`・1.20.1 と 1.21.1 の `WeakSpotMod.VERSION` の 6 か所。必ず揃える（`ReleaseFilesTest`）。**1 つの版だけを直したときも、いつも 3 つの jar を同じ番号で出す**。
 - 機能の追加・不具合の修正ごとに**パッチ**。互換性を破るとき（通信内容の変更、古い版で読めない保存データの形式変更、設定キーの削除・意味の変更）は**マイナー**。迷ったらマイナー。通信内容を変えたら必ずマイナー。
-- 今あるメッセージを、形も意味も同じまま**送り先だけ増やす**のはパッチ（新しい版の相手にだけ送る。1.11.3 の本人宛ての `OtherComboMessage`）。形・項目・値の意味を変えたらマイナー。
+- **サーバーとクライアントの両方が要る機能、サーバーから送る文の新しい翻訳キー、メッセージの種類や送り先の追加は、マイナーで行う**（同じマイナー同士しか接続しないので、版を確かめて機能を切り替える仕組みは持たない）。
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.20.1・1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - jar の名前と配布サイトの表示名の形（`weakspot-1.12.2-forge-<版>.jar`・`Weak Spot Mining <版> for MC 1.12.2 (Forge)`）は `doc/development.md` の「版の表記」。Mod の版はこの節の規則だけで決め、Minecraft の版と数字が重なるかは考えない。
-- 現行は **1.13.5**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
+- 現行は **1.13.6**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -60,41 +60,42 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。**種類を足すときに直す所の一覧は `doc/architecture.md`**。的当て（1.11.0）は種類ではなく別の仕組み（`TargetRounds` / `TargetPlay`。種類別の統計・設定・節目に入らない）。
 - 成長・収穫・機械・動物の「手が空いている」は、空か、右クリックで何もしないアイテム（`HeldItems`。1.11.0）。**移植のときは、版ごとに右クリックで動くアイテムを調べ直す**。
 - **機能を足す・直すときは、3 つの版で同じ PR で行う**（揃え続ける。ユーザーの判断）。版に依存しない部分は先に `common/` に書く。新しい Minecraft にしかない物（ラクダは 1.20.1・1.21.1、メイスは 1.21.1 など）が、その物がある版でだけ対象になるのはよい。
-- `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない。1.12.2 版を残す限り Java 8 の書き方）。どの版でも同じものを使うので、版に依存しない処理はここに書く。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。
+- `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない。1.12.2 版を残す限り Java 8 の書き方）。どの版でも同じものを使うので、版に依存しない処理はここに書く。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。`config/SettingNamesTest`（3 つの版に同じ中身）は、自分の版の設定の名前が正本 `common/settings.txt` と一致するかを確かめる（翻訳を確かめるのは 1.12.2 だけなので、名前が揃っていれば 3 つの版の分を見たことになる）。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（1.20.1・1.21.1 は `value = Dist.CLIENT`）。パケットのハンドラーは専用サーバーでも読み込まれるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る（全部の版）。
 - ヒット判定は `RenderWorldLastEvent`（1.20.1・1.21.1 は `RenderLevelStageEvent` の `AFTER_WEATHER`）で**毎フレーム**（tick 単位だと素早い照準移動を取りこぼす）。
-- **パッチで、サーバーとクライアントの両方が要る機能を足すときは、クライアント側を `ServerFeatures.since("1.x.y")` で囲む**。サーバー側は、新しいクライアントにだけ送る・使うものを `PlayerText.clientSince(player, "1.x.y")` で確かめる（版が分からないのは同じ jar のシングルプレイなので true）。相手のクライアントの版は、1.12.2 は Forge が受け取った Mod の一覧、1.20.1・1.21.1 は接続直後にクライアントが送る `HelloMessage` で知る。
+- パッチの版の違いは `server/VersionCheck` が本人とオペレーターに知らせるだけ。相手のクライアントの版は、1.12.2 は Forge が受け取った Mod の一覧、1.20.1・1.21.1 は接続直後にクライアントが送る `HelloMessage` で、`VersionCheck` が知る。
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。1.20.1・1.21.1 は HUD が `RenderGuiEvent.Post`、GUI の上が `ScreenEvent.Render.Post` で、図形は `client/Draw`（頂点は `GuiGraphics` の pose を掛ける）。1.20.1 の tick のイベントは `TickEvent`（`phase` で前後を分ける）、通信は `SimpleChannel`。
 - 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。改行は JSON の `\n`（`\\n` と書かない）。1.12.2 の `.lang` はビルドのときに作る（改行は `\` と `n` の 2 文字にする）。1.20.1・1.21.1 は json をそのまま使う。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
-- **サーバーからプレイヤーに送る文は翻訳キーで送る**。接続できる一番古い版（`ACCEPTED_VERSIONS` の下限）までに足したキーは `TextComponentTranslation`（1.20.1・1.21.1 は `Component.translatable`）、パッチで足したキーは `server/PlayerText.of(player, since, key, args)`（キーを持たない古いクライアントにだけ `ServerLang` の文章。1.11.5）。マイナーを上げたら、`PlayerText.of` の `since` が新しい下限以下になったものを `TextComponentTranslation` に直す。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
+- **サーバーからプレイヤーに送る文は翻訳キーで送る**（`TextComponentTranslation`、1.20.1・1.21.1 は `Component.translatable`。新しいキーはマイナーで足す）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*`・`weakspot.welcome.*`・`weakspot.target.updateGift` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
 - 共通の部品があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
 - **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
 - **採掘のヒットは、掘る前のものは予約にして、掘り始めた瞬間に確定する**（1.11.2。予約の時点でコンボ・統計を数えない。`ServerBoostTracker`）。
 - **コンボはサーバーの数が正**。クライアントの数がずれたら、サーバーが手の止まったときに本人宛ての `OtherComboMessage` で直す（1.11.3、`ComboSync`。片道だけで、サーバーはクライアントの数に合わせない）。
 - **サーバー側の採掘のブーストは時間枠ではない**。破壊速度まわりを変えるときは、クライアント（積算）とサーバー（瞬間判定）の結果が一致するかを確かめる（仕組みは `doc/architecture.md` の「重要」の節）。
-- **コードのコメントには、Why / Why not と、型で分からない約束（単位・範囲・どちらの側か）だけを書く**。How の言い直し・版の注記・前の形の説明は書かない（経緯はコミットログ・`CHANGELOG.md`・仕様書にある）。ただし `ServerFeatures.since` などで動作に関わる版は書く。名前で言えることは名前に、振る舞いはテストの名前に（コメントに書かない）。`doc/architecture.md` も同じ。
+- **コードのコメントには、Why / Why not と、型で分からない約束（単位・範囲・どちらの側か）だけを書く**。How の言い直し・版の注記・前の形の説明は書かない（経緯はコミットログ・`CHANGELOG.md`・仕様書にある）。名前で言えることは名前に、振る舞いはテストの名前に（コメントに書かない）。`doc/architecture.md` も同じ。
 
 ### 設定の約束事
 
 - `@Config`（`config/weakspot.cfg`）。カテゴリは 2 段（1.10.0）: `server`（`ServerConfig`）／`client`（`ClientConfig`）→ 種類・用途の入れ子のクラス。コードからは `WeakSpotConfig.server.mining.boostMultiplier` の形で読む。**項目の名前は変えない**（カテゴリを移すときは `configVersion` を上げて `WeakSpotConfig.migrate` で移す）。新しい種類の項目は、その種類のカテゴリに。名前から探すときは `WeakSpotConfig.setting(名前)`。コメントの先頭に `[サーバー]` / `[クライアント]` を書き、版の注記は書かない。
 - `[サーバー]` の項目でクライアントが使うものは `SyncedSettings` に入れて送り、クライアントは接続中 `ClientSettings.get()` を読む。**受け取った値を `WeakSpotConfig` のフィールドに書き込まない**（`ConfigManager.sync` でクライアントの cfg に保存されてしまう）。サーバーだけが使う項目は送らない。**`SyncedSettings` に項目を足すと通信内容が変わる（マイナー）**。
-- 設定画面は、ファイルのカテゴリではなく `common/SettingGroups` のまとめ（種類・用途）で出す（1.10.2）。設定を足すときは、`SettingGroups` のまとめ、`doc/config.md` のそのまとめの表、日英の lang の名前 `weakspot.<カテゴリ>.<キーを小文字にしたもの>` と説明 `.tooltip` を足す。説明は、サーバーの項目なら「マルチプレイ時、サーバー側設定が優先されます。」で始め、最後の行にファイルのキー（「ファイル: server.mining.boostMultiplier」）。クライアントの項目は断り書きなし（`LangFilesTest`・`SettingGroupsTest` が確かめる）。カテゴリを足したら、その名前 `weakspot.<カテゴリ>` と `.tooltip` も。
+- 設定画面は、ファイルのカテゴリではなく `common/SettingGroups` のまとめ（種類・用途）で出す（1.10.2）。設定を足すときは、`common/settings.txt`、`SettingGroups` のまとめ、`doc/config.md` のそのまとめの表、日英の lang の名前 `weakspot.<カテゴリ>.<キーを小文字にしたもの>` と説明 `.tooltip` を足す。説明は、サーバーの項目なら「マルチプレイ時、サーバー側設定が優先されます。」で始め、最後の行にファイルのキー（「ファイル: server.mining.boostMultiplier」）。クライアントの項目は断り書きなし（`LangFilesTest`・`SettingGroupsTest` が確かめる）。カテゴリを足したら、その名前 `weakspot.<カテゴリ>` と `.tooltip` も。
 - 設定ファイルの移行は `WeakSpotConfig.migrate`（`configVersion`、今は 7。`init` と `serverStarting` で呼ぶ。値は `Property` に書いてから `ConfigManager.sync` する。`preInit` の間は保存できない）。
 - パケットの中身の変更・追加・削除、統計の保存形式（NBT のキー）を古い版で読めなくする変更をしたら、マイナーを上げ、範囲を書き換え、`CHANGELOG.md` に書く。
 
 ## ユーザーとの進め方
 
-- ユーザーの要望は短い。「相談」「ラフ」と付いていれば、実装せずに相談から始める。相談では、案を表に並べ、おすすめを 1 つ示し、「決めてほしいこと」を番号付きで聞く。決まったら仕様書 `doc/spec/SPEC_vX.Y.Z.md` を書く（形は既存と同じ: 0. バージョンと制約 / 1.〜 内容 / README・doc / CLAUDE.md に書くこと / ユーザーに確認してもらうこと）。
-- 下書きの仕様書は、ユーザーが「実装」と言うまで実装しない。
+- ユーザーの要望は短い。「相談」と付いていれば、実装せずに相談から始める（案を表に並べ、おすすめを 1 つ示し、「決めてほしいこと」を番号付きで聞く）。「ラフ」と付いていれば、理解のまとめだけで、ファイルは作らない。
+- 「仕様書を書いて」と言われたら、`main` から切ったブランチに仕様書 `doc/spec/SPEC_vX.Y.Z.md` を下書き（先頭に「下書き」の印、`doc/spec/README.md` の行に「（下書き）」）で push し、`main` への PR を **Draft** で作る（題は「Spec X.Y.Z: 〜」、本文は仕様書の要約と「決めてほしいこと」。仕様書の形は既存と同じ: 0. バージョンと制約 / 1.〜 内容 / README・doc / CLAUDE.md に書くこと / ユーザーに確認してもらうこと）。レビューは PR の差分とコメント（またはユーザーが渡すレビューのファイル）で行い、直しは同じブランチに push する。PR のコメントは、ユーザーに「見て」と言われたときに読む。
+- 下書きの仕様書は、ユーザーが「実装」と言うまで実装しない。「実装」と言われたら、同じブランチに実装を積み、下書きの印を外し、PR の題を「Release X.Y.Z: 〜」、本文を「変えたこと・試してほしいこと・直さなかった文書」に書き換えて、Draft を外す（取り込みは 1 回）。
 - 色を提案するときは、必ずカラーコードを付ける（例 `#55CCFF`）。
 - **速さの上限は基本的に付けない（ユーザーの方針）**。上限が要りそうなときは、黙って付けずにユーザーに聞く。
 - ユーザーは vi に慣れていない。conf などを直してもらうときは、vi の使い方を簡単に添える（`/キー名` で検索 → `n` で次へ、`cw` で単語を書き換え → `Esc`、`:wq` で保存して終わる、`:q!` で保存せずに終わる）。
 - **ブランチと PR**:
   - **コミットの件名は中身の要約（と仕様書の節）。仕様書に書いていない理由（不具合の原因・レビューで直した理由・やり方を選んだ理由）は、本文に 1〜3 行で書く**。
   - 長く残すブランチは `main` だけ。作業は `claude/…` のブランチで。`main` への直接の push は禁止（Claude は push しない）。
-  - `main` に渡せる状態になったら（リリースのあと。文書だけの変更でも）、Claude が `main` への PR を作ってよい。本文は、変えたこと・試してほしいこと。
+  - 仕様書の Draft の PR は、仕様書を push した時点で作る。それ以外の PR は、`main` に渡せる状態になったら（リリースのあと。文書だけの変更でも）、Claude が `main` への PR を作ってよい。本文は、変えたこと・試してほしいこと。
   - CI（`ci.yml` の `build`）の成功が Merge に必須。**自分が作った PR の CI が赤くなったら、原因を直して push する**。
   - **PR を出したあとは見張らない**（PR の通知の購読・定期の確認の予約をしない。ユーザーの方針）。CI の結果は、ユーザーに聞かれたときと、次の作業を始めるときに確かめ、赤なら直す。
   - ユーザーが「Create a merge commit」で取り込み、取り込んだブランチは GitHub が自動で消す（想定どおり）。**作業ごとに、始めるときに `main` から新しい名前のブランチを切る**（名前は `claude/<内容が分かる英語>`。例 `claude/combo-sync-1.11.3`・`claude/docs-match-code`。セッションに割り当てられた名前は使わない）。取り込まれたブランチを同じ名前で作り直したり、取り込み済みの PR を使い回したりしない。
@@ -104,4 +105,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.13.5（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。
+現行は 1.13.6（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。
