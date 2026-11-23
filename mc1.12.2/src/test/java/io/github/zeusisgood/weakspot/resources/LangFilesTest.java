@@ -197,7 +197,7 @@ public class LangFilesTest {
         assertTrue("keys used in the code but missing from the lang files (lang/*.json): " + missing, missing.isEmpty());
     }
 
-    /** サーバーから翻訳キーで送る文（PlayerText）は、クライアントの翻訳で使える %s / %1$s の形だけを使う。 */
+    /** サーバーから翻訳キーで送る文は、クライアントの翻訳で使える %s / %1$s の形だけを使う。 */
     @Test
     public void serverSentTextsUseOnlyPercentS() {
         Pattern format = Pattern.compile("%(?!(\\d+\\$)?s)");

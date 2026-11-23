@@ -19,7 +19,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.apache.logging.log4j.LogManager;
 
 /**
- * クライアントの版は、接続直後にクライアントが送る HelloMessage で知る（PlayerText）。
+ * クライアントの版は、接続直後にクライアントが送る HelloMessage で知る（NeoForge は相手の Mod の版を教えてくれないため）。
  * ログインのメッセージに埋もれないように、DELAY_TICKS 後に出す。
  */
 @EventBusSubscriber(modid = WeakSpotMod.MODID)
@@ -29,6 +29,8 @@ public final class VersionCheck {
 
     /** 残りの tick。 */
     private static final Map<UUID, Integer> PENDING = new HashMap<>();
+    /** HelloMessage で届いた版。 */
+    private static final Map<UUID, String> VERSIONS = new HashMap<>();
 
     private VersionCheck() {
     }
@@ -40,8 +42,13 @@ public final class VersionCheck {
         }
     }
 
+    public static void onHello(ServerPlayer player, String version) {
+        VERSIONS.put(player.getUUID(), version);
+    }
+
     static void forgetOnLogout(Player player) {
         PENDING.remove(player.getUUID());
+        VERSIONS.remove(player.getUUID());
     }
 
     @SubscribeEvent
@@ -65,7 +72,7 @@ public final class VersionCheck {
     }
 
     private static void check(MinecraftServer server, ServerPlayer player) {
-        String clientVersion = PlayerText.clientVersion(player);
+        String clientVersion = VERSIONS.get(player.getUUID());
         String serverVersion = WeakSpotMod.VERSION;
         if (clientVersion == null) {
             return;

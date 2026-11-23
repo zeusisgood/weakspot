@@ -1,13 +1,13 @@
 package io.github.zeusisgood.weakspot.network;
 
 import io.github.zeusisgood.weakspot.WeakSpotMod;
-import io.github.zeusisgood.weakspot.server.PlayerText;
+import io.github.zeusisgood.weakspot.server.VersionCheck;
 import io.netty.buffer.ByteBuf;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
  * クライアント → サーバー: 接続直後に自分の Mod の版を送る。1.12.2 は Forge が受け取った Mod の一覧から読めたが、
- * NeoForge では読めないため（サーバーが PlayerText.clientSince・VersionCheck で使う）。
+ * NeoForge では読めないため（サーバーの VersionCheck が使う）。
  */
 public class HelloMessage extends Message {
 
@@ -34,6 +34,6 @@ public class HelloMessage extends Message {
     @Override
     void handle(IPayloadContext ctx) {
         String v = version;
-        ServerThread.run(ctx, player -> PlayerText.onHello(player, v));
+        ServerThread.run(ctx, player -> VersionCheck.onHello(player, v));
     }
 }

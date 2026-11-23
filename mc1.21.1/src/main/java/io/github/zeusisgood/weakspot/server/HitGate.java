@@ -112,7 +112,6 @@ public final class HitGate {
             ServerSwitches.forgetOnLogout(player);
             MiningRewards.forgetOnLogout(player);
             VersionCheck.forgetOnLogout(player);
-            PlayerText.forgetOnLogout(player);
             if (player instanceof ServerPlayer serverPlayer) {
                 VillagerBreedHints.onLogout(serverPlayer);
             }

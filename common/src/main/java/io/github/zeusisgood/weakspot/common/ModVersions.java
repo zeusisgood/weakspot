@@ -19,11 +19,6 @@ public final class ModVersions {
         return 0;
     }
 
-    /** 版が分からない（null・空）ときは false（サーバーで文にして送る）。 */
-    public static boolean hasKeysSince(String clientVersion, String since) {
-        return clientVersion != null && !clientVersion.isEmpty() && compare(clientVersion, since) >= 0;
-    }
-
     private static int number(String[] parts, int index) {
         if (index >= parts.length) {
             return 0;
