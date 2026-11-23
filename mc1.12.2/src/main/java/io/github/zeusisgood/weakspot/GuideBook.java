@@ -19,9 +19,6 @@ import net.minecraft.util.text.event.ClickEvent;
  */
 public final class GuideBook {
 
-    /** NBT の TAG_FORMAT。 */
-    public static final int FORMAT = 2;
-    public static final String TAG_FORMAT = "weakspotGuide";
     private static final String TITLE = "Weak Spot Mining";
     private static final String TOGGLE_KEY = "key.weakspot.toggle";
     private static final String STATS_KEY = "key.weakspot.stats";
@@ -125,7 +122,6 @@ public final class GuideBook {
         tag.setString("author", TITLE);
         // 読むときにサーバーが中身を解決し直さない（翻訳キーはクライアントで訳す）
         tag.setBoolean("resolved", true);
-        tag.setInteger(TAG_FORMAT, FORMAT);
         NBTTagList pages = new NBTTagList();
         for (ITextComponent page : pages()) {
             pages.appendTag(new NBTTagString(ITextComponent.Serializer.componentToJson(page)));
