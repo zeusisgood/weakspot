@@ -55,7 +55,7 @@
   - 上の 4 つと、そのテスト（`ModVersionsTest` の `hasKeysSince` の部分）を消す
   - `PlayerText` の残りは `VersionCheck` に移し、`PlayerText` を消す（使うのは `VersionCheck` だけなので、クラスを分けない）
     - 1.12.2: `clientVersion`（Forge が受け取った Mod の一覧から読む）だけを移す
-    - 1.20.1・1.21.1: `clientVersion`・`onHello`（`HelloMessage` から呼ぶ）と、覚えた版の表を移す。ログアウトのときに版を忘れる処理は、`VersionCheck.forgetOnLogout` にまとめる（`HitGate` から `PlayerText.forgetOnLogout` を呼んでいる 1 行は、`VersionCheck.forgetOnLogout` を呼ぶ形にする）
+    - 1.20.1・1.21.1: `clientVersion`・`onHello`（`HelloMessage` から呼ぶ）と、覚えた版の表を移す。ログアウトのときに版を忘れる処理は、今ある `VersionCheck.forgetOnLogout` に入れる。`HitGate` の `PlayerText.forgetOnLogout` の行は消す（すぐ上に `VersionCheck.forgetOnLogout` の行がもうあるので、足さない）
   - コメントを直す: `SyncedSettings.serverVersion`（`/weakspot bug` の環境の欄が使う）、`VersionCheck` の「（PlayerText）」、1.20.1・1.21.1 の `HelloMessage` の「PlayerText.clientSince・VersionCheck で使う」（`VersionCheck` だけが使う）
   - `LangFilesTest` の、サーバーから送る文の形（`%s`／`%1$s` だけ）を確かめるテストは残す（根拠は、クライアントの翻訳がこの形しか扱えないことなので、`ServerLang` を消しても変わらない）。コメントの `PlayerText` は直す
 - これからは、サーバーとクライアントの両方が要る機能、サーバーから送る文の新しい翻訳キー、メッセージの種類や送り先の追加は、マイナーで行う（§9）
@@ -63,19 +63,19 @@
 ## 5. 設定の形が 3 つの版で同じかを確かめるテストを足す（3 つの版）
 
 - 今: 1.12.2 の `LangFilesTest` は、1.12.2 の設定の一覧から翻訳（名前と説明）を確かめている。3 つの版の設定の名前が同じである限り、これで 3 つの版の分を見ていることになる。ただし、3 つの版の設定の名前が同じかを確かめるテストはない（1.21.1 にだけ設定を足して翻訳を忘れても、見つからない）
-  - 今は 3 つの版とも 156 項目で、名前は同じ（初期値は版で違うものがある）
+  - 今は 3 つの版とも名前が同じ（初期値は版で違うものがある）。項目の数（`ServerConfig` で 119 前後、`ClientConfig` で 40 前後）は、実装のときに正本を作って確かめる
 - 変更:
-  - 設定の一覧の正本 `common/settings.txt` を置く。1 行に 1 項目で `ServerConfig.Mining.boostMultiplier` の形（`ServerConfig`・`ClientConfig` の入れ子のクラスの名前と、フィールドの名前）。並びは `ServerConfig`・`ClientConfig` の書いた順
-  - 3 つの版に、同じ中身のテスト `config/SettingNamesTest` を 1 本ずつ足す（1.21.1 には `src/test/java` を作る）。自分の版の `ServerConfig`・`ClientConfig` の入れ子のクラスの public なフィールドを読み、`common/settings.txt` と、並びを含めて一致するかを確かめる。足りない項目と余分な項目を、失敗のメッセージに出す
+  - 設定の一覧の正本 `common/settings.txt` を置く。1 行に 1 項目で `ServerConfig.Mining.boostMultiplier` の形（`ServerConfig`・`ClientConfig` の入れ子のクラスの名前と、フィールドの名前）。並びは決めない（読みやすさのため、書いた順に並べる）
+  - 3 つの版に、同じ中身のテスト `config/SettingNamesTest` を 1 本ずつ足す（1.20.1・1.21.1 には `src/test/java` を作る。どちらも今は `common/` のテストしか流していない）。自分の版の `ServerConfig`・`ClientConfig` の入れ子のクラスの public なフィールドを読み、`common/settings.txt` と、集合として一致するかを確かめる（`getDeclaredFields()` の並びは Java の仕様で決まっていないので、並びは比べない）。足りない項目と余分な項目を、失敗のメッセージに出す
   - 1.20.1・1.21.1 の `ServerConfig`・`ClientConfig`・`Config`（注釈）は、Minecraft もローダーも import していないので、Minecraft なしで流せる。`WeakSpotConfig` は読み込まない
   - 翻訳の確かめは、今の 1.12.2 の `LangFilesTest` のまま（3 つの版が正本と一致すれば、3 つの版の分を見ていることになる）
 - 設定を足す・消すときは、`common/settings.txt` も直す（§9）
-- 実装のときに確かめること: 1.21.1（ModDevGradle）の `src/test/java` が、今の `test.java.srcDir '../common/src/test/java'` と一緒にコンパイルされて流れること
+- 実装のときに確かめること: 1.20.1（ForgeGradle 6）・1.21.1（ModDevGradle）の `src/test/java` が、今の `test.java.srcDir '../common/src/test/java'` と一緒にコンパイルされて流れること
 
 ## 6. CI とビルドの不揃いを直す
 
 - `shellcheck`: 版ごとの 3 つのジョブがそれぞれ流している。`ci.yml` に小さなジョブ `scripts`（`actions/checkout` と `shellcheck -x .github/scripts/*.sh` だけ）を足し、版ごとのビルドと並べて 1 回だけ流す。版ごとのジョブからは消す
-  - まとめ役の `build` ジョブは、`needs: [build-mc, scripts]` にして、両方が成功したときだけ成功する。Merge に必須のチェックは `build` の名前のままなので、ブランチの保護の設定は変えなくてよい
+  - まとめ役の `build` ジョブは、`needs: [build-mc, scripts]` にし、判定の行を `test "${{ needs.build-mc.result }}" = success && test "${{ needs.scripts.result }}" = success` にする（両方が成功したときだけ成功する。`needs` に足すだけでは、`scripts` が赤でも `build` は緑のまま）。Merge に必須のチェックは `build` の名前のままなので、ブランチの保護の設定は変えなくてよい
 - `org.gradle.caching=true`: 1.21.1 だけにある。1.20.1 の `gradle.properties` にも入れる。1.12.2（ForgeGradle 3 + Gradle 4.9）は壊れやすいので入れない
 - 1.20.1 の `options.compilerArgs << '-Xmaxerrs' << '2000'`（移植のときの名残）を消す
 
@@ -94,7 +94,7 @@
   - 通信の表の `HelloMessage` の行と、「クライアントを信じる範囲」の `PlayerText.clientVersion` を、`VersionCheck` に直す
   - テストの説明に、§5 の `SettingNamesTest` と `common/settings.txt` を足す
   - 設定を足すときに直す所に、`common/settings.txt` を足す
-- `doc/development.md`: 「リリースの手順」の 1. と 10. を、§9 の仕様書の段階から PR を作るやり方に直す。CI の説明があれば §6 に合わせる
+- `doc/development.md`: 「リリースの手順」の 1.・9.・10. を、§9 の仕様書の段階から PR を作るやり方に直す（9. のコミットの形は「Add the draft spec for X.Y.Z」→ レビューの直し（0 個以上）→ 機能のコミット（1 つ以上）→「Release X.Y.Z: 〜」）。CI の説明があれば §6 に合わせる
 - 直さない文書: `doc/play.md`・ガイドの本（遊び方は変わらない）・`doc/config.md`（設定の項目は変わらない）・`doc/store/description.md`・`doc/install.md`
 
 ## 9. `CLAUDE.md` に書くこと
@@ -108,7 +108,8 @@
   - 足す（「バージョン」）: 「サーバーとクライアントの両方が要る機能、サーバーから送る文の新しい翻訳キー、メッセージの種類や送り先の追加は、マイナーで行う（同じマイナー同士しか接続しないので、版を確かめる仕組みは持たない）」
 - 「アーキテクチャの約束事」の `resources/` のテストの説明に、§5 の `SettingNamesTest`（3 つの版）を足す
 - 「設定の約束事」の、設定を足すときに直す所に `common/settings.txt` を足す
-- 「ユーザーとの進め方」に、仕様書の段階から PR を作るやり方を書く（この 1.13.6 から使う）:
+- 「ユーザーとの進め方」に、仕様書の段階から PR を作るやり方を書く（この 1.13.6 から使う）。今の 1 行目（「相談」「ラフ」が付いていれば相談から始め、決まったら仕様書を書く）と 2 行目（下書きの仕様書は「実装」まで実装しない）は、下の形に置き換える。「ブランチと PR」の「`main` に渡せる状態になったら（リリースのあと。文書だけの変更でも）、Claude が `main` への PR を作ってよい」は、「仕様書の Draft の PR は、仕様書を push した時点で作る。それ以外の PR は `main` に渡せる状態になったら作る」に直す:
+  - 「相談」のときは、案を表に並べ、おすすめを 1 つ示し、「決めてほしいこと」を番号付きで聞く（今のまま）
   - 「ラフ」のときは、理解のまとめだけで、ファイルは作らない
   - 「仕様書を書いて」と言われたら、`main` から切ったブランチに仕様書を push し、`main` への PR を **Draft** で作る。題は「Spec X.Y.Z: 〜」、本文は仕様書の要約と「決めてほしいこと」
   - レビューは PR の差分とコメント（またはユーザーが渡すレビューのファイル）で行い、直しは同じブランチに push する。PR のコメントは、ユーザーに「見て」と言われたときに読む（見張らない方針のまま）
