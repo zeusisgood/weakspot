@@ -47,9 +47,9 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 ## ブランチとリリース
 
 - 作業は `main` 以外のブランチで行い、`main` への PR を作ります。PR ごとに GitHub Actions（[`.github/workflows/ci.yml`](../.github/workflows/ci.yml)）がビルドと全テストを実行し、成功しないと Merge できません。
-- テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）の確認も含まれます。配布サイトへ上げるスクリプトは、CI で `shellcheck` にかけます。
+- テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）、3 つの版の設定の名前が正本 `common/settings.txt` と揃っているか（`config/SettingNamesTest`、3 つの版）の確認も含まれます。配布サイトへ上げるスクリプトは、CI の `scripts` ジョブで 1 回だけ `shellcheck` にかけます。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
-- ビルドは Minecraft の版ごと（`ci.yml` の matrix の `build-mc`。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。Merge に必須のチェック「`build`」は、全部の版が通ったときだけ成功するまとめのジョブ（ブランチの保護の設定は変えなくてよい）。
+- ビルドは Minecraft の版ごと（`ci.yml` の matrix の `build-mc`。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。Merge に必須のチェック「`build`」は、全部の版と `scripts` が通ったときだけ成功するまとめのジョブ（ブランチの保護の設定は変えなくてよい）。
 - `main` に取り込まれた時、`mc1.12.2/build.gradle` の `version` がまだ Release のない版なら、全部の版のビルドが通ったときだけ、同じワークフローがタグ `vX.Y.Z` と GitHub Release を 1 つ自動で作成します（本文は `CHANGELOG.md` のその版の節、全部の版の jar `weakspot-<Minecraft の版>-<ローダー>-<版>.jar` を添付）。版を上げない変更（文書だけなど）では作成しません。
 - 続けて、Release の jar を Minecraft の版ごとに CurseForge にも上げます（下の「配布サイト」）。
 
@@ -88,7 +88,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 
 （直し忘れの多くは `ReleaseFilesTest` で CI が赤くなる。）
 
-1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を足し、`doc/spec/README.md` の表の一番上に 1 行足す。
+1. 仕様書 `doc/spec/SPEC_vX.Y.Z.md` を下書き（先頭に「下書き」の印）で足し、`doc/spec/README.md` の表の一番上に「（下書き）」付きで 1 行足して、`main` から切ったブランチに push する。`main` への PR を **Draft** で作る（題は「Spec X.Y.Z: 〜」、本文は仕様書の要約と「決めてほしいこと」）。レビューの直しは同じブランチに push する。「実装」と言われたら、同じブランチで 2. 以降に進み、仕様書と表の「下書き」の印を外す。
 2. 版を書く 6 か所（`mc1.12.2/build.gradle` の `version`・1.12.2 の `WeakSpotMod.VERSION`・`mc1.20.1/gradle.properties` と `mc1.21.1/gradle.properties` の `mod_version`・1.20.1 と 1.21.1 の `WeakSpotMod.VERSION`）を揃えて上げる。1 つの版だけを直したときも、全部を上げる。マイナーを上げるときは 1.12.2 の `WeakSpotMod.ACCEPTED_VERSIONS` を新しいマイナーの範囲に（例 `[1.13,1.14)`）、1.20.1 と 1.21.1 の `Network.PROTOCOL` を新しいマイナーの番号に（例 `1.13`）。あわせて、前のマイナーの仕様書を `doc/spec/` から消す（タグに残る。消す前に、そこにしか書いていない今の挙動を `doc/play.md`・`doc/config.md`・`doc/architecture.md` に移し、コードのコメントからの参照をタグのリンクに直し、`doc/spec/README.md` の表の行をタグへのリンクの 1 行にまとめる）。
 3. `CHANGELOG.md` の一番上に新しい版の節を足す（マイナーなら、旧マイナーとは接続できないことを書く）。
 4. README の「最近の更新」（新しい 3 件。一番古いものを消す）を直す。`README.en.md` の「Recent updates」も同じ 3 件にし、各版は英語のお知らせ（6.）の 1 行をそのまま使う。README のダウンロードは配布サイトへのリンクだけなので、版ごとには直さない。
@@ -96,8 +96,8 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 6. 更新のお知らせの要約 `weakspot.news.<版>` を `lang/ja_jp.json` と `lang/en_us.json` に 1 行足す（日本語で 40 字くらいまで）。
 7. 直下の `update.json` の `promos` の 6 つ（`<Minecraft の版>-latest` / `-recommended`）を新しい版にし、`"1.12.2"`・`"1.20.1"`・`"1.21.1"` の全部の節に英語のお知らせの 1 行を足す（`main` に入った時点で、古い版の人に通知が出始める）。
 8. 種類・操作・導入の条件・主な機能が変わったら、配布サイトの説明文 `doc/store/description.md` を直す（下の「配布サイト」）。
-9. コミットは「Add the spec for X.Y.Z」→ 機能のコミット（1 つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。
-10. 全部の jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push して `main` への PR を作る。
+9. コミットは「Add the draft spec for X.Y.Z」→ レビューの直し（0 個以上）→ 機能のコミット（1 つ以上）→ バージョン・README・CHANGELOG.md・doc・CLAUDE.md をまとめた「Release X.Y.Z: 〜」。
+10. 全部の jar を `mc1.12.2/build/release/` にもコピーし（Merge の前に試せるように）、作業用ブランチに push する。1. の PR の題を「Release X.Y.Z: 〜」、本文を「変えたこと・試してほしいこと・直さなかった文書」に書き換えて、Draft を外す。
 
 Merge のあとは、Actions がタグ・GitHub Release・CurseForge への公開を行う（上の「ブランチとリリース」）。
 

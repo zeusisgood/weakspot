@@ -30,10 +30,6 @@ jobs:
         working-directory: mc${{ matrix.mc }}
     steps:
       - uses: actions/checkout@v7
-      - name: Check the publishing scripts
-        # 配布サイトへ上げるスクリプトの書き間違いを見つける（shellcheck は ubuntu-latest に入っている）
-        working-directory: .
-        run: shellcheck -x .github/scripts/*.sh
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -54,15 +50,23 @@ jobs:
           name: jar-${{ matrix.mc }}
           path: mc${{ matrix.mc }}/build/libs/*.jar
 
+  # 配布サイトへ上げるスクリプトの書き間違いを見つける（版に依らないので 1 回だけ。shellcheck は ubuntu-latest に入っている）
+  scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the publishing scripts
+        run: shellcheck -x .github/scripts/*.sh
+
   # Merge に必須のチェックは、ブランチの保護の設定で「build」という名前で決めてある。matrix のジョブは
-  # 版ごとに名前が変わるので、全部の版が通ったときだけ成功する「build」をここで出す（版を足しても設定を変えずに済む）
+  # 版ごとに名前が変わるので、全部の版と scripts が通ったときだけ成功する「build」をここで出す（版を足しても設定を変えずに済む）
   build:
-    needs: build-mc
+    needs: [build-mc, scripts]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Every Minecraft version built
-        run: test "${{ needs.build-mc.result }}" = success
+      - name: Every Minecraft version built and the scripts passed
+        run: test "${{ needs.build-mc.result }}" = success && test "${{ needs.scripts.result }}" = success
 
   release:
     needs: build

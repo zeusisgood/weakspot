@@ -24,7 +24,7 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
  */
 public final class SyncedSettings {
 
-    /** ServerFeatures が使う。自分の設定の値なら、自分の版。 */
+    /** /weakspot bug の環境の欄に書く。自分の設定の値なら、自分の版。 */
     public String serverVersion;
 
     /**

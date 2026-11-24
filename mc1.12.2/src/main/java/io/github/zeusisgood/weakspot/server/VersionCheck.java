@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.network.handshake.NetworkDispatcher;
 import org.apache.logging.log4j.LogManager;
 
 /**
@@ -45,6 +46,16 @@ public final class VersionCheck {
         PENDING.remove(player.getUniqueID());
     }
 
+    /** 読めなければ null。 */
+    private static String clientVersion(EntityPlayerMP player) {
+        if (player.connection == null) {
+            return null;
+        }
+        NetworkDispatcher dispatcher = NetworkDispatcher.get(player.connection.getNetworkManager());
+        Map<String, String> mods = dispatcher == null ? null : dispatcher.getModList();
+        return mods == null ? null : mods.get(WeakSpotMod.MODID);
+    }
+
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase != TickEvent.Phase.END || PENDING.isEmpty()) {
@@ -66,7 +77,7 @@ public final class VersionCheck {
     }
 
     private static void check(MinecraftServer server, EntityPlayerMP player) {
-        String clientVersion = PlayerText.clientVersion(player);
+        String clientVersion = clientVersion(player);
         String serverVersion = WeakSpotMod.VERSION;
         if (clientVersion == null) {
             return;
