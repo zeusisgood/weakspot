@@ -7,9 +7,12 @@
 
 ## 全体
 
-- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`（改行はバニラと同じく JSON の `\n`）、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。1 行 1 キーなので値の改行は `\` と `n` の 2 文字にし、Forge の設定画面が説明を読むときに改行へ戻す。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
-- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。設定の一覧の正本 `common/settings.txt`（「`ServerConfig.Mining.boostMultiplier`」の形）は、3 つの版の `config/SettingNamesTest`（同じ中身）が、自分の版の `ServerConfig`・`ClientConfig` と集合として一致するかを確かめる。翻訳の確かめは 1.12.2 の `LangFilesTest` だけなので、名前が揃っていれば 3 つの版の分を見たことになる（1.20.1・1.21.1 の設定のクラスはローダーに依存しないので、Minecraft なしで流せる）。設定を足す・消すときは、正本も直す。
+- 想定する規模: 1 つのサーバーに**数百人**まで（ユーザーの判断。1.13.8）。プレイヤーごと・ヒットごとの処理は、この人数で tick の時間に響かない作りにする。数千人の規模は、プロキシで多数のサーバーに分ける形になり（Forge・NeoForge の 1 つのサーバーで数千人は現実的でない）、この Mod の記憶はサーバーごとなので、この前提に含まれる。
+
+- ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`（改行はバニラと同じく JSON の `\n`）、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。1 行 1 キーなので値の改行は `\` と `n` の 2 文字にし、Forge の設定画面が説明を読むときに改行へ戻す。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。`mojmap/`（リポジトリ直下）は 1.20.1・1.21.1 で同じ中身のコードとテストで、両方のビルドがソースで読む（どちらも Mojang の名前で書くので、同じ物をそのまま使える。下の「mojmap/ の約束」）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
+- `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。設定の一覧の正本 `common/settings.txt`（「`ServerConfig.Mining.boostMultiplier`」の形）は、1.12.2 と `mojmap/` の `config/SettingNamesTest`（同じ中身。`mojmap/` の分は 1.20.1・1.21.1 の両方のビルドで流れる）が、自分の版の `ServerConfig`・`ClientConfig` と集合として一致するかを確かめる。翻訳の確かめは 1.12.2 の `LangFilesTest` だけなので、名前が揃っていれば 3 つの版の分を見たことになる（1.20.1・1.21.1 の設定のクラスはローダーに依存しないので、Minecraft なしで流せる）。設定を足す・消すときは、正本も直す。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
+- `mojmap/` の約束: Minecraft のクラスを使ってよい（`common/` との違い）が、1.20.1（Forge・JDK 17）と 1.21.1（NeoForge・JDK 21）のどちらでもそのままビルドが通るものだけを置く（Java の書き方は 17 まで）。版ごとに違いが要るようになったら、そのファイルを両方の版のディレクトリに戻してそれぞれ直す（`mojmap/` の中で版を分ける仕組みは作らない）。名前で探すリフレクションを置くときは、SRG 名と Mojang の名前の両方を見る（1.20.1 は動いているとき SRG 名）。機能を足す・直すときは、まず `mojmap/` にあるかを見る（あれば 1 回の変更で 2 版に効く）。1.12.2 は名前も API も違うので、いつも自分のディレクトリ。
 - `client/`: 弱点の状態・ヒット判定・描画・音・クライアント側のブースト。
 - `server/`（論理サーバー）: ヒットの検証と効果・統計・節目・順位。
 - `network/`: パケット（下の「通信」）。
@@ -77,7 +80,7 @@
 ### 的当て・記録・知らせ（サーバー）
 
 - 的当て: `ItemTarget`・`server/TargetRounds`・`client/TargetPlay`・`common/TargetRules`。ラウンドの時間はサーバーの tick で数える。弱点の大きさの設定 `spotSize` は掛けない（記録を公平にするため）。的の位置はクライアントが、始めたときの向きからのずれで持つ。記録は `MiningStats` の `targetBest`・`targetRounds`（「統計をリセット」では消さない。ご褒美の解放が消えるため）。ご褒美の段階は、自己ベストと取った進捗の高いほう（`TargetRules.Tier.unlocked`。しきい値を上げる前に取った段階を残すため）。
-- 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存のキーは `saveKey`。近接は古いキー `critHits` も読む）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
+- 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存の形の正本は `save` / `load`。NBT を `MiningStats.Store` に包んで渡すのは、1.12.2 は `ServerStats`、1.20.1・1.21.1 は `mojmap/` の `server/StatsNbt`（NBT の API の形が同じ版で共有する。置き場所＝どのタグに入れるかは版ごとの `ServerStats`）。キーは `saveKey`、近接は古いキー `critHits` も読む。キーの名前と型を変えると古いワールドが読めなくなる）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
 - 配る物: `GuideBookGiver`（ガイドの本・的・ようこその案内。永続データの `guideGiven`・`targetsGiven`・`targetGiftVersion`（ない人は 1.11.0 とみなす））。
 - ほかのプレイヤーへの知らせ: 節目・コンボの段階・的当ての 1 位（`MiningRewards.broadcast*`・`TargetRounds`）。
 - サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする（新しいキーはマイナーで足すので、相手のクライアントは必ずキーを持っている）。翻訳の値は `%s`／`%1$s` の形だけ（クライアントの翻訳がこの形しか扱えない。`LangFilesTest` が確かめる）。
@@ -88,12 +91,13 @@
 `mc1.12.2/src/test/.../compat/WireCompatTest` が、統計・設定の送る中身と保存のキーがパッチの間に 1 バイトも変わらないことを確かめる（通信・保存の形を変えるマイナーでは、期待値を作り直す）。
 
 - ヒットの受け付け: `server/HitHandlers`（種類 → 処理の表。`HitHandlersTest` が全種類の登録を確かめる）→ `server/HitGate`（`allowed` / `ready` / `mark` / `take` / `accept`。間隔は `common/HitBudget`。受け付けたあとの統計・節目・コンボ・ほかの人への音は `accept` にまとめる）。
+- クライアントから来た座標・生き物: `server/Reach`（`block` は読み込み済みか → 届く距離の属性 + 16、`entity` は属性 + 16。版ごとに API が違うので 3 つの版それぞれにある）。座標を読む入口（採掘の掘り始め・採掘のヒット・右クリック・機械の問い合わせ）と動物のヒット・問い合わせは、どれもこれを通してから読む。理由は「クライアントを信じる範囲」。
 - 後片付け: `HitGate.forgetAll`（ログアウト・リスポーン・ディメンション移動。プレイヤーごとの記憶を持つクラスはここに並ぶ）。
 - 種類の表: `HitKind`（初期の色・コンボの掛け数を使うか）、`SyncedSettings.enabled(kind)` / `minHitInterval(kind)`（フィールドの名前の規則 `<key>WeakSpotEnabled` / `<key>MinHitIntervalTicks` で表を作る）、`SyncedSettings.server()`（サーバーの自分の設定。`fromConfig()` はリフレクションで約 80 項目を集めるので、ヒットのたびに呼ばない）。
 - コンボ: `common/ComboFactor`（掛け数）、`ServerStats.countStreak`、本人のコンボの直し `server/ComboRelay.checkOwn`・`common/ComboSync`。
 - 照準のまわり・画面の上: `AimSpotKind` / `AimSpots`、`ScreenSpotKind` / `ScreenSpots`（置き場所の選び方は `placeRandom`）、`HudSpot.gauge`・`ChargeGauge`、`ScreenProjection.drawMarker` / `edgeArrow`、`common/TimedBoost`・`common/TimedBoostMath`。
-- そのほか: `UseTimeCut`、`server/SpeedModifier`、`common/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`。
-- **弱点の種類を足すときに直す所**: `HitKind`（末尾に）、`server/HitHandlers` とその種類の `*Hits`、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上なら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列は自動。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。名前の規則に合わせると種類の表に自動で入る。上の「種類の表」）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・この文書、ガイドの本（`GuideBook.CONTENT`）。
+- そのほか: `UseTimeCut`、`server/SpeedModifier`、`common/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`（もう名簿にいない＝切断の処理が済んだ人のパケットは捨てる。切断のあとに動くと、`HitGate.forgetAll` で片付けた記憶を作り直すため。3 つの版）。
+- **弱点の種類を足すときに直す所**（1.20.1・1.21.1 は、`mojmap/` にあるクラスなら 1 か所）: `HitKind`（末尾に）、`server/HitHandlers` とその種類の `*Hits`、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上なら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列と保存 `save` / `load` は自動。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。名前の規則に合わせると種類の表に自動で入る。上の「種類の表」）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・この文書、ガイドの本（`GuideBook.CONTENT`）。
 
 ### 通信
 
@@ -121,6 +125,7 @@
 - **サーバーが正**: コンボの数（掛け数・節目・告知・進捗）、統計、間隔、種類ごとの条件、的当ての時間。クライアントから来た数（`HitMessage` の `streak` など）は、ほかの人の音の高さと、ずれの確認（`ComboRelay.checkOwn`）にしか使わず、サーバーの数をそれに合わせない。
 - **クライアントを信じている所**: 「照準が弱点に合った」こと（全種類）。改造クライアントなら、合わせずに当てたと送れる。ただし間隔と条件はサーバーが確かめるので（間隔は 4 回分まで貯められる `HitBudget`）、得られるのは普通に当て続けたときと同じまで（最初の 4 回分を一度に使える程度）で、バニラ用のチートツールでもできる程度。**塞がない**。
 - **的当て**: 当てた・✕ もクライアントの申告なので、ハズレを無視して記録・順位・告知を荒らせる。対策（弱点の位置をサーバーが決めて向きを確かめる。[roadmap.md](roadmap.md) の案 A）は、公開サーバーで遊ぶ予定が出るまで保留。
+- **座標と届く距離**: 読み込まれていない座標を読むと、サーバーはチャンクを同期で読み込み、無ければ生成する。なので、クライアントから来た座標は、ブロックを読む前に読み込み済みかを確かめる（`server/Reach`）。採掘の掘り始めのイベント（`LeftClickBlock`）は、Forge 1.20.1・NeoForge 1.21.1 ではバニラの距離の確認より前に来るので、ここでも確かめる（1.12.2 は Forge が距離を確かめてから出す）。距離は届く距離の属性 + 16 ブロックで、大きく外れていないかを見るだけ（守りは読み込みの確認が受け持つ。属性で範囲を伸ばす Mod にはそのまま付いていき、属性を使わない Mod も 16 ブロックまでは受け付ける）。ブロックでは遠くに当てても得はない（採掘のヒットは掘っているブロックと同じ座標でしか確定せず、右クリックの系統はバニラが受け付けた右クリックの座標と同じでないと通らない）。動物のヒットと問い合わせはバニラの操作に結び付いていないので、改造クライアントなら属性 + 16（初期値で 19〜21 ブロック）先の動物に壁越しでも効かせられるが、間隔は守られるので、得られるのはふつうに当て続けたときと同じまで。**塞がない**。
 - サーバーからクライアントへ送るものは間引く（1 人あたりの送信の間隔を決める）。でたらめな通知を大量に送られても、サーバーの送信が増えないように。
 - クライアントの版（`VersionCheck` が覚える、Mod の一覧・`HelloMessage` の版）は改造クライアントなら書き換えられる。これで機能を切り替えてよいのは、ごまかしても本人だけが困るものに限る。
 
@@ -165,7 +170,7 @@
 - 通信: `SimpleChannel`（`Network.PROTOCOL` が同じ相手だけ。ハンドラーはメインのスレッドへ回す）。メッセージの中身は 1.21.1 と同じ。
 - イベント: tick は `TickEvent`（`phase` で前後を分ける）、設定の読み込みは `ModConfigEvent.Loading`・`Reloading`、近接の倍率は `LivingHurtEvent`（1.21.1 の `LivingIncomingDamageEvent` に当たる）。`RenderLevelStageEvent` の `AFTER_WEATHER` では、イベントのポーズスタック（カメラの向き）がモデルビューにもう掛かっているので、頂点はカメラからの相対座標のまま渡し、`ScreenProjection.onFrame` にはポーズスタックの行列を渡す。
 - 保存データ: プレイヤーの統計は `getPersistentData()` の `PlayerPersisted` の下の `weakspot`（1.12.2 と同じ。死んでも残る）。ガイドの本・クロスボウの過剰チャージ（`weakspot_overcharge`）はアイテムの NBT。
-- 届く距離: 生き物は Forge の `canReach(entity, 3.0)`、ブロックは `canReach(pos, 1.5)`（どちらも Forge 47.1.32 の右クリックの受け付けと同じ。47.4 の `canReachRaw` は下限の版にないので使わない）。
+- 届く距離: `Reach` は Forge の `canReach(pos / entity, 余裕)`（1.21.1 は `canInteractWithBlock` / `canInteractWithEntity`。47.4 の `canReachRaw` は下限の版にないので使わない）。
 - 移動速度の修正は UUID で付け外しする（1.12.2 と同じ UUID）。
 - 成長の対象外の初期値: 草の登録名は `minecraft:grass`（`short_grass` は Minecraft 1.20.3 から）。一覧に `minecraft:short_grass` があれば、`minecraft:grass` も対象外にする（`SyncedSettings.fromConfig`。新しい Minecraft の名前で書いた一覧でも草が外れるように）。
 - 収穫: 壊すときの許可は `ForgeHooks.onBlockBreakEvent`、収穫物はそのままワールドに出す（1.20.1 の Forge に `BlockDropsEvent` はない）。

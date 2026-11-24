@@ -11,7 +11,8 @@ final class ServerThread {
     }
 
     static void run(IPayloadContext ctx, Consumer<ServerPlayer> task) {
-        if (ctx.player() instanceof ServerPlayer player) {
+        // メインのスレッドに回ったあとに切断が処理されることがある。そのまま動かすと、ログアウトで片付けた記憶を作り直す
+        if (ctx.player() instanceof ServerPlayer player && player.server.getPlayerList().getPlayer(player.getUUID()) == player) {
             task.accept(player);
         }
     }

@@ -23,7 +23,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 ## 開発環境・コマンド
 
 - 1.12.2: **JDK 8**、ForgeGradle 3 + Gradle 4.9（Gradle 5 以降の構文は使えない。依存は `compile` / `testCompile`）。1.20.1: **JDK 17**、ForgeGradle 6 + Gradle 8。1.21.1: **JDK 21**、ModDevGradle 2 + Gradle 8（1.20.1・1.21.1 は `implementation` / `testImplementation`）。
-- リポジトリの形: `common/`（版に依存しない計算。各版のビルドがソースで読む）・`lang/`（翻訳の正本）・`mc1.12.2/`・`mc1.20.1/`・`mc1.21.1/`（各版のビルド）。どれも別々の Gradle のビルド（1 つのマルチプロジェクトにできない）。`doc/` などは直下で全部の版に共通（`doc/development.md` の冒頭）。
+- リポジトリの形: `common/`（版に依存しない計算。各版のビルドがソースで読む）・`lang/`（翻訳の正本）・`mojmap/`（1.20.1・1.21.1 で同じ中身のコードとテスト。両方のビルドがソースで読む。Minecraft のクラスを使ってよいが、両方でそのままビルドが通るものだけ。違いが要るようになったら両方の版に戻す）・`mc1.12.2/`・`mc1.20.1/`・`mc1.21.1/`（各版のビルド）。どれも別々の Gradle のビルド（1 つのマルチプロジェクトにできない）。`doc/` などは直下で全部の版に共通（`doc/development.md` の冒頭）。
 - ビルド + テスト（各版のディレクトリの中で）: `./gradlew build` → `mc1.12.2/build/libs/weakspot-1.12.2-forge-<version>.jar`（reobf 済み）・`mc1.20.1/build/libs/weakspot-1.20.1-forge-<version>.jar`（reobf 済み）・`mc1.21.1/build/libs/weakspot-1.21.1-neoforge-<version>.jar`。テストのみ: `./gradlew test`（作業ディレクトリはリポジトリの直下）。`common/` のテストはどのビルドでも流れる。
 - クラウドでは JDK 8 を `apt-get install -y openjdk-8-jdk-headless` で入れ、`cd mc1.12.2 && JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:$PATH ./gradlew build -q`（Maven Central が 429 なら、30 秒ずつ間をあけて 5 回まで再実行）。1.20.1 は JDK 17（`openjdk-17-jdk-headless`）で `cd mc1.20.1 && JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 PATH=/usr/lib/jvm/java-17-openjdk-amd64/bin:$PATH ./gradlew build -q`。1.21.1 は JDK 21（`openjdk-21-jdk-headless`）で `cd mc1.21.1 && JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 PATH=/usr/lib/jvm/java-21-openjdk-amd64/bin:$PATH ./gradlew build -q`（初回は Minecraft の展開で数分かかる）。クラウドの環境のネットワーク設定で `maven.minecraftforge.net`・`maven.neoforged.net`・`piston-meta.mojang.com`・`piston-data.mojang.com`・`libraries.minecraft.net`・`resources.download.minecraft.net` を許可しておく（拒否されると 403。許可のしかたと、Gradle が使えないときに `common/` のテストだけ流す方法は `doc/development.md`）。
 - 1.12.2 の `runServer` の確認は devcontainer でだけ行う（クラウドでは FML の NPE で落ちるので、しなくてよい。止まる条件にも当たらない）。1.20.1 はクラウドでも起動する（`timeout` 付きで起動し、ログの `Done (` を見る）。やり方とノイズのログは `doc/development.md`。
@@ -38,7 +38,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.20.1・1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - jar の名前と配布サイトの表示名の形（`weakspot-1.12.2-forge-<版>.jar`・`Weak Spot Mining <版> for MC 1.12.2 (Forge)`）は `doc/development.md` の「版の表記」。Mod の版はこの節の規則だけで決め、Minecraft の版と数字が重なるかは考えない。
-- 現行は **1.13.7**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
+- 現行は **1.13.8**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -60,11 +60,13 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 弱点の種類は `common/HitKind`（通信は番号なので、足すときは末尾に。`key()` が設定・翻訳キーの小文字の名前）。**種類を足すときに直す所の一覧は `doc/architecture.md`**。的当て（1.11.0）は種類ではなく別の仕組み（`TargetRounds` / `TargetPlay`。種類別の統計・設定・節目に入らない）。
 - 成長・収穫・機械・動物の「手が空いている」は、空か、右クリックで何もしないアイテム（`HeldItems`。1.11.0）。**移植のときは、版ごとに右クリックで動くアイテムを調べ直す**。
 - **機能を足す・直すときは、3 つの版で同じ PR で行う**（揃え続ける。ユーザーの判断）。版に依存しない部分は先に `common/` に書く。新しい Minecraft にしかない物（ラクダは 1.20.1・1.21.1、メイスは 1.21.1 など）が、その物がある版でだけ対象になるのはよい。
-- `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない。1.12.2 版を残す限り Java 8 の書き方）。どの版でも同じものを使うので、版に依存しない処理はここに書く。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。`config/SettingNamesTest`（3 つの版に同じ中身）は、自分の版の設定の名前が正本 `common/settings.txt` と一致するかを確かめる（翻訳を確かめるのは 1.12.2 だけなので、名前が揃っていれば 3 つの版の分を見たことになる）。
+- `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算だけ（MC クラスを持ち込まない。1.12.2 版を残す限り Java 8 の書き方）。どの版でも同じものを使うので、版に依存しない処理はここに書く。単体テストはここと `compat/`・`config/` の golden テスト。`resources/` のテストはファイルの揃い具合: `LangFilesTest`（日英のキーの一致、設定の全項目に説明、全種類に名前、コードの翻訳キーが翻訳にある）と `ReleaseFilesTest`。`config/SettingNamesTest`（1.12.2 と `mojmap/` に同じ中身）は、自分の版の設定の名前が正本 `common/settings.txt` と一致するかを確かめる（翻訳を確かめるのは 1.12.2 だけなので、名前が揃っていれば 3 つの版の分を見たことになる）。
 - `client/` は `@EventBusSubscriber(value = Side.CLIENT)`（1.20.1・1.21.1 は `value = Dist.CLIENT`）。パケットのハンドラーは専用サーバーでも読み込まれるので、クライアント行きのパケットは `proxy.onXxx` 経由でクライアントのクラスに触る（全部の版）。
 - ヒット判定は `RenderWorldLastEvent`（1.20.1・1.21.1 は `RenderLevelStageEvent` の `AFTER_WEATHER`）で**毎フレーム**（tick 単位だと素早い照準移動を取りこぼす）。
 - パッチの版の違いは `server/VersionCheck` が本人とオペレーターに知らせるだけ。相手のクライアントの版は、1.12.2 は Forge が受け取った Mod の一覧、1.20.1・1.21.1 は接続直後にクライアントが送る `HelloMessage` で、`VersionCheck` が知る。
 - **サーバーはクライアントから来た数を正にしない**（コンボの数・当てた位置などは比べる・確かめるのに使うだけ）。不正対策の方針（どこまで塞ぐか）は `doc/architecture.md` の「クライアントを信じる範囲」。
+- クライアントから来た座標・生き物は、`server/Reach`（読み込み済みか → 届く距離の属性 + 16）で確かめてから読む（読み込まれていない座標を読むと、チャンクの読み込み・生成が走る。採掘の掘り始めのように、バニラのパケットから来るイベントの座標も、ローダーがバニラの確認より前に出すことがあるので確かめる）。
+- 統計の保存（NBT のキー）は `common/MiningStats.save` / `load` が正本。各版の `ServerStats` は受け渡すだけ。キーの名前を変えない。
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。1.20.1・1.21.1 は HUD が `RenderGuiEvent.Post`、GUI の上が `ScreenEvent.Render.Post` で、図形は `client/Draw`（頂点は `GuiGraphics` の pose を掛ける）。1.20.1 の tick のイベントは `TickEvent`（`phase` で前後を分ける）、通信は `SimpleChannel`。
 - 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。改行は JSON の `\n`（`\\n` と書かない）。1.12.2 の `.lang` はビルドのときに作る（改行は `\` と `n` の 2 文字にする）。1.20.1・1.21.1 は json をそのまま使う。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
 - **サーバーからプレイヤーに送る文は翻訳キーで送る**（`TextComponentTranslation`、1.20.1・1.21.1 は `Component.translatable`。新しいキーはマイナーで足す）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*`・`weakspot.welcome.*`・`weakspot.target.updateGift` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
@@ -107,4 +109,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.13.7（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。
+現行は 1.13.8（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。**これからも対応する版を増やす予定**（ユーザーの方針）。どの版にするか・版を足すときに決め直すこと（`mojmap/` の分け方など）は `doc/roadmap.md` の「ほかの版の候補」。版で違う所は、違い方ごとに小さなクラスに分けておく（新しい版がその部分だけを書けば済むように）。

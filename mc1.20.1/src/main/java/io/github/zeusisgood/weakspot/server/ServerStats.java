@@ -81,14 +81,14 @@ public final class ServerStats {
     }
 
     public static MiningStats total(Player player) {
-        return read(data(player).getCompound(TAG_TOTAL));
+        return StatsNbt.read(data(player).getCompound(TAG_TOTAL));
     }
 
     public static void record(Player player, Consumer<MiningStats> change) {
         change.accept(session(player));
         MiningStats total = total(player);
         change.accept(total);
-        data(player).put(TAG_TOTAL, write(total));
+        data(player).put(TAG_TOTAL, StatsNbt.write(total));
     }
 
     /** 近接はクリティカルにしたときに呼ぶ。 */
@@ -104,7 +104,7 @@ public final class ServerStats {
         MiningStats fresh = new MiningStats();
         fresh.targetBest = before.targetBest;
         fresh.targetRounds = before.targetRounds;
-        data(player).put(TAG_TOTAL, write(fresh));
+        data(player).put(TAG_TOTAL, StatsNbt.write(fresh));
         SESSIONS.put(player.getUUID(), new MiningStats());
         if (player instanceof ServerPlayer serverPlayer) {
             // 最初からやり直す感じを出すため（的は配り直さない）
@@ -138,44 +138,5 @@ public final class ServerStats {
         CompoundTag mine = persisted.getCompound(TAG);
         persisted.put(TAG, mine);
         return mine;
-    }
-
-    /** 古いワールドの近接の数（critHits）は、meleeHits がなければ読む。 */
-    private static MiningStats read(CompoundTag tag) {
-        MiningStats stats = new MiningStats();
-        stats.blocksBroken = tag.getLong("blocksBroken");
-        stats.blocksBrokenWithHit = tag.getLong("blocksBrokenWithHit");
-        // 古いワールドにはないので 0 から数える
-        stats.hitsOnBrokenBlocks = tag.getLong("hitsOnBrokenBlocks");
-        stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
-        stats.savedTicks = tag.getDouble("savedTicks");
-        stats.maxStreak = tag.getLong("maxStreak");
-        stats.targetBest = tag.getLong("targetBest");
-        stats.targetRounds = tag.getLong("targetRounds");
-        for (HitKind kind : HitKind.values()) {
-            String key = MiningStats.saveKey(kind);
-            String legacy = MiningStats.legacySaveKey(kind);
-            if (!tag.contains(key) && legacy != null) {
-                key = legacy;
-            }
-            stats.setCount(kind, tag.getLong(key));
-        }
-        return stats;
-    }
-
-    private static CompoundTag write(MiningStats stats) {
-        CompoundTag tag = new CompoundTag();
-        tag.putLong("blocksBroken", stats.blocksBroken);
-        tag.putLong("blocksBrokenWithHit", stats.blocksBrokenWithHit);
-        tag.putLong("hitsOnBrokenBlocks", stats.hitsOnBrokenBlocks);
-        tag.putLong("maxHitsOnBlock", stats.maxHitsOnBlock);
-        tag.putDouble("savedTicks", stats.savedTicks);
-        tag.putLong("maxStreak", stats.maxStreak);
-        tag.putLong("targetBest", stats.targetBest);
-        tag.putLong("targetRounds", stats.targetRounds);
-        for (HitKind kind : HitKind.values()) {
-            tag.putLong(MiningStats.saveKey(kind), stats.count(kind));
-        }
-        return tag;
     }
 }

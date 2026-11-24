@@ -519,6 +519,7 @@
   "weakspot.news.1.10.2": "Settings screen grouped by kind; a gauge for the next combo multiplier",
   "weakspot.news.1.13.1": "Fixed the fishing weak spot flickering",
   "weakspot.news.1.13.2": "Fixed the /weakspot bug link being unusable with many mods installed",
+  "weakspot.news.1.13.8": "Server-side fixes and internal cleanup",
   "weakspot.news.1.13.7": "Numbers always use a dot as the decimal point; small fixes",
   "weakspot.news.1.13.6": "Internal cleanup (no gameplay changes)",
   "weakspot.news.1.13.5": "Removed the boat boost cap; mooshroom stew and harvest Fortune fixes",

@@ -12,7 +12,8 @@ final class ServerThread {
 
     static void run(NetworkEvent.Context ctx, Consumer<ServerPlayer> task) {
         ServerPlayer player = ctx.getSender();
-        if (player != null) {
+        // メインのスレッドに回ったあとに切断が処理されることがある。そのまま動かすと、ログアウトで片付けた記憶を作り直す
+        if (player != null && player.server.getPlayerList().getPlayer(player.getUUID()) == player) {
             task.accept(player);
         }
     }

@@ -21,9 +21,6 @@ import net.minecraft.util.math.BlockPos;
 /** 動物のタイマーはサーバーだけが持つので、弱点が出る条件もここで決める。 */
 public final class AnimalHits {
 
-    /** NetHandlerPlayServer#processUseEntity。見えていれば 6 ブロック。 */
-    private static final double REACH_SQ = 36.0;
-
     /** メモリだけ（動物がいなくなれば消える）。 */
     private static final Map<Entity, AnimalTimers.HitCounter> WOOL_HITS = new WeakHashMap<>();
     private static final Map<Entity, AnimalTimers.HitCounter> TRADE_HITS = new WeakHashMap<>();
@@ -98,7 +95,7 @@ public final class AnimalHits {
     public static void onQuery(EntityPlayerMP player, int entityId) {
         Entity entity = player.world.getEntityByID(entityId);
         State state = new State(0);
-        if (entity != null && AnimalTargets.isCandidate(entity) && player.getDistanceSq(entity) < REACH_SQ) {
+        if (entity != null && AnimalTargets.isCandidate(entity) && Reach.entity(player, entity)) {
             SyncedSettings settings = SyncedSettings.server();
             state = state(entity, settings);
             if (entity instanceof EntityVillager) {
@@ -114,7 +111,7 @@ public final class AnimalHits {
             return;
         }
         Entity entity = player.world.getEntityByID(entityId);
-        if (entity == null || player.getDistanceSq(entity) >= REACH_SQ) {
+        if (entity == null || !Reach.entity(player, entity)) {
             return;
         }
         SyncedSettings settings = SyncedSettings.server();

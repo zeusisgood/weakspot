@@ -10,11 +10,6 @@ public final class HitPitch {
     private HitPitch() {
     }
 
-    /** streak は 1 始まり。 */
-    public static float forStreak(int streak) {
-        return HitScale.DEFAULT.melody(streak);
-    }
-
     public static final int BREAK_SOUND_FROM = 10;
 
     /** 和音の形（旋律から何度下を重ねるか。音階の度数）。コンボの段階 ComboTier に合わせる。 */
@@ -65,29 +60,10 @@ public final class HitPitch {
         return chordOffsets(streak) == SUS4;
     }
 
-    /** 重ねる音は旋律より下（ピッチの上限 2.0 のため）。chords が false なら旋律だけ。 */
-    public static float[] forHit(int streak, boolean chords) {
-        return HitScale.DEFAULT.forHit(streak, chords);
-    }
-
-    /** sus4 の形でなければ 0。 */
-    public static float resolveFor(int streak, boolean chords) {
-        return HitScale.DEFAULT.resolveFor(streak, chords);
-    }
-
     public static boolean withBell(int streak, boolean chords) {
         return chords && streak >= BELL_FROM;
     }
 
-    public static float[] breakNotes() {
-        return HitScale.DEFAULT.breakNotes();
-    }
-
     /** ピッチ 0.5 の低いドから 2.0 の高いドまで。 */
     public static final int TWO_OCTAVE_LENGTH = MAJOR_SCALE.length * 2 - 1;
-
-    /** index は 0 始まり。 */
-    public static float twoOctave(int index) {
-        return HitScale.DEFAULT.twoOctave(index);
-    }
 }

@@ -142,42 +142,42 @@ public final class ServerStats {
         return mine;
     }
 
-    /** 古いワールドの近接の数（critHits）は、meleeHits がなければ読む。 */
     private static MiningStats read(NBTTagCompound tag) {
-        MiningStats stats = new MiningStats();
-        stats.blocksBroken = tag.getLong("blocksBroken");
-        stats.blocksBrokenWithHit = tag.getLong("blocksBrokenWithHit");
-        // 古いワールドにはないので 0 から数える
-        stats.hitsOnBrokenBlocks = tag.getLong("hitsOnBrokenBlocks");
-        stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
-        stats.savedTicks = tag.getDouble("savedTicks");
-        stats.maxStreak = tag.getLong("maxStreak");
-        stats.targetBest = tag.getLong("targetBest");
-        stats.targetRounds = tag.getLong("targetRounds");
-        for (HitKind kind : HitKind.values()) {
-            String key = MiningStats.saveKey(kind);
-            String legacy = MiningStats.legacySaveKey(kind);
-            if (!tag.hasKey(key) && legacy != null) {
-                key = legacy;
-            }
-            stats.setCount(kind, tag.getLong(key));
-        }
-        return stats;
+        return MiningStats.load(store(tag));
     }
 
     private static NBTTagCompound write(MiningStats stats) {
         NBTTagCompound tag = new NBTTagCompound();
-        tag.setLong("blocksBroken", stats.blocksBroken);
-        tag.setLong("blocksBrokenWithHit", stats.blocksBrokenWithHit);
-        tag.setLong("hitsOnBrokenBlocks", stats.hitsOnBrokenBlocks);
-        tag.setLong("maxHitsOnBlock", stats.maxHitsOnBlock);
-        tag.setDouble("savedTicks", stats.savedTicks);
-        tag.setLong("maxStreak", stats.maxStreak);
-        tag.setLong("targetBest", stats.targetBest);
-        tag.setLong("targetRounds", stats.targetRounds);
-        for (HitKind kind : HitKind.values()) {
-            tag.setLong(MiningStats.saveKey(kind), stats.count(kind));
-        }
+        stats.save(store(tag));
         return tag;
+    }
+
+    private static MiningStats.Store store(NBTTagCompound tag) {
+        return new MiningStats.Store() {
+            @Override
+            public boolean has(String key) {
+                return tag.hasKey(key);
+            }
+
+            @Override
+            public long getLong(String key) {
+                return tag.getLong(key);
+            }
+
+            @Override
+            public double getDouble(String key) {
+                return tag.getDouble(key);
+            }
+
+            @Override
+            public void putLong(String key, long value) {
+                tag.setLong(key, value);
+            }
+
+            @Override
+            public void putDouble(String key, double value) {
+                tag.setDouble(key, value);
+            }
+        };
     }
 }

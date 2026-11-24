@@ -1,0 +1,64 @@
+package io.github.zeusisgood.weakspot.config;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import org.junit.Test;
+
+public class SyncedSettingsTest {
+
+    @Test
+    public void wireListsEveryFieldOnce() {
+        Set<String> fields = new HashSet<>();
+        for (Field field : SyncedSettings.class.getDeclaredFields()) {
+            if (!Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
+                fields.add(field.getName());
+            }
+        }
+        assertEquals(fields.size(), SyncedSettings.WIRE.length);
+        assertEquals(fields, new HashSet<>(Arrays.asList(SyncedSettings.WIRE)));
+    }
+
+    /** 設定から来ない serverVersion・tickingBlocks（サーバーが作る一覧）以外（一覧は Set、設定は String[]）。 */
+    @Test
+    public void everyFieldHasAConfigEntry() throws Exception {
+        for (String name : SyncedSettings.WIRE) {
+            if (!name.equals("serverVersion") && !name.equals("tickingBlocks")) {
+                WeakSpotConfig.Setting setting = WeakSpotConfig.setting(name);
+                assertTrue(name, setting != null && setting.category.startsWith("server."));
+                Class<?> config = setting.field.getType();
+                Class<?> synced = SyncedSettings.class.getField(name).getType();
+                assertEquals(name, synced == Set.class ? String[].class : synced, config);
+            }
+        }
+    }
+
+    @Test
+    public void everyKindHasAnIntervalAndServerSwitchesMatchTheFields() throws Exception {
+        java.lang.reflect.Constructor<SyncedSettings> c = SyncedSettings.class.getDeclaredConstructor();
+        c.setAccessible(true);
+        SyncedSettings s = c.newInstance();
+        s.minHitIntervalTicks = 6;
+        s.growthMinHitIntervalTicks = 7;
+        s.portalMinHitIntervalTicks = 9;
+        s.bowWeakSpotEnabled = false;
+        s.portalWeakSpotEnabled = true;
+        org.junit.Assert.assertEquals(6, s.minHitInterval(io.github.zeusisgood.weakspot.common.HitKind.MINING));
+        org.junit.Assert.assertEquals(7, s.minHitInterval(io.github.zeusisgood.weakspot.common.HitKind.GROWTH));
+        org.junit.Assert.assertEquals(9, s.minHitInterval(io.github.zeusisgood.weakspot.common.HitKind.PORTAL));
+        org.junit.Assert.assertFalse(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.BOW));
+        org.junit.Assert.assertTrue(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.PORTAL));
+        // 採掘・成長・機械・動物にも、全体のオン・オフがある
+        s.miningWeakSpotEnabled = true;
+        org.junit.Assert.assertTrue(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.MINING));
+        org.junit.Assert.assertFalse(s.enabled(io.github.zeusisgood.weakspot.common.HitKind.ANIMAL));
+        for (io.github.zeusisgood.weakspot.common.HitKind kind : io.github.zeusisgood.weakspot.common.HitKind.values()) {
+            s.minHitInterval(kind);
+        }
+    }
+}

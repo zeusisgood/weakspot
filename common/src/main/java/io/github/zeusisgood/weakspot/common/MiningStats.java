@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/** 弱点の統計（プレイヤー 1 人分）。保存と通信は呼び出し側。 */
+/** 弱点の統計（プレイヤー 1 人分）。保存の形（save / load）と通信の形（writeTo / readFrom）はここ、置き場所は呼び出し側。 */
 public final class MiningStats {
 
     /** サーバーが受け付けたもの。 */
@@ -100,6 +100,56 @@ public final class MiningStats {
     /** 新しいキーがないときだけ読む、古い版のキー。なければ null。 */
     public static String legacySaveKey(HitKind kind) {
         return kind == HitKind.MELEE ? "critHits" : null;
+    }
+
+    /** 保存先（各版の NBT）。ないキーの getLong / getDouble は 0。 */
+    public interface Store {
+        boolean has(String key);
+
+        long getLong(String key);
+
+        double getDouble(String key);
+
+        void putLong(String key, long value);
+
+        void putDouble(String key, double value);
+    }
+
+    /** キーの名前と型を変えると、古いワールドの統計が読めなくなる。 */
+    public void save(Store out) {
+        out.putLong("blocksBroken", blocksBroken);
+        out.putLong("blocksBrokenWithHit", blocksBrokenWithHit);
+        out.putLong("hitsOnBrokenBlocks", hitsOnBrokenBlocks);
+        out.putLong("maxHitsOnBlock", maxHitsOnBlock);
+        out.putDouble("savedTicks", savedTicks);
+        out.putLong("maxStreak", maxStreak);
+        out.putLong("targetBest", targetBest);
+        out.putLong("targetRounds", targetRounds);
+        for (HitKind kind : HitKind.values()) {
+            out.putLong(saveKey(kind), count(kind));
+        }
+    }
+
+    /** 古いワールドにないキー（hitsOnBrokenBlocks・新しい種類など）は 0 から数える。 */
+    public static MiningStats load(Store in) {
+        MiningStats stats = new MiningStats();
+        stats.blocksBroken = in.getLong("blocksBroken");
+        stats.blocksBrokenWithHit = in.getLong("blocksBrokenWithHit");
+        stats.hitsOnBrokenBlocks = in.getLong("hitsOnBrokenBlocks");
+        stats.maxHitsOnBlock = in.getLong("maxHitsOnBlock");
+        stats.savedTicks = in.getDouble("savedTicks");
+        stats.maxStreak = in.getLong("maxStreak");
+        stats.targetBest = in.getLong("targetBest");
+        stats.targetRounds = in.getLong("targetRounds");
+        for (HitKind kind : HitKind.values()) {
+            String key = saveKey(kind);
+            String legacy = legacySaveKey(kind);
+            if (!in.has(key) && legacy != null) {
+                key = legacy;
+            }
+            stats.setCount(kind, in.getLong(key));
+        }
+        return stats;
     }
 
     /** 種類や項目を足すと通信が変わる（マイナー）。 */
