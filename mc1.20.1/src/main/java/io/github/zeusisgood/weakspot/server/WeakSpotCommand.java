@@ -120,8 +120,8 @@ public final class WeakSpotCommand {
         double average = stats.averageHitsPerBlock();
         source.sendSystemMessage(Component.translatable(key,
                 stats.hits, stats.blocksBroken, stats.blocksBrokenWithHit,
-                Double.isNaN(average) ? "-" : String.format("%.2f", average),
-                stats.maxHitsOnBlock, String.format("%.1f", stats.savedSeconds()),
+                Double.isNaN(average) ? "-" : String.format(Locale.ROOT, "%.2f", average),
+                stats.maxHitsOnBlock, String.format(Locale.ROOT, "%.1f", stats.savedSeconds()),
                 stats.count(HitKind.GROWTH), stats.count(HitKind.MACHINE), stats.maxStreak,
                 stats.count(HitKind.ANIMAL), stats.count(HitKind.FISHING), stats.count(HitKind.BOW),
                 stats.count(HitKind.MELEE), stats.count(HitKind.VEHICLE), stats.count(HitKind.EAT),

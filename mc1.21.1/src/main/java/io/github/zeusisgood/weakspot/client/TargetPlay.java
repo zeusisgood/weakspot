@@ -534,7 +534,7 @@ public final class TargetPlay {
             drawScaled(g, font, best, bx, 19, (float) (1 + 0.6 * glow), passed ? GOLD : GRAY);
         }
         double left = Math.max(0, (TargetRules.ROUND_TICKS - into) / 20.0);
-        String time = I18n.get("weakspot.target.timeLeft", String.format("%.1f", left));
+        String time = I18n.get("weakspot.target.timeLeft", String.format(Locale.ROOT, "%.1f", left));
         g.drawString(font, time, cx - font.width(time) / 2F, 32, 0xFFFFFFFF, true);
     }
 
