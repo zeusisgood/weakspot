@@ -6,6 +6,7 @@ import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.network.StatsRequestMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Function;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -133,17 +134,17 @@ final class StatsTab extends StatsScreenTab {
 
     private static String formatAverage(MiningStats stats) {
         double average = stats.averageHitsPerBlock();
-        return Double.isNaN(average) ? "-" : String.format("%.2f", average);
+        return Double.isNaN(average) ? "-" : String.format(Locale.ROOT, "%.2f", average);
     }
 
     private static String formatDuration(double seconds) {
         if (seconds < 60) {
-            return I18n.get("weakspot.stats.time.seconds", String.format("%.1f", seconds));
+            return I18n.get("weakspot.stats.time.seconds", String.format(Locale.ROOT, "%.1f", seconds));
         }
         long whole = (long) seconds;
         if (whole < 3600) {
-            return I18n.get("weakspot.stats.time.minutes", whole / 60, String.format("%02d", whole % 60));
+            return I18n.get("weakspot.stats.time.minutes", whole / 60, String.format(Locale.ROOT, "%02d", whole % 60));
         }
-        return I18n.get("weakspot.stats.time.hours", whole / 3600, String.format("%02d", whole / 60 % 60));
+        return I18n.get("weakspot.stats.time.hours", whole / 3600, String.format(Locale.ROOT, "%02d", whole / 60 % 60));
     }
 }

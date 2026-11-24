@@ -5,6 +5,7 @@ import io.github.zeusisgood.weakspot.common.MiningStats;
 import io.github.zeusisgood.weakspot.config.WeakSpotConfig;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import javax.annotation.Nullable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -137,8 +138,8 @@ public final class WeakSpotCommand extends CommandBase {
         double average = stats.averageHitsPerBlock();
         sender.sendMessage(new TextComponentTranslation(key,
                 stats.hits, stats.blocksBroken, stats.blocksBrokenWithHit,
-                Double.isNaN(average) ? "-" : String.format("%.2f", average),
-                stats.maxHitsOnBlock, String.format("%.1f", stats.savedSeconds()),
+                Double.isNaN(average) ? "-" : String.format(Locale.ROOT, "%.2f", average),
+                stats.maxHitsOnBlock, String.format(Locale.ROOT, "%.1f", stats.savedSeconds()),
                 stats.count(HitKind.GROWTH), stats.count(HitKind.MACHINE), stats.maxStreak,
                 stats.count(HitKind.ANIMAL), stats.count(HitKind.FISHING), stats.count(HitKind.BOW),
                 stats.count(HitKind.MELEE), stats.count(HitKind.VEHICLE), stats.count(HitKind.EAT),

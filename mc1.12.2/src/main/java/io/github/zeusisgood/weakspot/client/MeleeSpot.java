@@ -36,7 +36,9 @@ final class MeleeSpot extends AimSpotKind {
 
     @Override
     void beforeTick(Minecraft mc) {
-        enemyNear = MeleeCharge.CHARGES.isHolding(mc.player) && MeleeTargets.hasEnemyNear(mc.player, ENEMY_RANGE);
+        // 近接の弱点が使えないときは、毎 tick の敵の探索を省く（弱点は allowed で出さない）
+        enemyNear = allowed(mc) && MeleeCharge.CHARGES.isHolding(mc.player)
+                && MeleeTargets.hasEnemyNear(mc.player, ENEMY_RANGE);
     }
 
     @Override

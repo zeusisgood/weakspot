@@ -11,6 +11,7 @@ import io.github.zeusisgood.weakspot.network.TargetMessage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
@@ -172,7 +173,7 @@ public final class TargetPlay {
                     MilestoneEffects.comboFireworks(3, GOLD);
                 }
                 playNote(mc, 1.0F, 1.0F);
-                if (newTier > 0 && mc.player != null) {
+                if (newTier > 0 && newTier < TargetRules.Tier.values().length && mc.player != null) {
                     TargetRules.Tier tier = TargetRules.Tier.values()[newTier];
                     TextComponentTranslation text = new TextComponentTranslation("weakspot.target.tierReached",
                             new TextComponentTranslation("weakspot.target.tier." + tierKey(tier)), tier.from);
@@ -522,7 +523,7 @@ public final class TargetPlay {
             drawScaled(font, best, bx, 19, (float) (1 + 0.6 * glow), passed ? GOLD : GRAY);
         }
         double left = Math.max(0, (TargetRules.ROUND_TICKS - into) / 20.0);
-        String time = I18n.format("weakspot.target.timeLeft", String.format("%.1f", left));
+        String time = I18n.format("weakspot.target.timeLeft", String.format(Locale.ROOT, "%.1f", left));
         font.drawStringWithShadow(time, cx - font.getStringWidth(time) / 2F, 32, 0xFFFFFF);
     }
 
