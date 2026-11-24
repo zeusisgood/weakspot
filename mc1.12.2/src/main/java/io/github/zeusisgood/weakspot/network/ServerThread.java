@@ -14,7 +14,12 @@ final class ServerThread {
     /** 返事のパケットはないので null を返す（onMessage の戻り値にする）。 */
     static IMessage run(MessageContext ctx, Consumer<EntityPlayerMP> task) {
         EntityPlayerMP player = ctx.getServerHandler().player;
-        player.getServerWorld().addScheduledTask(() -> task.accept(player));
+        player.getServerWorld().addScheduledTask(() -> {
+            // 列に入ったあとに切断が処理されることがある。そのまま動かすと、ログアウトで片付けた記憶を作り直す
+            if (player.mcServer.getPlayerList().getPlayerByUUID(player.getUniqueID()) == player) {
+                task.accept(player);
+            }
+        });
         return null;
     }
 }

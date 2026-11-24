@@ -7,6 +7,8 @@
 
 ## 全体
 
+- 想定する規模: 1 つのサーバーに**数百人**まで（ユーザーの判断。1.13.8）。プレイヤーごと・ヒットごとの処理は、この人数で tick の時間に響かない作りにする。数千人の規模は、プロキシで多数のサーバーに分ける形になり（Forge・NeoForge の 1 つのサーバーで数千人は現実的でない）、この Mod の記憶はサーバーごとなので、この前提に含まれる。
+
 - ディレクトリ: `common/`（リポジトリ直下）は Minecraft に依存しない純粋な計算で、各版のビルドがソースで読む（Gradle 4.9 と移植先の Gradle 8 は 1 つのマルチプロジェクトにできないため）。翻訳の正本は `lang/*.json`（改行はバニラと同じく JSON の `\n`）、1.12.2 のビルドは `mc1.12.2/`（`.lang` は `generateLang` が作る。1 行 1 キーなので値の改行は `\` と `n` の 2 文字にし、Forge の設定画面が説明を読むときに改行へ戻す。`キー.name` もあるキーは書き出さない: 1.12.2 のアイテム名は内部名を翻訳した結果に `.name` を付けて引くので、新しい版用の内部名のキーがあると「弱点の的.name」になる）、1.20.1・1.21.1 のビルドは `mc1.20.1/`・`mc1.21.1/`（json をそのまま使う）。`mojmap/`（リポジトリ直下）は 1.20.1・1.21.1 で同じ中身のコードとテストで、両方のビルドがソースで読む（どちらも Mojang の名前で書くので、同じ物をそのまま使える。下の「mojmap/ の約束」）。以下のパッケージ名は `io.github.zeusisgood.weakspot` からの相対。クラスの名前と分け方はどの版でも同じにしてある（読み比べやすくするため）。版で違う所は、下の「1.20.1 版・1.21.1 版」にまとめる。
 - `common/`: Minecraft に依存しない純粋な計算。クライアントの部品でも Minecraft のクラスを使わないもの（`TimedBoost`・`QueryThrottle`）と、設定の値の型・表（`HitSound`・`ComboPosition`・`SettingGroups`）もここ。テストは各版のビルドで流す（同じテストが 3 回流れるのは、3 つの JDK で通ることの確認になるので、そのままにする）。設定の一覧の正本 `common/settings.txt`（「`ServerConfig.Mining.boostMultiplier`」の形）は、1.12.2 と `mojmap/` の `config/SettingNamesTest`（同じ中身。`mojmap/` の分は 1.20.1・1.21.1 の両方のビルドで流れる）が、自分の版の `ServerConfig`・`ClientConfig` と集合として一致するかを確かめる。翻訳の確かめは 1.12.2 の `LangFilesTest` だけなので、名前が揃っていれば 3 つの版の分を見たことになる（1.20.1・1.21.1 の設定のクラスはローダーに依存しないので、Minecraft なしで流せる）。設定を足す・消すときは、正本も直す。
 - パッケージの直下（両側）: クライアントとサーバーが同じ条件（同期した設定）で判定するもの。対象の判定 `RightClickTargets`（成長・機械・収穫）・`AnimalTargets`・`VehicleTargets`・`MeleeTargets`、手 `HeldItems`、プレイヤー `PlayerRules`、使用時間と溜め `UseTimeCut`（`BowDraw`・`EatDraw`）・`HeldCharge`（`MeleeCharge`・`ThrowCharge`）、落下の見込み `FallDamage`、ガイドの本 `GuideBook`、的 `ItemTarget`、非公開のメンバー `Reflect`。
@@ -94,7 +96,7 @@
 - 種類の表: `HitKind`（初期の色・コンボの掛け数を使うか）、`SyncedSettings.enabled(kind)` / `minHitInterval(kind)`（フィールドの名前の規則 `<key>WeakSpotEnabled` / `<key>MinHitIntervalTicks` で表を作る）、`SyncedSettings.server()`（サーバーの自分の設定。`fromConfig()` はリフレクションで約 80 項目を集めるので、ヒットのたびに呼ばない）。
 - コンボ: `common/ComboFactor`（掛け数）、`ServerStats.countStreak`、本人のコンボの直し `server/ComboRelay.checkOwn`・`common/ComboSync`。
 - 照準のまわり・画面の上: `AimSpotKind` / `AimSpots`、`ScreenSpotKind` / `ScreenSpots`（置き場所の選び方は `placeRandom`）、`HudSpot.gauge`・`ChargeGauge`、`ScreenProjection.drawMarker` / `edgeArrow`、`common/TimedBoost`・`common/TimedBoostMath`。
-- そのほか: `UseTimeCut`、`server/SpeedModifier`、`common/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`。
+- そのほか: `UseTimeCut`、`server/SpeedModifier`、`common/QueryThrottle`、`server/QueryHandlers`（状態を問い合わせる種類を足すときは、表に足す。パケットは足さない）、`Reflect` / `Reflect.lazyField`（名前の試し方は [development.md](development.md) の「開発環境の細かいこと」）、`network/ServerThread.run`（もう名簿にいない＝切断の処理が済んだ人のパケットは捨てる。切断のあとに動くと、`HitGate.forgetAll` で片付けた記憶を作り直すため。3 つの版）。
 - **弱点の種類を足すときに直す所**（1.20.1・1.21.1 は、`mojmap/` にあるクラスなら 1 か所）: `HitKind`（末尾に）、`server/HitHandlers` とその種類の `*Hits`、照準のまわりなら `AimSpotKind` を継いだクラスと `AimSpots.KINDS`、画面の上なら `ScreenSpotKind` を継いだクラスと `ScreenSpots.KINDS`、統計（`MiningStats` の配列と保存 `save` / `load` は自動。送る並びに入るので通信が変わる → マイナー）、`SyncedSettings` のフィールドと `WIRE`・`WeakSpotConfig`（同じ名前。名前の規則に合わせると種類の表に自動で入る。上の「種類の表」）、プレイヤーごとの記憶を持つなら `HitGate.forgetAll`、`KindMask`・「弱点マーカー」タブ、lang（統計・設定の説明・節目）、`README.md` の種類の一覧・`README.en.md` の種類の名前・`doc/store/description.md` の種類の表・`doc/play.md`・`doc/config.md`・この文書、ガイドの本（`GuideBook.CONTENT`）。
 
 ### 通信
