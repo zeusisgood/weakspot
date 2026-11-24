@@ -9,10 +9,12 @@ base.archivesName = "weakspot-${minecraft_version}-neoforge"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-// 版に依存しない計算（common）は、各版のビルドがソースで読む
+// 版に依存しない計算（common）と、1.20.1・1.21.1 で同じ中身のコード（mojmap）は、ソースで読む
 sourceSets {
     main.java.srcDir '../common/src/main/java'
     test.java.srcDir '../common/src/test/java'
+    main.java.srcDir '../mojmap/src/main/java'
+    test.java.srcDir '../mojmap/src/test/java'
 }
 
 neoForge {
