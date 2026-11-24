@@ -42,6 +42,10 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 
 ## Recent updates
 
+### 1.13.7
+
+- Numbers always use a dot as the decimal point; small fixes
+
 ### 1.13.6
 
 - Internal cleanup (no gameplay changes)
@@ -49,10 +53,6 @@ There are 19 kinds: mining, growth, harvest, machine, animal, fishing, bow, mele
 ### 1.13.5
 
 - Removed the boat boost cap; mooshroom stew and harvest Fortune fixes
-
-### 1.13.4
-
-- Fixed line breaks in setting descriptions and overlapping buttons on the settings screen (1.20.1/1.21.1)
 
 ## More
 

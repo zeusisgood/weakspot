@@ -38,7 +38,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - 仕様書を書いた変更は、文書だけでも版を上げ、版の番号と仕様書の番号を揃える。仕様書のない文書の手直し（コードのコメントだけの修正を含む）は版を上げない。
 - 1.12.2 は `@Mod` の `acceptableRemoteVersions` = `WeakSpotMod.ACCEPTED_VERSIONS`、1.20.1・1.21.1 は `Network.PROTOCOL`（マイナーの番号）で同じマイナー同士を接続可能にする。マイナーを上げたら両方を書き換え、`CHANGELOG.md`（と README の「最近の更新」）に旧マイナーとは接続できないことを書く。
 - jar の名前と配布サイトの表示名の形（`weakspot-1.12.2-forge-<版>.jar`・`Weak Spot Mining <版> for MC 1.12.2 (Forge)`）は `doc/development.md` の「版の表記」。Mod の版はこの節の規則だけで決め、Minecraft の版と数字が重なるかは考えない。
-- 現行は **1.13.6**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
+- 現行は **1.13.7**、範囲は `"[1.13,1.14)"`（1.20.1・1.21.1 の `PROTOCOL` は `"1.13"`）。
 - タグと GitHub Release は、`main` に取り込まれたあとに Actions が作る。Claude はタグを付けない。
 
 ## リリース
@@ -68,6 +68,7 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 - **HUD に図形を描くときは `HudSpot.beginOverlay` / `endOverlay` を使う**（カリングを切らないと塗りが消える）。GUI の上（`DrawScreenEvent.Post`）に文字や図形を描くときは、ライティングを切ってから描き、終わったら戻す（コンテナ画面は有効のまま来る。1.11.4、`ScreenSpots`）。1.20.1・1.21.1 は HUD が `RenderGuiEvent.Post`、GUI の上が `ScreenEvent.Render.Post` で、図形は `client/Draw`（頂点は `GuiGraphics` の pose を掛ける）。1.20.1 の tick のイベントは `TickEvent`（`phase` で前後を分ける）、通信は `SimpleChannel`。
 - 画面の文字列は `lang/en_us.json` と `lang/ja_jp.json` の両方に足す（読みやすさのため 1 行に 1 つの `"キー": "値"`。改行は JSON の `\n`（`\\n` と書かない）。1.12.2 の `.lang` はビルドのときに作る（改行は `\` と `n` の 2 文字にする）。1.20.1・1.21.1 は json をそのまま使う。同じキーの 2 回目は `LangFilesTest` が見つける）。チャットの頭は日英とも `[WeakSpot]`。画面に出る文（案内・チャット・結果の板）は敬語で、体言止めにしない（ガイドの本は 1 ページの字数が限られるので短い書き方でよい）。
 - **サーバーからプレイヤーに送る文は翻訳キーで送る**（`TextComponentTranslation`、1.20.1・1.21.1 は `Component.translatable`。新しいキーはマイナーで足す）。翻訳の値は `%s` / `%1$s` の形だけ（`LangFilesTest` が `weakspot.version.*`・`weakspot.breed.*`・`weakspot.milestone.broadcast.*`・`weakspot.welcome.*`・`weakspot.target.updateGift` を確かめる。新しい種類の文を足したら、テストの対象にも足す）。
+- 画面・チャットに数字を出すときは `String.format(Locale.ROOT, …)` を使う（地域の指定がないと OS の言語の書式になり、ゲームの言語と食い違う）。
 - 共通の部品があるものは、それを使う。一覧は `doc/architecture.md` の「共通の部品」。
 - **ヒットの間隔は `common/HitBudget`**（設定の間隔ごとに 1 回分戻り、4 回分まで貯められる。1.11.6。全種類が `HitGate.ready` / `mark` / `take` で使う）。最後に受け付けた tick との比較を新しく書かない（ラグでまとめて届いた正しいヒットを落とす）。
 - **採掘のブーストは、クリックのたびにクライアントとサーバーの両方で捨てる**（掘る前のヒットと、待ちを 0 にするための当てたブロックは残す。1.11.6。クライアントだけ持ち越すと、クリックし直したブロックがクライアントだけでその場で壊れ、見えない壁になる。サーバーはクリックのたびにブロックの状態も送り直す。`MiningBoost.onLeftClickBlock`・`ServerBoostTracker`）。
@@ -105,4 +106,4 @@ Fortnite の「弱点（クリティカル）」採掘を Minecraft に持ち込
 
 ## 次の作業
 
-現行は 1.13.6（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。
+現行は 1.13.7（1.12.2 + Forge・1.20.1 + Forge・1.21.1 + NeoForge）。ほかの版への対応は `doc/roadmap.md` の保留中の相談。
