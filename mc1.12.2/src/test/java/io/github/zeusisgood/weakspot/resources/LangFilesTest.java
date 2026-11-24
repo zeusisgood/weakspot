@@ -181,7 +181,8 @@ public class LangFilesTest {
         Set<String> missing = new TreeSet<>();
         List<java.nio.file.Path> sources;
         sources = new java.util.ArrayList<>();
-        for (String root : new String[] {ResourceFiles.MC + "src/main/java", "common/src/main/java"}) {
+        for (String root : new String[] {ResourceFiles.MC + "src/main/java", "common/src/main/java",
+                "mc1.20.1/src/main/java", "mc1.21.1/src/main/java", "mojmap/src/main/java"}) {
             try (Stream<java.nio.file.Path> walk = Files.walk(Paths.get(root))) {
                 walk.filter(p -> p.toString().endsWith(".java")).forEach(sources::add);
             }

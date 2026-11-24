@@ -20,6 +20,9 @@ sourceSets {
 neoForge {
     version = neo_version
 
+    // 登録のテスト（HitHandlersTest など）が、Minecraft のクラスを参照する表を読み込めるように
+    addModdingDependenciesTo sourceSets.test
+
     runs {
         client {
             client()
