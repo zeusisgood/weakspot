@@ -5,7 +5,6 @@ import io.github.zeusisgood.weakspot.common.ComboSync;
 import io.github.zeusisgood.weakspot.common.HitStreak;
 import io.github.zeusisgood.weakspot.network.OtherComboMessage;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
@@ -74,12 +73,6 @@ public final class ComboRelay {
             }
         }
         sendOwn(server, now);
-        for (Iterator<UUID> it = SENT.keySet().iterator(); it.hasNext(); ) {
-            if (server.getPlayerList().getPlayer(it.next()) == null) {
-                it.remove();
-            }
-        }
-        OWN.keySet().removeIf(id -> server.getPlayerList().getPlayer(id) == null);
     }
 
     /** clientStreak はクライアントのヒット後の数。比べるだけで、サーバーの数をこれに合わせることはしない。 */
