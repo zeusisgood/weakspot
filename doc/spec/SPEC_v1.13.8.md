@@ -163,7 +163,7 @@
   - 「種類を足すときに直す所」のファイルの場所を、`mojmap/` に移ったものは `mojmap/` に直し、各版の `ServerStats` の読み書きを外す
   - 「共通の部品」に `server/Reach` と `MiningStats.save` / `load`（統計の保存の正本）を足す
 - `doc/development.md`: 冒頭のリポジトリの形に `mojmap/` を足す
-- 直さない文書: `doc/play.md`・ガイドの本（遊び方は変わらない。範囲を伸ばす Mod との組み合わせは更新履歴に書く）・`doc/config.md`（設定の項目は変わらない。余裕は設定にしない）・`doc/roadmap.md`・`doc/store/description.md`・`doc/install.md`
+- 直さない文書: `doc/play.md`・ガイドの本（遊び方は変わらない。範囲を伸ばす Mod との組み合わせは更新履歴に書く）（注: 実装では、更新履歴にも中身を書かない判断のとおり書いていない）・`doc/config.md`（設定の項目は変わらない。余裕は設定にしない）・`doc/roadmap.md`・`doc/store/description.md`・`doc/install.md`
 
 ## 8. `CLAUDE.md` に書くこと
 
