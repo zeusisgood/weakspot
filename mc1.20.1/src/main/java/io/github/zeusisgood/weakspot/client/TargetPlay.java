@@ -171,7 +171,7 @@ public final class TargetPlay {
                     MilestoneEffects.comboFireworks(3, GOLD);
                 }
                 playNote(mc, 1.0F, 1.0F);
-                if (newTier > 0 && mc.player != null) {
+                if (newTier > 0 && newTier < TargetRules.Tier.values().length && mc.player != null) {
                     TargetRules.Tier tier = TargetRules.Tier.values()[newTier];
                     mc.player.displayClientMessage(Component.translatable("weakspot.target.tierReached",
                             Component.translatable("weakspot.target.tier." + tierKey(tier)), tier.from)
