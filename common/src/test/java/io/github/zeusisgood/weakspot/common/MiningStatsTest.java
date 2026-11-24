@@ -145,4 +145,99 @@ public class MiningStatsTest {
             assertEquals(kind.name(), stats.count(kind), back.count(kind));
         }
     }
+
+    /** 項目を足して save / load を書き忘れると落ちるよう、項目は名前で並べずに全部取る。 */
+    @Test
+    public void saveAndLoadKeepEveryField() throws Exception {
+        MiningStats stats = new MiningStats();
+        int value = 1;
+        for (java.lang.reflect.Field field : MiningStats.class.getFields()) {
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            if (field.getType() == long.class) {
+                field.setLong(stats, value++);
+            } else if (field.getType() == double.class) {
+                field.setDouble(stats, value++ + 0.5);
+            } else {
+                throw new AssertionError("保存の形が決まっていない型: " + field);
+            }
+        }
+        for (HitKind kind : HitKind.values()) {
+            if (kind != HitKind.MINING) {
+                stats.setCount(kind, value++);
+            }
+        }
+        MapStore store = new MapStore();
+        stats.save(store);
+        MiningStats back = MiningStats.load(store);
+        for (java.lang.reflect.Field field : MiningStats.class.getFields()) {
+            if (!java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+                assertEquals(field.getName(), field.get(stats), field.get(back));
+            }
+        }
+        for (HitKind kind : HitKind.values()) {
+            assertEquals(kind.name(), stats.count(kind), back.count(kind));
+        }
+    }
+
+    /** キーを変えると古いワールドの統計が読めなくなる。 */
+    @Test
+    public void saveKeysUnchanged() {
+        MapStore store = new MapStore();
+        new MiningStats().save(store);
+        assertEquals("[animalHits, blocksBroken, blocksBrokenWithHit, bowHits, eatHits, elytraHits, enchantHits,"
+                + " fallHits, fishingHits, growthHits, harvestHits, hits, hitsOnBrokenBlocks, ladderHits, machineHits,"
+                + " maxHitsOnBlock, maxStreak, meleeHits, portalHits, savedTicks, sleepHits, sprintHits, swimHits,"
+                + " targetBest, targetRounds, throwHits, vehicleHits]", store.values.keySet().toString());
+        assertTrue(store.values.get("savedTicks") instanceof Double);
+        assertTrue(store.values.get("hits") instanceof Long);
+    }
+
+    @Test
+    public void legacyMeleeKeyIsReadOnlyWithoutTheNewOne() {
+        MapStore old = new MapStore();
+        old.putLong("critHits", 42);
+        assertEquals(42, MiningStats.load(old).count(HitKind.MELEE));
+        old.putLong("meleeHits", 7);
+        assertEquals(7, MiningStats.load(old).count(HitKind.MELEE));
+    }
+
+    @Test
+    public void missingKeysLoadAsZero() {
+        MiningStats stats = MiningStats.load(new MapStore());
+        assertEquals(0, stats.totalHits());
+        assertEquals(0, stats.savedTicks, 0);
+    }
+
+    private static final class MapStore implements MiningStats.Store {
+        final java.util.TreeMap<String, Object> values = new java.util.TreeMap<>();
+
+        @Override
+        public boolean has(String key) {
+            return values.containsKey(key);
+        }
+
+        @Override
+        public long getLong(String key) {
+            Object value = values.get(key);
+            return value instanceof Long ? (Long) value : 0;
+        }
+
+        @Override
+        public double getDouble(String key) {
+            Object value = values.get(key);
+            return value instanceof Double ? (Double) value : 0;
+        }
+
+        @Override
+        public void putLong(String key, long value) {
+            values.put(key, value);
+        }
+
+        @Override
+        public void putDouble(String key, double value) {
+            values.put(key, value);
+        }
+    }
 }

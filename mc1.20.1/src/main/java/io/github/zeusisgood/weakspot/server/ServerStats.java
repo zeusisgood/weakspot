@@ -140,42 +140,42 @@ public final class ServerStats {
         return mine;
     }
 
-    /** 古いワールドの近接の数（critHits）は、meleeHits がなければ読む。 */
     private static MiningStats read(CompoundTag tag) {
-        MiningStats stats = new MiningStats();
-        stats.blocksBroken = tag.getLong("blocksBroken");
-        stats.blocksBrokenWithHit = tag.getLong("blocksBrokenWithHit");
-        // 古いワールドにはないので 0 から数える
-        stats.hitsOnBrokenBlocks = tag.getLong("hitsOnBrokenBlocks");
-        stats.maxHitsOnBlock = tag.getLong("maxHitsOnBlock");
-        stats.savedTicks = tag.getDouble("savedTicks");
-        stats.maxStreak = tag.getLong("maxStreak");
-        stats.targetBest = tag.getLong("targetBest");
-        stats.targetRounds = tag.getLong("targetRounds");
-        for (HitKind kind : HitKind.values()) {
-            String key = MiningStats.saveKey(kind);
-            String legacy = MiningStats.legacySaveKey(kind);
-            if (!tag.contains(key) && legacy != null) {
-                key = legacy;
-            }
-            stats.setCount(kind, tag.getLong(key));
-        }
-        return stats;
+        return MiningStats.load(store(tag));
     }
 
     private static CompoundTag write(MiningStats stats) {
         CompoundTag tag = new CompoundTag();
-        tag.putLong("blocksBroken", stats.blocksBroken);
-        tag.putLong("blocksBrokenWithHit", stats.blocksBrokenWithHit);
-        tag.putLong("hitsOnBrokenBlocks", stats.hitsOnBrokenBlocks);
-        tag.putLong("maxHitsOnBlock", stats.maxHitsOnBlock);
-        tag.putDouble("savedTicks", stats.savedTicks);
-        tag.putLong("maxStreak", stats.maxStreak);
-        tag.putLong("targetBest", stats.targetBest);
-        tag.putLong("targetRounds", stats.targetRounds);
-        for (HitKind kind : HitKind.values()) {
-            tag.putLong(MiningStats.saveKey(kind), stats.count(kind));
-        }
+        stats.save(store(tag));
         return tag;
+    }
+
+    private static MiningStats.Store store(CompoundTag tag) {
+        return new MiningStats.Store() {
+            @Override
+            public boolean has(String key) {
+                return tag.contains(key);
+            }
+
+            @Override
+            public long getLong(String key) {
+                return tag.getLong(key);
+            }
+
+            @Override
+            public double getDouble(String key) {
+                return tag.getDouble(key);
+            }
+
+            @Override
+            public void putLong(String key, long value) {
+                tag.putLong(key, value);
+            }
+
+            @Override
+            public void putDouble(String key, double value) {
+                tag.putDouble(key, value);
+            }
+        };
     }
 }
