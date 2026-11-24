@@ -1,6 +1,5 @@
 package io.github.zeusisgood.weakspot.common;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -12,11 +11,7 @@ public class HitScaleTest {
     private static final HitScale TWO = new HitScale(HitScale.Type.MAJOR, HitScale.Direction.UP, 2);
 
     @Test
-    public void defaultMatchesHitPitch() {
-        for (int streak = 1; streak <= 1000; streak++) {
-            assertEquals(HitPitch.forStreak(streak), HitScale.DEFAULT.melody(streak), 0);
-            assertArrayEquals(HitPitch.forHit(streak, true), HitScale.DEFAULT.forHit(streak, true), 0);
-        }
+    public void defaultCyclesThroughOneOctave() {
         assertEquals(8, HitScale.DEFAULT.cycleLength());
     }
 

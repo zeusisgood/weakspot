@@ -39,10 +39,10 @@ public class HitStreakTest {
             count = streak.hit(i * 6);
         }
         assertEquals(20, count);
-        assertEquals(HitPitch.forStreak(1), HitPitch.forStreak(HitPitch.SCALE_LENGTH + 1), 1e-6);
-        assertEquals(2.0F, HitPitch.forStreak(HitPitch.SCALE_LENGTH), 1e-6);
-        assertEquals(HitPitch.forStreak(4), HitPitch.forStreak(count), 1e-6);
-        assertTrue(HitPitch.forStreak(9) < HitPitch.forStreak(8));
+        assertEquals(HitScale.DEFAULT.melody(1), HitScale.DEFAULT.melody(HitPitch.SCALE_LENGTH + 1), 1e-6);
+        assertEquals(2.0F, HitScale.DEFAULT.melody(HitPitch.SCALE_LENGTH), 1e-6);
+        assertEquals(HitScale.DEFAULT.melody(4), HitScale.DEFAULT.melody(count), 1e-6);
+        assertTrue(HitScale.DEFAULT.melody(9) < HitScale.DEFAULT.melody(8));
     }
 
     @Test
