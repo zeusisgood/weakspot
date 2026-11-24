@@ -104,7 +104,7 @@ public final class ServerBoostTracker {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         EntityPlayer player = event.getEntityPlayer();
-        if (player.world.isRemote || event.isCanceled()) {
+        if (player.world.isRemote || event.isCanceled() || !Reach.block(player, event.getPos())) {
             return;
         }
         // 同じブロックを叩き直した場合も、バニラは経過tickを0から数え直すので追加進捗もリセットする。
@@ -170,7 +170,7 @@ public final class ServerBoostTracker {
     /** サーバースレッドで実行される。 */
     public static void onHit(EntityPlayerMP player, BlockPos pos, int streak) {
         // クリエイティブはブロックが一瞬で壊れるので、採掘の弱点は出ない
-        if (player.capabilities.isCreativeMode || !HitGate.allowed(player, HitKind.MINING)) {
+        if (player.capabilities.isCreativeMode || !HitGate.allowed(player, HitKind.MINING) || !Reach.block(player, pos)) {
             return;
         }
         if (player.world.isAirBlock(pos) || player.world.getBlockState(pos).getBlockHardness(player.world, pos) < 0) {

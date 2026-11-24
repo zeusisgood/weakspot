@@ -20,8 +20,6 @@ public final class MachineStates {
 
     /** 位置ごと。 */
     private static final Map<ResourceKey<Level>, Map<BlockPos, MachineProgress.SpawnerDelay>> SPAWNERS = new HashMap<>();
-    /** バニラが右クリックを受け付ける距離の余裕（RightClickHits と同じ）。 */
-    private static final double REACH_MARGIN = 1.0;
 
     private MachineStates() {
     }
@@ -37,7 +35,7 @@ public final class MachineStates {
             return;
         }
         Level world = player.level();
-        if (!world.isLoaded(pos) || !player.canInteractWithBlock(pos, REACH_MARGIN)) {
+        if (!Reach.block(player, pos)) {
             return;
         }
         BlockEntity be = world.getBlockEntity(pos);

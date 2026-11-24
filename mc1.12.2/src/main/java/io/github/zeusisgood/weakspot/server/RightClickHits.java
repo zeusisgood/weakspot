@@ -53,7 +53,7 @@ public final class RightClickHits {
         if (clicking == null || !pos.equals(clicking.pos) || now - clicking.clickTick > RIGHT_CLICK_WINDOW_TICKS) {
             return;
         }
-        if (!withinReach(player, pos)) {
+        if (!Reach.block(player, pos)) {
             return;
         }
         SyncedSettings settings = SyncedSettings.server();
@@ -88,12 +88,6 @@ public final class RightClickHits {
         } else if (kind == HitKind.MACHINE) {
             MachineAccelerator.hit(world, pos, combo);
         }
-    }
-
-    /** バニラが右クリックを受け付ける距離と同じ（REACH_DISTANCE + 3 をブロックの中心から測る）。 */
-    private static boolean withinReach(EntityPlayerMP player, BlockPos pos) {
-        double reach = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
-        return player.getDistanceSq(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < reach * reach;
     }
 
     /**

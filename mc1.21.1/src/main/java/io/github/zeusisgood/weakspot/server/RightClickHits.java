@@ -24,8 +24,6 @@ public final class RightClickHits {
     * 最後の右クリックからこの tick 以内のヒットだけを受け付ける（ネットワークの揺らぎを見込んだ余裕）。
     */
     private static final int RIGHT_CLICK_WINDOW_TICKS = 10;
-    /** バニラが右クリックを受け付ける距離の余裕（ServerGamePacketListenerImpl#handleUseItemOn と同じ）。 */
-    private static final double REACH_MARGIN = 1.0;
 
     private static final Map<UUID, Clicking> CLICKING = new HashMap<>();
 
@@ -56,7 +54,7 @@ public final class RightClickHits {
         if (clicking == null || !pos.equals(clicking.pos) || now - clicking.clickTick > RIGHT_CLICK_WINDOW_TICKS) {
             return;
         }
-        if (!player.canInteractWithBlock(pos, REACH_MARGIN)) {
+        if (!Reach.block(player, pos)) {
             return;
         }
         SyncedSettings settings = SyncedSettings.server();

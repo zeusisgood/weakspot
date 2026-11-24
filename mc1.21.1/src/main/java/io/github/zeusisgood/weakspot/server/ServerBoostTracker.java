@@ -87,6 +87,10 @@ public final class ServerBoostTracker {
             return;
         }
         BlockPos pos = event.getPos().immutable();
+        // ローダーはこのイベントをバニラの距離の確認より前に出すので、遠い座標のまま読むとチャンクが作られる
+        if (!Reach.block(player, pos)) {
+            return;
+        }
         // 同じブロックを叩き直した場合も、バニラは経過tickを0から数え直すので追加進捗もリセットする。
         // ヒットの間隔（BUDGETS）はプレイヤーごとなので引き継ぐ
         Mining previous = MINING.get(player.getUUID());
@@ -142,7 +146,7 @@ public final class ServerBoostTracker {
 
     public static void onHit(ServerPlayer player, BlockPos pos, int streak) {
         // クリエイティブはブロックが一瞬で壊れるので、採掘の弱点は出ない
-        if (player.isCreative() || !HitGate.allowed(player, HitKind.MINING)) {
+        if (player.isCreative() || !HitGate.allowed(player, HitKind.MINING) || !Reach.block(player, pos)) {
             return;
         }
         BlockState state = player.level().getBlockState(pos);

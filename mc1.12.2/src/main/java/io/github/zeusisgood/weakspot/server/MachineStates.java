@@ -8,7 +8,6 @@ import io.github.zeusisgood.weakspot.network.StateMessage;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntity;
@@ -40,7 +39,7 @@ public final class MachineStates {
             return;
         }
         World world = player.world;
-        if (!world.isBlockLoaded(pos) || !withinReach(player, pos)) {
+        if (!Reach.block(player, pos)) {
             return;
         }
         TileEntity te = world.getTileEntity(pos);
@@ -67,12 +66,6 @@ public final class MachineStates {
             return;
         }
         WeakSpotMod.network.sendTo(StateMessage.machine(pos, progress, fuel), player);
-    }
-
-    /** バニラが右クリックを受け付ける距離と同じ。 */
-    private static boolean withinReach(EntityPlayerMP player, BlockPos pos) {
-        double reach = player.getEntityAttribute(EntityPlayer.REACH_DISTANCE).getAttributeValue() + 3;
-        return player.getDistanceSq(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < reach * reach;
     }
 
     public static void clear() {

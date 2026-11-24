@@ -24,9 +24,6 @@ import net.minecraft.world.entity.npc.Villager;
  */
 public final class AnimalHits {
 
-    /** バニラが生き物への右クリックを受け付ける距離の余裕（ServerGamePacketListenerImpl#handleInteract と同じ）。 */
-    private static final double REACH_MARGIN = 1.0;
-
     /** メモリだけ（動物がいなくなれば消える）。 */
     private static final Map<Entity, AnimalTimers.HitCounter> WOOL_HITS = new WeakHashMap<>();
     private static final Map<Entity, AnimalTimers.HitCounter> TRADE_HITS = new WeakHashMap<>();
@@ -100,7 +97,7 @@ public final class AnimalHits {
     public static void onQuery(ServerPlayer player, int entityId) {
         Entity entity = player.level().getEntity(entityId);
         State state = new State(0);
-        if (entity != null && AnimalTargets.isCandidate(entity) && player.canInteractWithEntity(entity, REACH_MARGIN)) {
+        if (entity != null && AnimalTargets.isCandidate(entity) && Reach.entity(player, entity)) {
             SyncedSettings settings = SyncedSettings.server();
             state = state(entity, settings);
             if (entity instanceof Villager villager) {
@@ -115,7 +112,7 @@ public final class AnimalHits {
             return;
         }
         Entity entity = player.level().getEntity(entityId);
-        if (entity == null || !player.canInteractWithEntity(entity, REACH_MARGIN)) {
+        if (entity == null || !Reach.entity(player, entity)) {
             return;
         }
         SyncedSettings settings = SyncedSettings.server();
