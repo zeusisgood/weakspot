@@ -1,7 +1,5 @@
 # 弱点破壊 Mod 追加仕様書（v1.13.8）
 
-> **下書き**（ユーザーが「実装」と言うまで実装しない）
-
 `SPEC_v1.13.7.md`（Mod 1.13.7）に対する**パッチ**の仕様（外部の点検の 7 件への対応。採掘のヒットの座標の確かめ漏れの修正と、1.20.1・1.21.1 の共通化・テスト・統計の保存の整理）。ここに書かれていないことは、それと現行実装のままとする。
 この仕様書は `doc/spec/SPEC_v1.13.8.md`。
 
@@ -78,7 +76,7 @@
 ### 2.2 変更
 
 - リポジトリの直下に `mojmap/src/main/java` と `mojmap/src/test/java` を作る。パッケージは今のまま（`io.github.zeusisgood.weakspot.…`）
-- 移すもの: §1 を入れたあとに `diff -rqs` を取り、2 版で同じ `.java` を全部と、`SettingNamesTest`（`git mv` で 1.20.1 から移し、1.21.1 の同じファイルを消す）。点検の時点では 53 本。§1 で数が変わったら PR の本文に書く
+- 移すもの: §1 を入れたあとに `diff -rqs` を取り、2 版で同じ `.java` を全部と、`SettingNamesTest`（`git mv` で 1.20.1 から移し、1.21.1 の同じファイルを消す）。点検の時点では 53 本。§1 で数が変わったら PR の本文に書く（注: 実装では 54 本。§1 で `server/MachineStates` が 2 版で同じ中身になった）
 - 移さないもの: 1 文字でも違うファイル、`src/main/resources` の全部（AT・`mods.toml`／`neoforge.mods.toml`・アイコンなど）
 - 読み込み: 1.20.1・1.21.1 の `build.gradle` の `sourceSets` に、`common` の 2 行の下へ次の 2 行を足す（Gradle のビルドは今のまま別々）
   - `main.java.srcDir '../mojmap/src/main/java'`
@@ -114,6 +112,7 @@
 
 - 書き方は各版の API に合わせる（1.12.2 の MCP の名前・`IMessage` を、Mojang の名前・各版の通信の部品にする）。確かめる中身とテストのメソッドの名前は 1.12.2 と同じにする。クラスの名前は、同じパッケージで重ならないよう、`mojmap/` に置く登録の部分だけ `QueryHandlersTest` にする（1.12.2 の `QueryMessagesTest` は分けない）
 - テストの中で Minecraft の初期化（レジストリなど）が要って落ちるときは、確かめる中身を変えずに、初期化の要らない形にする（例: 登録の一覧だけを読む）。それでも置けないテストは置かず、PR の本文に理由を書く
+- （注: 実装では、上の表の 4 本とも、書き換えた 1 つのファイルが 2 版でそのままビルドできたので、`mojmap/src/test/java` に 1.12.2 と同じクラスの名前（`HitHandlersTest`・`QueryMessagesTest`・`SyncedSettingsTest`）で置いた。`QueryMessagesTest` を分けないので、`QueryHandlersTest` は作らない。1.21.1 はテストのクラスパスに Minecraft がなく、処理の表のクラスを読み込めないので、`build.gradle` に `addModdingDependenciesTo sourceSets.test` を足した。1.20.1・1.21.1 だけの `SyncedSettings.tickingBlocks` はサーバーが作る一覧で設定がないので、`everyFieldHasAConfigEntry` では `serverVersion` と同じく外した）
 - 確かめ方: 実装のときに、`HitHandlers` の登録を 1 つ消すと 2 版の `./gradlew test` が赤くなることを一度試す（コミットしない）
 
 ## 4. 統計の保存を `common/MiningStats` の 1 か所にまとめる
@@ -142,7 +141,7 @@
 - 消す: `HitPitch.forStreak`・`forHit`・`resolveFor`・`breakNotes`・`twoOctave`（どれも `HitScale.DEFAULT` を呼ぶだけで、3 つの版のコードは `HitScale` を直接使っている。呼んでいるのはテストだけ）
 - 残す: `withBell`・`chordOffsets`・`isSus4`・定数（`SCALE_LENGTH`・`BREAK_SOUND_FROM`・`BELL_FROM`・`TWO_OCTAVE_LENGTH` など）
 - テスト（`HitPitchTest`・`HitStreakTest`・`HitScaleTest`）は `HitScale.DEFAULT.xxx` を呼ぶ形に書き換える。名前の対応: `forStreak` → `melody`、`forHit` → `forHit`、`resolveFor` → `resolveFor`、`breakNotes` → `breakNotes`、`twoOctave` → `twoOctave`。テストの名前と確かめる中身は変えない
-- ただし `HitScaleTest.defaultMatchesHitPitch` の、`HitPitch` と `HitScale.DEFAULT` が同じかを比べる 2 行は、書き換えると自分自身と比べるだけになるので消す（同じテストの `cycleLength` の確認は残す）
+- ただし `HitScaleTest.defaultMatchesHitPitch` の、`HitPitch` と `HitScale.DEFAULT` が同じかを比べる 2 行は、書き換えると自分自身と比べるだけになるので消す（同じテストの `cycleLength` の確認は残す）（注: 実装では、残った確認に合わせてテストの名前を `defaultCyclesThroughOneOctave` にした）
 
 ## 6. `ComboRelay` の毎 tick の掃除を消す（3 つの版。`ComboRelay` は 2 版で中身が違うので、`mojmap/` には移らない）
 

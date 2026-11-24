@@ -1,14 +1,15 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/weakspot",
   "promos": {
-    "1.12.2-latest": "1.13.7",
-    "1.12.2-recommended": "1.13.7",
-    "1.20.1-latest": "1.13.7",
-    "1.20.1-recommended": "1.13.7",
-    "1.21.1-latest": "1.13.7",
-    "1.21.1-recommended": "1.13.7"
+    "1.12.2-latest": "1.13.8",
+    "1.12.2-recommended": "1.13.8",
+    "1.20.1-latest": "1.13.8",
+    "1.20.1-recommended": "1.13.8",
+    "1.21.1-latest": "1.13.8",
+    "1.21.1-recommended": "1.13.8"
   },
   "1.12.2": {
+    "1.13.8": "Server-side fixes and internal cleanup",
     "1.13.7": "Numbers always use a dot as the decimal point; small fixes",
     "1.13.6": "Internal cleanup (no gameplay changes)",
     "1.13.5": "Removed the boat boost cap; mooshroom stew and harvest Fortune fixes",
@@ -43,6 +44,7 @@
     "1.9.2": "Chat notice when a new version is out"
   },
   "1.20.1": {
+    "1.13.8": "Server-side fixes and internal cleanup",
     "1.13.7": "Numbers always use a dot as the decimal point; small fixes",
     "1.13.6": "Internal cleanup (no gameplay changes)",
     "1.13.5": "Removed the boat boost cap; mooshroom stew and harvest Fortune fixes",
@@ -53,6 +55,7 @@
     "1.13.0": "Now available for Minecraft 1.20.1 (Forge)"
   },
   "1.21.1": {
+    "1.13.8": "Server-side fixes and internal cleanup",
     "1.13.7": "Numbers always use a dot as the decimal point; small fixes",
     "1.13.6": "Internal cleanup (no gameplay changes)",
     "1.13.5": "Removed the boat boost cap; mooshroom stew and harvest Fortune fixes",

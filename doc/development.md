@@ -37,6 +37,7 @@ lang/        翻訳の正本（en_us.json・ja_jp.json。読みやすさのた�
 mc1.12.2/    1.12.2 + Forge のビルド（Gradle 4.9、JDK 8）
 mc1.20.1/    1.20.1 + Forge のビルド（Gradle 8、JDK 17）。翻訳は ../lang の json をそのまま jar に入れる
 mc1.21.1/    1.21.1 + NeoForge のビルド（Gradle 8、JDK 21）。翻訳は ../lang の json をそのまま jar に入れる
+mojmap/      1.20.1・1.21.1 で同じ中身のコードとテスト（Mojang の名前。両方でそのままビルドが通るものだけ）。両方のビルドが ../mojmap をソースとして読む。違いが要るようになったら両方の版に戻す
 doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 ```
 
@@ -47,7 +48,7 @@ doc/ CHANGELOG.md README*.md LICENSE update.json   全部の版で共通
 ## ブランチとリリース
 
 - 作業は `main` 以外のブランチで行い、`main` への PR を作ります。PR ごとに GitHub Actions（[`.github/workflows/ci.yml`](../.github/workflows/ci.yml)）がビルドと全テストを実行し、成功しないと Merge できません。
-- テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）、3 つの版の設定の名前が正本 `common/settings.txt` と揃っているか（`config/SettingNamesTest`、3 つの版）の確認も含まれます。配布サイトへ上げるスクリプトは、CI の `scripts` ジョブで 1 回だけ `shellcheck` にかけます。
+- テストには、翻訳の抜け（`resources/LangFilesTest`）と、版を上げたときに直すファイルの揃い具合（`resources/ReleaseFilesTest`）、3 つの版の設定の名前が正本 `common/settings.txt` と揃っているか（`config/SettingNamesTest`。1.12.2 と `mojmap/`）、全部の種類に処理の登録があるか（`compat/HitHandlersTest`・`QueryMessagesTest`・`config/SyncedSettingsTest`。1.12.2 と `mojmap/`）の確認も含まれます。配布サイトへ上げるスクリプトは、CI の `scripts` ジョブで 1 回だけ `shellcheck` にかけます。
 - ワークフローで使う部品（`actions/checkout` など）は、Dependabot（[`.github/dependabot.yml`](../.github/dependabot.yml)）が週に 1 回（更新があった週だけ）、更新の PR を作ります。
 - ビルドは Minecraft の版ごと（`ci.yml` の matrix の `build-mc`。版を足すときは matrix と `.github/scripts/mc-versions.sh` に足す）。Merge に必須のチェック「`build`」は、全部の版と `scripts` が通ったときだけ成功するまとめのジョブ（ブランチの保護の設定は変えなくてよい）。
 - `main` に取り込まれた時、`mc1.12.2/build.gradle` の `version` がまだ Release のない版なら、全部の版のビルドが通ったときだけ、同じワークフローがタグ `vX.Y.Z` と GitHub Release を 1 つ自動で作成します（本文は `CHANGELOG.md` のその版の節、全部の版の jar `weakspot-<Minecraft の版>-<ローダー>-<版>.jar` を添付）。版を上げない変更（文書だけなど）では作成しません。
