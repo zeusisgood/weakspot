@@ -81,14 +81,14 @@ public final class ServerStats {
     }
 
     public static MiningStats total(Player player) {
-        return read(data(player).getCompound(TAG_TOTAL));
+        return StatsNbt.read(data(player).getCompound(TAG_TOTAL));
     }
 
     public static void record(Player player, Consumer<MiningStats> change) {
         change.accept(session(player));
         MiningStats total = total(player);
         change.accept(total);
-        data(player).put(TAG_TOTAL, write(total));
+        data(player).put(TAG_TOTAL, StatsNbt.write(total));
     }
 
     /** 近接はクリティカルにしたときに呼ぶ。 */
@@ -104,7 +104,7 @@ public final class ServerStats {
         MiningStats fresh = new MiningStats();
         fresh.targetBest = before.targetBest;
         fresh.targetRounds = before.targetRounds;
-        data(player).put(TAG_TOTAL, write(fresh));
+        data(player).put(TAG_TOTAL, StatsNbt.write(fresh));
         SESSIONS.put(player.getUUID(), new MiningStats());
         if (player instanceof ServerPlayer serverPlayer) {
             // 最初からやり直す感じを出すため（的は配り直さない）
@@ -133,44 +133,5 @@ public final class ServerStats {
     /** 無ければ作って付ける。中身を書き換えると保存される。 */
     static CompoundTag data(Player player) {
         return player.getData(Registration.PLAYER_DATA);
-    }
-
-    private static MiningStats read(CompoundTag tag) {
-        return MiningStats.load(store(tag));
-    }
-
-    private static CompoundTag write(MiningStats stats) {
-        CompoundTag tag = new CompoundTag();
-        stats.save(store(tag));
-        return tag;
-    }
-
-    private static MiningStats.Store store(CompoundTag tag) {
-        return new MiningStats.Store() {
-            @Override
-            public boolean has(String key) {
-                return tag.contains(key);
-            }
-
-            @Override
-            public long getLong(String key) {
-                return tag.getLong(key);
-            }
-
-            @Override
-            public double getDouble(String key) {
-                return tag.getDouble(key);
-            }
-
-            @Override
-            public void putLong(String key, long value) {
-                tag.putLong(key, value);
-            }
-
-            @Override
-            public void putDouble(String key, double value) {
-                tag.putDouble(key, value);
-            }
-        };
     }
 }

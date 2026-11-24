@@ -78,7 +78,7 @@
 ### 的当て・記録・知らせ（サーバー）
 
 - 的当て: `ItemTarget`・`server/TargetRounds`・`client/TargetPlay`・`common/TargetRules`。ラウンドの時間はサーバーの tick で数える。弱点の大きさの設定 `spotSize` は掛けない（記録を公平にするため）。的の位置はクライアントが、始めたときの向きからのずれで持つ。記録は `MiningStats` の `targetBest`・`targetRounds`（「統計をリセット」では消さない。ご褒美の解放が消えるため）。ご褒美の段階は、自己ベストと取った進捗の高いほう（`TargetRules.Tier.unlocked`。しきい値を上げる前に取った段階を残すため）。
-- 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存の形の正本は `save` / `load`。各版の `ServerStats` は NBT を `MiningStats.Store` に包んで渡すだけ。キーは `saveKey`、近接は古いキー `critHits` も読む。キーの名前と型を変えると古いワールドが読めなくなる）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
+- 統計: `ServerStats`（累計はプレイヤーの永続データ `PlayerPersisted` の `weakspot`、「今回」はメモリ）、`common/MiningStats`（保存の形の正本は `save` / `load`。NBT を `MiningStats.Store` に包んで渡すのは、1.12.2 は `ServerStats`、1.20.1・1.21.1 は `mojmap/` の `server/StatsNbt`（NBT の API の形が同じ版で共有する。置き場所＝どのタグに入れるかは版ごとの `ServerStats`）。キーは `saveKey`、近接は古いキー `critHits` も読む。キーの名前と型を変えると古いワールドが読めなくなる）。節目は `MiningRewards`・`common/Milestones`。進捗は `WeakSpotAdvancements`（条件はどれも `minecraft:impossible` で、サーバーが与える。ログインで累計から判定し直す）。順位は `Leaderboard`（ワールドの保存データ `data/weakspot_leaderboard.dat`。同じ数は名前の順）。
 - 配る物: `GuideBookGiver`（ガイドの本・的・ようこその案内。永続データの `guideGiven`・`targetsGiven`・`targetGiftVersion`（ない人は 1.11.0 とみなす））。
 - ほかのプレイヤーへの知らせ: 節目・コンボの段階・的当ての 1 位（`MiningRewards.broadcast*`・`TargetRounds`）。
 - サーバーからの文: 翻訳キーで送り、クライアントが自分の言語で文にする（新しいキーはマイナーで足すので、相手のクライアントは必ずキーを持っている）。翻訳の値は `%s`／`%1$s` の形だけ（クライアントの翻訳がこの形しか扱えない。`LangFilesTest` が確かめる）。

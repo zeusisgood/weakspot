@@ -128,7 +128,7 @@
   - `interface Store { boolean has(String key); long getLong(String key); double getDouble(String key); void putLong(String key, long value); void putDouble(String key, double value); }`
   - `void save(Store out)`: 今の `write` と同じキー・同じ型で全部の項目を書く（`savedTicks` だけ double）
   - `static MiningStats load(Store in)`: 今の `read` と同じ。近接は、新しいキー（`meleeHits`）がなく古いキー（`critHits`）があれば古いキーを読む（`legacySaveKey` の扱いをここへ移す）。ないキーは 0
-- 各版の `ServerStats.read` / `write` は、NBT（1.12.2 は `NBTTagCompound`、1.20.1・1.21.1 は `CompoundTag`）を `Store` に包んで `load` / `save` を呼ぶだけにする（数行）。統計の置き場所（1.12.2・1.20.1 は持ち越されるプレイヤーのデータ、1.21.1 は死亡で消えないデータの添付）は変えない
+- 各版の `ServerStats.read` / `write` は、NBT（1.12.2 は `NBTTagCompound`、1.20.1・1.21.1 は `CompoundTag`）を `Store` に包んで `load` / `save` を呼ぶだけにする（数行）。統計の置き場所（1.12.2・1.20.1 は持ち越されるプレイヤーのデータ、1.21.1 は死亡で消えないデータの添付）は変えない（注: 実装では、1.20.1・1.21.1 の受け渡しの部分が 2 版で同じ中身になったので、実装のレビューを受けて `mojmap/` の `server/StatsNbt` に移した。版ごとの `ServerStats` に残るのは置き場所だけ）
 - キーの名前と型は今と同じ（古いワールドの統計はそのまま読め、1.13.8 で保存した統計は 1.13.7 でも読める）
 - `common/` にテストを足す（`Store` は `HashMap` で作る）:
   - 全部の項目に違う値を入れて `save` → `load` すると、同じ値に戻る。項目は名前で並べず、`MiningStats` の public で static でない long / double のフィールドをリフレクションで全部取って値を入れる（種類ごとのヒット数は `HitKind.values()` で回す）。こうすると、項目を足して `save` / `load` を書き忘れたときに赤くなる
